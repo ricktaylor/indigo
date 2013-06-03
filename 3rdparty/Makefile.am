@@ -8,7 +8,7 @@ glfw-all:
 		-D BUILD_SHARED_LIBS:BOOL=OFF \
 		-D GLFW_BUILD_EXAMPLES:BOOL=OFF \
 		-D GLFW_BUILD_TESTS:BOOL=OFF \
-		@srcdir@/glfw/
+		../@srcdir@/glfw
 	@make -C @builddir@/glfw all
 
 clean: glfw-clean
