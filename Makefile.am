@@ -9,11 +9,6 @@ EXTRA_DIST = \
 ####################################
 # Some helper targets
 
-astyle:
-	astyle -A1 -T4 -K -N -w -U -c -n -R @srcdir@/*.h
-	astyle -A1 -T4 -K -N -w -U -c -n -R @srcdir@/*.inl
-	astyle -A1 -T4 -K -N -w -U -c -n -R @srcdir@/*.cpp
-
 reallyclean: maintainer-clean
 	rm -f @srcdir@/Makefile.in
 	rm -f @srcdir@/aclocal.m4
@@ -29,14 +24,7 @@ reallyclean: maintainer-clean
 	rm -f @srcdir@/m4/ltversion.m4
 	rm -f @srcdir@/m4/lt~obsolete.m4
 	rm -f @srcdir@/src/Makefile.in
-	rm -f @srcdir@/src/OOCore/Makefile.in
-	rm -f @srcdir@/src/OORegister/Makefile.in
-	rm -f @srcdir@/src/OOServer/Makefile.in
-	rm -f @srcdir@/test/CoreTests/Makefile.in
-	rm -f @srcdir@/test/CoreTests/TestLibrary/Makefile.in
-	rm -f @srcdir@/test/CoreTests/TestProcess/Makefile.in
-	rm -f @srcdir@/test/Makefile.in
-
+	
 ####################################
 # Hook to make the ChangeLog
 dist-hook:
