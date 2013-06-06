@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<!-- This is a test file to see how to define Pandemic -->
+
+
+<Game min_players="2" max_players="4">
+<!-- The outermost object is always a Game object -->
+	
+	<!--  First we define the types of things in the game -->
+	
+	<Piece Type="Pawn">
+		<!--  A piece is a type of single 3D object, can't be flipped or whatever -->
+		
+		<Asset Location="/assets/pawn.xml" RGBColor="{RGBColor}" />
+		<!-- An asset refers to the location of the asset XML file that defines how to draw the object 
+			Asset attributes are passed through to the asset loader when loaded -->
+	</Piece>
+	
+	<Piece Type="ResearchStation">
+		<Asset Location="/assets/r_stat.xml" />
+	</Piece>
+	
+	<Piece Type="DiseaseCube">
+		<Asset Location="/assets/cube.xml" RGBColor="{RGBColor}" />
+	</Piece>
+	
+	<Token Type="CureMarker">
+		<!--  A token is a thin flippable cardboard object -->
+			
+		<Property Name="Flipped">False</Property>
+		<!--  A property sets the default value of a property on any instance of this type -->
+		
+		<Asset Location="/assets/cure.xml" Color="{Color}" Flipped="{Flipped}" />
+	</Token>
+	
+	<Token Type="InfectionMarker">
+		<Asset Location="/assets/inf_mkr.xml" />
+	</Token>
+	
+	<Token Type="OutbreakMarker">
+		<Asset Location="/assets/out_mkr.xml" />
+	</Token>
+	
+	<Card Type="RoleCard">
+		<!-- A card is a card... obviously -->
+		
+		<Property Name="Title">{Key}</Property>
+		<!--  The default value of the "Title" property is the value of the "Key" property -->
+		
+		<Asset Location="/assets/role_card.xml" Title="{Title}" Image="{Image}" />
+	</Card>
+	
+	<Card Type="PlayerCard">
+		<Asset Location="/assets/player_card.xml" City="{City}" Image="{Image}" />
+	</Card>
+	
+	<Card Type="SpecialEventCard">
+		<Asset Location="/assets/se_card.xml" Image="{Image}" Text="{Text}" />
+	</Card>
+	
+	<Card Type="EpidemicCard">
+		<Asset Location="/assets/epi_card.xml" />
+	</Card>
+	
+	<Card Type="InfectionCard">
+		<Asset Location="/assets/inf_card.xml" Image="{Image}" />
+	</Card>
+	
+	<Set Key="Pawns" >
+	<!-- A set element is a named set of named objects -->
+	
+		<Pawn Key="Medic" RGBColor="#FF8C00"/>
+		<!--  Here we use the previously defined Pawn type to create an instance -->
+		
+		<Pawn Key="Researcher" RGBColor="#FFFFFF"/>
+		<Pawn Key="Brown" RGBColor="#A0522D"/>
+		<Pawn Key="Purple" RGBColor="#800080"/>
+		<Pawn Key="OpExpert" RGBColor="#32CD32"/>
+	</Set>
+	
+	<Set Key="RoleCards" >
+		<RoleCard Key="Medic" />
+		<RoleCard Key="Researcher" />
+		<RoleCard Key="OpExpert" Title="Operations Expert" />
+		<!--  etc... -->
+	</Set>
+		
+	<Set Key="Cubes" >
+		<Heap Key="Red" Type="DiseaseCube" Count="24">
+		<!-- A heap is a multiplicity of the same type of object, all identical -->
+			<RGBColor>#FF0000</RGBColor>
+			<!-- We can specify property values here as we are instantiating -->
+		</Heap>
+		<Heap Key="Blue" Type="DiseaseCube" Count="24">
+			<RGBColor>#0000FF</RGBColor>
+		</Heap>
+		<Heap Key="Yellow" Type="DiseaseCube" Count="24">
+			<RGBColor>#FFFF00</RGBColor>
+		</Heap>
+		<Heap Key="Black" Type="DiseaseCube" Count="24">
+			<RGBColor>#000000</RGBColor>
+		</Heap>
+	</Set>
+	
+	<Set Key="Cures" >
+		<CureMarker Color="Red"/>
+		<CureMarker Color="Blue"/>
+		<CureMarker Color="Yellow"/>
+		<CureMarker Color="Black"/>
+	</Set>
+	
+	<InfectionMarker/>
+	<OutbreakMarker/>
+		
+	<Heap Key="ResearchStations" Type="ResearchStation" Count="6" />
+		
+	<Set Key="PlayerCards" >
+		<PlayerCard City="Ho Chi Minh City" Color="Red" Image="ho_chi_minh_city.png" />
+		<PlayerCard City="Kinchasa" Color="Yellow" Image="kinnchasa.png" />
+		<PlayerCard City="Mumbai" Color="Black" Image="mumbai.png" />
+		<PlayerCard City="Paris" Color="Blue" Image="paris.png" />
+		<!--  etc... -->
+	</Set>
+	
+	<Heap Key="EpidemicCards" Type="EpidemicCard" Count="6"/>	
+	
+	<Set Key="SpecialEventCards">
+		<SpecialEvent Text="Resilient Population" Image="res_pop.png" />
+		<!-- etc... -->
+	</Set>
+	
+	<Set Key="InfectionCards">
+		<InfectionCard City="Bogota" Color="Yellow" Image="bogota.png" />
+		<InfectionCard City="Seoul" Color="Red" Image="seoul.png" />
+		<InfectionCard City="Algiers" Color="Black" Image="algiers.png" />
+		<InfectionCard City="Milan" Color="Blue" Image="milan.png" />
+		<!--  etc... -->
+	</Set>
+		
+	
+	
+</Game>
