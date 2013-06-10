@@ -10,9 +10,8 @@
 	<Piece Type="Pawn">
 		<!--  A piece is a type of single 3D object, can't be flipped or whatever -->
 		
-		<Asset Location="/assets/pawn.xml" RGBColor="{RGBColor}" />
-		<!-- An asset refers to the location of the asset XML file that defines how to draw the object 
-			Asset attributes are passed through to the asset loader when loaded -->
+		<Asset Location="/assets/pawn.xml" />
+		<!-- An asset refers to the location of the asset XML file that defines how to draw the object -->
 	</Piece>
 	
 	<Piece Type="ResearchStation">
@@ -20,7 +19,7 @@
 	</Piece>
 	
 	<Piece Type="DiseaseCube">
-		<Asset Location="/assets/cube.xml" RGBColor="{RGBColor}" />
+		<Asset Location="/assets/cube.xml" />
 	</Piece>
 	
 	<Token Type="CureMarker">
@@ -29,7 +28,7 @@
 		<Property Name="Flipped">False</Property>
 		<!--  A property sets the default value of a property on any instance of this type -->
 		
-		<Asset Location="/assets/cure.xml" Color="{Color}" Flipped="{Flipped}" />
+		<Asset Location="/assets/cure.xml" />
 	</Token>
 	
 	<Token Type="InfectionMarker">
@@ -46,15 +45,15 @@
 		<Property Name="Title">{Key}</Property>
 		<!--  The default value of the "Title" property is the value of the "Key" property -->
 		
-		<Asset Location="/assets/role_card.xml" Title="{Title}" Image="{Image}" />
+		<Asset Location="/assets/role_card.xml" />		
 	</Card>
 	
 	<Card Type="PlayerCard">
-		<Asset Location="/assets/player_card.xml" City="{City}" Image="{Image}" />
+		<Asset Location="/assets/player_card.xml" />
 	</Card>
 	
 	<Card Type="SpecialEventCard">
-		<Asset Location="/assets/se_card.xml" Image="{Image}" Text="{Text}" />
+		<Asset Location="/assets/se_card.xml" />
 	</Card>
 	
 	<Card Type="EpidemicCard">
@@ -62,7 +61,7 @@
 	</Card>
 	
 	<Card Type="InfectionCard">
-		<Asset Location="/assets/inf_card.xml" Image="{Image}" />
+		<Asset Location="/assets/inf_card.xml" />
 	</Card>
 	
 	<Set Key="Pawns" >
