@@ -10,3 +10,6 @@
 [submodule "ooxml"]
 	path = ooxml
 	url = https://github.com/omegaonline/ooxml.git
+[submodule "3rdparty/freetype2"]
+	path = 3rdparty/freetype2
+	url = http://git.sv.nongnu.org/r/freetype/freetype2.git

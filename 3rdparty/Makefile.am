@@ -1,8 +1,9 @@
+SUBDIRS = freetype2 .
 
-glfw-clean:
+clean-local:
 	@if [ -f @builddir@/glfw/Makefile ]; then make -C @builddir@/glfw clean; fi
 	
-glfw-all:
+all-local:
 	@mkdir -p @builddir@/glfw
 	cd @builddir@/glfw && cmake -G 'Unix Makefiles' \
 		-D BUILD_SHARED_LIBS:BOOL=OFF \
@@ -10,7 +11,3 @@ glfw-all:
 		-D GLFW_BUILD_TESTS:BOOL=OFF \
 		@top_srcdir@/3rdparty/glfw
 	@make -C @builddir@/glfw all
-
-clean: glfw-clean
-
-all: glfw-all
