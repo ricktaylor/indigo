@@ -61,6 +61,8 @@
 namespace Indigo
 {
 	bool is_debug();
+
+	bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 }
 
 #endif // INDIGO_COMMON_H_INCLUDED

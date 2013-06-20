@@ -220,5 +220,5 @@ int main(int argc, const char* argv[])
 	if (!load_config(args,config_args))
 		return EXIT_FAILURE;
 
-	return 0;
+	return Indigo::draw_thread(config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
