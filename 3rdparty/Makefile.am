@@ -31,3 +31,14 @@ libsquirrel_la_SOURCES = \
 	SQUIRREL3/squirrel/sqmem.cpp \
 	SQUIRREL3/squirrel/sqvm.cpp \
 	SQUIRREL3/squirrel/sqclass.cpp
+	
+# Add bits of the standard library
+libsquirrel_la_SOURCES += \
+	SQUIRREL3/sqstdlib/sqstdblob.cpp \
+	SQUIRREL3/sqstdlib/sqstdmath.cpp \
+	SQUIRREL3/sqstdlib/sqstdstring.cpp \
+	SQUIRREL3/sqstdlib/sqstdrex.cpp
+#	SQUIRREL3/sqstdlib/sqstdaux.cpp \
+#	SQUIRREL3/sqstdlib/sqstdio.cpp \
+#	SQUIRREL3/sqstdlib/sqstdstream.cpp
+#	SQUIRREL3/sqstdlib/sqstdsystem.cpp 
