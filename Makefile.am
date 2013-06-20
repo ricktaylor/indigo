@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = 3rdparty oobase ooxml .  
+SUBDIRS = 3rdparty oobase ooxml src .  
 
 EXTRA_DIST = \
 	gpl3_0.txt \

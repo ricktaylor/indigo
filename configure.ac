@@ -2,7 +2,7 @@ AC_PREREQ(2.61)
 
 AC_INIT(indigo,0.0.1)
 AC_CONFIG_SRCDIR([README.md])
-AC_CONFIG_HEADERS([autoheader_dummy.h])
+AC_CONFIG_HEADERS([autoheader_dummy.h src/Config.h])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SUBDIRS([3rdparty/freetype2 oobase ooxml])
@@ -11,6 +11,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([
 	Makefile
 	3rdparty/Makefile
+	src/Makefile
 ])
 
 AM_INIT_AUTOMAKE([foreign 1.10 no-define])
@@ -37,6 +38,8 @@ AM_CONDITIONAL([DEBUG], [test "x$debug" = "xtrue"])
 
 OO_PROG_CC
 OO_PROG_CXX
+
+AC_CHECK_FUNCS([realpath])
 
 # Set sensible default CFLAGS if necessary
 AS_IF([test "x$oo_test_CFLAGS" != "xset"],

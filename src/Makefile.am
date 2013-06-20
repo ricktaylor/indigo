@@ -1,0 +1,22 @@
+include $(top_srcdir)/m4/ltrc.inc
+
+AM_CPPFLAGS = -I@top_srcdir@/oobase/include -I@top_builddir@/oobase/include
+AM_CFLAGS = $(PTHREAD_CFLAGS)
+AM_CXXFLAGS = $(PTHREAD_CFLAGS)
+AM_LDFLAGS = $(PTHREAD_LIBS)
+
+if WIN32
+AM_CPPFLAGS += -D_WIN32_WINNT=0x0502
+endif
+
+bin_PROGRAMS = indigo
+		
+indigo_LDADD = @top_builddir@/oobase/liboobase.la
+
+indigo_SOURCES = \
+	Main.cpp 
+
+if WIN32
+indigo_SOURCES += Indigo.rc
+indigo_LDADD += -lole32 -lrpcrt4
+endif
