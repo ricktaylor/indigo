@@ -131,15 +131,14 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 	// Load from config file
 	if (!strFile.empty())
 	{
-#if defined(HAVE_REALPATH)
-		char rpath[PATH_MAX] = {0};
-		if (!realpath(strFile.c_str(),rpath))
-			strncpy(rpath,strFile.c_str(),sizeof(rpath)-1);
-#else
 		const char* rpath = strFile.c_str();
-#endif
 
-		OOBase::Logger::log(OOBase::Logger::Information,"Using config file: '%s'",rpath);
+#if defined(HAVE_REALPATH)
+		OOBase::SmartPtr<char,OOBase::FreeDestructor<OOBase::CrtAllocator> > rp = realpath(strFile.c_str(),NULL);
+		if (rp)
+			rpath = rp;
+#endif
+		OOBase::Logger::log(OOBase::Logger::Information,"Using configuration file: '%s'",rpath);
 
 		OOBase::ConfigFile::error_pos_t error = {0};
 		err = OOBase::ConfigFile::load(strFile.c_str(),config_args,&error);
@@ -162,14 +161,14 @@ int main(int argc, const char* argv[])
 	// Declare a local stack allocator
 	OOBase::StackAllocator<1024> allocator;
 
-	// Get the debug ENV var
+	// Get the debug ENV variable
 	{
 		OOBase::LocalString str(allocator);
 		OOBase::Environment::getenv("INDIGO_DEBUG",str);
 		s_is_debug = (str == "true");
 	}
 
-	// Set up the command line args
+	// Set up the command line arguments
 	OOBase::CmdArgs cmd_args(allocator);
 	cmd_args.add_option("help",'h');
 	cmd_args.add_option("config-file",'f',true);
@@ -216,7 +215,7 @@ int main(int argc, const char* argv[])
 		LOG_ERROR_RETURN(("Failed to adjust signals: %s",OOBase::system_error_text(err)),EXIT_FAILURE);
 #endif
 
-	// Load up our global config arguments
+	// Load up our global configuration arguments
 	OOBase::Table<OOBase::String,OOBase::String> config_args;
 	if (!load_config(args,config_args))
 		return EXIT_FAILURE;
