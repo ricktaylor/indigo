@@ -77,9 +77,6 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 {
 	int err = 0;
 
-	// Clear current entries
-	config_args.clear();
-
 	// Copy command line args
 	for (size_t i=0; i < cmd_args.size(); ++i)
 	{
@@ -198,7 +195,7 @@ int main(int argc, const char* argv[])
 	if (args.exists("help"))
 		return help();
 
-	void* TODO; // Implement NULL and stderr loggers...
+	void* TODO; // TODO, Implement NULL and stderr loggers...
 
 	// Start the logger
 	OOBase::Logger::open("Indigo",__FILE__);
