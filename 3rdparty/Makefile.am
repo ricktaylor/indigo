@@ -9,9 +9,8 @@ all-local:
 		-D BUILD_SHARED_LIBS:BOOL=OFF \
 		-D GLFW_BUILD_EXAMPLES:BOOL=OFF \
 		-D GLFW_BUILD_TESTS:BOOL=OFF \
-		@top_srcdir@/3rdparty/glfw
+		@abs_srcdir@/glfw
 	@make -C @builddir@/glfw all
-
 	
 # Custom squirrel makefile
 noinst_LTLIBRARIES = libsquirrel.la

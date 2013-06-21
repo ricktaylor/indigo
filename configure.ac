@@ -96,6 +96,10 @@ AX_CXXFLAGS_WARN_ALL
 # Check the multi-threading flags
 OO_MULTI_THREAD
 
+# Check for CMake
+AC_PATH_PROG([CMAKE],[cmake])
+AS_IF([test "x$CMAKE" == "x"],[AC_MSG_ERROR([Need cmake command])])
+
 # Set up libtool correctly
 m4_ifdef([LT_PREREQ],,[AC_MSG_ERROR([Need libtool version 2.2.6 or later])])
 LT_PREREQ([2.2.6])
