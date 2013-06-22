@@ -45,8 +45,6 @@ AS_CASE([$host_os],
 	[AX_PTHREAD]
 )
 
-AC_CHECK_FUNCS([realpath])
-
 # Set sensible default CFLAGS if necessary
 AS_IF([test "x$oo_test_CFLAGS" != "xset"],
 [
@@ -79,6 +77,9 @@ AS_IF([test "x$oo_test_CXXFLAGS" != "xset"],
 AX_APPEND_COMPILE_FLAGS([-fvisibility=hidden -pipe],[CFLAGS])
 AX_APPEND_COMPILE_FLAGS([-fvisibility=hidden -fno-rtti -fno-exceptions -pipe],[CXXFLAGS])
 
+# Check for functions we use
+AC_CHECK_FUNCS([realpath])
+
 # Always add full warnings
 AX_CFLAGS_WARN_ALL
 AX_CXXFLAGS_WARN_ALL
@@ -91,5 +92,7 @@ AS_IF([test "x$CMAKE" == "x"],[AC_MSG_ERROR([Need cmake command])])
 m4_ifdef([LT_PREREQ],,[AC_MSG_ERROR([Need libtool version 2.2.6 or later])])
 LT_PREREQ([2.2.6])
 LT_INIT([disable-shared])
+
+AC_PROG_MAKE_SET
 
 AC_OUTPUT

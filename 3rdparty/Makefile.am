@@ -1,3 +1,5 @@
+@SET_MAKE@
+
 SUBDIRS = freetype2 .
 
 clean-local:
