@@ -25,12 +25,13 @@
 
 bool Indigo::draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
+	// Get our ThreadLocalAllocator
+	OOBase::AllocatorInstance& allocator = OOBase::ThreadLocalAllocator::instance();
+
 	bool res = false;
 	if (glfwInit())
 	{
 		res = true;
-
-		// Get our ThreadLocalAllocator
 
 		for (;;)
 		{
