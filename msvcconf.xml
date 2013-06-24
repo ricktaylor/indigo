@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MsvcConf>
+  <Project Name="indigo">
+    <Include Name="OOBase/SmartPtr.h" />
+    <Include Name="GLFW/glfw3.h" />
+    <!-- <Configuration Name="Debug">
+      <Platform Name="Win32">
+        <Include Name="vld.h" Optional="true" Define="HAVE_VLD_H" />
+        <Library Name="vld.lib" Optional="true" />
+      </Platform> 
+    </Configuration> -->
+  </Project>
+</MsvcConf>

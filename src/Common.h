@@ -50,7 +50,7 @@
 #include <OOBase/AsyncResponse.h>
 
 #if defined(_MSC_VER)
-	#include "Config_msvc.h"
+	//#include "Config_msvc.h"
 #elif defined(HAVE_CONFIG_H)
 	// Autoconf
 	#include <Config.h>
