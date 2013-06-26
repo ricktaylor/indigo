@@ -22,7 +22,9 @@ indigo_LDADD = \
 
 indigo_SOURCES = \
 	Main.cpp \
-	DrawThread.cpp
+	DrawThread.cpp \
+	LogicThread.cpp \
+	Queue.cpp
 
 if WIN32
 indigo_SOURCES += Indigo.rc

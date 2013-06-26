@@ -30,6 +30,7 @@
 //////////////////////////////////////////////
 
 #include <OOBase/SmartPtr.h>
+#include <OOBase/Vector.h>
 #include <OOBase/TLSSingleton.h>
 #include <OOBase/Environment.h>
 #include <OOBase/Posix.h>
@@ -58,11 +59,14 @@
 #error Need some kind of configure scipt!
 #endif
 
+#include "Queue.h"
+
 namespace Indigo
 {
 	bool is_debug();
 
-	bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
+	bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args, Queue& draw_queue, Queue& logic_queue);
+	bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args, Queue& draw_queue, Queue& logic_queue);
 }
 
 #endif // INDIGO_COMMON_H_INCLUDED
