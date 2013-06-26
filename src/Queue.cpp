@@ -20,6 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
+#include "Queue.h"
 
 Indigo::Queue::Queue(OOBase::AllocatorInstance& allocator) : m_queue(allocator)
 {

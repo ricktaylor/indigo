@@ -20,15 +20,18 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
+#include "Queue.h"
 
 #include <GLFW/glfw3.h>
 
 // This points to the current out cmd buffer
 static OOBase::Buffer** s_pcmd_buffer = NULL;
 
+// Should the draw thread stop?
+static bool s_bStop = false;
+
 // The vector of windows
 static OOBase::Vector<GLFWwindow*,OOBase::AllocatorInstance> s_vecWindows(OOBase::ThreadLocalAllocator::instance());
-
 
 static void on_glfw_error(int code, const char* message)
 {
@@ -45,7 +48,19 @@ static bool parse_command(OOBase::Buffer* cmd_buffer)
 
 		switch (op_code)
 		{
-		case 0: // Quit...
+		case 0: // Quit
+			s_bStop = true;
+			break;
+
+		case 1:
+			{
+				// Free buffer...
+				OOBase::Buffer* buf = NULL;
+				if (!input.read(buf))
+					LOG_ERROR_RETURN(("Failed to read free buffer: %s",OOBase::system_error_text(input.last_error())),false);
+
+				buf->release();
+			}
 			break;
 
 		default:
@@ -55,7 +70,7 @@ static bool parse_command(OOBase::Buffer* cmd_buffer)
 	return true;
 }
 
-bool Indigo::draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args, Queue& draw_queue, Queue& logic_queue)
+bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args, Indigo::Queue& draw_queue, Indigo::Queue& logic_queue)
 {
 	// Not sure if we need to set this first...
 	glfwSetErrorCallback(&on_glfw_error);
@@ -63,7 +78,10 @@ bool Indigo::draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& con
 	if (!glfwInit())
 		LOG_ERROR_RETURN(("glfwInit failed"),false);
 
-	for (bool bStop = false; !bStop;)
+	if (!Indigo::is_debug())
+		glfwSwapInterval(1);
+
+	while (!s_bStop)
 	{
 		if (!*s_pcmd_buffer)
 		{
@@ -85,10 +103,10 @@ bool Indigo::draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& con
 		else if (err)
 			LOG_ERROR_RETURN(("Failed to dequeue logic packet: %s",OOBase::system_error_text(err)),false);
 
-		// Update animations
-
 		if (!s_vecWindows.empty())
 		{
+			// Update animations
+
 			for (OOBase::Vector<GLFWwindow*,OOBase::AllocatorInstance>::iterator i=s_vecWindows.begin();i!=s_vecWindows.end();++i)
 			{
 				// for each camera
@@ -106,7 +124,9 @@ bool Indigo::draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& con
 		if (cmd_buffer)
 		{
 			// Push cmd block into out queue (it's not ours to free)
-
+			OOBase::CDRStream output(*s_pcmd_buffer);
+			if (!output.write(OOBase::uint8_t(1)) || !output.write(cmd_buffer))
+				LOG_ERROR_RETURN(("Failed to write message: %s",OOBase::system_error_text(output.last_error())),false);
 		}
 
 		// If we have a command buffer, enqueue it...
