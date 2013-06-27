@@ -24,6 +24,7 @@ indigo_SOURCES = \
 	Main.cpp \
 	DrawThread.cpp \
 	LogicThread.cpp \
+	Window.cpp \
 	Queue.cpp
 
 if WIN32

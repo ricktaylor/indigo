@@ -19,24 +19,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_QUEUE_H_INCLUDED
-#define INDIGO_QUEUE_H_INCLUDED
+#ifndef INDIGO_WINDOWS_H_INCLUDED
+#define INDIGO_WINDOWS_H_INCLUDED
 
 namespace Indigo
 {
-	class Queue
-	{
-	public:
-		int enqueue(OOBase::Buffer* buffer);
-		bool dequeue(OOBase::Buffer*& buffer, int& err);
-		bool dequeue_block(OOBase::Buffer*& buffer, int& err, const OOBase::Timeout& timeout = OOBase::Timeout());
 
-	private:
-		OOBase::Condition::Mutex m_lock;
-		OOBase::Condition        m_cond;
-
-		OOBase::Queue<OOBase::Buffer*,OOBase::ThreadLocalAllocator> m_queue;
-	};
 }
 
-#endif // INDIGO_QUEUE_H_INCLUDED
+#endif // INDIGO_WINDOWS_H_INCLUDED

@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include "Queue.h"
+#include "Protocol.h"
 
 // This points to the current out cmd buffer
 static OOBase::Buffer** s_pcmd_buffer = NULL;
@@ -32,16 +33,16 @@ static bool parse_command(OOBase::Buffer* cmd_buffer)
 {
 	for (OOBase::CDRStream input(cmd_buffer);input.length();)
 	{
-		OOBase::uint8_t op_code;
+		Indigo::Protocol::Response_t op_code;
 		if (!input.read(op_code))
 			LOG_ERROR_RETURN(("Failed to read op_code: %s",OOBase::system_error_text(input.last_error())),false);
 
 		switch (op_code)
 		{
-		case 0:	// Abort
+		case Indigo::Protocol::Response::Abort:	// Abort
 			return false;
 
-		case 1:
+		case Indigo::Protocol::Response::ReleaseBuffer:
 			{
 				// Free buffer...
 				OOBase::Buffer* buf = NULL;
@@ -86,7 +87,7 @@ bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_arg
 		{
 			// Push cmd block into out queue (it's not ours to free)
 			OOBase::CDRStream output(*s_pcmd_buffer);
-			if (!output.write(OOBase::uint8_t(1)) || !output.write(cmd_buffer))
+			if (!output.write(Indigo::Protocol::Response_t(Indigo::Protocol::Response::ReleaseBuffer)) || !output.write(cmd_buffer))
 				LOG_ERROR_RETURN(("Failed to write message: %s",OOBase::system_error_text(output.last_error())),false);
 		}
 

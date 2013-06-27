@@ -171,7 +171,7 @@ static int logic_thread_start(void* param)
 	thread_info* ti = reinterpret_cast<thread_info*>(param);
 
 	// Create the logic queue
-	Indigo::Queue logic_queue(OOBase::ThreadLocalAllocator::instance());
+	Indigo::Queue logic_queue;
 	ti->m_logic_queue = &logic_queue;
 
 	// Signal we have started
@@ -183,7 +183,7 @@ static int logic_thread_start(void* param)
 
 static bool start_threads(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
-	Indigo::Queue draw_queue(OOBase::ThreadLocalAllocator::instance());
+	Indigo::Queue draw_queue;
 	OOBase::Event started(false,false);
 
 	thread_info ti;

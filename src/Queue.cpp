@@ -22,10 +22,6 @@
 #include "Common.h"
 #include "Queue.h"
 
-Indigo::Queue::Queue(OOBase::AllocatorInstance& allocator) : m_queue(allocator)
-{
-}
-
 int Indigo::Queue::enqueue(OOBase::Buffer* buffer)
 {
 	int err = 0;

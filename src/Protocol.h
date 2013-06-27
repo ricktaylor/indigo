@@ -19,24 +19,35 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_QUEUE_H_INCLUDED
-#define INDIGO_QUEUE_H_INCLUDED
+#ifndef INDIGO_PROTOCOL_H_INCLUDED
+#define INDIGO_PROTOCOL_H_INCLUDED
 
 namespace Indigo
 {
-	class Queue
+	namespace Protocol
 	{
-	public:
-		int enqueue(OOBase::Buffer* buffer);
-		bool dequeue(OOBase::Buffer*& buffer, int& err);
-		bool dequeue_block(OOBase::Buffer*& buffer, int& err, const OOBase::Timeout& timeout = OOBase::Timeout());
+		namespace Request
+		{
+			enum tagRequest
+			{
+				Quit = 0,
+				ReleaseBuffer,
+				WindowMsg,
+			};
+		}
+		typedef OOBase::uint8_t Request_t;
 
-	private:
-		OOBase::Condition::Mutex m_lock;
-		OOBase::Condition        m_cond;
-
-		OOBase::Queue<OOBase::Buffer*,OOBase::ThreadLocalAllocator> m_queue;
-	};
+		namespace Response
+		{
+			enum tagResponse
+			{
+				Abort = 0,
+				ReleaseBuffer,
+				WindowMsg
+			};
+		}
+		typedef OOBase::uint8_t Response_t;
+	}
 }
 
-#endif // INDIGO_QUEUE_H_INCLUDED
+#endif // INDIGO_PROTOCOL_H_INCLUDED

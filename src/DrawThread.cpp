@@ -21,46 +21,50 @@
 
 #include "Common.h"
 #include "Queue.h"
+#include "Protocol.h"
 
 #include <GLFW/glfw3.h>
 
-// This points to the current out cmd buffer
-static OOBase::Buffer** s_pcmd_buffer = NULL;
-
-// Should the draw thread stop?
-static bool s_bStop = false;
-
-// The vector of windows
-static OOBase::Vector<GLFWwindow*,OOBase::AllocatorInstance> s_vecWindows(OOBase::ThreadLocalAllocator::instance());
+// Forward declare the windowing functions
+bool have_windows();
+bool handle_event(OOBase::CDRStream& input, OOBase::CDRStream& output);
+bool render_windows(OOBase::CDRStream& output);
 
 static void on_glfw_error(int code, const char* message)
 {
 	LOG_ERROR(("GLFW error %d: %s",code,message));
 }
 
-static bool parse_command(OOBase::Buffer* cmd_buffer)
+static bool parse_command(OOBase::Buffer* cmd_buffer, OOBase::Buffer* event_buffer, bool& bStop)
 {
-	for (OOBase::CDRStream input(cmd_buffer);input.length();)
+	OOBase::CDRStream input(cmd_buffer);
+	OOBase::CDRStream output(event_buffer);
+
+	while (input.length())
 	{
-		OOBase::uint8_t op_code;
+		Indigo::Protocol::Request_t op_code;
 		if (!input.read(op_code))
 			LOG_ERROR_RETURN(("Failed to read op_code: %s",OOBase::system_error_text(input.last_error())),false);
 
 		switch (op_code)
 		{
-		case 0: // Quit
-			s_bStop = true;
+		case Indigo::Protocol::Request::Quit:
+			bStop = true;
 			break;
 
-		case 1:
+		case Indigo::Protocol::Request::ReleaseBuffer:
 			{
-				// Free buffer...
 				OOBase::Buffer* buf = NULL;
 				if (!input.read(buf))
 					LOG_ERROR_RETURN(("Failed to read free buffer: %s",OOBase::system_error_text(input.last_error())),false);
 
 				buf->release();
 			}
+			break;
+
+		case Indigo::Protocol::Request::WindowMsg:
+			if (!handle_event(input,output))
+				return false;
 			break;
 
 		default:
@@ -81,62 +85,53 @@ bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args
 	if (!Indigo::is_debug())
 		glfwSwapInterval(1);
 
-	while (!s_bStop)
+	OOBase::RefPtr<OOBase::Buffer> event_buffer;
+	for (bool bStop = false;!bStop;)
 	{
-		if (!*s_pcmd_buffer)
+		if (!event_buffer)
 		{
-			*s_pcmd_buffer = OOBase::Buffer::create(OOBase::ThreadLocalAllocator::instance(),OOBase::CDRStream::MaxAlignment);
-			if (!*s_pcmd_buffer)
+			event_buffer = OOBase::Buffer::create<OOBase::ThreadLocalAllocator>(OOBase::CDRStream::MaxAlignment);
+			if (!event_buffer)
 				LOG_ERROR_RETURN(("Failed to allocate buffer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
+		OOBase::CDRStream output(event_buffer);
 
 		// Get next cmd block from in queue
 		int err = 0;
 		OOBase::Buffer* cmd_buffer = NULL;
-		bool have_msg = s_vecWindows.empty() ? logic_queue.dequeue_block(cmd_buffer,err) : logic_queue.dequeue(cmd_buffer,err);
-		if (have_msg)
+		if (have_windows() ? logic_queue.dequeue_block(cmd_buffer,err) : logic_queue.dequeue(cmd_buffer,err))
 		{
 			// Parse command block
-			if (!parse_command(cmd_buffer))
+			if (!parse_command(cmd_buffer,event_buffer,bStop))
 				return false;
 		}
 		else if (err)
 			LOG_ERROR_RETURN(("Failed to dequeue logic packet: %s",OOBase::system_error_text(err)),false);
 
-		if (!s_vecWindows.empty())
-		{
-			// Update animations
+		// Update animations
 
-			for (OOBase::Vector<GLFWwindow*,OOBase::AllocatorInstance>::iterator i=s_vecWindows.begin();i!=s_vecWindows.end();++i)
-			{
-				// for each camera
-
-				// Cull
-				// Sort
-				// Draw
-
-				glfwSwapBuffers(*i);
-			}
-
-			glfwPollEvents();
-		}
+		// Render all windows (this collects events)
+		if (!render_windows(output))
+			return false;
 
 		if (cmd_buffer)
 		{
 			// Push cmd block into out queue (it's not ours to free)
-			OOBase::CDRStream output(*s_pcmd_buffer);
-			if (!output.write(OOBase::uint8_t(1)) || !output.write(cmd_buffer))
+			if (!output.write(Indigo::Protocol::Request_t(Indigo::Protocol::Request::ReleaseBuffer)) || !output.write(cmd_buffer))
 				LOG_ERROR_RETURN(("Failed to write message: %s",OOBase::system_error_text(output.last_error())),false);
 		}
 
 		// If we have a command buffer, enqueue it...
-		if ((*s_pcmd_buffer)->length() > 0)
+		if (event_buffer->length() > 0)
 		{
-			err = draw_queue.enqueue(*s_pcmd_buffer);
+			err = draw_queue.enqueue(event_buffer);
 			if (err)
 				LOG_ERROR(("Failed to enqueue command: %s",OOBase::system_error_text(err)));
 			else
-				*s_pcmd_buffer = NULL;
+			{
+				event_buffer->addref();
+				event_buffer = NULL;
+			}
 		}
 	}
 
