@@ -29,9 +29,9 @@ libsquirrel_la_SOURCES = \
 	SQUIRREL3/squirrel/sqcompiler.cpp \
 	SQUIRREL3/squirrel/sqstate.cpp \
 	SQUIRREL3/squirrel/sqtable.cpp \
-	SQUIRREL3/squirrel/sqmem.cpp \
 	SQUIRREL3/squirrel/sqvm.cpp \
 	SQUIRREL3/squirrel/sqclass.cpp
+#	SQUIRREL3/squirrel/sqmem.cpp
 	
 # Add bits of the standard library
 libsquirrel_la_SOURCES += \

@@ -14,18 +14,21 @@ AM_CPPFLAGS += -D_WIN32_WINNT=0x0502
 endif
 
 bin_PROGRAMS = indigo
-		
-indigo_LDADD = \
-	@top_builddir@/oobase/liboobase.la \
-	@top_builddir@/3rdparty/glfw/src/libglfw3.a \
-	-lGL
 
 indigo_SOURCES = \
 	Main.cpp \
 	DrawThread.cpp \
 	LogicThread.cpp \
 	Window.cpp \
+	Squirrel.cpp \
 	Queue.cpp
+		
+indigo_LDADD = \
+	@top_builddir@/oobase/liboobase.la \
+	@top_builddir@/3rdparty/glfw/src/libglfw3.a \
+	@top_builddir@/3rdparty/libsquirrel.la
+	
+indigo_LDADD += -lGL
 
 if WIN32
 indigo_SOURCES += Indigo.rc
