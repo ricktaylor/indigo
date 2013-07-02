@@ -32,7 +32,7 @@ bool render_windows(OOBase::CDRStream& output);
 
 static void on_glfw_error(int code, const char* message)
 {
-	LOG_ERROR(("GLFW error %d: %s",code,message));
+	OOBase::Logger::log(OOBase::Logger::Error,"GLFW error %d: %s",code,message);
 }
 
 static bool parse_command(OOBase::Buffer* cmd_buffer, OOBase::Buffer* event_buffer, bool& bStop)
@@ -82,8 +82,8 @@ bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args
 	if (!glfwInit())
 		LOG_ERROR_RETURN(("glfwInit failed"),false);
 
-	if (!Indigo::is_debug())
-		glfwSwapInterval(1);
+//	if (!Indigo::is_debug())
+//		glfwSwapInterval(1);
 
 	OOBase::RefPtr<OOBase::Buffer> event_buffer;
 	for (bool bStop = false;!bStop;)
@@ -99,7 +99,7 @@ bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args
 		// Get next cmd block from in queue
 		int err = 0;
 		OOBase::Buffer* cmd_buffer = NULL;
-		if (have_windows() ? logic_queue.dequeue_block(cmd_buffer,err) : logic_queue.dequeue(cmd_buffer,err))
+		if (have_windows() ? logic_queue.dequeue(cmd_buffer,err) : logic_queue.dequeue_block(cmd_buffer,err))
 		{
 			// Parse command block
 			if (!parse_command(cmd_buffer,event_buffer,bStop))

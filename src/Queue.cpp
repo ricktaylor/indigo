@@ -50,14 +50,7 @@ bool Indigo::Queue::dequeue(OOBase::Buffer*& buffer, int& err)
 
 bool Indigo::Queue::dequeue_block(OOBase::Buffer*& buffer, int& err, const OOBase::Timeout& timeout)
 {
-#if defined(_WIN32)
-	OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock,false);
-	if (!guard.acquire(timeout))
-		return false;
-#else
 	OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
-#endif
-
 	while (m_queue.empty())
 	{
 		if (!m_cond.wait(m_lock,timeout))

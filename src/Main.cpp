@@ -213,7 +213,11 @@ static bool start_threads(const OOBase::Table<OOBase::String,OOBase::String>& co
 	return res;
 }
 
+#if defined(_WIN32)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+#else
 int main(int argc, const char* argv[])
+#endif
 {
 	// Set critical failure handler
 	OOBase::SetCriticalFailure(&critical_failure);
@@ -236,7 +240,11 @@ int main(int argc, const char* argv[])
 
 	// Parse command line
 	OOBase::CmdArgs::results_t args(allocator);
+#if defined(_WIN32)
+	int err = cmd_args.parse(args);
+#else
 	int err = cmd_args.parse(argc,argv,args);
+#endif
 	if (err	!= 0)
 	{
 		OOBase::LocalString strErr(allocator);
@@ -257,7 +265,7 @@ int main(int argc, const char* argv[])
 	void* TODO; // TODO, Implement NULL and stderr loggers...
 
 	// Start the logger
-	OOBase::Logger::open("Indigo",__FILE__);
+	OOBase::Logger::open_console_log(__FILE__);
 
 #if defined(HAVE_UNISTD_H)
 	// Ignore SIGCHLD and SIGPIPE
