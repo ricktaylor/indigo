@@ -15,7 +15,11 @@ all-local:
 	$(MAKE) -C @builddir@/glfw all
 	
 # Custom squirrel makefile
-noinst_LTLIBRARIES = libsquirrel.la
+noinst_LTLIBRARIES = libsquirrel.la libminiz.la
+
+libminiz_la_CPPFLAGS = -DMINIZ_NO_MALLOC 
+
+libminiz_la_SOURCES = miniz/miniz.c
 
 libsquirrel_la_CPPFLAGS = -I @srcdir@/SQUIRREL3/include
 
