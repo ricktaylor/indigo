@@ -36,7 +36,6 @@ void* sq_vm_realloc(void* p, SQUnsignedInteger oldsize,	SQUnsignedInteger size)
 	if (!p)
 		LOG_ERROR(("Failed to reallocate squirrel memory"));
 	return p;
-	return realloc(p, size);
 }
 
 void sq_vm_free(void* p, SQUnsignedInteger size)
@@ -76,11 +75,20 @@ static void on_print(HSQUIRRELVM, const SQChar* msg, ...)
 
 static SQInteger on_file_read(SQUserPointer p, SQUserPointer dest, SQInteger size)
 {
+	SQInteger r = static_cast<OOBase::File*>(p)->read(dest,size);
+	if (r != 0)
+		return r;
+	return -1;
 }
 
 static bool load_file(HSQUIRRELVM vm, const char* filename)
 {
-	return false;
+	OOBase::File file;
+	int err = file.open(filename,false);
+	if (err)
+		LOG_ERROR_RETURN(("Failed to open file %s: %s",filename,OOBase::system_error_text(err)),false);
+
+	return SQ_SUCCEEDED(sq_readclosure(vm,&on_file_read,&file));
 }
 
 Indigo::Squirrel::Environment::Environment(unsigned int stack)
