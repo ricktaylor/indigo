@@ -158,13 +158,16 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 	return true;
 }
 
-struct thread_info
+namespace 
 {
-	Indigo::Queue* m_draw_queue;
-	Indigo::Queue* m_logic_queue;
-	OOBase::Event* m_started;
-	const OOBase::Table<OOBase::String,OOBase::String>* m_config;
-};
+	struct thread_info
+	{
+		Indigo::Queue* m_draw_queue;
+		Indigo::Queue* m_logic_queue;
+		OOBase::Event* m_started;
+		const OOBase::Table<OOBase::String,OOBase::String>* m_config;
+	};
+}
 
 static int logic_thread_start(void* param)
 {

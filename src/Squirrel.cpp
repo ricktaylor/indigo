@@ -74,6 +74,10 @@ static void on_print(HSQUIRRELVM, const SQChar* msg, ...)
 	va_end(args);
 }
 
+static SQInteger on_file_read(SQUserPointer p, SQUserPointer dest, SQInteger size)
+{
+}
+
 static bool load_file(HSQUIRRELVM vm, const char* filename)
 {
 	return false;
