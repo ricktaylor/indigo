@@ -28,25 +28,12 @@ namespace Indigo
 {
 	namespace Squirrel
 	{
-		class Script : public OOBase::NonCopyable
+		class Script : public OOBase::RefCounted
 		{
 			friend class Environment;
 			friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 
 		public:
-			/// Increment the reference
-			void addref()
-			{
-				++m_refcount;
-			}
-
-			/// Release a reference
-			void release()
-			{
-				if (--m_refcount == 0)
-					OOBase::ThreadLocalAllocator::delete_free(this);
-			}
-
 			bool call(const char* func, const char* format, ...);
 
 		private:
@@ -56,6 +43,11 @@ namespace Indigo
 			~Script()
 			{
 				sq_release(m_vm,&m_handle);
+			}
+
+			virtual void destroy()
+			{
+				OOBase::ThreadLocalAllocator::delete_free(this);
 			}
 
 			size_t      m_refcount;
