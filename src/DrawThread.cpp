@@ -21,18 +21,27 @@
 
 #include "Common.h"
 #include "Queue.h"
-#include "Protocol.h"
 
 #include <GLFW/glfw3.h>
 
 // Forward declare the windowing functions
 bool have_windows();
-bool handle_event(OOBase::CDRStream& input, OOBase::CDRStream& output);
 bool render_windows(OOBase::CDRStream& output);
 
 static void on_glfw_error(int code, const char* message)
 {
 	OOBase::Logger::log(OOBase::Logger::Error,"GLFW error %d: %s",code,message);
+}
+
+static bool release_buffer(OOBase::CDRStream& input, OOBase::CDRStream& output)
+{
+	OOBase::Buffer* buf = NULL;
+	if (!input.read(buf))
+		LOG_ERROR_RETURN(("Failed to read free buffer: %s",OOBase::system_error_text(input.last_error())),false);
+
+	buf->release();
+
+	return true;
 }
 
 static bool parse_command(OOBase::Buffer* cmd_buffer, OOBase::Buffer* event_buffer, bool& bStop)
@@ -42,35 +51,20 @@ static bool parse_command(OOBase::Buffer* cmd_buffer, OOBase::Buffer* event_buff
 
 	while (input.length())
 	{
-		Indigo::Protocol::Request_t op_code;
-		if (!input.read(op_code))
-			LOG_ERROR_RETURN(("Failed to read op_code: %s",OOBase::system_error_text(input.last_error())),false);
+		bool (*callback)(OOBase::CDRStream& input, OOBase::CDRStream& output);
+		if (!input.read(callback))
+			LOG_ERROR_RETURN(("Failed to read callback: %s",OOBase::system_error_text(input.last_error())),false);
 
-		switch (op_code)
+		if (!callback)
 		{
-		case Indigo::Protocol::Request::Quit:
 			bStop = true;
 			break;
-
-		case Indigo::Protocol::Request::ReleaseBuffer:
-			{
-				OOBase::Buffer* buf = NULL;
-				if (!input.read(buf))
-					LOG_ERROR_RETURN(("Failed to read free buffer: %s",OOBase::system_error_text(input.last_error())),false);
-
-				buf->release();
-			}
-			break;
-
-		case Indigo::Protocol::Request::WindowMsg:
-			if (!handle_event(input,output))
-				return false;
-			break;
-
-		default:
-			LOG_ERROR_RETURN(("Invalid op_code: %u",op_code),false);
 		}
+
+		if (!(*callback)(input,output))
+			return false;
 	}
+
 	return true;
 }
 
@@ -117,7 +111,7 @@ bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args
 		if (cmd_buffer)
 		{
 			// Push cmd block into out queue (it's not ours to free)
-			if (!output.write(Indigo::Protocol::Request_t(Indigo::Protocol::Request::ReleaseBuffer)) || !output.write(cmd_buffer))
+			if (!output.write(&release_buffer) || !output.write(cmd_buffer))
 				LOG_ERROR_RETURN(("Failed to write message: %s",OOBase::system_error_text(output.last_error())),false);
 		}
 

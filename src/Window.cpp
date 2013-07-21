@@ -20,7 +20,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
-#include "Protocol.h"
 
 #include <GLFW/glfw3.h>
 
@@ -28,28 +27,6 @@
 
 namespace
 {
-	struct WindowRequest
-	{
-		enum tag
-		{
-			Create = 0,
-		};
-	};
-	typedef OOBase::uint8_t WindowRequest_t;
-
-	struct WindowEvent
-	{
-		enum tag
-		{
-			PositionChanged = 0,
-			SizeChanged,
-			CloseRequest,
-			FocusChanged,
-			Iconified
-		};
-	};
-	typedef OOBase::uint8_t WindowEvent_t;
-
 	class RenderWindow
 	{
 	public:
@@ -90,48 +67,48 @@ void RenderWindow::swap_buffers()
 
 void RenderWindow::on_pos(GLFWwindow* window, int xpos, int ypos)
 {
-	RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
+	/*RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
 	s_event_stream->write(Indigo::Protocol::Response_t(Indigo::Protocol::Response::WindowMsg));
 	s_event_stream->write(WindowEvent_t(WindowEvent::PositionChanged));
 	s_event_stream->write(pThis->m_id);
 	s_event_stream->write(xpos);
-	s_event_stream->write(ypos);
+	s_event_stream->write(ypos);*/
 }
 
 void RenderWindow::on_size(GLFWwindow* window, int width, int height)
 {
-	RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
+	/*RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
 	s_event_stream->write(Indigo::Protocol::Response_t(Indigo::Protocol::Response::WindowMsg));
 	s_event_stream->write(WindowEvent_t(WindowEvent::SizeChanged));
 	s_event_stream->write(pThis->m_id);
 	s_event_stream->write(width);
-	s_event_stream->write(height);
+	s_event_stream->write(height);*/
 }
 
 void RenderWindow::on_close(GLFWwindow* window)
 {
-	RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
+	/*RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
 	s_event_stream->write(Indigo::Protocol::Response_t(Indigo::Protocol::Response::WindowMsg));
 	s_event_stream->write(WindowEvent_t(WindowEvent::CloseRequest));
-	s_event_stream->write(pThis->m_id);
+	s_event_stream->write(pThis->m_id);*/
 }
 
 void RenderWindow::on_focus(GLFWwindow* window, int focused)
 {
-	RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
+	/*RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
 	s_event_stream->write(Indigo::Protocol::Response_t(Indigo::Protocol::Response::WindowMsg));
 	s_event_stream->write(WindowEvent_t(WindowEvent::FocusChanged));
 	s_event_stream->write(pThis->m_id);
-	s_event_stream->write(focused);
+	s_event_stream->write(focused);*/
 }
 
 void RenderWindow::on_iconify(GLFWwindow* window, int iconified)
 {
-	RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
+	/*RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
 	s_event_stream->write(Indigo::Protocol::Response_t(Indigo::Protocol::Response::WindowMsg));
 	s_event_stream->write(WindowEvent_t(WindowEvent::Iconified));
 	s_event_stream->write(pThis->m_id);
-	s_event_stream->write(iconified);
+	s_event_stream->write(iconified);*/
 }
 
 static bool return_error(OOBase::CDRStream& output, int err)
@@ -199,25 +176,6 @@ static bool create_window(OOBase::CDRStream& input, OOBase::CDRStream& output)
 	}
 
 	return return_error(output,0);
-}
-
-bool handle_event(OOBase::CDRStream& input, OOBase::CDRStream& output)
-{
-	WindowRequest_t op_code;
-	if (!input.read(op_code))
-		LOG_ERROR_RETURN(("Failed to read op_code: %s",OOBase::system_error_text(input.last_error())),false);
-
-	switch (op_code)
-	{
-	case WindowRequest::Create:
-		return create_window(input,output);
-
-	default:
-		LOG_ERROR(("Invalid op_code: %u",op_code));
-		break;
-	}
-
-	return false;
 }
 
 bool have_windows()

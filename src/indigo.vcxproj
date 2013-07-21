@@ -12,7 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
-    <ClInclude Include="Protocol.h" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="Squirrel.h" />
     <ClInclude Include="Window.h" />
