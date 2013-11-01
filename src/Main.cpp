@@ -205,13 +205,12 @@ static bool start_threads(const OOBase::Table<OOBase::String,OOBase::String>& co
 
 	// Now run the draw_thread (it must be the main thread)
 	bool res = draw_thread(config_args,draw_queue,*ti.m_logic_queue);
-	if (!res)
-	{
-		void* TODO; // Send an abort to the logic_thread
-	}
 
 	// Wait for logic thread to end
 	logic_thread.join();
+
+	// Send an abort to the logic_thread
+	draw_queue.enqueue(NULL);
 
 	return res;
 }

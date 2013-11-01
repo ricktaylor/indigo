@@ -173,3 +173,37 @@ OOBase::RefPtr<Indigo::Squirrel::Script> Indigo::Squirrel::Environment::load_scr
 
 	return ptrScript;
 }
+
+bool Indigo::Squirrel::Environment::add_class(const char* name, size_t size, const char* base)
+{
+	SQInteger top = sq_gettop(m_vm);
+
+	// Get the base class 'base'
+	if (base)
+	{
+		sq_pushstring(m_vm,base,-1);
+		if (!SQ_SUCCEEDED(sq_get(m_vm,-1)) || sq_gettype(m_vm,-1) != OT_CLASS)
+		{
+			sq_settop(m_vm,top);
+			LOG_ERROR_RETURN(("'%s' is not a squirrel class",base),false);
+		}
+	}
+
+	// Create the class
+	if (!SQ_SUCCEEDED(sq_newclass(m_vm,base ? 1 : 0)))
+	{
+		sq_settop(m_vm,top);
+		LOG_ERROR_RETURN(("Failed to create class '%s'",name),false);
+	}
+
+	// Set userdata size
+	if (!SQ_SUCCEEDED(sq_setclassudsize(m_vm,-1,size)))
+	{
+		sq_settop(m_vm,top);
+		LOG_ERROR_RETURN(("sq_setclassudsize() failed"),false);
+	}
+
+
+
+	return true;
+}

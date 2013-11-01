@@ -64,6 +64,8 @@ namespace Indigo
 			bool load_library(const char* filename);
 			OOBase::RefPtr<Script> load_script(const char* filename, unsigned int stack = 1024);
 
+			bool add_class(const char* name, size_t size, const char* base = NULL);
+
 		private:
 			HSQUIRRELVM m_vm;
 		};

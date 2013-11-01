@@ -80,6 +80,8 @@ bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args
 //		glfwSwapInterval(1);
 
 	OOBase::RefPtr<OOBase::Buffer> event_buffer;
+	OOBase::Buffer* cmd_buffer = NULL;
+
 	for (bool bStop = false;!bStop;)
 	{
 		if (!event_buffer)
@@ -90,9 +92,21 @@ bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args
 		}
 		OOBase::CDRStream output(event_buffer);
 
+		if (cmd_buffer)
+		{
+			// Push cmd block into out queue (it's not ours to free)
+			if (!output.write(&release_buffer) || !output.write(cmd_buffer))
+				LOG_ERROR_RETURN(("Failed to write message: %s",OOBase::system_error_text(output.last_error())),false);
+		}
+
+		// Update animations
+
+		// Render all windows (this collects events)
+		if (!render_windows(output))
+			return false;
+
 		// Get next cmd block from in queue
 		int err = 0;
-		OOBase::Buffer* cmd_buffer = NULL;
 		if (have_windows() ? logic_queue.dequeue(cmd_buffer,err) : logic_queue.dequeue_block(cmd_buffer,err))
 		{
 			// Parse command block
@@ -102,20 +116,7 @@ bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args
 		else if (err)
 			LOG_ERROR_RETURN(("Failed to dequeue logic packet: %s",OOBase::system_error_text(err)),false);
 
-		// Update animations
-
-		// Render all windows (this collects events)
-		if (!render_windows(output))
-			return false;
-
-		if (cmd_buffer)
-		{
-			// Push cmd block into out queue (it's not ours to free)
-			if (!output.write(&release_buffer) || !output.write(cmd_buffer))
-				LOG_ERROR_RETURN(("Failed to write message: %s",OOBase::system_error_text(output.last_error())),false);
-		}
-
-		// If we have a command buffer, enqueue it...
+		// Send event buffer back to logic thread
 		if (event_buffer->length() > 0)
 		{
 			err = draw_queue.enqueue(event_buffer);
