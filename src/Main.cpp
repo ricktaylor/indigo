@@ -73,7 +73,7 @@ static int exit_failure(OOBase::AllocatorInstance& allocator, const char* fmt, .
 	va_end(args);
 
 	if (err == 0)
-		OOBase::stderr_write(msg);
+		OOBase::stderr_write(msg.get());
 
 	return EXIT_FAILURE;
 }
@@ -139,7 +139,7 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 		const char* rpath = strFile.c_str();
 
 #if defined(HAVE_REALPATH)
-		OOBase::SmartPtr<char,OOBase::FreeDestructor<OOBase::CrtAllocator> > rp = realpath(strFile.c_str(),NULL);
+		OOBase::SmartPtr<char,OOBase::Deleter<OOBase::CrtAllocator> > rp = realpath(strFile.c_str(),NULL);
 		if (rp)
 			rpath = rp;
 #endif
