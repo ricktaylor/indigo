@@ -62,18 +62,18 @@ static bool critical_failure(const char* msg)
 	return true;
 }
 
-static int exit_failure(OOBase::AllocatorInstance& allocator, const char* fmt, ...)
+static int exit_failure(const char* fmt, ...)
 {
 	va_list args;
 	va_start(args,fmt);
 
-	OOBase::TempPtr<char> msg(allocator);
-	int err = OOBase::temp_vprintf(msg,fmt,args);
+	OOBase::ScopedString<> msg;
+	int err = msg.vprintf(fmt,args);
 
 	va_end(args);
 
 	if (err == 0)
-		OOBase::stderr_write(msg.get());
+		OOBase::stderr_write(msg.c_str());
 
 	return EXIT_FAILURE;
 }
@@ -113,7 +113,7 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 		else
 		{
 			// Get user directory and check for .indo.conf there
-			OOBase::POSIX::pw_info info(cmd_args.get_allocator(),getuid());
+			OOBase::POSIX::pw_info info(getuid());
 			if (!(!info) && info->pw_dir)
 			{
 				err = strFile.concat(info->pw_dir,"/.indigo.conf");
@@ -139,9 +139,9 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 		const char* rpath = strFile.c_str();
 
 #if defined(HAVE_REALPATH)
-		OOBase::SmartPtr<char,OOBase::Deleter<OOBase::CrtAllocator> > rp = realpath(strFile.c_str(),NULL);
+		OOBase::SharedPtr<char> rp = OOBase::make_shared<char,OOBase::CrtAllocator>(realpath(strFile.c_str(),NULL));
 		if (rp)
-			rpath = rp;
+			rpath = rp.get();
 #endif
 		OOBase::Logger::log(OOBase::Logger::Information,"Using configuration file: '%s'",rpath);
 
@@ -224,24 +224,21 @@ int main(int argc, const char* argv[])
 	// Set critical failure handler
 	OOBase::SetCriticalFailure(&critical_failure);
 
-	// Declare a local stack allocator
-	OOBase::StackAllocator<1024> allocator;
-
 	// Get the debug ENV variable
 	{
-		OOBase::LocalString str(allocator);
+		OOBase::String str;
 		OOBase::Environment::getenv("INDIGO_DEBUG",str);
 		s_is_debug = (str == "true");
 	}
 
 	// Set up the command line arguments
-	OOBase::CmdArgs cmd_args(allocator);
+	OOBase::CmdArgs cmd_args;
 	cmd_args.add_option("help",'h');
 	cmd_args.add_option("config-file",'f',true);
 	cmd_args.add_option("debug");
 
 	// Parse command line
-	OOBase::CmdArgs::results_t args(allocator);
+	OOBase::CmdArgs::results_t args;
 #if defined(_WIN32)
 	int err = cmd_args.parse(args);
 #else
@@ -249,13 +246,13 @@ int main(int argc, const char* argv[])
 #endif
 	if (err	!= 0)
 	{
-		OOBase::LocalString strErr(allocator);
+		OOBase::String strErr;
 		if (args.find("missing",strErr))
-			return exit_failure(allocator,"Missing value for option %s\n",strErr.c_str());
+			return exit_failure("Missing value for option %s\n",strErr.c_str());
 		else if (args.find("unknown",strErr))
-			return exit_failure(allocator,"Unknown option %s\n",strErr.c_str());
+			return exit_failure("Unknown option %s\n",strErr.c_str());
 		else
-			return exit_failure(allocator,"Failed to parse command line: %s\n",OOBase::system_error_text(err));
+			return exit_failure("Failed to parse command line: %s\n",OOBase::system_error_text(err));
 	}
 
 	if (args.exists("debug"))
@@ -263,8 +260,6 @@ int main(int argc, const char* argv[])
 
 	if (args.exists("help"))
 		return help();
-
-	void* TODO; // TODO, Implement NULL and stderr loggers...
 
 	// Start the logger
 	OOBase::Logger::open_console_log(__FILE__);

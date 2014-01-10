@@ -155,7 +155,7 @@ static bool create_window(OOBase::CDRStream& input, OOBase::CDRStream& output)
 	if (fullscreen)
 		monitor = glfwGetPrimaryMonitor();
 
-	OOBase::LocalString strTitle(OOBase::ThreadLocalAllocator::instance());
+	OOBase::ScopedString<> strTitle;
 	if (!input.read_string(strTitle))
 		LOG_ERROR_RETURN(("Failed to read request: %s",OOBase::system_error_text(input.last_error())),false);
 

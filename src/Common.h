@@ -29,7 +29,7 @@
 
 //////////////////////////////////////////////
 
-#include <OOBase/SmartPtr.h>
+#include <OOBase/SharedPtr.h>
 #include <OOBase/Vector.h>
 #include <OOBase/CDRStream.h>
 #include <OOBase/TLSSingleton.h>
