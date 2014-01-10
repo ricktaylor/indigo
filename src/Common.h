@@ -48,6 +48,7 @@
 #include <OOBase/ConfigFile.h>
 #include <OOBase/Server.h>
 #include <OOBase/File.h>
+#include <OOBase/Singleton.h>
 
 #if defined(_MSC_VER)
 	//#include "Config_msvc.h"

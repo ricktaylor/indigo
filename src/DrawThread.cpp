@@ -68,8 +68,11 @@ static bool parse_command(OOBase::Buffer* cmd_buffer, OOBase::Buffer* event_buff
 	return true;
 }
 
-bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args, Indigo::Queue& draw_queue, Indigo::Queue& logic_queue)
+bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
+	Indigo::Queue& draw_queue = OOBase::Singleton<Indigo::DrawQueue>::instance();
+	Indigo::Queue& logic_queue = OOBase::Singleton<Indigo::DrawQueue>::instance();
+
 	// Not sure if we need to set this first...
 	glfwSetErrorCallback(&on_glfw_error);
 

@@ -19,14 +19,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_WINDOWS_H_INCLUDED
-#define INDIGO_WINDOWS_H_INCLUDED
+#ifndef INDIGO_LOGICOBJECT_H_INCLUDED
+#define INDIGO_LOGICOBJECT_H_INCLUDED
 
-#include "LogicObject.h"
+#include "Queue.h"
 
 namespace Indigo
 {
+	class LogicObject :	public OOBase::NonCopyable
+	{
+	public:
+		LogicObject() : m_active(0)
+		{}
+
+	protected:
+		bool call_fn(OOBase::CDRStream& input, OOBase::CDRStream& output)
+		{
+			if (!m_active)
+			{
+				bool (*callback)(OOBase::CDRStream& input, OOBase::CDRStream& output);
+				if (!input.read(callback))
+					LOG_ERROR_RETURN(("Failed to read callback: %s",OOBase::system_error_text(input.last_error())),false);
+
+				return (callback && (*callback)(input,output));
+			}
+			return false;
+		}
+
+	private:
+		bool (*m_render_fn)(OOBase::CDRStream&, OOBase::CDRStream&);
+		OOBase::Atomic<int> m_active;
+	};
+
 
 }
 
-#endif // INDIGO_WINDOWS_H_INCLUDED
+#endif /* INDIGO_LOGICOBJECT_H_INCLUDED */

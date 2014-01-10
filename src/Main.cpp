@@ -32,8 +32,8 @@
 static bool s_is_debug = false;
 
 // Forward declare the thread functions
-bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args, Indigo::Queue& draw_queue, Indigo::Queue& logic_queue);
-bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args, Indigo::Queue& draw_queue, Indigo::Queue& logic_queue);
+bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
+bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
 bool Indigo::is_debug()
 {
@@ -162,8 +162,6 @@ namespace
 {
 	struct thread_info
 	{
-		Indigo::Queue* m_draw_queue;
-		Indigo::Queue* m_logic_queue;
 		OOBase::Event* m_started;
 		const OOBase::Table<OOBase::String,OOBase::String>* m_config;
 	};
@@ -173,15 +171,11 @@ static int logic_thread_start(void* param)
 {
 	thread_info* ti = reinterpret_cast<thread_info*>(param);
 
-	// Create the logic queue
-	Indigo::Queue logic_queue;
-	ti->m_logic_queue = &logic_queue;
-
 	// Signal we have started
 	ti->m_started->set();
 
 	// Run the logic loop
-	return logic_thread(*ti->m_config,*ti->m_draw_queue,logic_queue) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return logic_thread(*ti->m_config) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 static bool start_threads(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
@@ -190,8 +184,6 @@ static bool start_threads(const OOBase::Table<OOBase::String,OOBase::String>& co
 	OOBase::Event started(false,false);
 
 	thread_info ti;
-	ti.m_draw_queue = &draw_queue;
-	ti.m_logic_queue = NULL;
 	ti.m_started = &started;
 	ti.m_config = &config_args;
 
@@ -204,7 +196,7 @@ static bool start_threads(const OOBase::Table<OOBase::String,OOBase::String>& co
 	started.wait();
 
 	// Now run the draw_thread (it must be the main thread)
-	bool res = draw_thread(config_args,draw_queue,*ti.m_logic_queue);
+	bool res = draw_thread(config_args);
 
 	// Wait for logic thread to end
 	logic_thread.join();

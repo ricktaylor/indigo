@@ -22,6 +22,8 @@
 #ifndef INDIGO_QUEUE_H_INCLUDED
 #define INDIGO_QUEUE_H_INCLUDED
 
+#include "Common.h"
+
 namespace Indigo
 {
 	class Queue
@@ -36,6 +38,14 @@ namespace Indigo
 		OOBase::Condition        m_cond;
 
 		OOBase::Queue<OOBase::Buffer*,OOBase::ThreadLocalAllocator> m_queue;
+	};
+
+	class LogicQueue : public Queue
+	{
+	};
+
+	class DrawQueue : public Queue
+	{
 	};
 }
 
