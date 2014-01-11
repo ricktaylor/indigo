@@ -31,7 +31,7 @@ indigo_LDADD = \
 indigo_LDADD += -lGL
 
 if WIN32
-indigo_SOURCES += Indigo.rc
+#indigo_SOURCES += Indigo.rc
 indigo_LDADD += -lole32 -lrpcrt4
 else
 indigo_LDADD += -lX11 -lXrandr -lXi -lXxf86vm
