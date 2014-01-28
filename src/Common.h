@@ -49,6 +49,7 @@
 #include <OOBase/Server.h>
 #include <OOBase/File.h>
 #include <OOBase/Singleton.h>
+#include <OOBase/SignalSlot.h>
 
 #if defined(_MSC_VER)
 	//#include "Config_msvc.h"
