@@ -46,8 +46,6 @@ namespace
 
 static OOBase::HashTable<OOBase::uint16_t,RenderWindow*,OOBase::ThreadLocalAllocator> s_mapRenderWindows;
 
-static OOBase::CDRStream* s_event_stream = NULL;
-
 RenderWindow::RenderWindow(OOBase::uint16_t id, GLFWwindow* win) : m_id(id), m_glfw_window(win)
 {
 	glfwSetWindowUserPointer(win,this);
@@ -181,7 +179,7 @@ bool have_windows()
 	return !s_mapRenderWindows.empty();
 }
 
-bool render_windows(OOBase::CDRStream& output)
+bool render_windows()
 {
 	for (OOBase::HashTable<OOBase::uint16_t,RenderWindow*,OOBase::ThreadLocalAllocator>::iterator i=s_mapRenderWindows.begin();i!=s_mapRenderWindows.end();++i)
 	{
@@ -194,13 +192,7 @@ bool render_windows(OOBase::CDRStream& output)
 		i->value->swap_buffers();
 	}
 
-	// Stash the event stream so the callbacks can update it
-	s_event_stream = &output;
-
 	glfwPollEvents();
-
-	if (output.last_error())
-		LOG_ERROR_RETURN(("Failed to write events to queue: %s",OOBase::system_error_text(output.last_error())),false);
 
 	return true;
 }

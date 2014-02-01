@@ -29,24 +29,46 @@ namespace Indigo
 	class Queue
 	{
 	public:
-		int enqueue(OOBase::Buffer* buffer);
-		bool dequeue(OOBase::Buffer*& buffer, int& err);
-		bool dequeue_block(OOBase::Buffer*& buffer, int& err, const OOBase::Timeout& timeout = OOBase::Timeout());
+		typedef bool (*callback_t)(OOBase::CDRStream& input);
+
+		bool enqueue(callback_t callback, const OOBase::RefPtr<OOBase::Buffer>& buffer = OOBase::RefPtr<OOBase::Buffer>());
+		bool dequeue();
+		bool dequeue_block(const OOBase::Timeout& timeout = OOBase::Timeout());
 
 	private:
 		OOBase::Condition::Mutex m_lock;
 		OOBase::Condition        m_cond;
 
-		OOBase::Queue<OOBase::Buffer*,OOBase::ThreadLocalAllocator> m_queue;
+		struct Item
+		{
+			Item() : m_callback(), m_buffer()
+			{}
+
+			Item(callback_t c, const OOBase::RefPtr<OOBase::Buffer>& b) : m_callback(c), m_buffer(b)
+			{}
+
+			callback_t m_callback;
+			OOBase::RefPtr<OOBase::Buffer> m_buffer;
+		};
+
+		OOBase::Queue<Item,OOBase::ThreadLocalAllocator> m_queue;
+
+		bool dequeue_i();
 	};
 
-	class LogicQueue : public Queue
+	namespace detail
 	{
-	};
+		class LogicQueue : public Queue
+		{
+		};
 
-	class DrawQueue : public Queue
-	{
-	};
+		class DrawQueue : public Queue
+		{
+		};
+	}
+
+	typedef OOBase::Singleton<detail::LogicQueue> LOGIC_QUEUE;
+	typedef OOBase::Singleton<detail::DrawQueue> DRAW_QUEUE;
 }
 
 #endif // INDIGO_QUEUE_H_INCLUDED

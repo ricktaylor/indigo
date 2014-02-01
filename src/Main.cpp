@@ -202,7 +202,7 @@ static bool start_threads(const OOBase::Table<OOBase::String,OOBase::String>& co
 	logic_thread.join();
 
 	// Send an abort to the logic_thread
-	draw_queue.enqueue(NULL);
+	draw_queue.enqueue(NULL,NULL);
 
 	return res;
 }

@@ -26,52 +26,16 @@
 
 // Forward declare the windowing functions
 bool have_windows();
-bool render_windows(OOBase::CDRStream& output);
+bool render_windows();
 
 static void on_glfw_error(int code, const char* message)
 {
 	OOBase::Logger::log(OOBase::Logger::Error,"GLFW error %d: %s",code,message);
 }
 
-static bool release_buffer(OOBase::CDRStream& input, OOBase::CDRStream& output)
-{
-	OOBase::Buffer* buf = NULL;
-	if (!input.read(buf))
-		LOG_ERROR_RETURN(("Failed to read free buffer: %s",OOBase::system_error_text(input.last_error())),false);
-
-	buf->release();
-
-	return true;
-}
-
-static bool parse_command(OOBase::Buffer* cmd_buffer, OOBase::Buffer* event_buffer, bool& bStop)
-{
-	OOBase::CDRStream input(cmd_buffer);
-	OOBase::CDRStream output(event_buffer);
-
-	while (input.length())
-	{
-		bool (*callback)(OOBase::CDRStream& input, OOBase::CDRStream& output);
-		if (!input.read(callback))
-			LOG_ERROR_RETURN(("Failed to read callback: %s",OOBase::system_error_text(input.last_error())),false);
-
-		if (!callback)
-		{
-			bStop = true;
-			break;
-		}
-
-		if (!(*callback)(input,output))
-			return false;
-	}
-
-	return true;
-}
-
 bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
-	Indigo::Queue& draw_queue = OOBase::Singleton<Indigo::DrawQueue>::instance();
-	Indigo::Queue& logic_queue = OOBase::Singleton<Indigo::DrawQueue>::instance();
+	Indigo::Queue& logic_queue = Indigo::LOGIC_QUEUE::instance();
 
 	// Not sure if we need to set this first...
 	glfwSetErrorCallback(&on_glfw_error);
@@ -82,55 +46,18 @@ bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args
 //	if (!Indigo::is_debug())
 //		glfwSwapInterval(1);
 
-	OOBase::RefPtr<OOBase::Buffer> event_buffer;
-	OOBase::Buffer* cmd_buffer = NULL;
-
-	for (bool bStop = false;!bStop;)
+	for (;;)
 	{
-		if (!event_buffer)
-		{
-			event_buffer = OOBase::Buffer::create<OOBase::ThreadLocalAllocator>(OOBase::CDRStream::MaxAlignment);
-			if (!event_buffer)
-				LOG_ERROR_RETURN(("Failed to allocate buffer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
-		}
-		OOBase::CDRStream output(event_buffer);
-
-		if (cmd_buffer)
-		{
-			// Push cmd block into out queue (it's not ours to free)
-			if (!output.write(&release_buffer) || !output.write(cmd_buffer))
-				LOG_ERROR_RETURN(("Failed to write message: %s",OOBase::system_error_text(output.last_error())),false);
-		}
+		if (have_windows() ? !logic_queue.dequeue() : !logic_queue.dequeue_block())
+			break;
 
 		// Update animations
 
 		// Render all windows (this collects events)
-		if (!render_windows(output))
-			return false;
+		if (!render_windows())
+			break;
 
-		// Get next cmd block from in queue
-		int err = 0;
-		if (have_windows() ? logic_queue.dequeue(cmd_buffer,err) : logic_queue.dequeue_block(cmd_buffer,err))
-		{
-			// Parse command block
-			if (!parse_command(cmd_buffer,event_buffer,bStop))
-				return false;
-		}
-		else if (err)
-			LOG_ERROR_RETURN(("Failed to dequeue logic packet: %s",OOBase::system_error_text(err)),false);
 
-		// Send event buffer back to logic thread
-		if (event_buffer->length() > 0)
-		{
-			err = draw_queue.enqueue(event_buffer);
-			if (err)
-				LOG_ERROR(("Failed to enqueue command: %s",OOBase::system_error_text(err)));
-			else
-			{
-				event_buffer->addref();
-				event_buffer = NULL;
-			}
-		}
 	}
 
 	glfwTerminate();

@@ -22,41 +22,71 @@
 #include "Common.h"
 #include "Queue.h"
 
-int Indigo::Queue::enqueue(OOBase::Buffer* buffer)
+bool Indigo::Queue::enqueue(callback_t callback, const OOBase::RefPtr<OOBase::Buffer>& buffer)
 {
-	int err = 0;
-	if (buffer)
-	{
-		OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
+	OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
 
-		err = m_queue.push(buffer);
-		if (!err)
-			m_cond.signal();
-	}
+	int err = m_queue.push(Item(callback,buffer));
+	if (err)
+		LOG_ERROR_RETURN(("Failed to enqueue command: %s",OOBase::system_error_text(err)),false);
 
-	return err;
+	m_cond.signal();
+	return true;
 }
 
-bool Indigo::Queue::dequeue(OOBase::Buffer*& buffer, int& err)
+bool Indigo::Queue::dequeue()
 {
 	OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock,false);
-	if (guard.try_acquire() && !m_queue.empty())
-	{
-		err = m_queue.pop(&buffer);
+	if (!guard.try_acquire())
 		return true;
-	}
-	return false;
+
+	return dequeue_i();
 }
 
-bool Indigo::Queue::dequeue_block(OOBase::Buffer*& buffer, int& err, const OOBase::Timeout& timeout)
+bool Indigo::Queue::dequeue_block(const OOBase::Timeout& timeout)
 {
 	OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
 	while (m_queue.empty())
 	{
 		if (!m_cond.wait(m_lock,timeout))
-			return false;
+			return true;
 	}
 
-	err = m_queue.pop(&buffer);
+	return dequeue_i();
+}
+
+static bool release_buffer(OOBase::CDRStream& input)
+{
+	OOBase::Buffer* buf = NULL;
+	if (!input.read(buf))
+		LOG_ERROR_RETURN(("Failed to read free buffer: %s",OOBase::system_error_text(input.last_error())),false);
+
+	if (buf)
+		buf->release();
+
+	return 0;
+}
+
+bool Indigo::Queue::dequeue_i()
+{
+	// Get next buffer
+	for (Item item;m_queue.pop(&item);)
+	{
+		// Enqueue buffer relase
+		if (item.m_buffer)
+		{
+			// Push cmd buffer into out queue (it's not ours to free)
+			OOBase::CDRStream output;
+			if (!output.write(item.m_buffer.addref()))
+				LOG_ERROR_RETURN(("Failed to write buffer release message: %s",OOBase::system_error_text(output.last_error())),false);
+
+			if (!Indigo::DRAW_QUEUE::instance().enqueue(&release_buffer,output.buffer()))
+				return false;
+		}
+
+		OOBase::CDRStream input(item.m_buffer);
+		if (!item.m_callback || !(*item.m_callback)(input))
+			return false;
+	}
 	return true;
 }

@@ -24,8 +24,6 @@
 
 bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
-	Indigo::Queue& draw_queue = OOBase::Singleton<Indigo::DrawQueue>::instance();
-	Indigo::Queue& logic_queue = OOBase::Singleton<Indigo::DrawQueue>::instance();
 
 	return true;
 }
