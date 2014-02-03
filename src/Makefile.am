@@ -17,11 +17,10 @@ bin_PROGRAMS = indigo
 
 indigo_SOURCES = \
 	Main.cpp \
-	DrawThread.cpp \
+	Render.cpp \
 	LogicThread.cpp \
 	Window.cpp \
-	Squirrel.cpp \
-	Queue.cpp
+	Squirrel.cpp
 		
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \

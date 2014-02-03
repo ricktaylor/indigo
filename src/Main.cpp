@@ -20,7 +20,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
-#include "Queue.h"
 
 #include <stdlib.h>
 #include <limits.h>
@@ -32,7 +31,7 @@
 static bool s_is_debug = false;
 
 // Forward declare the thread functions
-bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
+bool start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
 bool Indigo::is_debug()
@@ -158,55 +157,6 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 	return true;
 }
 
-namespace 
-{
-	struct thread_info
-	{
-		OOBase::Event* m_started;
-		const OOBase::Table<OOBase::String,OOBase::String>* m_config;
-	};
-}
-
-static int logic_thread_start(void* param)
-{
-	thread_info* ti = reinterpret_cast<thread_info*>(param);
-
-	// Signal we have started
-	ti->m_started->set();
-
-	// Run the logic loop
-	return logic_thread(*ti->m_config) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
-
-static bool start_threads(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
-{
-	Indigo::Queue draw_queue;
-	OOBase::Event started(false,false);
-
-	thread_info ti;
-	ti.m_started = &started;
-	ti.m_config = &config_args;
-
-	OOBase::Thread logic_thread(false);
-	int err = logic_thread.run(&logic_thread_start,&ti);
-	if (err)
-		LOG_ERROR_RETURN(("Failed to start thread: %s",OOBase::system_error_text(err)),false);
-
-	// Wait for the logic thread to start
-	started.wait();
-
-	// Now run the draw_thread (it must be the main thread)
-	bool res = draw_thread(config_args);
-
-	// Wait for logic thread to end
-	logic_thread.join();
-
-	// Send an abort to the logic_thread
-	draw_queue.enqueue(NULL,NULL);
-
-	return res;
-}
-
 #if defined(_WIN32)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #else
@@ -278,5 +228,5 @@ int main(int argc, const char* argv[])
 		return EXIT_FAILURE;
 
 	// Start our two main threads
-	return start_threads(config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return start_render_thread(&logic_thread,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

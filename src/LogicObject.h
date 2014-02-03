@@ -22,7 +22,7 @@
 #ifndef INDIGO_LOGICOBJECT_H_INCLUDED
 #define INDIGO_LOGICOBJECT_H_INCLUDED
 
-#include "Queue.h"
+#include "Common.h"
 
 namespace Indigo
 {

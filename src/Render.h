@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2013 Rick Taylor
+// Copyright (C) 2014 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,10 +19,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
+#ifndef INDIGO_RENDER_H_INCLUDED
+#define INDIGO_RENDER_H_INCLUDED
 
-bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
-{
+bool render_call(bool (*fn)(void*), void* param);
+bool raise_event(bool (*fn)(void*), void* param);
 
-	return true;
-}
+#endif // INDIGO_RENDER_H_INCLUDED
