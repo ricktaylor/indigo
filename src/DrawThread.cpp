@@ -33,6 +33,30 @@ static void on_glfw_error(int code, const char* message)
 	OOBase::Logger::log(OOBase::Logger::Error,"GLFW error %d: %s",code,message);
 }
 
+static bool parse_command(const OOBase::RefPtr<OOBase::Buffer>& cmd_buffer, const OOBase::RefPtr<OOBase::Buffer>& event_buffer, bool& bStop)
+{
+	OOBase::CDRStream input(cmd_buffer);
+	OOBase::CDRStream output(event_buffer);
+
+	while (input.length())
+	{
+		bool (*callback)(OOBase::CDRStream& input, OOBase::CDRStream& output);
+		if (!input.read(callback))
+			LOG_ERROR_RETURN(("Failed to read callback: %s",OOBase::system_error_text(input.last_error())),false);
+
+		if (!callback)
+		{
+			bStop = true;
+			break;
+		}
+
+		if (!(*callback)(input,output))
+			return false;
+	}
+
+	return true;
+}
+
 bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
 	Indigo::Queue& logic_queue = Indigo::LOGIC_QUEUE::instance();
