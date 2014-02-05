@@ -14,36 +14,8 @@ all-local:
 		@abs_srcdir@/glfw
 	$(MAKE) -C @builddir@/glfw all
 	
-# Custom squirrel makefile
-noinst_LTLIBRARIES = libsquirrel.la libminiz.la
+noinst_LTLIBRARIES = libminiz.la
 
 libminiz_la_CPPFLAGS = -DMINIZ_NO_MALLOC 
 
 libminiz_la_SOURCES = miniz/miniz.c
-
-libsquirrel_la_CPPFLAGS = -I @srcdir@/SQUIRREL3/include
-
-libsquirrel_la_SOURCES = \
-	SQUIRREL3/squirrel/sqapi.cpp \
-	SQUIRREL3/squirrel/sqbaselib.cpp \
-	SQUIRREL3/squirrel/sqfuncstate.cpp \
-	SQUIRREL3/squirrel/sqdebug.cpp \
-	SQUIRREL3/squirrel/sqlexer.cpp \
-	SQUIRREL3/squirrel/sqobject.cpp \
-	SQUIRREL3/squirrel/sqcompiler.cpp \
-	SQUIRREL3/squirrel/sqstate.cpp \
-	SQUIRREL3/squirrel/sqtable.cpp \
-	SQUIRREL3/squirrel/sqvm.cpp \
-	SQUIRREL3/squirrel/sqclass.cpp
-#	SQUIRREL3/squirrel/sqmem.cpp
-	
-# Add bits of the standard library
-libsquirrel_la_SOURCES += \
-	SQUIRREL3/sqstdlib/sqstdblob.cpp \
-	SQUIRREL3/sqstdlib/sqstdmath.cpp \
-	SQUIRREL3/sqstdlib/sqstdstring.cpp \
-	SQUIRREL3/sqstdlib/sqstdrex.cpp
-#	SQUIRREL3/sqstdlib/sqstdaux.cpp \
-#	SQUIRREL3/sqstdlib/sqstdio.cpp \
-#	SQUIRREL3/sqstdlib/sqstdstream.cpp
-#	SQUIRREL3/sqstdlib/sqstdsystem.cpp 

@@ -19,13 +19,11 @@ indigo_SOURCES = \
 	Main.cpp \
 	Render.cpp \
 	LogicThread.cpp \
-	Window.cpp \
-	Squirrel.cpp
+	Window.cpp
 		
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \
-	@top_builddir@/3rdparty/glfw/src/libglfw3.a \
-	@top_builddir@/3rdparty/libsquirrel.la
+	@top_builddir@/3rdparty/glfw/src/libglfw3.a
 	
 indigo_LDADD += -lGL
 
