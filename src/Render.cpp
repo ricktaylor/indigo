@@ -19,7 +19,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
 #include "Render.h"
 #include "Window.h"
 
@@ -190,20 +189,22 @@ static bool stop_thread(void*)
 static int logic_thread_start(void* param)
 {
 	thread_info ti = *reinterpret_cast<thread_info*>(param);
+	int err = 0;
+	{
+		// Force creation of render queue here
+		RenderQueue render_queue;
+		s_render_queue = &render_queue;
 
-	// Force creation of render queue here
-	RenderQueue render_queue;
-	s_render_queue = &render_queue;
+		// Signal we have started
+		ti.m_started->set();
+		ti.m_started = NULL;
 
-	// Signal we have started
-	ti.m_started->set();
-	ti.m_started = NULL;
+		// Run the logic loop
+		err = (*ti.m_fn)(*ti.m_config) ? EXIT_SUCCESS : EXIT_FAILURE;
 
-	// Run the logic loop
-	int err = (*ti.m_fn)(*ti.m_config) ? EXIT_SUCCESS : EXIT_FAILURE;
-
-	// Tell the render thread we have finished
-	render_queue.enqueue(&stop_thread);
+		// Tell the render thread we have finished
+		render_queue.enqueue(&stop_thread);
+	}
 
 	return err;
 }

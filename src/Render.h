@@ -22,6 +22,8 @@
 #ifndef INDIGO_RENDER_H_INCLUDED
 #define INDIGO_RENDER_H_INCLUDED
 
+#include "Common.h"
+
 namespace Indigo
 {
 	bool start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args);

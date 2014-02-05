@@ -19,9 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
 #include "Render.h"
 #include "Window.h"
+#include "Framebuffer.h"
 
 static OOBase::SharedPtr<Indigo::Window> s_ptrSplash;
 
@@ -39,7 +39,7 @@ static bool render_start(void*)
 	if (!ptrSplash)
 		return false;
 
-	int err = ptrSplash->m_on_close.connect(&on_window_close);
+	int err = ptrSplash->signal_close.connect(&on_window_close);
 	if (err)
 		LOG_ERROR_RETURN(("Failed to attach signal: %s",OOBase::system_error_text(err)),false);
 
@@ -57,7 +57,7 @@ bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_arg
 	if (!Indigo::handle_events())
 		return false;
 
-	LOG_ERROR(("Window closed"));
+	OOBase::Logger::log(OOBase::Logger::Information,"Quit");
 
 	return true;
 }

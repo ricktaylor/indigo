@@ -19,15 +19,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
 #include "Window.h"
+#include "Framebuffer.h"
 
 void Indigo::Window::render()
 {
-	if (!m_glfw_window)
+	if (!make_current())
 		return;
-
-	make_current();
 
 	// for each camera
 
@@ -40,10 +38,15 @@ void Indigo::Window::render()
 	glfwSwapBuffers(m_glfw_window);
 }
 
-void Indigo::Window::make_current()
+bool Indigo::Window::make_current() const
 {
-	if (m_glfw_window && glfwGetCurrentContext() != m_glfw_window)
+	if (!m_glfw_window)
+		return false;
+
+	if (glfwGetCurrentContext() != m_glfw_window)
 		glfwMakeContextCurrent(m_glfw_window);
+
+	return true;
 }
 
 bool Indigo::Window::is_visible() const
@@ -98,7 +101,7 @@ void Indigo::Window::on_close(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
-		pThis->m_on_close.fire();
+		pThis->signal_close.fire();
 }
 
 void Indigo::Window::on_focus(GLFWwindow* window, int focused)
@@ -116,4 +119,26 @@ void Indigo::Window::on_refresh(GLFWwindow* window)
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->is_visible() && !pThis->is_iconified())
 		pThis->render();
+}
+
+GLFWwindow* Indigo::Window::get_glfw_window() const
+{
+	return m_glfw_window;
+}
+
+Indigo::Window::operator Indigo::Window::bool_type() const
+{
+	return m_glfw_window != NULL ? &SafeBoolean::this_type_does_not_support_comparisons : NULL;
+}
+
+const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::default_frame_buffer() const
+{
+	if (!m_default_fb && make_current())
+	{
+		GLint fb_id = GL_INVALID_VALUE;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING,&fb_id);
+		if (fb_id != GL_INVALID_VALUE)
+			m_default_fb = OOBase::allocate_shared<Framebuffer,OOBase::ThreadLocalAllocator>(*this,fb_id);
+	}
+	return m_default_fb;
 }

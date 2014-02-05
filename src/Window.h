@@ -22,10 +22,12 @@
 #ifndef INDIGO_WINDOWS_H_INCLUDED
 #define INDIGO_WINDOWS_H_INCLUDED
 
-#include <GLFW/glfw3.h>
+#include "Common.h"
 
 namespace Indigo
 {
+	class Framebuffer;
+
 	class Window : public OOBase::SafeBoolean
 	{
 	public:
@@ -39,6 +41,8 @@ namespace Indigo
 		Window(int width, int height, const char* title, unsigned int style = eWSdecorated, GLFWmonitor* monitor = NULL, Window* share = NULL);
 		~Window();
 
+		operator bool_type() const;
+
 		bool is_visible() const;
 		void visible(bool show);
 
@@ -47,17 +51,18 @@ namespace Indigo
 
 		void render();
 
-		operator bool_type() const
-		{
-			return m_glfw_window != NULL ? &SafeBoolean::this_type_does_not_support_comparisons : NULL;
-		}
+		const OOBase::SharedPtr<Framebuffer>& default_frame_buffer() const;
 
-		OOBase::Signal0<OOBase::ThreadLocalAllocator> m_on_close;
+		GLFWwindow* get_glfw_window() const;
+		bool make_current() const;
+
+	// Signals
+	public:
+		OOBase::Signal0<OOBase::ThreadLocalAllocator> signal_close;
 
 	private:
 		GLFWwindow* m_glfw_window;
-
-		void make_current();
+		mutable OOBase::SharedPtr<Indigo::Framebuffer> m_default_fb;
 
 		static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 

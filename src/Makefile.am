@@ -19,7 +19,8 @@ indigo_SOURCES = \
 	Main.cpp \
 	Render.cpp \
 	LogicThread.cpp \
-	Window.cpp
+	Window.cpp \
+	Framebuffer.cpp
 		
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \

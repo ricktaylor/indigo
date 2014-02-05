@@ -110,8 +110,11 @@
 namespace Indigo
 {
 	bool is_debug();
-
-
 }
+
+#include <GLFW/glfw3.h>
+
+// Include our own glext.h
+#include "glext.h"
 
 #endif // INDIGO_COMMON_H_INCLUDED
