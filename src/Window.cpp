@@ -24,14 +24,26 @@
 
 void Indigo::Window::render()
 {
+	if (!m_glfw_window)
+		return;
+
+	make_current();
+
 	// for each camera
 
 	// Cull
 	// Sort
+
+
 	// Draw
 
-
 	glfwSwapBuffers(m_glfw_window);
+}
+
+void Indigo::Window::make_current()
+{
+	if (m_glfw_window && glfwGetCurrentContext() != m_glfw_window)
+		glfwMakeContextCurrent(m_glfw_window);
 }
 
 bool Indigo::Window::is_visible() const
@@ -50,6 +62,25 @@ void Indigo::Window::visible(bool show)
 			glfwShowWindow(m_glfw_window);
 		else
 			glfwHideWindow(m_glfw_window);
+	}
+}
+
+bool Indigo::Window::is_iconified() const
+{
+	if (!m_glfw_window)
+		return false;
+
+	return glfwGetWindowAttrib(m_glfw_window,GLFW_ICONIFIED) != 0;
+}
+
+void Indigo::Window::iconify(bool minimize)
+{
+	if (m_glfw_window)
+	{
+		if (minimize)
+			glfwIconifyWindow(m_glfw_window);
+		else
+			glfwRestoreWindow(m_glfw_window);
 	}
 }
 
@@ -78,4 +109,11 @@ void Indigo::Window::on_focus(GLFWwindow* window, int focused)
 void Indigo::Window::on_iconify(GLFWwindow* window, int iconified)
 {
 	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
+}
+
+void Indigo::Window::on_refresh(GLFWwindow* window)
+{
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (pThis && pThis->is_visible() && !pThis->is_iconified())
+		pThis->render();
 }

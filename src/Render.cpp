@@ -240,7 +240,7 @@ bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args
 		// Render all windows (this collects events)
 		for (OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();++i)
 		{
-			if ((*i)->is_visible())
+			if ((*i)->is_visible() && !(*i)->is_iconified())
 			{
 				(*i)->render();
 
@@ -385,6 +385,7 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 		glfwSetWindowCloseCallback(m_glfw_window,&on_close);
 		glfwSetWindowFocusCallback(m_glfw_window,&on_focus);
 		glfwSetWindowIconifyCallback(m_glfw_window,&on_iconify);
+		glfwSetWindowRefreshCallback(m_glfw_window,&on_refresh);
 
 		s_vecWindows->push_back(this);
 	}

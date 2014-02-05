@@ -33,7 +33,7 @@ namespace Indigo
 		{
 			eWSvisible = 1,
 			eWSresizable = 2,
-			eWSdecorated = 4,
+			eWSdecorated = 4
 		};
 
 		Window(int width, int height, const char* title, unsigned int style = eWSdecorated, GLFWmonitor* monitor = NULL, Window* share = NULL);
@@ -41,6 +41,9 @@ namespace Indigo
 
 		bool is_visible() const;
 		void visible(bool show);
+
+		bool is_iconified() const;
+		void iconify(bool minimize);
 
 		void render();
 
@@ -54,6 +57,8 @@ namespace Indigo
 	private:
 		GLFWwindow* m_glfw_window;
 
+		void make_current();
+
 		static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
 		static void on_pos(GLFWwindow* window, int xpos, int ypos);
@@ -61,6 +66,7 @@ namespace Indigo
 		static void on_close(GLFWwindow* window);
 		static void on_focus(GLFWwindow* window, int focused);
 		static void on_iconify(GLFWwindow* window, int iconified);
+		static void on_refresh(GLFWwindow* window);
 	};
 }
 
