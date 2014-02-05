@@ -20,6 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
+#include "Render.h"
 
 #include <stdlib.h>
 #include <limits.h>
@@ -31,7 +32,6 @@
 static bool s_is_debug = false;
 
 // Forward declare the thread functions
-bool start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
 bool Indigo::is_debug()
@@ -66,7 +66,7 @@ static int exit_failure(const char* fmt, ...)
 	va_list args;
 	va_start(args,fmt);
 
-	OOBase::ScopedString<> msg;
+	OOBase::ScopedString msg;
 	int err = msg.vprintf(fmt,args);
 
 	va_end(args);
@@ -84,13 +84,7 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 	// Copy command line args
 	for (size_t i=0; i < cmd_args.size(); ++i)
 	{
-		OOBase::String strKey,strValue;
-		err = strKey.assign(*cmd_args.key_at(i));
-		if (!err)
-			err = strValue.assign(*cmd_args.at(i));
-		if (!err)
-			err = config_args.insert(strKey,strValue);
-
+		err = config_args.insert(*cmd_args.key_at(i),*cmd_args.at(i));
 		if (err)
 			LOG_ERROR_RETURN(("Failed to copy command args: %s",OOBase::system_error_text(err)),false);
 	}
@@ -111,11 +105,13 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 			err = strFile.assign(".indigo.conf");
 		else
 		{
-			// Get user directory and check for .indo.conf there
+			// Get user directory and check for .indigo.conf there
 			OOBase::POSIX::pw_info info(getuid());
 			if (!(!info) && info->pw_dir)
 			{
-				err = strFile.concat(info->pw_dir,"/.indigo.conf");
+				err = strFile.assign(info->pw_dir);
+				if (!err)
+					err = strFile.append("/.indigo.conf");
 				if (!err && access(strFile.c_str(),F_OK) != 0)
 					strFile.clear();
 			}
@@ -148,7 +144,7 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 		err = OOBase::ConfigFile::load(strFile.c_str(),config_args,&error);
 		if (err == EINVAL)
 			LOG_ERROR_RETURN(("Failed read configuration file %s: Syntax error at line %lu, column %lu",rpath,(unsigned long)error.line,(unsigned long)error.col),false);
-		else if (err)
+		else if (err != ENOENT)
 			LOG_ERROR_RETURN(("Failed load configuration file %s: %s",rpath,OOBase::system_error_text(err)),false);
 	}
 
@@ -228,5 +224,5 @@ int main(int argc, const char* argv[])
 		return EXIT_FAILURE;
 
 	// Start our two main threads
-	return start_render_thread(&logic_thread,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return Indigo::start_render_thread(&logic_thread,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

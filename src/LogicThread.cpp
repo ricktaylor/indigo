@@ -20,9 +20,44 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
+#include "Render.h"
+#include "Window.h"
+
+static OOBase::SharedPtr<Indigo::Window> s_ptrSplash;
+
+static void on_window_close()
+{
+	s_ptrSplash.reset();
+}
+
+static bool render_start(void*)
+{
+	// Set defaults
+	glfwDefaultWindowHints();
+
+	OOBase::SharedPtr<Indigo::Window> ptrSplash = OOBase::allocate_shared<Indigo::Window,OOBase::ThreadLocalAllocator>(320,200,"Test");
+	if (!ptrSplash)
+		return false;
+
+	int err = ptrSplash->m_on_close.connect(&on_window_close);
+	if (err)
+		LOG_ERROR_RETURN(("Failed to attach signal: %s",OOBase::system_error_text(err)),false);
+
+	ptrSplash->visible(true);
+	s_ptrSplash.swap(ptrSplash);
+	return true;
+}
 
 bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
+	// Set up graphics first
+	if (!Indigo::render_call(&render_start,NULL))
+		return false;
+
+	if (!Indigo::handle_events())
+		return false;
+
+	LOG_ERROR(("Window closed"));
 
 	return true;
 }

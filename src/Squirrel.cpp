@@ -53,7 +53,7 @@ static void on_error(HSQUIRRELVM, const SQChar* msg, ...)
 	va_list args;
 	va_start(args,msg);
 
-	OOBase::ScopedString<> ptr;
+	OOBase::ScopedString ptr;
 	if (ptr.vprintf(msg,args) == 0)
 		OOBase::Logger::log(OOBase::Logger::Error,"Script runtime error: %s",ptr.c_str());
 	else

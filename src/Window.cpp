@@ -19,180 +19,63 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "Common.h"
 #include "Window.h"
 
-#include <GLFW/glfw3.h>
-
-namespace
+void Indigo::Window::render()
 {
-	class RenderWindow
-	{
-	public:
-		RenderWindow(OOBase::uint16_t id, GLFWwindow* w);
+	// for each camera
 
-		void swap_buffers();
+	// Cull
+	// Sort
+	// Draw
 
-	private:
-		OOBase::uint16_t m_id;
-		GLFWwindow*      m_glfw_window;
 
-		static void on_pos(GLFWwindow* window, int xpos, int ypos);
-		static void on_size(GLFWwindow* window, int width, int height);
-		static void on_close(GLFWwindow* window);
-		static void on_focus(GLFWwindow* window, int focused);
-		static void on_iconify(GLFWwindow* window, int iconified);
-	};
-}
-
-static OOBase::HashTable<OOBase::uint16_t,RenderWindow*,OOBase::ThreadLocalAllocator> s_mapRenderWindows;
-
-RenderWindow::RenderWindow(OOBase::uint16_t id, GLFWwindow* win) : m_id(id), m_glfw_window(win)
-{
-	glfwSetWindowUserPointer(win,this);
-	glfwSetWindowPosCallback(win,&on_pos);
-	glfwSetWindowSizeCallback(win,&on_size);
-	glfwSetWindowCloseCallback(win,&on_close);
-	glfwSetWindowFocusCallback(win,&on_focus);
-	glfwSetWindowIconifyCallback(win,&on_iconify);
-}
-
-void RenderWindow::swap_buffers()
-{
 	glfwSwapBuffers(m_glfw_window);
 }
 
-void RenderWindow::on_pos(GLFWwindow* window, int xpos, int ypos)
+bool Indigo::Window::is_visible() const
 {
-	/*RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
-	s_event_stream->write(Indigo::Protocol::Response_t(Indigo::Protocol::Response::WindowMsg));
-	s_event_stream->write(WindowEvent_t(WindowEvent::PositionChanged));
-	s_event_stream->write(pThis->m_id);
-	s_event_stream->write(xpos);
-	s_event_stream->write(ypos);*/
+	if (!m_glfw_window)
+		return false;
+
+	return glfwGetWindowAttrib(m_glfw_window,GLFW_VISIBLE) != 0;
 }
 
-void RenderWindow::on_size(GLFWwindow* window, int width, int height)
+void Indigo::Window::visible(bool show)
 {
-	/*RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
-	s_event_stream->write(Indigo::Protocol::Response_t(Indigo::Protocol::Response::WindowMsg));
-	s_event_stream->write(WindowEvent_t(WindowEvent::SizeChanged));
-	s_event_stream->write(pThis->m_id);
-	s_event_stream->write(width);
-	s_event_stream->write(height);*/
-}
-
-void RenderWindow::on_close(GLFWwindow* window)
-{
-	/*RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
-	s_event_stream->write(Indigo::Protocol::Response_t(Indigo::Protocol::Response::WindowMsg));
-	s_event_stream->write(WindowEvent_t(WindowEvent::CloseRequest));
-	s_event_stream->write(pThis->m_id);*/
-}
-
-void RenderWindow::on_focus(GLFWwindow* window, int focused)
-{
-	/*RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
-	s_event_stream->write(Indigo::Protocol::Response_t(Indigo::Protocol::Response::WindowMsg));
-	s_event_stream->write(WindowEvent_t(WindowEvent::FocusChanged));
-	s_event_stream->write(pThis->m_id);
-	s_event_stream->write(focused);*/
-}
-
-void RenderWindow::on_iconify(GLFWwindow* window, int iconified)
-{
-	/*RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
-	s_event_stream->write(Indigo::Protocol::Response_t(Indigo::Protocol::Response::WindowMsg));
-	s_event_stream->write(WindowEvent_t(WindowEvent::Iconified));
-	s_event_stream->write(pThis->m_id);
-	s_event_stream->write(iconified);*/
-}
-
-static bool return_error(OOBase::CDRStream& output, int err)
-{
-	if (!output.write(err))
-		LOG_ERROR_RETURN(("Failed to write response: %s",OOBase::system_error_text(output.last_error())),false);
-	return true;
-}
-
-static bool create_window(OOBase::CDRStream& input, OOBase::CDRStream& output)
-{
-	OOBase::uint16_t window_id = 0;
-
-	input.read(window_id);
-	if (input.last_error())
-		LOG_ERROR_RETURN(("Failed to read request: %s",OOBase::system_error_text(input.last_error())),false);
-
-	// Check if we already have a window with this id
-	if (s_mapRenderWindows.exists(window_id))
-		return return_error(output,EINVAL);
-
-	// Set defaults
-	glfwDefaultWindowHints();
-
-	// Set up the window hints
-	size_t hints = 0;
-	if (!input.read(hints))
-		LOG_ERROR_RETURN(("Failed to read request: %s",OOBase::system_error_text(input.last_error())),false);
-	while (hints--)
+	if (m_glfw_window)
 	{
-		int target,hint;
-		if (!input.read(target) || !input.read(hint))
-			LOG_ERROR_RETURN(("Failed to read request: %s",OOBase::system_error_text(input.last_error())),false);
-
-		glfwWindowHint(target,hint);
+		if (show)
+			glfwShowWindow(m_glfw_window);
+		else
+			glfwHideWindow(m_glfw_window);
 	}
-
-	// Fullscreen?
-	bool fullscreen = false;
-	if (!input.read(fullscreen))
-		LOG_ERROR_RETURN(("Failed to read request: %s",OOBase::system_error_text(input.last_error())),false);
-
-	GLFWmonitor* monitor = NULL;
-	if (fullscreen)
-		monitor = glfwGetPrimaryMonitor();
-
-	OOBase::ScopedString<> strTitle;
-	if (!input.read_string(strTitle))
-		LOG_ERROR_RETURN(("Failed to read request: %s",OOBase::system_error_text(input.last_error())),false);
-
-	int width,height;
-	if (!input.read(width) || !input.read(height))
-		LOG_ERROR_RETURN(("Failed to read request: %s",OOBase::system_error_text(input.last_error())),false);
-
-	// Now try to create the window
-	GLFWwindow* win = glfwCreateWindow(width,height,strTitle.c_str(),monitor,NULL);
-	if (!win)
-		return return_error(output,EINVAL);
-
-	RenderWindow* rwin = NULL;
-	if (!OOBase::ThreadLocalAllocator::allocate_new(rwin,window_id,win))
-	{
-		glfwDestroyWindow(win);
-		return return_error(output,ERROR_OUTOFMEMORY);
-	}
-
-	return return_error(output,0);
 }
 
-bool have_windows()
+void Indigo::Window::on_pos(GLFWwindow* window, int xpos, int ypos)
 {
-	return !s_mapRenderWindows.empty();
+	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
 }
 
-bool render_windows()
+void Indigo::Window::on_size(GLFWwindow* window, int width, int height)
 {
-	for (OOBase::HashTable<OOBase::uint16_t,RenderWindow*,OOBase::ThreadLocalAllocator>::iterator i=s_mapRenderWindows.begin();i!=s_mapRenderWindows.end();++i)
-	{
-		// for each camera
+	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
+}
 
-		// Cull
-		// Sort
-		// Draw
+void Indigo::Window::on_close(GLFWwindow* window)
+{
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (pThis)
+		pThis->m_on_close.fire();
+}
 
-		i->value->swap_buffers();
-	}
+void Indigo::Window::on_focus(GLFWwindow* window, int focused)
+{
+	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
+}
 
-	glfwPollEvents();
-
-	return true;
+void Indigo::Window::on_iconify(GLFWwindow* window, int iconified)
+{
+	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
 }

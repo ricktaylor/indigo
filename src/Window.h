@@ -22,11 +22,46 @@
 #ifndef INDIGO_WINDOWS_H_INCLUDED
 #define INDIGO_WINDOWS_H_INCLUDED
 
-#include "LogicObject.h"
+#include <GLFW/glfw3.h>
 
 namespace Indigo
 {
+	class Window : public OOBase::SafeBoolean
+	{
+	public:
+		enum Style
+		{
+			eWSvisible = 1,
+			eWSresizable = 2,
+			eWSdecorated = 4,
+		};
 
+		Window(int width, int height, const char* title, unsigned int style = eWSdecorated, GLFWmonitor* monitor = NULL, Window* share = NULL);
+		~Window();
+
+		bool is_visible() const;
+		void visible(bool show);
+
+		void render();
+
+		operator bool_type() const
+		{
+			return m_glfw_window != NULL ? &SafeBoolean::this_type_does_not_support_comparisons : NULL;
+		}
+
+		OOBase::Signal0<OOBase::ThreadLocalAllocator> m_on_close;
+
+	private:
+		GLFWwindow* m_glfw_window;
+
+		static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
+
+		static void on_pos(GLFWwindow* window, int xpos, int ypos);
+		static void on_size(GLFWwindow* window, int width, int height);
+		static void on_close(GLFWwindow* window);
+		static void on_focus(GLFWwindow* window, int focused);
+		static void on_iconify(GLFWwindow* window, int iconified);
+	};
 }
 
 #endif // INDIGO_WINDOWS_H_INCLUDED

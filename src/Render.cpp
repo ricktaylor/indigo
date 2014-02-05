@@ -21,14 +21,9 @@
 
 #include "Common.h"
 #include "Render.h"
+#include "Window.h"
 
 #include <stdlib.h>
-
-#include <GLFW/glfw3.h>
-
-// Forward declare the windowing functions
-bool have_windows();
-bool render_windows();
 
 namespace
 {
@@ -47,6 +42,13 @@ namespace
 
 			m_cond.signal();
 			return true;
+		}
+
+		void swap(Queue& rhs)
+		{
+			OOBase::swap(m_lock,rhs.m_lock);
+			OOBase::swap(m_cond,rhs.m_cond);
+			OOBase::swap(m_queue,rhs.m_queue);
 		}
 
 	protected:
@@ -79,7 +81,7 @@ namespace
 				while (m_queue.empty())
 				{
 					if (!m_cond.wait(m_lock,timeout))
-						return true;
+						return false;
 				}
 
 				for (Item item;m_queue.pop(&item);)
@@ -88,7 +90,7 @@ namespace
 
 					// NULL callback means response
 					if (!item.m_callback)
-						return true;
+						return item.m_param == reinterpret_cast<void*>(1);
 
 					if (!(*item.m_callback)(item.m_param))
 						return false;
@@ -151,8 +153,9 @@ namespace
 		}
 	};
 
-	typedef OOBase::Singleton<EventQueue> EVENT_QUEUE;
-	typedef OOBase::Singleton<RenderQueue> RENDER_QUEUE;
+	static EventQueue* s_event_queue = NULL;
+	static RenderQueue* s_render_queue = NULL;
+	static OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>* s_vecWindows;
 
 	struct thread_info
 	{
@@ -160,45 +163,23 @@ namespace
 		const OOBase::Table<OOBase::String,OOBase::String>* m_config;
 		bool (*m_fn)(const OOBase::Table<OOBase::String,OOBase::String>& args);
 	};
+
+	struct render_call_info
+	{
+		bool (*m_fn)(void*);
+		void* m_param;
+	};
+
+	struct raise_event_thunk
+	{
+		void (*m_fn)(OOBase::CDRStream& stream);
+		OOBase::Buffer* m_buffer;
+	};
 }
 
 static void on_glfw_error(int code, const char* message)
 {
 	OOBase::Logger::log(OOBase::Logger::Error,"GLFW error %d: %s",code,message);
-}
-
-static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
-{
-	// Get the render_queue instance up front
-	RenderQueue& render_queue = RENDER_QUEUE::instance();
-
-	// Not sure if we need to set this first...
-	glfwSetErrorCallback(&on_glfw_error);
-
-	if (!glfwInit())
-		LOG_ERROR_RETURN(("glfwInit failed"),false);
-
-//	if (!Indigo::is_debug())
-//		glfwSwapInterval(1);
-
-	for (;;)
-	{
-		// Get render commands
-		if (!(have_windows() ? render_queue.dequeue() : render_queue.dequeue_block()))
-			break;
-
-		// Update animations
-
-		// Render all windows (this collects events)
-		if (!render_windows())
-			break;
-	}
-
-	// Some kind of cleanup?
-
-	glfwTerminate();
-
-	return true;
 }
 
 static bool stop_thread(void*)
@@ -211,7 +192,8 @@ static int logic_thread_start(void* param)
 	thread_info ti = *reinterpret_cast<thread_info*>(param);
 
 	// Force creation of render queue here
-	RENDER_QUEUE::instance();
+	RenderQueue render_queue;
+	s_render_queue = &render_queue;
 
 	// Signal we have started
 	ti.m_started->set();
@@ -220,16 +202,69 @@ static int logic_thread_start(void* param)
 	// Run the logic loop
 	int err = (*ti.m_fn)(*ti.m_config) ? EXIT_SUCCESS : EXIT_FAILURE;
 
-	// Clean out the event queue
-	EVENT_QUEUE::instance().dequeue();
-
 	// Tell the render thread we have finished
-	RENDER_QUEUE::instance().enqueue(&stop_thread);
+	render_queue.enqueue(&stop_thread);
 
 	return err;
 }
 
-bool start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args)
+bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
+{
+	OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator> vecWindows;
+	s_vecWindows = &vecWindows;
+
+	// Not sure if we need to set this first...
+	glfwSetErrorCallback(&on_glfw_error);
+
+	if (!glfwInit())
+		LOG_ERROR_RETURN(("glfwInit failed"),false);
+
+//	if (!Indigo::is_debug())
+//		glfwSwapInterval(1);
+
+	// Loop blocking until we have windows
+	bool res = true;
+	while (vecWindows.empty())
+	{
+		res = s_render_queue->dequeue_block();
+		if (!res)
+			break;
+	}
+
+	while (res)
+	{
+		bool visible_window = false;
+
+		// Update animations
+
+		// Render all windows (this collects events)
+		for (OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();++i)
+		{
+			if ((*i)->is_visible())
+			{
+				(*i)->render();
+
+				visible_window = true;
+			}
+		}
+
+		// Poll for UI events
+		if (visible_window)
+			glfwPollEvents();
+		else
+			glfwWaitEvents();
+
+		// Get render commands
+		if (vecWindows.empty() || !(res = s_render_queue->dequeue()))
+			break;
+	}
+
+	glfwTerminate();
+
+	return res;
+}
+
+bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
 	OOBase::Event started(false,false);
 
@@ -239,7 +274,8 @@ bool start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String
 	ti.m_fn = logic_thread;
 
 	// Force creation of event queue here
-	EVENT_QUEUE::instance();
+	EventQueue event_queue;
+	s_event_queue = &event_queue;
 
 	OOBase::Thread logic(false);
 	int err = logic.run(&logic_thread_start,&ti);
@@ -251,24 +287,115 @@ bool start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String
 	// Now run the draw_thread (it must be the main thread)
 	bool res = draw_thread(config_args);
 
-	// Send an abort to the logic_thread
-	EVENT_QUEUE::instance().enqueue(&stop_thread);
-
-	// Wait for logic thread to end
-	logic.join();
+	// Send a quit to the logic_thread
+	if (event_queue.enqueue(NULL,reinterpret_cast<void*>(1)))
+	{
+		// Wait for logic thread to end
+		logic.join();
+	}
 
 	return res;
 }
 
-bool render_call(bool (*fn)(void*), void* param)
+static bool make_render_call(void* param)
 {
-	if (!RENDER_QUEUE::instance().enqueue(fn,param))
-		return false;
+	struct render_call_info* rci = static_cast<struct render_call_info*>(param);
 
-	return EVENT_QUEUE::instance().dequeue();
+	void* ret = (*rci->m_fn)(rci->m_param) ? reinterpret_cast<void*>(1) : static_cast<void*>(0);
+
+	return s_event_queue->enqueue(NULL,ret);
 }
 
-bool raise_event(bool (*fn)(void*), void* param)
+bool Indigo::render_call(bool (*fn)(void*), void* param)
 {
-	return EVENT_QUEUE::instance().enqueue(fn,param);
+	struct render_call_info rci;
+	rci.m_fn = fn;
+	rci.m_param = param;
+
+	if (!s_render_queue->enqueue(&make_render_call,&rci))
+		return false;
+
+	return s_event_queue->dequeue();
+}
+
+static bool raise_raw_event(bool (*fn)(void*), void* param)
+{
+	return s_event_queue->enqueue(fn,param);
+}
+
+static bool raise_event_cleanup(void* param)
+{
+	struct raise_event_thunk* ret = static_cast<struct raise_event_thunk*>(param);
+
+	ret->m_buffer->release();
+	OOBase::ThreadLocalAllocator::delete_free(ret);
+
+	return true;
+}
+
+static bool raise_event_i(void* param)
+{
+	struct raise_event_thunk* ret = static_cast<struct raise_event_thunk*>(param);
+
+	OOBase::CDRStream stream(ret->m_buffer);
+	(*ret->m_fn)(stream);
+
+	return s_render_queue->enqueue(&raise_event_cleanup,ret);
+}
+
+bool Indigo::raise_event(void (*fn)(OOBase::CDRStream&), OOBase::CDRStream& stream)
+{
+	struct raise_event_thunk* ret = NULL;
+	OOBase::ThreadLocalAllocator::allocate_new(ret);
+	if (!ret)
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
+
+	ret->m_fn = fn;
+	ret->m_buffer = stream.buffer().addref();
+
+	if (!raise_raw_event(&raise_event_i,ret))
+	{
+		ret->m_buffer->release();
+		OOBase::ThreadLocalAllocator::free(ret);
+		return false;
+	}
+	return true;
+}
+
+bool Indigo::handle_events()
+{
+	return s_event_queue->dequeue();
+}
+
+Indigo::Window::Window(int width, int height, const char* title, unsigned int style, GLFWmonitor* monitor, Window* share) : m_glfw_window(NULL)
+{
+	glfwWindowHint(GLFW_VISIBLE,(style & eWSvisible) ? GL_TRUE : GL_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE,(style & eWSresizable) ? GL_TRUE : GL_FALSE);
+	glfwWindowHint(GLFW_DECORATED,(style & eWSdecorated) ? GL_TRUE : GL_FALSE);
+
+	// Now try to create the window
+	m_glfw_window = glfwCreateWindow(width,height,title,monitor,share ? share->m_glfw_window : NULL);
+	if (!m_glfw_window)
+		LOG_ERROR(("Failed to create window"));
+	else
+	{
+		glfwSetWindowUserPointer(m_glfw_window,this);
+		glfwSetWindowPosCallback(m_glfw_window,&on_pos);
+		glfwSetWindowSizeCallback(m_glfw_window,&on_size);
+		glfwSetWindowCloseCallback(m_glfw_window,&on_close);
+		glfwSetWindowFocusCallback(m_glfw_window,&on_focus);
+		glfwSetWindowIconifyCallback(m_glfw_window,&on_iconify);
+
+		s_vecWindows->push_back(this);
+	}
+}
+
+Indigo::Window::~Window()
+{
+	if (m_glfw_window)
+	{
+		s_vecWindows->remove(this);
+
+		glfwDestroyWindow(m_glfw_window);
+	}
 }
