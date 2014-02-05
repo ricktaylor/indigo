@@ -368,14 +368,15 @@ bool Indigo::handle_events()
 	return s_event_queue->dequeue();
 }
 
-Indigo::Window::Window(int width, int height, const char* title, unsigned int style, GLFWmonitor* monitor, Window* share) : m_glfw_window(NULL)
+Indigo::Window::Window(int width, int height, const char* title, unsigned int style, GLFWmonitor* monitor) :
+		m_glfw_window(NULL), m_fb_fns()
 {
 	glfwWindowHint(GLFW_VISIBLE,(style & eWSvisible) ? GL_TRUE : GL_FALSE);
 	glfwWindowHint(GLFW_RESIZABLE,(style & eWSresizable) ? GL_TRUE : GL_FALSE);
 	glfwWindowHint(GLFW_DECORATED,(style & eWSdecorated) ? GL_TRUE : GL_FALSE);
 
 	// Now try to create the window
-	m_glfw_window = glfwCreateWindow(width,height,title,monitor,share ? share->m_glfw_window : NULL);
+	m_glfw_window = glfwCreateWindow(width,height,title,monitor,NULL);
 	if (!m_glfw_window)
 		LOG_ERROR(("Failed to create window"));
 	else
@@ -389,6 +390,13 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 		glfwSetWindowRefreshCallback(m_glfw_window,&on_refresh);
 
 		s_vecWindows->push_back(this);
+
+		// Give the window manager a chance to create the window and GL context
+		glfwWaitEvents();
+
+		m_fb_fns = OOBase::allocate_shared<detail::FramebufferFunctions,OOBase::ThreadLocalAllocator>();
+		if (m_fb_fns)
+			m_fb_fns->init(m_glfw_window);
 	}
 }
 

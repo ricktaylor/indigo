@@ -60,53 +60,6 @@
 #error Need some kind of configure scipt!
 #endif
 
-////////////////////////////////////////
-// Try to work out what's going on with MS Windows
-#if defined(HAVE_WINDOWS_H)
-	#if !defined(_WIN32)
-	#error No _WIN32 ?!?
-	#endif
-
-	// Prevent inclusion of old winsock
-	#define _WINSOCKAPI_
-
-	// Reduce the amount of windows we include
-	#define WIN32_LEAN_AND_MEAN
-	#if !defined(STRICT)
-	#define STRICT
-	#endif
-
-	// We support Vista API's
-	#if !defined(_WIN32_WINNT)
-	#define _WIN32_WINNT 0x0600
-	#elif _WIN32_WINNT < 0x0500
-	#error Indigo requires _WIN32_WINNT >= 0x0500!
-	#endif
-
-	// We require IE 5 or later
-	#if !defined(_WIN32_IE)
-	#define _WIN32_IE 0x0500
-	#elif _WIN32_IE < 0x0500
-	#error Indigo requires _WIN32_IE >= 0x0500!
-	#endif
-
-	#if !defined(WINVER)
-	#define WINVER _WIN32_WINNT
-	#endif
-
-	#include <windows.h>
-
-	// Check for obsolete windows versions
-	#if defined(_WIN32_WINDOWS)
-	#error You cannot build Indigo for Windows 95/98/Me!
-	#endif
-
-	// Remove the unistd include - we are windows
-	#if defined(HAVE_UNISTD_H)
-	#undef HAVE_UNISTD_H
-	#endif
-#endif
-
 namespace Indigo
 {
 	bool is_debug();

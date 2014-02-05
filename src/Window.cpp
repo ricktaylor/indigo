@@ -20,7 +20,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Window.h"
-#include "Framebuffer.h"
 
 void Indigo::Window::render()
 {
@@ -121,24 +120,19 @@ void Indigo::Window::on_refresh(GLFWwindow* window)
 		pThis->render();
 }
 
-GLFWwindow* Indigo::Window::get_glfw_window() const
-{
-	return m_glfw_window;
-}
-
 Indigo::Window::operator Indigo::Window::bool_type() const
 {
 	return m_glfw_window != NULL ? &SafeBoolean::this_type_does_not_support_comparisons : NULL;
 }
 
-const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::default_frame_buffer() const
+const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::get_default_frame_buffer() const
 {
 	if (!m_default_fb && make_current())
 	{
 		GLint fb_id = GL_INVALID_VALUE;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING,&fb_id);
 		if (fb_id != GL_INVALID_VALUE)
-			m_default_fb = OOBase::allocate_shared<Framebuffer,OOBase::ThreadLocalAllocator>(*this,fb_id);
+			m_default_fb = OOBase::allocate_shared<Framebuffer,OOBase::ThreadLocalAllocator>(const_cast<Window*>(this)->shared_from_this(),fb_id);
 	}
 	return m_default_fb;
 }

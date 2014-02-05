@@ -20,54 +20,50 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Framebuffer.h"
+#include "Window.h"
 
-Indigo::Framebuffer::Framebuffer(const Window& win, GLuint id) :
-		m_id(id),
-		m_fn_delFrameBuffers(NULL),
-		m_fn_bindFrameBuffer(NULL),
-		m_fn_checkFrameBufferStatus(NULL)
+void Indigo::detail::FramebufferFunctions::init(GLFWwindow* win)
 {
-	if (id == GL_INVALID_VALUE)
-	{
-		PFNGLGENFRAMEBUFFERSPROC fn_genFrameBuffers = NULL;
-		if (win.make_current())
-		{
-			if (glfwGetWindowAttrib(win.get_glfw_window(),GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
-			{
-				fn_genFrameBuffers = (PFNGLGENFRAMEBUFFERSPROC)glfwGetProcAddress("glGenFramebuffers");
-				m_fn_delFrameBuffers = (PFNGLDELETEFRAMEBUFFERSPROC)glfwGetProcAddress("glDeleteFramebuffers");
-			}
-			if ((!fn_genFrameBuffers || !m_fn_delFrameBuffers) && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
-			{
-				fn_genFrameBuffers = (PFNGLGENFRAMEBUFFERSPROC)glfwGetProcAddress("glGenFramebuffersEXT");
-				m_fn_delFrameBuffers = (PFNGLDELETEFRAMEBUFFERSPROC)glfwGetProcAddress("glDeleteFramebuffersEXT");
-			}
-			if (!fn_genFrameBuffers || !m_fn_delFrameBuffers)
-				OOBase_CallCriticalFailure("Failed to load OpenGL FBO support");
+	if (!win)
+		return;
 
-			if (fn_genFrameBuffers)
-				(*fn_genFrameBuffers)(1,&m_id);
-		}
+	if (glfwGetCurrentContext() != win)
+		glfwMakeContextCurrent(win);
+
+	if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
+	{
+		m_fn_genFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)glfwGetProcAddress("glGenFramebuffers");
+		m_fn_delFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)glfwGetProcAddress("glDeleteFramebuffers");
+		m_fn_bindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)glfwGetProcAddress("glBindFramebuffer");
+		m_fn_checkFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)glfwGetProcAddress("glCheckFramebufferStatus");
+	}
+	if (!m_fn_genFramebuffers && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
+	{
+		m_fn_genFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)glfwGetProcAddress("glGenFramebuffersEXT");
+		m_fn_delFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)glfwGetProcAddress("glDeleteFramebuffersEXT");
+		m_fn_bindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)glfwGetProcAddress("glBindFramebufferEXT");
+		m_fn_checkFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)glfwGetProcAddress("glCheckFramebufferStatusEXT");
 	}
 
-	if (glfwGetWindowAttrib(win.get_glfw_window(),GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
-	{
-		m_fn_bindFrameBuffer = (PFNGLBINDFRAMEBUFFERPROC)glfwGetProcAddress("glBindFramebuffer");
-		m_fn_checkFrameBufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)glfwGetProcAddress("glCheckFramebufferStatus");
-	}
-	if (!m_fn_bindFrameBuffer && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
-	{
-		m_fn_bindFrameBuffer = (PFNGLBINDFRAMEBUFFERPROC)glfwGetProcAddress("glBindFramebufferEXT");
-		m_fn_checkFrameBufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)glfwGetProcAddress("glCheckFramebufferStatusEXT");
-	}
-	if (!m_fn_bindFrameBuffer || !m_fn_checkFrameBufferStatus)
+	if (!m_fn_genFramebuffers)
 		OOBase_CallCriticalFailure("Failed to load OpenGL FBO support");
+}
+
+Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id) : m_fns(window->m_fb_fns), m_id(id), m_destroy(true)
+{
+	if (m_id == GL_INVALID_VALUE)
+	{
+		if (m_fns && m_fns->m_fn_genFramebuffers)
+			(*m_fns->m_fn_genFramebuffers)(1,&m_id);
+	}
+	else
+		m_destroy = false;
 }
 
 Indigo::Framebuffer::~Framebuffer()
 {
-	if (m_id != GL_INVALID_VALUE && m_fn_delFrameBuffers)
-		(*m_fn_delFrameBuffers)(1,&m_id);
+	if (m_destroy && m_id != GL_INVALID_VALUE && m_fns && m_fns->m_fn_delFramebuffers)
+		(*m_fns->m_fn_delFramebuffers)(1,&m_id);
 }
 
 Indigo::Framebuffer::operator Indigo::Framebuffer::bool_type() const
@@ -77,17 +73,17 @@ Indigo::Framebuffer::operator Indigo::Framebuffer::bool_type() const
 
 bool Indigo::Framebuffer::bind(GLenum target) const
 {
-	if (m_id == GL_INVALID_VALUE || !m_fn_bindFrameBuffer)
+	if (m_id == GL_INVALID_VALUE || !m_fns || !m_fns->m_fn_bindFramebuffer)
 		return false;
 
-	(*m_fn_bindFrameBuffer)(target,m_id);
+	(*m_fns->m_fn_bindFramebuffer)(target,m_id);
 	return true;
 }
 
 GLenum Indigo::Framebuffer::check() const
 {
-	if (m_id == GL_INVALID_VALUE || !m_fn_checkFrameBufferStatus)
+	if (m_id == GL_INVALID_VALUE || !m_fns || !m_fns->m_fn_checkFramebufferStatus)
 		return GL_FRAMEBUFFER_UNDEFINED;
 
-	return (*m_fn_checkFrameBufferStatus)(m_id);
+	return (*m_fns->m_fn_checkFramebufferStatus)(m_id);
 }

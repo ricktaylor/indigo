@@ -22,14 +22,40 @@
 #ifndef INDIGO_FRAMEBUFFER_H_INCLUDED
 #define INDIGO_FRAMEBUFFER_H_INCLUDED
 
-#include "Window.h"
+#include "Common.h"
 
 namespace Indigo
 {
+	class Window;
+	class FramebufferStack;
+
+	namespace detail
+	{
+		struct FramebufferFunctions
+		{
+			friend class Indigo::Window;
+
+			FramebufferFunctions() :
+				m_fn_genFramebuffers(NULL),
+				m_fn_delFramebuffers(NULL),
+				m_fn_bindFramebuffer(NULL),
+				m_fn_checkFramebufferStatus(NULL)
+			{}
+
+			PFNGLGENFRAMEBUFFERSPROC        m_fn_genFramebuffers;
+			PFNGLDELETEFRAMEBUFFERSPROC     m_fn_delFramebuffers;
+			PFNGLBINDFRAMEBUFFERPROC        m_fn_bindFramebuffer;
+			PFNGLCHECKFRAMEBUFFERSTATUSPROC m_fn_checkFramebufferStatus;
+
+		private:
+			void init(GLFWwindow* win);
+		};
+	}
+
 	class Framebuffer : public OOBase::SafeBoolean, public OOBase::NonCopyable
 	{
 	public:
-		Framebuffer(const Window& win, GLuint id = GL_INVALID_VALUE);
+		Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id = GL_INVALID_VALUE);
 		~Framebuffer();
 
 		operator bool_type() const;
@@ -38,11 +64,9 @@ namespace Indigo
 		GLenum check() const;
 
 	private:
+		OOBase::SharedPtr<detail::FramebufferFunctions> m_fns;
 		GLuint m_id;
-
-		PFNGLDELETEFRAMEBUFFERSPROC     m_fn_delFrameBuffers;
-		PFNGLBINDFRAMEBUFFERPROC        m_fn_bindFrameBuffer;
-		PFNGLCHECKFRAMEBUFFERSTATUSPROC m_fn_checkFrameBufferStatus;
+		bool   m_destroy;
 	};
 }
 

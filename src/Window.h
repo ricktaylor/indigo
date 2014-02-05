@@ -22,14 +22,14 @@
 #ifndef INDIGO_WINDOWS_H_INCLUDED
 #define INDIGO_WINDOWS_H_INCLUDED
 
-#include "Common.h"
+#include "Framebuffer.h"
 
 namespace Indigo
 {
-	class Framebuffer;
-
-	class Window : public OOBase::SafeBoolean
+	class Window : public OOBase::SafeBoolean, public OOBase::EnableSharedFromThis<Window>
 	{
+		friend class Framebuffer;
+
 	public:
 		enum Style
 		{
@@ -38,7 +38,7 @@ namespace Indigo
 			eWSdecorated = 4
 		};
 
-		Window(int width, int height, const char* title, unsigned int style = eWSdecorated, GLFWmonitor* monitor = NULL, Window* share = NULL);
+		Window(int width, int height, const char* title, unsigned int style = eWSdecorated, GLFWmonitor* monitor = NULL);
 		~Window();
 
 		operator bool_type() const;
@@ -51,10 +51,8 @@ namespace Indigo
 
 		void render();
 
-		const OOBase::SharedPtr<Framebuffer>& default_frame_buffer() const;
-
-		GLFWwindow* get_glfw_window() const;
 		bool make_current() const;
+		const OOBase::SharedPtr<Framebuffer>& get_default_frame_buffer() const;
 
 	// Signals
 	public:
@@ -62,7 +60,8 @@ namespace Indigo
 
 	private:
 		GLFWwindow* m_glfw_window;
-		mutable OOBase::SharedPtr<Indigo::Framebuffer> m_default_fb;
+		mutable OOBase::SharedPtr<Framebuffer> m_default_fb;
+		OOBase::SharedPtr<detail::FramebufferFunctions> m_fb_fns;
 
 		static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
