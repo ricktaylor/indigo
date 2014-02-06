@@ -51,7 +51,6 @@ namespace Indigo
 
 		void render();
 
-		bool make_current() const;
 		const OOBase::SharedPtr<Framebuffer>& get_default_frame_buffer() const;
 
 	// Signals
@@ -60,7 +59,7 @@ namespace Indigo
 
 	private:
 		GLFWwindow* m_glfw_window;
-		mutable OOBase::SharedPtr<Framebuffer> m_default_fb;
+		OOBase::SharedPtr<Framebuffer> m_default_fb;
 		OOBase::SharedPtr<detail::FramebufferFunctions> m_fb_fns;
 
 		static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
@@ -71,6 +70,9 @@ namespace Indigo
 		static void on_focus(GLFWwindow* window, int focused);
 		static void on_iconify(GLFWwindow* window, int iconified);
 		static void on_refresh(GLFWwindow* window);
+
+		bool make_current() const;
+		void init_default_fb();
 	};
 }
 

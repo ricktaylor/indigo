@@ -390,13 +390,6 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 		glfwSetWindowRefreshCallback(m_glfw_window,&on_refresh);
 
 		s_vecWindows->push_back(this);
-
-		// Give the window manager a chance to create the window and GL context
-		glfwWaitEvents();
-
-		m_fb_fns = OOBase::allocate_shared<detail::FramebufferFunctions,OOBase::ThreadLocalAllocator>();
-		if (m_fb_fns)
-			m_fb_fns->init(m_glfw_window);
 	}
 }
 

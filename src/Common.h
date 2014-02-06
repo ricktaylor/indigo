@@ -66,6 +66,7 @@ namespace Indigo
 }
 
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 // Include our own glext.h
 #include "glext.h"

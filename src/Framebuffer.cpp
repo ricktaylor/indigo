@@ -27,9 +27,6 @@ void Indigo::detail::FramebufferFunctions::init(GLFWwindow* win)
 	if (!win)
 		return;
 
-	if (glfwGetCurrentContext() != win)
-		glfwMakeContextCurrent(win);
-
 	if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
 	{
 		m_fn_genFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)glfwGetProcAddress("glGenFramebuffers");
@@ -49,7 +46,15 @@ void Indigo::detail::FramebufferFunctions::init(GLFWwindow* win)
 		OOBase_CallCriticalFailure("Failed to load OpenGL FBO support");
 }
 
-Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id) : m_fns(window->m_fb_fns), m_id(id), m_destroy(true)
+Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id) :
+		m_window(window),
+		m_fns(window->m_fb_fns),
+		m_id(id),
+		m_destroy(true),
+		m_clear_bits(GL_COLOR_BUFFER_BIT),
+		m_clear_colour(),
+		m_clear_depth(1.0f),
+		m_clear_stencil(0)
 {
 	if (m_id == GL_INVALID_VALUE)
 	{
@@ -71,13 +76,9 @@ Indigo::Framebuffer::operator Indigo::Framebuffer::bool_type() const
 	return m_id != GL_INVALID_VALUE ? &SafeBoolean::this_type_does_not_support_comparisons : NULL;
 }
 
-bool Indigo::Framebuffer::bind(GLenum target) const
+OOBase::SharedPtr<Indigo::Window> Indigo::Framebuffer::window() const
 {
-	if (m_id == GL_INVALID_VALUE || !m_fns || !m_fns->m_fn_bindFramebuffer)
-		return false;
-
-	(*m_fns->m_fn_bindFramebuffer)(target,m_id);
-	return true;
+	return m_window.lock();
 }
 
 GLenum Indigo::Framebuffer::check() const
@@ -86,4 +87,88 @@ GLenum Indigo::Framebuffer::check() const
 		return GL_FRAMEBUFFER_UNDEFINED;
 
 	return (*m_fns->m_fn_checkFramebufferStatus)(m_id);
+}
+
+void Indigo::Framebuffer::clear_colour(const glm::vec4& rgba)
+{
+	m_clear_colour = rgba;
+}
+
+glm::vec4 Indigo::Framebuffer::clear_colour() const
+{
+	return m_clear_colour;
+}
+
+void Indigo::Framebuffer::clear_depth(GLdouble depth)
+{
+	m_clear_depth = depth;
+}
+
+GLdouble Indigo::Framebuffer::clear_depth()
+{
+	return m_clear_depth;
+}
+
+void Indigo::Framebuffer::clear_stencil(GLint s)
+{
+	m_clear_stencil = s;
+}
+
+GLint Indigo::Framebuffer::clear_stencil() const
+{
+	return m_clear_stencil;
+}
+
+void Indigo::Framebuffer::clear_bits(GLbitfield bits)
+{
+	m_clear_bits = bits;
+}
+
+GLbitfield Indigo::Framebuffer::clear_bits() const
+{
+	return m_clear_bits;
+}
+
+void Indigo::Framebuffer::render()
+{
+	if (m_id == GL_INVALID_VALUE || !m_fns || !m_fns->m_fn_bindFramebuffer)
+		return;
+
+	// Get the previous binding
+	GLint old_fb = GL_INVALID_VALUE;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING,&old_fb);
+
+	// Bind this FB
+	if (static_cast<GLuint>(old_fb) != m_id)
+		(*m_fns->m_fn_bindFramebuffer)(GL_FRAMEBUFFER,m_id);
+
+	// Clear
+	if (m_clear_bits)
+	{
+		if (m_clear_bits & GL_STENCIL_BUFFER_BIT)
+			glClearStencil(m_clear_stencil);
+		if (m_clear_bits & GL_DEPTH_BUFFER_BIT)
+			glClearDepth(m_clear_depth);
+		if (m_clear_bits & GL_COLOR_BUFFER_BIT)
+			glClearColor(m_clear_colour.r,m_clear_colour.g,m_clear_colour.b,m_clear_colour.a);
+
+		glClear(m_clear_bits);
+	}
+
+	// Render more stuff
+	void* TODO;
+
+	// For each viewport
+	{
+		// for each camera
+		{
+			// Cull
+			// Sort
+			// Draw
+		}
+	}
+
+	// Bind the previous FB
+	if (static_cast<GLuint>(old_fb) != m_id)
+		(*m_fns->m_fn_bindFramebuffer)(GL_FRAMEBUFFER,old_fb);
 }

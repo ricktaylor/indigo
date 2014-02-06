@@ -21,22 +21,6 @@
 
 #include "Window.h"
 
-void Indigo::Window::render()
-{
-	if (!make_current())
-		return;
-
-	// for each camera
-
-	// Cull
-	// Sort
-
-
-	// Draw
-
-	glfwSwapBuffers(m_glfw_window);
-}
-
 bool Indigo::Window::make_current() const
 {
 	if (!m_glfw_window)
@@ -125,14 +109,40 @@ Indigo::Window::operator Indigo::Window::bool_type() const
 	return m_glfw_window != NULL ? &SafeBoolean::this_type_does_not_support_comparisons : NULL;
 }
 
+void Indigo::Window::init_default_fb()
+{
+	if (make_current())
+	{
+		m_fb_fns = OOBase::allocate_shared<detail::FramebufferFunctions,OOBase::ThreadLocalAllocator>();
+		if (m_fb_fns)
+		{
+			m_fb_fns->init(m_glfw_window);
+
+			GLint fb_id = GL_INVALID_VALUE;
+			glGetIntegerv(GL_FRAMEBUFFER_BINDING,&fb_id);
+			if (fb_id != GL_INVALID_VALUE)
+				m_default_fb = OOBase::allocate_shared<Framebuffer,OOBase::ThreadLocalAllocator>(shared_from_this(),fb_id);
+		}
+	}
+}
+
 const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::get_default_frame_buffer() const
 {
-	if (!m_default_fb && make_current())
-	{
-		GLint fb_id = GL_INVALID_VALUE;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING,&fb_id);
-		if (fb_id != GL_INVALID_VALUE)
-			m_default_fb = OOBase::allocate_shared<Framebuffer,OOBase::ThreadLocalAllocator>(const_cast<Window*>(this)->shared_from_this(),fb_id);
-	}
+	if (!m_default_fb)
+		const_cast<Window*>(this)->init_default_fb();
+
 	return m_default_fb;
+}
+
+void Indigo::Window::render()
+{
+	// Make this context current
+	if (!make_current())
+		return;
+
+	// Render the default FB
+	if (m_default_fb)
+		m_default_fb->render();
+
+	glfwSwapBuffers(m_glfw_window);
 }

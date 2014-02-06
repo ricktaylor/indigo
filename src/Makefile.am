@@ -3,7 +3,8 @@ include $(top_srcdir)/m4/ltrc.inc
 AM_CPPFLAGS = \
 	-I@top_srcdir@/oobase/include \
 	-I@top_builddir@/oobase/include \
-	-I@top_srcdir@/3rdparty/glfw/include
+	-I@top_srcdir@/3rdparty/glfw/include \
+	-I@top_srcdir@/3rdparty/glm
 	
 AM_CFLAGS = $(PTHREAD_CFLAGS)
 AM_CXXFLAGS = $(PTHREAD_CFLAGS)

@@ -60,13 +60,33 @@ namespace Indigo
 
 		operator bool_type() const;
 
-		bool bind(GLenum target = GL_FRAMEBUFFER) const;
+		OOBase::SharedPtr<Window> window() const;
+
 		GLenum check() const;
 
+		void clear_bits(GLbitfield bits);
+		GLbitfield clear_bits() const;
+
+		void clear_colour(const glm::vec4& rgba);
+		glm::vec4 clear_colour() const;
+
+		void clear_depth(GLdouble depth);
+		GLdouble clear_depth();
+
+		void clear_stencil(GLint s);
+		GLint clear_stencil() const;
+
+		void render();
+
 	private:
+		OOBase::WeakPtr<Window>  m_window;
 		OOBase::SharedPtr<detail::FramebufferFunctions> m_fns;
-		GLuint m_id;
-		bool   m_destroy;
+		GLuint       m_id;
+		bool         m_destroy;
+		GLbitfield   m_clear_bits;
+		glm::vec4    m_clear_colour;
+		GLdouble     m_clear_depth;
+		GLint        m_clear_stencil;
 	};
 }
 

@@ -43,6 +43,8 @@ static bool render_start(void*)
 	if (err)
 		LOG_ERROR_RETURN(("Failed to attach signal: %s",OOBase::system_error_text(err)),false);
 
+	ptrSplash->get_default_frame_buffer()->clear_colour(glm::vec4(1.0f));
+
 	ptrSplash->visible(true);
 	s_ptrSplash.swap(ptrSplash);
 	return true;
