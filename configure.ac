@@ -80,6 +80,8 @@ AX_APPEND_COMPILE_FLAGS([-fvisibility=hidden -fno-rtti -fno-exceptions -pipe],[C
 # Check for functions we use
 AC_CHECK_FUNCS([realpath])
 
+AC_CHECK_HEADERS([GL/glext.h])
+
 # Always add full warnings
 AX_CFLAGS_WARN_ALL
 AX_CXXFLAGS_WARN_ALL
