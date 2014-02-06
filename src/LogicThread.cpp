@@ -47,6 +47,7 @@ static bool render_start(void*)
 
 	ptrSplash->visible(true);
 	s_ptrSplash.swap(ptrSplash);
+
 	return true;
 }
 

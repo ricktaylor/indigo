@@ -70,14 +70,11 @@ void Indigo::Window::iconify(bool minimize)
 	}
 }
 
-void Indigo::Window::on_pos(GLFWwindow* window, int xpos, int ypos)
-{
-	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
-}
-
 void Indigo::Window::on_size(GLFWwindow* window, int width, int height)
 {
-	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (pThis)
+		pThis->get_default_frame_buffer()->signal_sized.fire(glm::vec2(width,height));
 }
 
 void Indigo::Window::on_close(GLFWwindow* window)

@@ -64,7 +64,6 @@ namespace Indigo
 
 		static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
-		static void on_pos(GLFWwindow* window, int xpos, int ypos);
 		static void on_size(GLFWwindow* window, int width, int height);
 		static void on_close(GLFWwindow* window);
 		static void on_focus(GLFWwindow* window, int focused);

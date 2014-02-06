@@ -54,6 +54,8 @@ namespace Indigo
 
 	class Framebuffer : public OOBase::SafeBoolean, public OOBase::NonCopyable
 	{
+		friend class Window;
+
 	public:
 		Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id = GL_INVALID_VALUE);
 		~Framebuffer();
@@ -77,6 +79,10 @@ namespace Indigo
 		GLint clear_stencil() const;
 
 		void render();
+
+	// Signals
+	public:
+		OOBase::Signal1<glm::vec2,OOBase::ThreadLocalAllocator> signal_sized;
 
 	private:
 		OOBase::WeakPtr<Window>  m_window;

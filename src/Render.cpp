@@ -382,8 +382,7 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 	else
 	{
 		glfwSetWindowUserPointer(m_glfw_window,this);
-		glfwSetWindowPosCallback(m_glfw_window,&on_pos);
-		glfwSetWindowSizeCallback(m_glfw_window,&on_size);
+		glfwSetFramebufferSizeCallback(m_glfw_window,&on_size);
 		glfwSetWindowCloseCallback(m_glfw_window,&on_close);
 		glfwSetWindowFocusCallback(m_glfw_window,&on_focus);
 		glfwSetWindowIconifyCallback(m_glfw_window,&on_iconify);
