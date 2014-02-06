@@ -54,10 +54,11 @@ namespace Indigo
 
 	class Framebuffer : public OOBase::SafeBoolean, public OOBase::NonCopyable
 	{
+		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		friend class Window;
 
 	public:
-		Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id = GL_INVALID_VALUE);
+		Framebuffer(const OOBase::SharedPtr<Window>& window);
 		~Framebuffer();
 
 		operator bool_type() const;
@@ -88,11 +89,14 @@ namespace Indigo
 		OOBase::WeakPtr<Window>  m_window;
 		OOBase::SharedPtr<detail::FramebufferFunctions> m_fns;
 		GLuint       m_id;
-		bool         m_destroy;
+		bool         m_default;
 		GLbitfield   m_clear_bits;
 		glm::vec4    m_clear_colour;
 		GLdouble     m_clear_depth;
 		GLint        m_clear_stencil;
+
+		Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id);
+		static OOBase::SharedPtr<Framebuffer> get_default(const OOBase::SharedPtr<Window>& window);
 	};
 }
 

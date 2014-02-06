@@ -114,11 +114,7 @@ void Indigo::Window::init_default_fb()
 		if (m_fb_fns)
 		{
 			m_fb_fns->init(m_glfw_window);
-
-			GLint fb_id = GL_INVALID_VALUE;
-			glGetIntegerv(GL_FRAMEBUFFER_BINDING,&fb_id);
-			if (fb_id != GL_INVALID_VALUE)
-				m_default_fb = OOBase::allocate_shared<Framebuffer,OOBase::ThreadLocalAllocator>(shared_from_this(),fb_id);
+			m_default_fb = Framebuffer::get_default(shared_from_this());
 		}
 	}
 }

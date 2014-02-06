@@ -46,28 +46,45 @@ void Indigo::detail::FramebufferFunctions::init(GLFWwindow* win)
 		OOBase_CallCriticalFailure("Failed to load OpenGL FBO support");
 }
 
-Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id) :
+Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window) :
 		m_window(window),
 		m_fns(window->m_fb_fns),
-		m_id(id),
-		m_destroy(true),
+		m_id(GL_INVALID_VALUE),
+		m_default(false),
 		m_clear_bits(GL_COLOR_BUFFER_BIT),
 		m_clear_colour(),
 		m_clear_depth(1.0f),
 		m_clear_stencil(0)
 {
-	if (m_id == GL_INVALID_VALUE)
-	{
-		if (m_fns && m_fns->m_fn_genFramebuffers)
-			(*m_fns->m_fn_genFramebuffers)(1,&m_id);
-	}
-	else
-		m_destroy = false;
+	if (m_fns && m_fns->m_fn_genFramebuffers)
+		(*m_fns->m_fn_genFramebuffers)(1,&m_id);
+}
+
+Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id) :
+		m_window(window),
+		m_fns(window->m_fb_fns),
+		m_id(id),
+		m_default(true),
+		m_clear_bits(GL_COLOR_BUFFER_BIT),
+		m_clear_colour(),
+		m_clear_depth(1.0f),
+		m_clear_stencil(0)
+{
+}
+
+OOBase::SharedPtr<Indigo::Framebuffer> Indigo::Framebuffer::get_default(const OOBase::SharedPtr<Window>& window)
+{
+	OOBase::SharedPtr<Framebuffer> ret;
+	GLint fb_id = GL_INVALID_VALUE;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING,&fb_id);
+	if (fb_id != GL_INVALID_VALUE)
+		ret = OOBase::allocate_shared<Framebuffer,OOBase::ThreadLocalAllocator>(window,fb_id);
+	return ret;
 }
 
 Indigo::Framebuffer::~Framebuffer()
 {
-	if (m_destroy && m_id != GL_INVALID_VALUE && m_fns && m_fns->m_fn_delFramebuffers)
+	if (!m_default && m_id != GL_INVALID_VALUE && m_fns && m_fns->m_fn_delFramebuffers)
 		(*m_fns->m_fn_delFramebuffers)(1,&m_id);
 }
 
