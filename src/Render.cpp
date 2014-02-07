@@ -209,62 +209,6 @@ static int logic_thread_start(void* param)
 	return err;
 }
 
-bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
-{
-	OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator> vecWindows;
-	s_vecWindows = &vecWindows;
-
-	// Not sure if we need to set this first...
-	glfwSetErrorCallback(&on_glfw_error);
-
-	if (!glfwInit())
-		LOG_ERROR_RETURN(("glfwInit failed"),false);
-
-//	if (!Indigo::is_debug())
-//		glfwSwapInterval(1);
-
-	// Loop blocking until we have windows
-	bool res = true;
-	while (vecWindows.empty())
-	{
-		res = s_render_queue->dequeue_block();
-		if (!res)
-			break;
-	}
-
-	while (res)
-	{
-		bool visible_window = false;
-
-		// Update animations
-
-		// Render all windows (this collects events)
-		for (OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();++i)
-		{
-			if ((*i)->is_visible() && !(*i)->is_iconified())
-			{
-				(*i)->render();
-
-				visible_window = true;
-			}
-		}
-
-		// Poll for UI events
-		if (visible_window)
-			glfwPollEvents();
-		else
-			glfwWaitEvents();
-
-		// Get render commands
-		if (vecWindows.empty() || !(res = s_render_queue->dequeue()))
-			break;
-	}
-
-	glfwTerminate();
-
-	return res;
-}
-
 bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
 	OOBase::Event started(false,false);
@@ -286,7 +230,7 @@ bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase
 	started.wait();
 
 	// Now run the draw_thread (it must be the main thread)
-	bool res = draw_thread(config_args);
+	bool res = Window::draw_thread(config_args);
 
 	// Send a quit to the logic_thread
 	if (event_queue.enqueue(NULL,reinterpret_cast<void*>(1)))
@@ -400,4 +344,62 @@ Indigo::Window::~Window()
 
 		glfwDestroyWindow(m_glfw_window);
 	}
+}
+
+bool Indigo::Window::draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
+{
+	OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator> vecWindows;
+	s_vecWindows = &vecWindows;
+
+	// Not sure if we need to set this first...
+	glfwSetErrorCallback(&on_glfw_error);
+
+	if (!glfwInit())
+		LOG_ERROR_RETURN(("glfwInit failed"),false);
+
+//	if (!Indigo::is_debug())
+//		glfwSwapInterval(1);
+
+	// Loop blocking until we have windows
+	bool res = true;
+	while (vecWindows.empty())
+	{
+		res = s_render_queue->dequeue_block();
+		if (!res)
+			break;
+	}
+
+	while (res)
+	{
+		bool visible_window = false;
+
+		// Draw all windows (this collects events)
+		for (OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();++i)
+		{
+			if ((*i)->draw())
+				visible_window = true;
+		}
+
+		// Update animations
+
+		// Get render commands
+		if (vecWindows.empty() || !(res = s_render_queue->dequeue()))
+			break;
+
+		// Swap all windows (this collects events)
+		for (OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();++i)
+		{
+			(*i)->swap();
+		}
+
+		// Poll for UI events
+		if (visible_window)
+			glfwPollEvents();
+		else
+			glfwWaitEvents();
+	}
+
+	glfwTerminate();
+
+	return res;
 }

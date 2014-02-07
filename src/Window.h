@@ -22,6 +22,7 @@
 #ifndef INDIGO_WINDOWS_H_INCLUDED
 #define INDIGO_WINDOWS_H_INCLUDED
 
+#include "Render.h"
 #include "Framebuffer.h"
 
 namespace Indigo
@@ -29,6 +30,7 @@ namespace Indigo
 	class Window : public OOBase::SafeBoolean, public OOBase::EnableSharedFromThis<Window>
 	{
 		friend class Framebuffer;
+		friend bool start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
 	public:
 		enum Style
@@ -49,8 +51,6 @@ namespace Indigo
 		bool is_iconified() const;
 		void iconify(bool minimize);
 
-		void render();
-
 		const OOBase::SharedPtr<Framebuffer>& get_default_frame_buffer() const;
 
 	// Signals
@@ -62,13 +62,15 @@ namespace Indigo
 		OOBase::SharedPtr<Framebuffer> m_default_fb;
 		OOBase::SharedPtr<detail::FramebufferFunctions> m_fb_fns;
 
-		static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
-
 		static void on_size(GLFWwindow* window, int width, int height);
 		static void on_close(GLFWwindow* window);
 		static void on_focus(GLFWwindow* window, int focused);
 		static void on_iconify(GLFWwindow* window, int iconified);
 		static void on_refresh(GLFWwindow* window);
+
+		static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
+		bool draw();
+		void swap();
 
 		bool make_current() const;
 		void init_default_fb();

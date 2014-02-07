@@ -19,6 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "Viewport.h"
 #include "Framebuffer.h"
 #include "Window.h"
 
@@ -116,12 +117,12 @@ glm::vec4 Indigo::Framebuffer::clear_colour() const
 	return m_clear_colour;
 }
 
-void Indigo::Framebuffer::clear_depth(GLdouble depth)
+void Indigo::Framebuffer::clear_depth(GLfloat depth)
 {
 	m_clear_depth = depth;
 }
 
-GLdouble Indigo::Framebuffer::clear_depth()
+GLfloat Indigo::Framebuffer::clear_depth()
 {
 	return m_clear_depth;
 }
@@ -144,6 +145,26 @@ void Indigo::Framebuffer::clear_bits(GLbitfield bits)
 GLbitfield Indigo::Framebuffer::clear_bits() const
 {
 	return m_clear_bits;
+}
+
+const Indigo::Framebuffer::viewports_t& Indigo::Framebuffer::viewports() const
+{
+	return m_viewports;
+}
+
+OOBase::SharedPtr<Indigo::Viewport> Indigo::Framebuffer::add_viewport(const glm::ivec2& lower_left, const glm::ivec2& size, const glm::vec2& depth_range)
+{
+	OOBase::SharedPtr<Viewport> v = OOBase::allocate_shared<Viewport,OOBase::ThreadLocalAllocator>(shared_from_this(),lower_left,size,depth_range);
+	if (v)
+	{
+		int err = m_viewports.push_back(v);
+		if (err)
+		{
+			v.reset();
+			LOG_ERROR(("Failed to insert viewport: %s",OOBase::system_error_text(err)));
+		}
+	}
+	return v;
 }
 
 void Indigo::Framebuffer::render()
@@ -172,20 +193,11 @@ void Indigo::Framebuffer::render()
 		glClear(m_clear_bits);
 	}
 
-	// Render more stuff
-	void* TODO;
-
 	// For each viewport
-	{
-		// for each camera
-		{
-			// Cull
-			// Sort
-			// Draw
-		}
-	}
+	for (viewports_t::iterator v = m_viewports.begin();v != m_viewports.end(); ++v)
+		(*v)->render();
 
 	// Bind the previous FB
-	if (static_cast<GLuint>(old_fb) != m_id)
+	if (static_cast<GLuint>(old_fb) != m_id && static_cast<GLuint>(old_fb) != GL_INVALID_VALUE)
 		(*m_fns->m_fn_bindFramebuffer)(GL_FRAMEBUFFER,old_fb);
 }

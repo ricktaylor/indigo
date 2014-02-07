@@ -27,7 +27,7 @@
 namespace Indigo
 {
 	class Window;
-	class FramebufferStack;
+	class Viewport;
 
 	namespace detail
 	{
@@ -52,7 +52,10 @@ namespace Indigo
 		};
 	}
 
-	class Framebuffer : public OOBase::SafeBoolean, public OOBase::NonCopyable
+	class Framebuffer :
+			public OOBase::SafeBoolean,
+			public OOBase::NonCopyable,
+			public OOBase::EnableSharedFromThis<Framebuffer>
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		friend class Window;
@@ -73,17 +76,21 @@ namespace Indigo
 		void clear_colour(const glm::vec4& rgba);
 		glm::vec4 clear_colour() const;
 
-		void clear_depth(GLdouble depth);
-		GLdouble clear_depth();
+		void clear_depth(GLfloat depth);
+		GLfloat clear_depth();
 
 		void clear_stencil(GLint s);
 		GLint clear_stencil() const;
+
+		typedef OOBase::Vector<OOBase::SharedPtr<Viewport>,OOBase::ThreadLocalAllocator> viewports_t;
+		const viewports_t& viewports() const;
+		OOBase::SharedPtr<Viewport> add_viewport(const glm::ivec2& lower_left, const glm::ivec2& size, const glm::vec2& depth_range = glm::vec2(0,1));
 
 		void render();
 
 	// Signals
 	public:
-		OOBase::Signal1<glm::vec2,OOBase::ThreadLocalAllocator> signal_sized;
+		OOBase::Signal1<glm::ivec2,OOBase::ThreadLocalAllocator> signal_sized;
 
 	private:
 		OOBase::WeakPtr<Window>  m_window;
@@ -92,8 +99,9 @@ namespace Indigo
 		bool         m_default;
 		GLbitfield   m_clear_bits;
 		glm::vec4    m_clear_colour;
-		GLdouble     m_clear_depth;
+		GLfloat      m_clear_depth;
 		GLint        m_clear_stencil;
+		viewports_t  m_viewports;
 
 		Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id);
 		static OOBase::SharedPtr<Framebuffer> get_default(const OOBase::SharedPtr<Window>& window);

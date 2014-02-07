@@ -74,7 +74,7 @@ void Indigo::Window::on_size(GLFWwindow* window, int width, int height)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
-		pThis->get_default_frame_buffer()->signal_sized.fire(glm::vec2(width,height));
+		pThis->get_default_frame_buffer()->signal_sized.fire(glm::ivec2(width,height));
 }
 
 void Indigo::Window::on_close(GLFWwindow* window)
@@ -97,8 +97,8 @@ void Indigo::Window::on_iconify(GLFWwindow* window, int iconified)
 void Indigo::Window::on_refresh(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
-	if (pThis && pThis->is_visible() && !pThis->is_iconified())
-		pThis->render();
+	if (pThis && pThis->draw())
+		pThis->swap();
 }
 
 Indigo::Window::operator Indigo::Window::bool_type() const
@@ -127,15 +127,21 @@ const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::get_default_frame_
 	return m_default_fb;
 }
 
-void Indigo::Window::render()
+bool Indigo::Window::draw()
 {
 	// Make this context current
-	if (!make_current())
-		return;
+	if (!make_current() || !is_visible() || is_iconified())
+		return false;
 
 	// Render the default FB
 	if (m_default_fb)
 		m_default_fb->render();
 
-	glfwSwapBuffers(m_glfw_window);
+	return true;
+}
+
+void Indigo::Window::swap()
+{
+	if (m_glfw_window)
+		glfwSwapBuffers(m_glfw_window);
 }
