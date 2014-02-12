@@ -30,7 +30,7 @@ void Indigo::Scene::cull(const glm::vec4 planes[6], const glm::vec4 abs_planes[6
 			  if (d - r >= 0) // fully inside */
 }
 
-void Indigo::Scene::draw()
+void Indigo::Scene::draw(const glm::mat4& pv_matrix)
 {
 
 }

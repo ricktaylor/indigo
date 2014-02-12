@@ -50,9 +50,6 @@ namespace Indigo
 		void camera_matrix(const glm::mat4& camera_matrix);
 		const glm::mat4& camera_matrix() const;
 
-		void rotate(float_t angle, const glm::vec3& v);
-		void scale(const glm::vec3& v);
-		void translate(const glm::vec3& v);
 		void look_at(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up);
 
 		void projection_matrix(const glm::mat4& projection_matrix);

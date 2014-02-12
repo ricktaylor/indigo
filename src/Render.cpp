@@ -340,7 +340,7 @@ Indigo::Window::~Window()
 {
 	if (m_glfw_window)
 	{
-		s_vecWindows->remove(this);
+		s_vecWindows->erase(this);
 
 		glfwDestroyWindow(m_glfw_window);
 	}

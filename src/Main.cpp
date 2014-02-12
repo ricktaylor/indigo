@@ -31,6 +31,19 @@
 
 static bool s_is_debug = false;
 
+#include <OOBase/BTree.h>
+
+static void test_btree()
+{
+	OOBase::BTree<char,int,OOBase::Less<char>,3> tree;
+
+	tree.insert(OOBase::make_pair('D',1));
+	tree.insert(OOBase::make_pair('F',1));
+	tree.insert(OOBase::make_pair('B',1));
+	tree.insert(OOBase::make_pair('H',1));
+}
+
+
 // Forward declare the thread functions
 bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
@@ -82,12 +95,9 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 	int err = 0;
 
 	// Copy command line args
-	for (size_t i=0; i < cmd_args.size(); ++i)
-	{
-		err = config_args.insert(*cmd_args.key_at(i),*cmd_args.at(i));
-		if (err)
-			LOG_ERROR_RETURN(("Failed to copy command args: %s",OOBase::system_error_text(err)),false);
-	}
+	err = config_args.insert(cmd_args.begin(),cmd_args.end());
+	if (err)
+		LOG_ERROR_RETURN(("Failed to copy command args: %s",OOBase::system_error_text(err)),false);
 
 #if defined(_WIN32)
 	// Read from WIN32 registry
@@ -222,6 +232,8 @@ int main(int argc, const char* argv[])
 	OOBase::Table<OOBase::String,OOBase::String> config_args;
 	if (!load_config(args,config_args))
 		return EXIT_FAILURE;
+
+	test_btree();
 
 	// Start our two main threads
 	return Indigo::start_render_thread(&logic_thread,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;

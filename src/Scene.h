@@ -35,7 +35,7 @@ namespace Indigo
 
 	private:
 		void cull(const glm::vec4 planes[6], const glm::vec4 abs_planes[6]);
-		void draw();
+		void draw(const glm::mat4& pv_matrix);
 	};
 }
 

@@ -89,21 +89,6 @@ const glm::mat4& Indigo::Camera::camera_matrix() const
 	return m_camera_matrix;
 }
 
-void Indigo::Camera::rotate(float_t angle, const glm::vec3& v)
-{
-	m_camera_matrix = glm::rotate(m_camera_matrix,angle,v);
-}
-
-void Indigo::Camera::scale(const glm::vec3& v)
-{
-	m_camera_matrix = glm::scale(m_camera_matrix,v);
-}
-
-void Indigo::Camera::translate(const glm::vec3& v)
-{
-	m_camera_matrix = glm::translate(m_camera_matrix,v);
-}
-
 void Indigo::Camera::look_at(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up)
 {
 	m_camera_matrix = glm::lookAt(eye,center,up);
@@ -143,7 +128,11 @@ void Indigo::Camera::draw()
 {
 	// Draw
 	if (m_scene)
-		m_scene->draw();
+	{
+		glm::mat4 view_matrix = m_projection_matrix * m_camera_matrix;
+
+		m_scene->draw(view_matrix);
+	}
 }
 
 void Indigo::Camera::cull()
