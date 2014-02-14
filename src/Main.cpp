@@ -38,9 +38,21 @@ static void test_btree()
 	OOBase::BTree<char,int,OOBase::Less<char>,3> tree;
 
 	tree.insert(OOBase::make_pair('D',1));
+	tree.dump();
 	tree.insert(OOBase::make_pair('F',1));
+	tree.dump();
 	tree.insert(OOBase::make_pair('B',1));
+	tree.dump();
 	tree.insert(OOBase::make_pair('H',1));
+	tree.dump();
+	tree.insert(OOBase::make_pair('C',1));
+	tree.dump();
+	tree.insert(OOBase::make_pair('J',1));
+	tree.dump();
+	tree.insert(OOBase::make_pair('E',1));
+	tree.dump();
+	tree.insert(OOBase::make_pair('A',1));
+	tree.dump();
 }
 
 
