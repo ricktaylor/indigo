@@ -53,6 +53,14 @@ static void test_btree()
 	tree.dump();
 	tree.insert(OOBase::make_pair('A',1));
 	tree.dump();
+	tree.insert(OOBase::make_pair('I',1));
+	tree.dump();
+	tree.insert(OOBase::make_pair('L',1));
+	tree.dump();
+	tree.insert(OOBase::make_pair('K',1));
+	tree.dump();
+	tree.insert(OOBase::make_pair('G',1));
+	tree.dump();
 }
 
 
