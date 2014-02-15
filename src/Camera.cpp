@@ -104,22 +104,22 @@ const glm::mat4& Indigo::Camera::projection_matrix() const
 	return m_projection_matrix;
 }
 
-void Indigo::Camera::frustum(float_t left, float_t right, float_t bottom, float_t top, float_t near, float_t far)
+void Indigo::Camera::frustum(const float_t& left, const float_t& right, const float_t& bottom, const float_t& top, const float_t& zNear, const float_t& zFar)
 {
-	m_projection_matrix = glm::frustum(left,right,bottom,top,near,far);
+	m_projection_matrix = glm::frustum(left,right,bottom,top,zNear,zFar);
 }
 
-void Indigo::Camera::ortho(float_t left, float_t right, float_t bottom, float_t top)
+void Indigo::Camera::ortho(const float_t& left, const float_t& right, const float_t& bottom, const float_t& top)
 {
 	m_projection_matrix = glm::ortho(left,right,bottom,top);
 }
 
-void Indigo::Camera::ortho(float_t left, float_t right, float_t bottom, float_t top, float_t zNear, float_t zFar)
+void Indigo::Camera::ortho(const float_t& left, const float_t& right, const float_t& bottom, const float_t& top, const float_t& zNear, const float_t& zFar)
 {
 	m_projection_matrix = glm::ortho(left,right,bottom,top,zNear,zFar);
 }
 
-void Indigo::Camera::perspective(float_t fovy, float_t aspect, float_t zNear, float_t zFar)
+void Indigo::Camera::perspective(const float_t& fovy, const float_t& aspect, const float_t& zNear, const float_t& zFar)
 {
 	m_projection_matrix = glm::perspective(fovy,aspect,zNear,zFar);
 }

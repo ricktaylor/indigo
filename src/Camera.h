@@ -55,10 +55,10 @@ namespace Indigo
 		void projection_matrix(const glm::mat4& projection_matrix);
 		const glm::mat4& projection_matrix() const;
 
-		void frustum(float_t left, float_t right, float_t bottom, float_t top, float_t near, float_t far);
-	 	void ortho(float_t left, float_t right, float_t bottom, float_t top);
-	 	void ortho(float_t left, float_t right, float_t bottom, float_t top, float_t zNear, float_t zFar);
-	 	void perspective(float_t fovy, float_t aspect, float_t zNear, float_t zFar);
+		void frustum(const float_t& left, const float_t& right, const float_t& bottom, const float_t& top, const float_t& zNear, const float_t& zFar);
+	 	void ortho(const float_t& left, const float_t& right, const float_t& bottom, const float_t& top);
+	 	void ortho(const float_t& left, const float_t& right, const float_t& bottom, const float_t& top, const float_t& zNear, const float_t& zFar);
+	 	void perspective(const float_t& fovy, const float_t& aspect, const float_t& zNear, const float_t& zFar);
 
 	private:
 		OOBase::WeakPtr<Viewport> m_viewport;
