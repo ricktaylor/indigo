@@ -45,6 +45,8 @@ namespace Indigo
 
 		operator bool_type() const;
 
+		bool make_current() const;
+
 		bool is_visible() const;
 		void visible(bool show);
 
@@ -72,7 +74,6 @@ namespace Indigo
 		bool draw();
 		void swap();
 
-		bool make_current() const;
 		void init_default_fb();
 	};
 }

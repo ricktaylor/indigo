@@ -31,39 +31,6 @@
 
 static bool s_is_debug = false;
 
-#include <OOBase/BTree.h>
-
-static void test_btree()
-{
-	OOBase::BTree<char,int,OOBase::Less<char>,3> tree;
-
-	tree.insert(OOBase::make_pair('D',1));
-	tree.dump();
-	tree.insert(OOBase::make_pair('F',1));
-	tree.dump();
-	tree.insert(OOBase::make_pair('B',1));
-	tree.dump();
-	tree.insert(OOBase::make_pair('H',1));
-	tree.dump();
-	tree.insert(OOBase::make_pair('C',1));
-	tree.dump();
-	tree.insert(OOBase::make_pair('J',1));
-	tree.dump();
-	tree.insert(OOBase::make_pair('E',1));
-	tree.dump();
-	tree.insert(OOBase::make_pair('A',1));
-	tree.dump();
-	tree.insert(OOBase::make_pair('I',1));
-	tree.dump();
-	tree.insert(OOBase::make_pair('L',1));
-	tree.dump();
-	tree.insert(OOBase::make_pair('K',1));
-	tree.dump();
-	tree.insert(OOBase::make_pair('G',1));
-	tree.dump();
-}
-
-
 // Forward declare the thread functions
 bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
@@ -252,8 +219,6 @@ int main(int argc, const char* argv[])
 	OOBase::Table<OOBase::String,OOBase::String> config_args;
 	if (!load_config(args,config_args))
 		return EXIT_FAILURE;
-
-	test_btree();
 
 	// Start our two main threads
 	return Indigo::start_render_thread(&logic_thread,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;

@@ -17,6 +17,7 @@
     <ClInclude Include="glext.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="State.h" />
     <ClInclude Include="Viewport.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
@@ -27,6 +28,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="State.cpp" />
     <ClCompile Include="Viewport.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>

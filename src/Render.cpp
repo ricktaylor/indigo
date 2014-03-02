@@ -20,6 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Render.h"
+#include "State.h"
 #include "Window.h"
 
 #include <stdlib.h>
@@ -373,7 +374,7 @@ bool Indigo::Window::draw_thread(const OOBase::Table<OOBase::String,OOBase::Stri
 	{
 		bool visible_window = false;
 
-		// Draw all windows (this collects events)
+		// Draw all windows
 		for (OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();++i)
 		{
 			if ((*i)->draw())
