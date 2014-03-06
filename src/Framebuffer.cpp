@@ -152,9 +152,9 @@ const Indigo::Framebuffer::viewports_t& Indigo::Framebuffer::viewports() const
 	return m_viewports;
 }
 
-OOBase::SharedPtr<Indigo::Viewport> Indigo::Framebuffer::add_viewport(const glm::ivec2& lower_left, const glm::ivec2& size, const glm::vec2& depth_range)
+OOBase::SharedPtr<Indigo::Viewport> Indigo::Framebuffer::add_viewport(const glm::ivec2& lower_left, const glm::ivec2& size)
 {
-	OOBase::SharedPtr<Viewport> v = OOBase::allocate_shared<Viewport,OOBase::ThreadLocalAllocator>(shared_from_this(),lower_left,size,depth_range);
+	OOBase::SharedPtr<Viewport> v = OOBase::allocate_shared<Viewport,OOBase::ThreadLocalAllocator>(shared_from_this(),lower_left,size);
 	if (v)
 	{
 		int err = m_viewports.push_back(v);
@@ -167,37 +167,33 @@ OOBase::SharedPtr<Indigo::Viewport> Indigo::Framebuffer::add_viewport(const glm:
 	return v;
 }
 
-void Indigo::Framebuffer::render()
+void Indigo::Framebuffer::bind()
+{
+	(*m_fns->m_fn_bindFramebuffer)(GL_FRAMEBUFFER,m_id);
+}
+
+void Indigo::Framebuffer::render(State& gl_state)
 {
 	if (m_id == GL_INVALID_VALUE || !m_fns || !m_fns->m_fn_bindFramebuffer)
 		return;
 
-	// Get the previous binding
-	GLint old_fb = GL_INVALID_VALUE;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING,&old_fb);
-
 	// Bind this FB
-	if (static_cast<GLuint>(old_fb) != m_id)
-		(*m_fns->m_fn_bindFramebuffer)(GL_FRAMEBUFFER,m_id);
+	gl_state.bind(shared_from_this());
 
 	// Clear
 	if (m_clear_bits)
 	{
 		if (m_clear_bits & GL_STENCIL_BUFFER_BIT)
-			glClearStencil(m_clear_stencil);
+			gl_state.clear_stencil(m_clear_stencil);
 		if (m_clear_bits & GL_DEPTH_BUFFER_BIT)
-			glClearDepth(m_clear_depth);
+			gl_state.clear_depth(m_clear_depth);
 		if (m_clear_bits & GL_COLOR_BUFFER_BIT)
-			glClearColor(m_clear_colour.r,m_clear_colour.g,m_clear_colour.b,m_clear_colour.a);
+			gl_state.clear_colour(m_clear_colour);
 
 		glClear(m_clear_bits);
 	}
 
 	// For each viewport
 	for (viewports_t::iterator v = m_viewports.begin();v != m_viewports.end(); ++v)
-		(*v)->render();
-
-	// Bind the previous FB
-	if (static_cast<GLuint>(old_fb) != m_id && static_cast<GLuint>(old_fb) != GL_INVALID_VALUE)
-		(*m_fns->m_fn_bindFramebuffer)(GL_FRAMEBUFFER,old_fb);
+		(*v)->render(gl_state);
 }

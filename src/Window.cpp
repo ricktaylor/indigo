@@ -21,15 +21,12 @@
 
 #include "Window.h"
 
-bool Indigo::Window::make_current() const
+Indigo::State& Indigo::Window::make_current() const
 {
-	if (!m_glfw_window)
-		return false;
-
 	if (glfwGetCurrentContext() != m_glfw_window)
 		glfwMakeContextCurrent(m_glfw_window);
 
-	return true;
+	return *m_state;
 }
 
 bool Indigo::Window::is_visible() const
@@ -106,23 +103,10 @@ Indigo::Window::operator Indigo::Window::bool_type() const
 	return m_glfw_window != NULL ? &SafeBoolean::this_type_does_not_support_comparisons : NULL;
 }
 
-void Indigo::Window::init_default_fb()
-{
-	if (make_current())
-	{
-		m_fb_fns = OOBase::allocate_shared<detail::FramebufferFunctions,OOBase::ThreadLocalAllocator>();
-		if (m_fb_fns)
-		{
-			m_fb_fns->init(m_glfw_window);
-			m_default_fb = Framebuffer::get_default(shared_from_this());
-		}
-	}
-}
-
 const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::get_default_frame_buffer() const
 {
 	if (!m_default_fb)
-		const_cast<Window*>(this)->init_default_fb();
+		const_cast<Window*>(this)->m_default_fb = Framebuffer::get_default(const_cast<Window*>(this)->shared_from_this());
 
 	return m_default_fb;
 }
@@ -130,12 +114,12 @@ const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::get_default_frame_
 bool Indigo::Window::draw()
 {
 	// Make this context current
-	if (!make_current() || !is_visible() || is_iconified())
+	if (!is_visible() || is_iconified())
 		return false;
 
 	// Render the default FB
 	if (m_default_fb)
-		m_default_fb->render();
+		m_default_fb->render(make_current());
 
 	return true;
 }

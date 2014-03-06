@@ -22,7 +22,7 @@
 #ifndef INDIGO_CAMERA_H_INCLUDED
 #define INDIGO_CAMERA_H_INCLUDED
 
-#include "Common.h"
+#include "State.h"
 
 namespace Indigo
 {
@@ -66,7 +66,7 @@ namespace Indigo
 		glm::mat4                 m_camera_matrix;
 		glm::mat4                 m_projection_matrix;
 
-		void draw();
+		void draw(State& gl_state);
 		void cull();
 	};
 }

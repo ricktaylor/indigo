@@ -29,20 +29,33 @@ namespace Indigo
 	class Window;
 	class Framebuffer;
 
-	class State : public OOBase::NonCopyable
+	class State : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<State>
 	{
+		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
+		friend class Window;
+
 	public:
-		typedef OOBase::Singleton<State,State> current_t;
+		//void window(const OOBase::WeakPtr<Window>& w);
+		void bind(const OOBase::SharedPtr<Framebuffer>& fb);
 
-		State();
-		~State();
-
-		void window(const OOBase::WeakPtr<Window>& w);
-		void framebuffer(const OOBase::SharedPtr<Framebuffer>& fb);
+		void clear_colour(const glm::vec4& rgba);
+		void clear_depth(GLfloat depth);
+		void clear_stencil(GLint s);
+		void depth_range(const glm::vec2& depth_range);
+		void scissor_off();
+		void scissor(const glm::ivec2& lower_left, const glm::ivec2& size);
 
 	private:
 		OOBase::WeakPtr<Window>        m_window;
 		OOBase::SharedPtr<Framebuffer> m_fb;
+		glm::vec4                      m_clear_colour;
+		GLfloat                        m_clear_depth;
+		GLint                          m_clear_stencil;
+		glm::vec2                      m_depth_range;
+		bool                           m_scissor;
+		glm::ivec4                     m_scissor_rect;
+
+		State(const OOBase::SharedPtr<Window>& window);
 	};
 }
 

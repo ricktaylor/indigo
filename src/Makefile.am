@@ -24,7 +24,8 @@ indigo_SOURCES = \
 	Framebuffer.cpp \
 	Viewport.cpp \
 	Camera.cpp \
-	Scene.cpp
+	Scene.cpp \
+	State.cpp
 		
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \

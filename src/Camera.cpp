@@ -124,7 +124,7 @@ void Indigo::Camera::perspective(const float_t& fovy, const float_t& aspect, con
 	m_projection_matrix = glm::perspective(fovy,aspect,zNear,zFar);
 }
 
-void Indigo::Camera::draw()
+void Indigo::Camera::draw(State& gl_state)
 {
 	// Draw
 	if (m_scene)

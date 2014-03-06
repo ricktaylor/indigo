@@ -326,6 +326,21 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 		LOG_ERROR(("Failed to create window"));
 	else
 	{
+		// Wait for window manager to do its thing
+		glfwWaitEvents();
+
+		glfwMakeContextCurrent(m_glfw_window);
+
+		m_state = OOBase::allocate_shared<State,OOBase::ThreadLocalAllocator>(shared_from_this());
+		if (!m_state)
+			LOG_ERROR(("Failed to allocate GL state object"));
+
+		m_fb_fns = OOBase::allocate_shared<detail::FramebufferFunctions,OOBase::ThreadLocalAllocator>();
+		if (!m_fb_fns)
+			LOG_ERROR(("Failed to allocate framebuffer functions"));
+		else
+			m_fb_fns->init(m_glfw_window);
+
 		glfwSetWindowUserPointer(m_glfw_window,this);
 		glfwSetFramebufferSizeCallback(m_glfw_window,&on_size);
 		glfwSetWindowCloseCallback(m_glfw_window,&on_close);

@@ -22,7 +22,7 @@
 #ifndef INDIGO_FRAMEBUFFER_H_INCLUDED
 #define INDIGO_FRAMEBUFFER_H_INCLUDED
 
-#include "Common.h"
+#include "State.h"
 
 namespace Indigo
 {
@@ -59,6 +59,7 @@ namespace Indigo
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		friend class Window;
+		friend class State;
 
 	public:
 		Framebuffer(const OOBase::SharedPtr<Window>& window);
@@ -84,9 +85,9 @@ namespace Indigo
 
 		typedef OOBase::Vector<OOBase::SharedPtr<Viewport>,OOBase::ThreadLocalAllocator> viewports_t;
 		const viewports_t& viewports() const;
-		OOBase::SharedPtr<Viewport> add_viewport(const glm::ivec2& lower_left, const glm::ivec2& size, const glm::vec2& depth_range = glm::vec2(0,1));
+		OOBase::SharedPtr<Viewport> add_viewport(const glm::ivec2& lower_left, const glm::ivec2& size);
 
-		void render();
+		void render(State& gl_state);
 
 	// Signals
 	public:
@@ -105,6 +106,8 @@ namespace Indigo
 
 		Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id);
 		static OOBase::SharedPtr<Framebuffer> get_default(const OOBase::SharedPtr<Window>& window);
+
+		void bind();
 	};
 }
 

@@ -22,11 +22,10 @@
 #include "Viewport.h"
 #include "Camera.h"
 
-Indigo::Viewport::Viewport(const OOBase::SharedPtr<Framebuffer>& fb, const glm::ivec2& lower_left, const glm::ivec2& size, const glm::vec2& depth_range) :
+Indigo::Viewport::Viewport(const OOBase::SharedPtr<Framebuffer>& fb, const glm::ivec2& lower_left, const glm::ivec2& size) :
 		m_fb(fb),
 		m_lower_left(lower_left),
 		m_size(size),
-		m_depth_range(depth_range),
 		m_scissor(false)
 {
 }
@@ -35,7 +34,6 @@ Indigo::Viewport::Viewport(const Viewport& rhs) :
 		m_fb(rhs.m_fb),
 		m_lower_left(rhs.m_lower_left),
 		m_size(rhs.m_size),
-		m_depth_range(rhs.m_depth_range),
 		m_scissor(rhs.m_scissor),
 		m_cameras(rhs.m_cameras)
 {
@@ -56,7 +54,6 @@ void Indigo::Viewport::swap(Viewport& rhs)
 	OOBase::swap(m_fb,rhs.m_fb);
 	OOBase::swap(m_lower_left,rhs.m_lower_left);
 	OOBase::swap(m_size,rhs.m_size);
-	OOBase::swap(m_depth_range,rhs.m_depth_range);
 	OOBase::swap(m_cameras,rhs.m_cameras);
 }
 
@@ -97,16 +94,6 @@ void Indigo::Viewport::size(const glm::ivec2& size)
 	move(m_lower_left,size);
 }
 
-void Indigo::Viewport::depth_range(const glm::vec2& depth_range)
-{
-	m_depth_range = depth_range;
-}
-
-const glm::vec2& Indigo::Viewport::depth_range() const
-{
-	return m_depth_range;
-}
-
 void Indigo::Viewport::scissor(bool scissor)
 {
 	m_scissor = scissor;
@@ -122,23 +109,15 @@ const Indigo::Viewport::cameras_t& Indigo::Viewport::cameras() const
 	return m_cameras;
 }
 
-void Indigo::Viewport::render()
+void Indigo::Viewport::render(State& gl_state)
 {
 	glViewport(m_lower_left.x,m_lower_left.y,m_size.x,m_size.y);
-	glDepthRange(m_depth_range.x,m_depth_range.y);
 
-	bool scissor_on = (glIsEnabled(GL_SCISSOR_TEST) == GL_TRUE);
-	if (m_scissor != scissor_on)
-	{
-		if (m_scissor)
-		{
-			glScissor(m_lower_left.x,m_lower_left.y,m_size.x,m_size.y);
-			glEnable(GL_SCISSOR_TEST);
-		}
-		else
-			glDisable(GL_SCISSOR_TEST);
-	}
+	if (!m_scissor)
+		gl_state.scissor_off();
+	else
+		gl_state.scissor(m_lower_left,m_size);
 
 	for (cameras_t::iterator c = m_cameras.begin(); c != m_cameras.end(); ++c)
-		(*c)->draw();
+		(*c)->draw(gl_state);
 }

@@ -24,6 +24,7 @@
 
 #include "Render.h"
 #include "Framebuffer.h"
+#include "State.h"
 
 namespace Indigo
 {
@@ -45,7 +46,7 @@ namespace Indigo
 
 		operator bool_type() const;
 
-		bool make_current() const;
+		State& make_current() const;
 
 		bool is_visible() const;
 		void visible(bool show);
@@ -63,6 +64,7 @@ namespace Indigo
 		GLFWwindow* m_glfw_window;
 		OOBase::SharedPtr<Framebuffer> m_default_fb;
 		OOBase::SharedPtr<detail::FramebufferFunctions> m_fb_fns;
+		OOBase::SharedPtr<State> m_state;
 
 		static void on_size(GLFWwindow* window, int width, int height);
 		static void on_close(GLFWwindow* window);
@@ -73,8 +75,6 @@ namespace Indigo
 		static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 		bool draw();
 		void swap();
-
-		void init_default_fb();
 	};
 }
 

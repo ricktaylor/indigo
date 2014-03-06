@@ -22,7 +22,7 @@
 #ifndef INDIGO_VIEWPORT_H_INCLUDED
 #define INDIGO_VIEWPORT_H_INCLUDED
 
-#include "Common.h"
+#include "State.h"
 
 namespace Indigo
 {
@@ -34,7 +34,7 @@ namespace Indigo
 		friend class Framebuffer;
 
 	public:
-		Viewport(const OOBase::SharedPtr<Framebuffer>& fb, const glm::ivec2& lower_left, const glm::ivec2& size, const glm::vec2& depth_range = glm::vec2(0,1));
+		Viewport(const OOBase::SharedPtr<Framebuffer>& fb, const glm::ivec2& lower_left, const glm::ivec2& size);
 		Viewport(const Viewport& rhs);
 		~Viewport();
 
@@ -51,9 +51,6 @@ namespace Indigo
 		void size(const glm::ivec2& size);
 		const glm::ivec2& size() const;
 
-		void depth_range(const glm::vec2& depth_range);
-		const glm::vec2& depth_range() const;
-
 		void scissor(bool scissor);
 		bool scissor() const;
 
@@ -64,11 +61,10 @@ namespace Indigo
 		OOBase::WeakPtr<Framebuffer> m_fb;
 		glm::ivec2                   m_lower_left;
 		glm::ivec2                   m_size;
-		glm::vec2                    m_depth_range;
 		bool                         m_scissor;
 		cameras_t                    m_cameras;
 
-		void render();
+		void render(State& gl_state);
 	};
 }
 
