@@ -16,6 +16,15 @@ endif
 
 bin_PROGRAMS = indigo
 
+bin2c: bin2c.c Makefile
+	$(CC_FOR_BUILD) $(INCLUDES) $(AM_CFLAGS) -o $@ $(srcdir)/bin2c.c
+	
+%.c: ../resources/%.tga bin2c
+	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
+	
+%.c: ../resources/%.fnt bin2c
+	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
+
 indigo_SOURCES = \
 	Main.cpp \
 	Render.cpp \
@@ -24,8 +33,10 @@ indigo_SOURCES = \
 	Framebuffer.cpp \
 	Viewport.cpp \
 	Camera.cpp \
-	Scene.cpp \
-	State.cpp
+	State.cpp \
+	DejaVu_Sans_0.c \
+	DejaVu_Sans_1.c \
+	DejaVu_Sans.c
 		
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \
