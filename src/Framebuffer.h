@@ -29,29 +29,6 @@ namespace Indigo
 	class Window;
 	class Viewport;
 
-	namespace detail
-	{
-		struct FramebufferFunctions
-		{
-			friend class Indigo::Window;
-
-			FramebufferFunctions() :
-				m_fn_genFramebuffers(NULL),
-				m_fn_delFramebuffers(NULL),
-				m_fn_bindFramebuffer(NULL),
-				m_fn_checkFramebufferStatus(NULL)
-			{}
-
-			PFNGLGENFRAMEBUFFERSPROC        m_fn_genFramebuffers;
-			PFNGLDELETEFRAMEBUFFERSPROC     m_fn_delFramebuffers;
-			PFNGLBINDFRAMEBUFFERPROC        m_fn_bindFramebuffer;
-			PFNGLCHECKFRAMEBUFFERSTATUSPROC m_fn_checkFramebufferStatus;
-
-		private:
-			void init(GLFWwindow* win);
-		};
-	}
-
 	class Framebuffer :
 			public OOBase::SafeBoolean,
 			public OOBase::NonCopyable,
@@ -95,7 +72,6 @@ namespace Indigo
 
 	private:
 		OOBase::WeakPtr<Window>  m_window;
-		OOBase::SharedPtr<detail::FramebufferFunctions> m_fns;
 		GLuint       m_id;
 		bool         m_default;
 		GLbitfield   m_clear_bits;

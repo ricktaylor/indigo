@@ -66,6 +66,8 @@ namespace Indigo
 }
 
 #include <GLFW/glfw3.h>
+
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
 #if defined(HAVE_GL_GLEXT_H)

@@ -314,7 +314,7 @@ bool Indigo::handle_events()
 }
 
 Indigo::Window::Window(int width, int height, const char* title, unsigned int style, GLFWmonitor* monitor) :
-		m_glfw_window(NULL), m_fb_fns()
+		m_glfw_window(NULL)
 {
 	glfwWindowHint(GLFW_VISIBLE,(style & eWSvisible) ? GL_TRUE : GL_FALSE);
 	glfwWindowHint(GLFW_RESIZABLE,(style & eWSresizable) ? GL_TRUE : GL_FALSE);
@@ -334,12 +334,6 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 		m_state = OOBase::allocate_shared<State,OOBase::ThreadLocalAllocator>(shared_from_this());
 		if (!m_state)
 			LOG_ERROR(("Failed to allocate GL state object"));
-
-		m_fb_fns = OOBase::allocate_shared<detail::FramebufferFunctions,OOBase::ThreadLocalAllocator>();
-		if (!m_fb_fns)
-			LOG_ERROR(("Failed to allocate framebuffer functions"));
-		else
-			m_fb_fns->init(m_glfw_window);
 
 		glfwSetWindowUserPointer(m_glfw_window,this);
 		glfwSetFramebufferSizeCallback(m_glfw_window,&on_size);

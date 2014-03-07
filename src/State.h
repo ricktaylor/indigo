@@ -36,14 +36,13 @@ namespace Indigo
 
 	public:
 		//void window(const OOBase::WeakPtr<Window>& w);
-		void bind(const OOBase::SharedPtr<Framebuffer>& fb);
+		OOBase::SharedPtr<Framebuffer> bind(const OOBase::SharedPtr<Framebuffer>& fb);
 
-		void clear_colour(const glm::vec4& rgba);
-		void clear_depth(GLfloat depth);
-		void clear_stencil(GLint s);
-		void depth_range(const glm::vec2& depth_range);
-		void scissor_off();
-		void scissor(const glm::ivec2& lower_left, const glm::ivec2& size);
+		glm::vec4 clear_colour(const glm::vec4& rgba);
+		GLfloat clear_depth(GLfloat depth);
+		GLint clear_stencil(GLint s);
+		glm::vec2 depth_range(const glm::vec2& depth_range);
+		glm::ivec4 scissor(const glm::ivec4& rect);
 
 	private:
 		OOBase::WeakPtr<Window>        m_window;

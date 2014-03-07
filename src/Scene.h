@@ -22,20 +22,14 @@
 #ifndef INDIGO_SCENE_H_INCLUDED
 #define INDIGO_SCENE_H_INCLUDED
 
-#include "Common.h"
+#include "State.h"
 
 namespace Indigo
 {
-	class Camera;
-
 	class Scene
 	{
-		friend class Camera;
 	public:
-
-	private:
-		void cull(const glm::vec4 planes[6], const glm::vec4 abs_planes[6]);
-		void draw(const glm::mat4& pv_matrix);
+		virtual void draw(State& gl_state, const glm::mat4& pv_matrix) = 0;
 	};
 }
 

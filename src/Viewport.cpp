@@ -64,14 +64,8 @@ OOBase::SharedPtr<Indigo::Framebuffer> Indigo::Viewport::framebuffer() const
 
 void Indigo::Viewport::move(const glm::ivec2& lower_left, const glm::ivec2& size)
 {
-	if (lower_left != m_lower_left || size != m_size)
-	{
-		m_lower_left = lower_left;
-		m_size = size;
-
-		for (cameras_t::iterator c = m_cameras.begin(); c != m_cameras.end(); ++c)
-			(*c)->cull();
-	}
+	m_lower_left = lower_left;
+	m_size = size;
 }
 
 const glm::ivec2& Indigo::Viewport::lower_left() const
@@ -113,10 +107,10 @@ void Indigo::Viewport::render(State& gl_state)
 {
 	glViewport(m_lower_left.x,m_lower_left.y,m_size.x,m_size.y);
 
-	if (!m_scissor)
-		gl_state.scissor_off();
+	if (m_scissor)
+		gl_state.scissor(glm::ivec4(m_lower_left.x,m_lower_left.y,m_size.x,m_size.y));
 	else
-		gl_state.scissor(m_lower_left,m_size);
+		gl_state.scissor(glm::ivec4(0,0,0,0));
 
 	for (cameras_t::iterator c = m_cameras.begin(); c != m_cameras.end(); ++c)
 		(*c)->draw(gl_state);

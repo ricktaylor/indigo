@@ -63,7 +63,6 @@ namespace Indigo
 	private:
 		GLFWwindow* m_glfw_window;
 		OOBase::SharedPtr<Framebuffer> m_default_fb;
-		OOBase::SharedPtr<detail::FramebufferFunctions> m_fb_fns;
 		OOBase::SharedPtr<State> m_state;
 
 		static void on_size(GLFWwindow* window, int width, int height);

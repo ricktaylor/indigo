@@ -29,9 +29,10 @@ namespace Indigo
 	class Viewport;
 	class Scene;
 
-	class Camera
+	class Camera : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<Camera>
 	{
 		friend class Viewport;
+
 	public:
 		Camera(const OOBase::SharedPtr<Viewport>& viewport, const glm::mat4& camera_matrix = glm::mat4(), const glm::mat4& projection_matrix = glm::mat4());
 		Camera(const Camera& rhs);
@@ -50,7 +51,7 @@ namespace Indigo
 		void camera_matrix(const glm::mat4& camera_matrix);
 		const glm::mat4& camera_matrix() const;
 
-		void look_at(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up);
+		void look_at(const glm::vec3& eye, const glm::vec3& target, const glm::vec3& up);
 
 		void projection_matrix(const glm::mat4& projection_matrix);
 		const glm::mat4& projection_matrix() const;
@@ -60,14 +61,27 @@ namespace Indigo
 	 	void ortho(const float_t& left, const float_t& right, const float_t& bottom, const float_t& top, const float_t& zNear, const float_t& zFar);
 	 	void perspective(const float_t& fovy, const float_t& aspect, const float_t& zNear, const float_t& zFar);
 
+	 	enum CullType
+	 	{
+	 		outside = 0,
+	 		intersect,
+	 		inside
+	 	};
+	 	enum CullType frustum_cull(const glm::vec3& centre, const glm::vec3& extent, unsigned int& hint) const;
+	 	enum CullType frustum_cull(const glm::vec3& centre, const glm::vec3& extent) const;
+
 	private:
 		OOBase::WeakPtr<Viewport> m_viewport;
 		OOBase::SharedPtr<Scene>  m_scene;
 		glm::mat4                 m_camera_matrix;
 		glm::mat4                 m_projection_matrix;
 
+		bool                      m_dirty;
+		glm::vec4                 m_clip_planes[6];
+		glm::vec4                 m_clip_abs_planes[6];
+
+		void refresh();
 		void draw(State& gl_state);
-		void cull();
 	};
 }
 

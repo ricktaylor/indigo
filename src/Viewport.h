@@ -29,7 +29,7 @@ namespace Indigo
 	class Framebuffer;
 	class Camera;
 
-	class Viewport
+	class Viewport : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<Viewport>
 	{
 		friend class Framebuffer;
 
