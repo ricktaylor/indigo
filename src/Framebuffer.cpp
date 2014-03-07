@@ -123,11 +123,7 @@ static GLenum checkFrameBufferStatus(GLenum target)
 Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window) :
 		m_window(window),
 		m_id(GL_INVALID_VALUE),
-		m_default(false),
-		m_clear_bits(GL_COLOR_BUFFER_BIT),
-		m_clear_colour(),
-		m_clear_depth(1.0f),
-		m_clear_stencil(0)
+		m_default(false)
 {
 	genFrameBuffers(1,&m_id);
 }
@@ -135,11 +131,7 @@ Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window) :
 Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id) :
 		m_window(window),
 		m_id(id),
-		m_default(true),
-		m_clear_bits(GL_COLOR_BUFFER_BIT),
-		m_clear_colour(),
-		m_clear_depth(1.0f),
-		m_clear_stencil(0)
+		m_default(true)
 {
 }
 
@@ -174,46 +166,6 @@ GLenum Indigo::Framebuffer::check() const
 	return checkFrameBufferStatus(m_id);
 }
 
-void Indigo::Framebuffer::clear_colour(const glm::vec4& rgba)
-{
-	m_clear_colour = rgba;
-}
-
-glm::vec4 Indigo::Framebuffer::clear_colour() const
-{
-	return m_clear_colour;
-}
-
-void Indigo::Framebuffer::clear_depth(GLfloat depth)
-{
-	m_clear_depth = depth;
-}
-
-GLfloat Indigo::Framebuffer::clear_depth()
-{
-	return m_clear_depth;
-}
-
-void Indigo::Framebuffer::clear_stencil(GLint s)
-{
-	m_clear_stencil = s;
-}
-
-GLint Indigo::Framebuffer::clear_stencil() const
-{
-	return m_clear_stencil;
-}
-
-void Indigo::Framebuffer::clear_bits(GLbitfield bits)
-{
-	m_clear_bits = bits;
-}
-
-GLbitfield Indigo::Framebuffer::clear_bits() const
-{
-	return m_clear_bits;
-}
-
 const Indigo::Framebuffer::viewports_t& Indigo::Framebuffer::viewports() const
 {
 	return m_viewports;
@@ -241,26 +193,13 @@ void Indigo::Framebuffer::bind()
 
 void Indigo::Framebuffer::render(State& gl_state)
 {
-	if (m_id == GL_INVALID_VALUE)
-		return;
-
-	// Bind this FB
-	gl_state.bind(shared_from_this());
-
-	// Clear
-	if (m_clear_bits)
+	if (m_id != GL_INVALID_VALUE)
 	{
-		if (m_clear_bits & GL_STENCIL_BUFFER_BIT)
-			gl_state.clear_stencil(m_clear_stencil);
-		if (m_clear_bits & GL_DEPTH_BUFFER_BIT)
-			gl_state.clear_depth(m_clear_depth);
-		if (m_clear_bits & GL_COLOR_BUFFER_BIT)
-			gl_state.clear_colour(m_clear_colour);
+		// Bind this FB
+		gl_state.bind(shared_from_this());
 
-		glClear(m_clear_bits);
+		// For each viewport
+		for (viewports_t::iterator v = m_viewports.begin();v != m_viewports.end(); ++v)
+			(*v)->render(gl_state);
 	}
-
-	// For each viewport
-	for (viewports_t::iterator v = m_viewports.begin();v != m_viewports.end(); ++v)
-		(*v)->render(gl_state);
 }

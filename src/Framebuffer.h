@@ -48,18 +48,6 @@ namespace Indigo
 
 		GLenum check() const;
 
-		void clear_bits(GLbitfield bits);
-		GLbitfield clear_bits() const;
-
-		void clear_colour(const glm::vec4& rgba);
-		glm::vec4 clear_colour() const;
-
-		void clear_depth(GLfloat depth);
-		GLfloat clear_depth();
-
-		void clear_stencil(GLint s);
-		GLint clear_stencil() const;
-
 		typedef OOBase::Vector<OOBase::SharedPtr<Viewport>,OOBase::ThreadLocalAllocator> viewports_t;
 		const viewports_t& viewports() const;
 		OOBase::SharedPtr<Viewport> add_viewport(const glm::ivec2& lower_left, const glm::ivec2& size);
@@ -74,10 +62,6 @@ namespace Indigo
 		OOBase::WeakPtr<Window>  m_window;
 		GLuint       m_id;
 		bool         m_default;
-		GLbitfield   m_clear_bits;
-		glm::vec4    m_clear_colour;
-		GLfloat      m_clear_depth;
-		GLint        m_clear_stencil;
 		viewports_t  m_viewports;
 
 		Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id);
