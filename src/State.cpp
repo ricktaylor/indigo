@@ -102,7 +102,10 @@ glm::ivec4 Indigo::State::scissor(const glm::ivec4& rect)
 	bool scissor = (rect == glm::ivec4(0,0,0,0));
 
 	if (scissor && rect != m_scissor_rect)
+	{
+		m_scissor_rect = rect;
 		glScissor(m_scissor_rect.x,m_scissor_rect.y,m_scissor_rect.x,m_scissor_rect.y);
+	}
 
 	if (m_scissor != scissor)
 	{
