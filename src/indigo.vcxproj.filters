@@ -42,6 +42,9 @@
     <ClInclude Include="State.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\resources\resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -70,16 +73,19 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\resources\DejaVu_Sans.fnt">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\resources\DejaVu_Sans_0.tga">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="..\resources\DejaVu_Sans_1.tga">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\resources\DejaVu_Sans.fnt">
+    <ResourceCompile Include="..\resources\indigo.rc">
       <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\resources\DejaVu_Sans_0.tga">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

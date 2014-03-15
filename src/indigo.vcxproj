@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="Framebuffer.h" />
@@ -48,6 +49,14 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\resources\DejaVu_Sans.fnt" />
+    <None Include="..\resources\DejaVu_Sans_0.tga" />
+    <None Include="..\resources\DejaVu_Sans_1.tga" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\resources\indigo.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{45062950-051B-42F7-A502-3F0F39282C22}</ProjectGuid>
