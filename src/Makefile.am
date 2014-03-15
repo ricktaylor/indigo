@@ -16,8 +16,8 @@ endif
 
 bin_PROGRAMS = indigo
 
-bin2c: bin2c.c Makefile
-	$(CC_FOR_BUILD) $(INCLUDES) $(AM_CFLAGS) -o $@ $(srcdir)/bin2c.c
+bin2c: $(top_srcdir)/tools/bin2c.c Makefile
+	$(AM_V_CC)$(CC_FOR_BUILD) $(INCLUDES) $(AM_CFLAGS) -o $@ $(top_srcdir)/tools/bin2c.c
 	
 %.c: ../resources/%.tga bin2c
 	$(AM_V_GEN)./bin2c "$<" "$@" "$*"

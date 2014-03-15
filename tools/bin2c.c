@@ -16,9 +16,6 @@ int main( int argc, char* argv[])
 
     FILE *f_input, *f_output;
 
-	for (i=0;i<argc;++i)
-		printf("argv[%d] = %s\n",i,argv[i]);
-
     if (argc < 4) {
         fprintf(stderr, "Usage: %s binary_file output_file array_name\n", argv[0]);
         return -1;
