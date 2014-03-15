@@ -1,7 +1,5 @@
 @SET_MAKE@
 
-SUBDIRS = freetype2 .
-
 clean-local:
 	@if [ -f @builddir@/glfw/Makefile ]; then make -C @builddir@/glfw clean; fi
 	
@@ -14,8 +12,3 @@ all-local:
 		@abs_srcdir@/glfw
 	$(MAKE) -C @builddir@/glfw all
 	
-noinst_LTLIBRARIES = libminiz.la
-
-libminiz_la_CPPFLAGS = -DMINIZ_NO_MALLOC 
-
-libminiz_la_SOURCES = miniz/miniz.c
