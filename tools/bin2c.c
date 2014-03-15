@@ -1,3 +1,8 @@
+
+#if defined(_MSC_VER)
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -10,6 +15,9 @@ int main( int argc, char* argv[])
     unsigned int i, file_size, need_comma;
 
     FILE *f_input, *f_output;
+
+	for (i=0;i<argc;++i)
+		printf("argv[%d] = %s\n",i,argv[i]);
 
     if (argc < 4) {
         fprintf(stderr, "Usage: %s binary_file output_file array_name\n", argv[0]);
