@@ -198,6 +198,9 @@ void Indigo::Framebuffer::render(State& gl_state)
 		// Bind this FB
 		gl_state.bind(shared_from_this());
 
+		// Always clear everything
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 		// For each viewport
 		for (viewports_t::iterator v = m_viewports.begin();v != m_viewports.end(); ++v)
 			(*v)->render(gl_state);

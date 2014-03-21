@@ -36,7 +36,7 @@ static bool render_start(void*)
 	glfwDefaultWindowHints();
 
 	OOBase::SharedPtr<Indigo::Window> ptrSplash = OOBase::allocate_shared<Indigo::Window,OOBase::ThreadLocalAllocator>(320,200,"Test");
-	if (!ptrSplash)
+	if (!ptrSplash || !*ptrSplash)
 		return false;
 
 	int err = ptrSplash->signal_close.connect(&on_window_close);
