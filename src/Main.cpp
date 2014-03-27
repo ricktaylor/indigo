@@ -20,13 +20,17 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
-#include "Render.h"
+#include "../lib/Render.h"
 
 #include <stdlib.h>
 #include <limits.h>
 
 #if defined(_WIN32)
 #include <shlwapi.h>
+#endif
+
+#if defined(HAVE_UNISTD_H)
+#include <signal.h>
 #endif
 
 static bool s_is_debug = false;

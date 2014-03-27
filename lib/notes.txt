@@ -1,0 +1,74 @@
+
+
+
+enum CullType
+{
+	outside = 0,
+	intersect,
+	inside
+};
+
+void Indigo::Camera::refresh()
+{
+	glm::mat4 view_matrix = m_projection_matrix * m_camera_matrix;
+
+	// Create non-normalized clipping planes
+	glm::vec4 col0(glm::column(view_matrix,0));
+	glm::vec4 col1(glm::column(view_matrix,1));
+	glm::vec4 col2(glm::column(view_matrix,2));
+	glm::vec4 col3(glm::column(view_matrix,3));
+
+	m_clip_planes[0] = col3 + col0; // left
+	m_clip_planes[1] = col3 - col0; // right
+	m_clip_planes[2] = col3 - col1; // top
+	m_clip_planes[3] = col3 + col1; // bottom
+	m_clip_planes[4] = col3 + col2; // near
+	m_clip_planes[5] = col3 - col2; // far
+
+	m_clip_abs_planes[0] = glm::abs(m_clip_planes[0]);
+	m_clip_abs_planes[1] = glm::abs(m_clip_planes[1]);
+	m_clip_abs_planes[2] = glm::abs(m_clip_planes[2]);
+	m_clip_abs_planes[3] = glm::abs(m_clip_planes[3]);
+	m_clip_abs_planes[4] = glm::abs(m_clip_planes[4]);
+	m_clip_abs_planes[5] = glm::abs(m_clip_planes[5]);
+
+	m_dirty = false;
+}
+
+enum Indigo::Camera::CullType Indigo::Camera::frustum_cull(const glm::vec3& centre, const glm::vec3& extent, unsigned int& hint) const
+{
+	// See http://fgiesen.wordpress.com/2010/10/17/view-frustum-culling/
+	enum CullType cull = outside;
+
+	if (m_dirty)
+		const_cast<Camera*>(this)->refresh();
+
+	glm::vec4 centre4(centre,1.0f);
+	glm::vec4 extent4(extent,1.0f);
+
+	unsigned int i = hint;
+	do
+	{
+		glm::vec3::value_type d = glm::dot(centre4,m_clip_planes[i]);
+		glm::vec3::value_type r = glm::dot(extent4,m_clip_abs_planes[i]);
+
+		if (d + r > 0) // partially inside
+			cull = intersect;
+		else if (d - r >= 0) // fully inside
+		{
+			if (cull != intersect)
+				cull = inside;
+		}
+		else
+		{
+			hint = i;
+			return outside;
+		}
+
+		i = (i + 1) % 6;
+	}
+	while (i != hint);
+
+	return cull;
+}
+

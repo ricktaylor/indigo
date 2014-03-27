@@ -26,14 +26,12 @@ bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
 
 indigo_SOURCES = \
-	Main.cpp \
-	Render.cpp \
+	../lib/Render.cpp \
+	../lib/Window.cpp \
+	../lib/Framebuffer.cpp \
+	../lib/State.cpp \
 	LogicThread.cpp \
-	Window.cpp \
-	Framebuffer.cpp \
-	Viewport.cpp \
-	Camera.cpp \
-	State.cpp \
+	Main.cpp \
 	DejaVu_Sans_0.c \
 	DejaVu_Sans_1.c \
 	DejaVu_Sans.c

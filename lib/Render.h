@@ -22,7 +22,7 @@
 #ifndef INDIGO_RENDER_H_INCLUDED
 #define INDIGO_RENDER_H_INCLUDED
 
-#include "Common.h"
+#include "OOGL.h"
 
 namespace Indigo
 {

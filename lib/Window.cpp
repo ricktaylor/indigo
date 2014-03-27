@@ -71,7 +71,7 @@ void Indigo::Window::on_size(GLFWwindow* window, int width, int height)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
-		pThis->get_default_frame_buffer()->signal_sized.fire(glm::ivec2(width,height));
+		pThis->signal_sized.fire(glm::ivec2(width,height));
 }
 
 void Indigo::Window::on_close(GLFWwindow* window)
@@ -98,9 +98,9 @@ void Indigo::Window::on_refresh(GLFWwindow* window)
 		pThis->swap();
 }
 
-Indigo::Window::operator Indigo::Window::bool_type() const
+bool Indigo::Window::is_valid() const
 {
-	return m_glfw_window != NULL ? &SafeBoolean::this_type_does_not_support_comparisons : NULL;
+	return m_glfw_window != NULL;
 }
 
 const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::get_default_frame_buffer() const
@@ -114,12 +114,17 @@ const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::get_default_frame_
 bool Indigo::Window::draw()
 {
 	// Make this context current
-	if (!is_visible() || is_iconified())
+	if (!m_glfw_window || !is_visible() || is_iconified())
 		return false;
 
-	// Render the default FB
-	if (m_default_fb)
-		m_default_fb->render(make_current());
+	make_current();
+
+	m_state->bind(get_default_frame_buffer());
+
+	// Always clear everything
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	signal_draw.fire(*m_state);
 
 	return true;
 }

@@ -19,7 +19,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Viewport.h"
 #include "Framebuffer.h"
 #include "Window.h"
 
@@ -151,11 +150,6 @@ Indigo::Framebuffer::~Framebuffer()
 		deleteFrameBuffers(1,&m_id);
 }
 
-Indigo::Framebuffer::operator Indigo::Framebuffer::bool_type() const
-{
-	return m_id != GL_INVALID_VALUE ? &SafeBoolean::this_type_does_not_support_comparisons : NULL;
-}
-
 OOBase::SharedPtr<Indigo::Window> Indigo::Framebuffer::window() const
 {
 	return m_window.lock();
@@ -166,43 +160,7 @@ GLenum Indigo::Framebuffer::check() const
 	return checkFrameBufferStatus(m_id);
 }
 
-const Indigo::Framebuffer::viewports_t& Indigo::Framebuffer::viewports() const
-{
-	return m_viewports;
-}
-
-OOBase::SharedPtr<Indigo::Viewport> Indigo::Framebuffer::add_viewport(const glm::ivec2& lower_left, const glm::ivec2& size)
-{
-	OOBase::SharedPtr<Viewport> v = OOBase::allocate_shared<Viewport,OOBase::ThreadLocalAllocator>(shared_from_this(),lower_left,size);
-	if (v)
-	{
-		int err = m_viewports.push_back(v);
-		if (err)
-		{
-			v.reset();
-			LOG_ERROR(("Failed to insert viewport: %s",OOBase::system_error_text(err)));
-		}
-	}
-	return v;
-}
-
 void Indigo::Framebuffer::bind()
 {
 	bindFrameBuffer(GL_FRAMEBUFFER,m_id);
-}
-
-void Indigo::Framebuffer::render(State& gl_state)
-{
-	if (m_id != GL_INVALID_VALUE)
-	{
-		// Bind this FB
-		gl_state.bind(shared_from_this());
-
-		// Always clear everything
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-		// For each viewport
-		for (viewports_t::iterator v = m_viewports.begin();v != m_viewports.end(); ++v)
-			(*v)->render(gl_state);
-	}
 }

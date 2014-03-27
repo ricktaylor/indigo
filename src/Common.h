@@ -29,27 +29,10 @@
 
 //////////////////////////////////////////////
 
-#include <OOBase/SharedPtr.h>
-#include <OOBase/Vector.h>
-#include <OOBase/CDRStream.h>
-#include <OOBase/TLSSingleton.h>
 #include <OOBase/Environment.h>
 #include <OOBase/Posix.h>
-#include <OOBase/BoundedQueue.h>
-#include <OOBase/StackAllocator.h>
-#include <OOBase/HandleTable.h>
-#include <OOBase/Thread.h>
-#include <OOBase/Socket.h>
-#include <OOBase/Set.h>
-#include <OOBase/String.h>
 #include <OOBase/CmdArgs.h>
-#include <OOBase/Win32Security.h>
-#include <OOBase/Logger.h>
 #include <OOBase/ConfigFile.h>
-#include <OOBase/Server.h>
-#include <OOBase/File.h>
-#include <OOBase/Singleton.h>
-#include <OOBase/SignalSlot.h>
 
 #if defined(_MSC_VER)
 	//#include "Config_msvc.h"
@@ -64,17 +47,5 @@ namespace Indigo
 {
 	bool is_debug();
 }
-
-#include <GLFW/glfw3.h>
-
-#define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-
-#if defined(HAVE_GL_GLEXT_H)
-#include <GL/glext.h>
-#else
-// Include our own glext.h
-#include "glext.h"
-#endif
 
 #endif // INDIGO_COMMON_H_INCLUDED

@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
 //
 // Copyright (C) 2014 Rick Taylor
 //
@@ -19,18 +19,38 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_SCENE_H_INCLUDED
-#define INDIGO_SCENE_H_INCLUDED
+#ifndef OOGL_H_INCLUDED
+#define OOGL_H_INCLUDED
 
-#include "State.h"
+//////////////////////////////////////////////
 
-namespace Indigo
-{
-	class Scene
-	{
-	public:
-		virtual void draw(State& gl_state, const glm::mat4& pv_matrix) = 0;
-	};
-}
+#include <OOBase/CDRStream.h>
+#include <OOBase/Queue.h>
+#include <OOBase/Condition.h>
+#include <OOBase/Thread.h>
+#include <OOBase/Logger.h>
+#include <OOBase/Table.h>
+#include <OOBase/SignalSlot.h>
 
-#endif // INDIGO_SCENE_H_INCLUDED
+#if defined(_MSC_VER)
+	//#include "Config_msvc.h"
+#elif defined(HAVE_CONFIG_H)
+	// Autoconf
+	#include <Config.h>
+#else
+#error Need some kind of configure scipt!
+#endif
+
+#include <GLFW/glfw3.h>
+
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+
+#if defined(HAVE_GL_GLEXT_H)
+#include <GL/glext.h>
+#else
+// Include our own glext.h
+#include "glext.h"
+#endif
+
+#endif // OOGL_H_INCLUDED

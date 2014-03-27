@@ -22,7 +22,7 @@
 #ifndef INDIGO_STATE_H_INCLUDED
 #define INDIGO_STATE_H_INCLUDED
 
-#include "Common.h"
+#include "OOGL.h"
 
 namespace Indigo
 {

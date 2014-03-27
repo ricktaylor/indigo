@@ -28,7 +28,7 @@
 
 namespace Indigo
 {
-	class Window : public OOBase::SafeBoolean, public OOBase::EnableSharedFromThis<Window>
+	class Window : public OOBase::EnableSharedFromThis<Window>
 	{
 		friend class Framebuffer;
 		friend bool start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args);
@@ -44,7 +44,7 @@ namespace Indigo
 		Window(int width, int height, const char* title, unsigned int style = eWSdecorated, GLFWmonitor* monitor = NULL);
 		~Window();
 
-		operator bool_type() const;
+		bool is_valid() const;
 
 		State& make_current() const;
 
@@ -59,6 +59,8 @@ namespace Indigo
 	// Signals
 	public:
 		OOBase::Signal0<OOBase::ThreadLocalAllocator> signal_close;
+		OOBase::Signal1<State&,OOBase::ThreadLocalAllocator> signal_draw;
+		OOBase::Signal1<glm::ivec2,OOBase::ThreadLocalAllocator> signal_sized;
 
 	private:
 		GLFWwindow* m_glfw_window;

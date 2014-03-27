@@ -189,23 +189,22 @@ static bool stop_thread(void*)
 
 static int logic_thread_start(void* param)
 {
+	RenderQueue render_queue;
+	s_render_queue = &render_queue;
+
+	// Signal we have started
 	thread_info ti = *reinterpret_cast<thread_info*>(param);
-	int err = 0;
-	{
-		// Force creation of render queue here
-		RenderQueue render_queue;
-		s_render_queue = &render_queue;
+	ti.m_started->set();
+	ti.m_started = NULL;
 
-		// Signal we have started
-		ti.m_started->set();
-		ti.m_started = NULL;
+	// Run the logic loop
+	int err = (*ti.m_fn)(*ti.m_config) ? EXIT_SUCCESS : EXIT_FAILURE;
 
-		// Run the logic loop
-		err = (*ti.m_fn)(*ti.m_config) ? EXIT_SUCCESS : EXIT_FAILURE;
+	// Tell the render thread we have finished
+	render_queue.enqueue(&stop_thread);
 
-		// Tell the render thread we have finished
-		render_queue.enqueue(&stop_thread);
-	}
+	// Wait for the render thread to stop using render_queue
+	s_event_queue->dequeue();
 
 	return err;
 }
@@ -381,9 +380,8 @@ bool Indigo::Window::draw_thread(const OOBase::Table<OOBase::String,OOBase::Stri
 
 	while (res)
 	{
-		bool visible_window = false;
-
 		// Draw all windows
+		bool visible_window = false;
 		for (OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();++i)
 		{
 			if ((*i)->draw())
@@ -398,9 +396,7 @@ bool Indigo::Window::draw_thread(const OOBase::Table<OOBase::String,OOBase::Stri
 
 		// Swap all windows (this collects events)
 		for (OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();++i)
-		{
 			(*i)->swap();
-		}
 
 		// Poll for UI events
 		if (visible_window)
