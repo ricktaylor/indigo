@@ -71,14 +71,14 @@ void Indigo::Window::on_size(GLFWwindow* window, int width, int height)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
-		pThis->signal_sized.fire(glm::ivec2(width,height));
+		pThis->signal_sized.fire(pThis->shared_from_this(),glm::ivec2(width,height));
 }
 
 void Indigo::Window::on_close(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
-		pThis->signal_close.fire();
+		pThis->signal_close.fire(pThis->shared_from_this());
 }
 
 void Indigo::Window::on_focus(GLFWwindow* window, int focused)
@@ -111,6 +111,14 @@ const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::get_default_frame_
 	return m_default_fb;
 }
 
+glm::ivec2 Indigo::Window::size() const
+{
+	int width,height;
+	glfwGetFramebufferSize(m_glfw_window,&width,&height);
+
+	return glm::ivec2(width,height);
+}
+
 bool Indigo::Window::draw()
 {
 	// Make this context current
@@ -124,7 +132,7 @@ bool Indigo::Window::draw()
 	// Always clear everything
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	signal_draw.fire(*m_state);
+	signal_draw.fire(shared_from_this(),*m_state);
 
 	return true;
 }

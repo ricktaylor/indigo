@@ -54,13 +54,15 @@ namespace Indigo
 		bool is_iconified() const;
 		void iconify(bool minimize);
 
+		glm::ivec2 size() const;
+
 		const OOBase::SharedPtr<Framebuffer>& get_default_frame_buffer() const;
 
 	// Signals
 	public:
-		OOBase::Signal0<OOBase::ThreadLocalAllocator> signal_close;
-		OOBase::Signal1<State&,OOBase::ThreadLocalAllocator> signal_draw;
-		OOBase::Signal1<glm::ivec2,OOBase::ThreadLocalAllocator> signal_sized;
+		OOBase::Signal1<const OOBase::SharedPtr<Window>&,OOBase::ThreadLocalAllocator> signal_close;
+		OOBase::Signal2<const OOBase::SharedPtr<Window>&,State&,OOBase::ThreadLocalAllocator> signal_draw;
+		OOBase::Signal2<const OOBase::SharedPtr<Window>&,const glm::ivec2&,OOBase::ThreadLocalAllocator> signal_sized;
 
 	private:
 		GLFWwindow* m_glfw_window;

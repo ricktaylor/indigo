@@ -21,9 +21,7 @@
 
 #include "../lib/Render.h"
 
-
 bool showSplash();
-
 
 bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {

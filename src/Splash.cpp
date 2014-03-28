@@ -23,8 +23,27 @@
 #include "../lib/Window.h"
 
 static OOBase::SharedPtr<Indigo::Window> s_ptrSplash;
+static float ratio;
 
-static void on_window_close()
+static void on_window_draw(const OOBase::SharedPtr<Indigo::Window>&, Indigo::State& glState)
+{
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glRotatef((float) glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
+	glBegin(GL_TRIANGLES);
+	glColor3f(1.f, 0.f, 0.f);
+	glVertex3f(-0.6f, -0.4f, 0.f);
+	glColor3f(0.f, 1.f, 0.f);
+	glVertex3f(0.6f, -0.4f, 0.f);
+	glColor3f(0.f, 0.f, 1.f);
+	glVertex3f(0.f, 0.6f, 0.f);
+	glEnd();
+}
+
+static void on_window_close(const OOBase::SharedPtr<Indigo::Window>&)
 {
 	s_ptrSplash.reset();
 }
@@ -36,8 +55,14 @@ static bool create_splash(void*)
 		return false;
 
 	int err = ptrSplash->signal_close.connect(&on_window_close);
+	if (!err)
+		err = ptrSplash->signal_draw.connect(&on_window_draw);
 	if (err)
 		LOG_ERROR_RETURN(("Failed to attach signal: %s",OOBase::system_error_text(err)),false);
+
+	glm::ivec2 sz = ptrSplash->size();
+	ratio = sz.x / (float)sz.y;
+	glViewport(0, 0, sz.x, sz.y);
 
 	ptrSplash->visible(true);
 	s_ptrSplash.swap(ptrSplash);
@@ -47,6 +72,7 @@ static bool create_splash(void*)
 
 static bool close_splash(void*)
 {
+	s_ptrSplash.reset();
 	return true;
 }
 
