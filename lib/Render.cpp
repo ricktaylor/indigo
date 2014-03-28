@@ -369,6 +369,9 @@ bool Indigo::Window::draw_thread(const OOBase::Table<OOBase::String,OOBase::Stri
 	if (!glfwInit())
 		LOG_ERROR_RETURN(("glfwInit failed"),false);
 
+	// Set defaults
+	glfwDefaultWindowHints();
+
 //	if (!Indigo::is_debug())
 //		glfwSwapInterval(1);
 
