@@ -31,9 +31,6 @@ static void on_window_close()
 
 static bool create_splash(void*)
 {
-	return false;
-
-
 	OOBase::SharedPtr<Indigo::Window> ptrSplash = OOBase::allocate_shared<Indigo::Window,OOBase::ThreadLocalAllocator>(320,200,"Test");
 	if (!ptrSplash || !ptrSplash->is_valid())
 		return false;
