@@ -32,6 +32,7 @@ indigo_SOURCES = \
 	../lib/State.cpp \
 	LogicThread.cpp \
 	Main.cpp \
+	Splash.cpp \
 	DejaVu_Sans_0.c \
 	DejaVu_Sans_1.c \
 	DejaVu_Sans.c

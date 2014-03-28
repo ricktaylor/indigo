@@ -1,6 +1,7 @@
+
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2013 Rick Taylor
+// Copyright (C) 2014 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,22 +20,45 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../lib/Render.h"
+#include "../lib/Window.h"
 
+static OOBase::SharedPtr<Indigo::Window> s_ptrSplash;
 
-bool showSplash();
-
-
-bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
+static void on_window_close()
 {
-	// Set up graphics first
-	if (!showSplash())
+	s_ptrSplash.reset();
+}
+
+static bool create_splash(void*)
+{
+	return false;
+
+
+	OOBase::SharedPtr<Indigo::Window> ptrSplash = OOBase::allocate_shared<Indigo::Window,OOBase::ThreadLocalAllocator>(320,200,"Test");
+	if (!ptrSplash || !ptrSplash->is_valid())
 		return false;
 
-	if (!Indigo::handle_events())
-		return false;
+	int err = ptrSplash->signal_close.connect(&on_window_close);
+	if (err)
+		LOG_ERROR_RETURN(("Failed to attach signal: %s",OOBase::system_error_text(err)),false);
 
-	OOBase::Logger::log(OOBase::Logger::Information,"Quit");
+	ptrSplash->visible(true);
+	s_ptrSplash.swap(ptrSplash);
 
 	return true;
+}
+
+static bool close_splash(void*)
+{
+	return true;
+}
+
+bool showSplash()
+{
+	return Indigo::render_call(&create_splash,NULL);
+}
+
+bool hideSplash()
+{
+	return Indigo::render_call(&close_splash,NULL);
 }
