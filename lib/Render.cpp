@@ -203,8 +203,11 @@ static int logic_thread_start(void* param)
 	// Tell the render thread we have finished
 	render_queue.enqueue(&stop_thread);
 
-	// Wait for the render thread to stop using render_queue
-	s_event_queue->dequeue();
+	if (err != EXIT_SUCCESS)
+	{
+		// Wait for the render thread to stop using render_queue
+		s_event_queue->dequeue();
+	}
 
 	return err;
 }
