@@ -11,26 +11,26 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\lib\Framebuffer.h" />
+    <ClInclude Include="..\lib\glext.h" />
+    <ClInclude Include="..\lib\OOGL.h" />
+    <ClInclude Include="..\lib\Render.h" />
+    <ClInclude Include="..\lib\Shader.h" />
+    <ClInclude Include="..\lib\State.h" />
+    <ClInclude Include="..\lib\Texture.h" />
+    <ClInclude Include="..\lib\Window.h" />
     <ClInclude Include="..\resources\resource.h" />
-    <ClInclude Include="Camera.h" />
     <ClInclude Include="Common.h" />
-    <ClInclude Include="Framebuffer.h" />
-    <ClInclude Include="glext.h" />
-    <ClInclude Include="Render.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="State.h" />
-    <ClInclude Include="Viewport.h" />
-    <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Framebuffer.cpp" />
+    <ClCompile Include="..\lib\Framebuffer.cpp" />
+    <ClCompile Include="..\lib\Render.cpp" />
+    <ClCompile Include="..\lib\State.cpp" />
+    <ClCompile Include="..\lib\Texture.cpp" />
+    <ClCompile Include="..\lib\Window.cpp" />
     <ClCompile Include="LogicThread.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Render.cpp" />
-    <ClCompile Include="State.cpp" />
-    <ClCompile Include="Viewport.cpp" />
-    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="Splash.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\3rdparty\glfw\src\glfw.vcxproj">

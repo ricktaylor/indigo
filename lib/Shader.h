@@ -19,14 +19,36 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Texture.h"
+#ifndef INDIGO_SHADER_H_INCLUDED
+#define INDIGO_SHADER_H_INCLUDED
 
-Indigo::TextureBase::TextureBase() : m_tex(0)
+#include "OOGL.h"
+
+namespace Indigo
 {
-	glGenTextures(1,&m_tex);
+	class ShaderBase : public OOBase::EnableSharedFromThis<ShaderBase>
+	{
+	public:
+		void load(const GLchar* sz, GLint len = -1);
+
+	protected:
+		ShaderBase() : m_id(0)
+		{}
+
+		void create(GLenum shaderType);
+
+		GLuint m_id;
+	};
+
+	class VertexShader : public ShaderBase
+	{
+	public:
+		VertexShader()
+		{
+			create(GL_VERTEX_SHADER);
+		}
+	};
 }
 
-void Indigo::TextureBase::bind(GLenum target)
-{
-	glBindTexture(target,m_tex);
-}
+
+#endif // INDIGO_SHADER_H_INCLUDED

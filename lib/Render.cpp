@@ -329,7 +329,7 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 	else
 	{
 		// Wait for window manager to do its thing
-		glfwWaitEvents();
+		//glfwWaitEvents();
 
 		glfwMakeContextCurrent(m_glfw_window);
 

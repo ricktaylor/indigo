@@ -26,18 +26,15 @@
 
 namespace Indigo
 {
-	namespace Texture
+	class TextureBase : public OOBase::EnableSharedFromThis<TextureBase>
 	{
-		class Generic : public OOBase::EnableSharedFromThis<Generic>
-		{
-		protected:
-			Generic();
+	protected:
+		TextureBase();
 
-			void bind(GLenum target);
+		void bind(GLenum target);
 
-			GLuint m_tex;
-		};
-	}
+		GLuint m_tex;
+	};
 }
 
 
