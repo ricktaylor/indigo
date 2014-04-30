@@ -17,6 +17,7 @@
     <ClInclude Include="..\lib\Render.h" />
     <ClInclude Include="..\lib\Shader.h" />
     <ClInclude Include="..\lib\State.h" />
+    <ClInclude Include="..\lib\StateFns.h" />
     <ClInclude Include="..\lib\Texture.h" />
     <ClInclude Include="..\lib\Window.h" />
     <ClInclude Include="..\resources\resource.h" />
@@ -25,7 +26,9 @@
   <ItemGroup>
     <ClCompile Include="..\lib\Framebuffer.cpp" />
     <ClCompile Include="..\lib\Render.cpp" />
+    <ClCompile Include="..\lib\Shader.cpp" />
     <ClCompile Include="..\lib\State.cpp" />
+    <ClCompile Include="..\lib\StateFns.cpp" />
     <ClCompile Include="..\lib\Texture.cpp" />
     <ClCompile Include="..\lib\Window.cpp" />
     <ClCompile Include="LogicThread.cpp" />

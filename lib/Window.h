@@ -25,11 +25,14 @@
 #include "Render.h"
 #include "Framebuffer.h"
 #include "State.h"
+#include "StateFns.h"
 
 namespace Indigo
 {
 	class Window : public OOBase::EnableSharedFromThis<Window>
 	{
+		friend class State;
+		friend class StateFns;
 		friend class Framebuffer;
 		friend bool start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
@@ -66,8 +69,10 @@ namespace Indigo
 
 	private:
 		GLFWwindow* m_glfw_window;
+
 		OOBase::SharedPtr<Framebuffer> m_default_fb;
-		OOBase::SharedPtr<State> m_state;
+		OOBase::SharedPtr<State>       m_state;
+		OOBase::SharedPtr<StateFns>    m_state_fns;
 
 		static void on_size(GLFWwindow* window, int width, int height);
 		static void on_close(GLFWwindow* window);

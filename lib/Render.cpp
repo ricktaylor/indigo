@@ -21,6 +21,7 @@
 
 #include "Render.h"
 #include "State.h"
+#include "StateFns.h"
 #include "Window.h"
 
 #include <stdlib.h>
@@ -336,6 +337,10 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 		m_state = OOBase::allocate_shared<State,OOBase::ThreadLocalAllocator>(shared_from_this());
 		if (!m_state)
 			LOG_ERROR(("Failed to allocate GL state object"));
+
+		m_state_fns = OOBase::allocate_shared<StateFns,OOBase::ThreadLocalAllocator>();
+		if (!m_state_fns)
+			LOG_ERROR(("Failed to allocate GL state functions object"));
 
 		glfwSetWindowUserPointer(m_glfw_window,this);
 		glfwSetFramebufferSizeCallback(m_glfw_window,&on_size);

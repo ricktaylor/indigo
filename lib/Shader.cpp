@@ -19,48 +19,20 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_SHADER_H_INCLUDED
-#define INDIGO_SHADER_H_INCLUDED
+#include "Shader.h"
+#include "StateFns.h"
 
-#include "OOGL.h"
-
-namespace Indigo
+Indigo::ShaderBase::ShaderBase(GLenum shaderType) : m_id(StateFns::get_current()->glCreateShader(shaderType))
 {
-	class ShaderBase : public OOBase::EnableSharedFromThis<ShaderBase>
-	{
-	public:
-		virtual ~ShaderBase();
-
-		void load(const GLchar* sz, GLint len = -1);
-
-	protected:
-		ShaderBase(GLenum shaderType);
-
-		GLuint m_id;
-	};
-
-	class VertexShader : public ShaderBase
-	{
-	public:
-		VertexShader() : ShaderBase(GL_VERTEX_SHADER)
-		{}
-	};
-
-	class FragmentShader : public ShaderBase
-	{
-	public:
-		FragmentShader() : ShaderBase(GL_FRAGMENT_SHADER)
-		{}
-	};
-
-	class ShaderProgram : public OOBase::EnableSharedFromThis<ShaderProgram>
-	{
-	public:
-		ShaderProgram();
-
-	private:
-		GLuint m_id;
-	};
 }
 
-#endif // INDIGO_SHADER_H_INCLUDED
+Indigo::ShaderBase::~ShaderBase()
+{
+	StateFns::get_current()->glDeleteShader(m_id);
+}
+
+void Indigo::ShaderBase::load(const GLchar* sz, GLint len)
+{
+
+}
+

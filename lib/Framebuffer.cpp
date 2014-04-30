@@ -22,109 +22,14 @@
 #include "Framebuffer.h"
 #include "Window.h"
 
-static void genFrameBuffers(GLsizei n, GLuint *framebuffers)
-{
-	static PFNGLGENFRAMEBUFFERSPROC s_fn = NULL;
-	if (!s_fn)
-	{
-		GLFWwindow* win = glfwGetCurrentContext();
-		if (!win)
-		{
-			LOG_ERROR(("No current context!"));
-			return;
-		}
-
-		if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
-			s_fn = (PFNGLGENFRAMEBUFFERSPROC)glfwGetProcAddress("glGenFramebuffers");
-
-		if (!s_fn && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
-			s_fn = (PFNGLGENFRAMEBUFFERSPROC)glfwGetProcAddress("glGenFramebuffersEXT");
-	}
-
-	if (!s_fn)
-		LOG_ERROR(("No glGenFramebuffers function"));
-	else
-		(*s_fn)(n,framebuffers);
-}
-
-static void deleteFrameBuffers(GLsizei n, GLuint *framebuffers)
-{
-	static PFNGLDELETEFRAMEBUFFERSPROC s_fn = NULL;
-	if (!s_fn)
-	{
-		GLFWwindow* win = glfwGetCurrentContext();
-		if (!win)
-		{
-			LOG_ERROR(("No current context!"));
-			return;
-		}
-
-		if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
-			s_fn = (PFNGLDELETEFRAMEBUFFERSPROC)glfwGetProcAddress("glDeleteFramebuffers");
-
-		if (!s_fn && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
-			s_fn = (PFNGLDELETEFRAMEBUFFERSPROC)glfwGetProcAddress("glDeleteFramebuffersEXT");
-	}
-
-	if (!s_fn)
-		LOG_ERROR(("No glDeleteFramebuffers function"));
-	else
-		(*s_fn)(n,framebuffers);
-}
-
-static void bindFrameBuffer(GLenum target, GLuint framebuffer)
-{
-	static PFNGLBINDFRAMEBUFFERPROC s_fn = NULL;
-	if (!s_fn)
-	{
-		GLFWwindow* win = glfwGetCurrentContext();
-		if (!win)
-		{
-			LOG_ERROR(("No current context!"));
-			return;
-		}
-
-		if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
-			s_fn = (PFNGLBINDFRAMEBUFFERPROC)glfwGetProcAddress("glBindFramebuffer");
-
-		if (!s_fn && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
-			s_fn = (PFNGLBINDFRAMEBUFFERPROC)glfwGetProcAddress("glBindFramebufferEXT");
-	}
-
-	if (!s_fn)
-		LOG_ERROR(("No glBindFramebuffer function"));
-	else
-		(*s_fn)(target,framebuffer);
-}
-
-static GLenum checkFrameBufferStatus(GLenum target)
-{
-	static PFNGLCHECKFRAMEBUFFERSTATUSPROC s_fn = NULL;
-	if (!s_fn)
-	{
-		GLFWwindow* win = glfwGetCurrentContext();
-		if (!win)
-			LOG_ERROR_RETURN(("No current context!"),GL_FRAMEBUFFER_UNSUPPORTED);
-
-		if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
-			s_fn = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)glfwGetProcAddress("glCheckFramebufferStatus");
-
-		if (!s_fn && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
-			s_fn = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)glfwGetProcAddress("glCheckFramebufferStatusEXT");
-	}
-
-	if (!s_fn)
-		LOG_ERROR_RETURN(("No glCheckFramebufferStatus function"),GL_FRAMEBUFFER_UNSUPPORTED);
-
-	return (*s_fn)(target);
-}
-
 Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window) :
 		m_window(window),
 		m_id(GL_INVALID_VALUE),
 		m_default(false)
 {
-	genFrameBuffers(1,&m_id);
+	OOBase::SharedPtr<Window> win = m_window.lock();
+	if (win)
+		win->m_state_fns->glGenFramebuffers(1,&m_id);
 }
 
 Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id) :
@@ -146,8 +51,12 @@ OOBase::SharedPtr<Indigo::Framebuffer> Indigo::Framebuffer::get_default(const OO
 
 Indigo::Framebuffer::~Framebuffer()
 {
-	if (!m_default)
-		deleteFrameBuffers(1,&m_id);
+	if (!m_default && m_id != GL_INVALID_VALUE)
+	{
+		OOBase::SharedPtr<Window> win = m_window.lock();
+		if (win)
+			win->m_state_fns->glDeleteFramebuffers(1,&m_id);
+	}
 }
 
 OOBase::SharedPtr<Indigo::Window> Indigo::Framebuffer::window() const
@@ -157,10 +66,16 @@ OOBase::SharedPtr<Indigo::Window> Indigo::Framebuffer::window() const
 
 GLenum Indigo::Framebuffer::check() const
 {
-	return checkFrameBufferStatus(m_id);
+	OOBase::SharedPtr<Window> win = m_window.lock();
+	if (!win)
+		return GL_FRAMEBUFFER_UNSUPPORTED;
+
+	return win->m_state_fns->glCheckFramebufferStatus(m_id);
 }
 
 void Indigo::Framebuffer::bind()
 {
-	bindFrameBuffer(GL_FRAMEBUFFER,m_id);
+	OOBase::SharedPtr<Window> win = m_window.lock();
+	if (win)
+		win->m_state_fns->glBindFramebuffer(GL_FRAMEBUFFER,m_id);
 }

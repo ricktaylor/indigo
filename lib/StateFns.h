@@ -19,43 +19,38 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_STATE_H_INCLUDED
-#define INDIGO_STATE_H_INCLUDED
+#ifndef INDIGO_STATE_FNS_H_INCLUDED
+#define INDIGO_STATE_FNS_H_INCLUDED
 
 #include "OOGL.h"
 
 namespace Indigo
 {
-	class Window;
-	class Framebuffer;
-
-	class State : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<State>
+	class StateFns : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<StateFns>
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
-		friend class Window;
-
+		
 	public:
-		static OOBase::SharedPtr<State> get_current();
+		static OOBase::SharedPtr<StateFns> get_current();
 
-		OOBase::SharedPtr<Framebuffer> bind(const OOBase::SharedPtr<Framebuffer>& fb);
+		void glGenFramebuffers(GLsizei n, GLuint *framebuffers);
+		void glDeleteFramebuffers(GLsizei n, GLuint *framebuffers);
+		void glBindFramebuffer(GLenum target, GLuint framebuffer);
+		GLenum glCheckFramebufferStatus(GLenum target);
 
-		glm::vec4 clear_colour(const glm::vec4& rgba);
-		GLfloat clear_depth(GLfloat depth);
-		GLint clear_stencil(GLint s);
-		glm::vec2 depth_range(const glm::vec2& depth_range);
-		glm::ivec4 scissor(const glm::ivec4& rect);
+		GLuint glCreateShader(GLenum shaderType);
+		void glDeleteShader(GLuint shader);
 
 	private:
-		OOBase::WeakPtr<Window>        m_window;
-		OOBase::SharedPtr<Framebuffer> m_fb;
-		glm::vec4                      m_clear_colour;
-		GLfloat                        m_clear_depth;
-		GLint                          m_clear_stencil;
-		glm::vec2                      m_depth_range;
-		bool                           m_scissor;
-		glm::ivec4                     m_scissor_rect;
+		StateFns();
 
-		State(const OOBase::SharedPtr<Window>& window);
+		PFNGLGENFRAMEBUFFERSPROC m_fn_glGenFramebuffers;
+		PFNGLDELETEFRAMEBUFFERSPROC m_fn_glDeleteFramebuffers;
+		PFNGLBINDFRAMEBUFFERPROC m_fn_glBindFramebuffer;
+		PFNGLCHECKFRAMEBUFFERSTATUSPROC m_fn_glCheckFramebufferStatus;
+
+		PFNGLCREATESHADERPROC m_fn_glCreateShader;
+		PFNGLDELETESHADERPROC m_fn_glDeleteShader;
 	};
 }
 

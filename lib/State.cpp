@@ -19,8 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "State.h"
-#include "Framebuffer.h"
+#include "Window.h"
 
 Indigo::State::State(const OOBase::SharedPtr<Window>& window) :
 		m_window(window),
@@ -29,6 +28,25 @@ Indigo::State::State(const OOBase::SharedPtr<Window>& window) :
 		m_depth_range(0,1),
 		m_scissor(false)
 {
+}
+
+OOBase::SharedPtr<Indigo::State> Indigo::State::get_current()
+{
+	GLFWwindow* win = glfwGetCurrentContext();
+	if (!win)
+	{
+		LOG_ERROR(("No current context!"));
+		return OOBase::SharedPtr<State>();
+	}
+
+	Window* window = static_cast<Window*>(glfwGetWindowUserPointer(win));
+	if (!window)
+	{
+		LOG_ERROR(("No current window!"));
+		return OOBase::SharedPtr<State>();
+	}
+
+	return window->m_state;
 }
 
 OOBase::SharedPtr<Indigo::Framebuffer> Indigo::State::bind(const OOBase::SharedPtr<Framebuffer>& fb)
