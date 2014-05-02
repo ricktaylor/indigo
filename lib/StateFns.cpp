@@ -25,7 +25,10 @@ Indigo::StateFns::StateFns() :
 		m_fn_glGenFramebuffers(NULL),
 		m_fn_glDeleteFramebuffers(NULL),
 		m_fn_glBindFramebuffer(NULL),
-		m_fn_glCheckFramebufferStatus(NULL)
+		m_fn_glCheckFramebufferStatus(NULL),
+		m_fn_glCreateShader(NULL),
+		m_fn_glDeleteShader(NULL),
+		m_fn_glShaderSource(NULL)
 {
 }
 
@@ -144,14 +147,7 @@ GLenum Indigo::StateFns::glCheckFramebufferStatus(GLenum target)
 GLuint Indigo::StateFns::glCreateShader(GLenum shaderType)
 {
 	if (!m_fn_glCreateShader)
-	{
-		GLFWwindow* win = glfwGetCurrentContext();
-		if (!win)
-			LOG_ERROR_RETURN(("No current context!"),0);
-		
-		if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 2)
-			m_fn_glCreateShader = (PFNGLCREATESHADERPROC)glfwGetProcAddress("glCreateShader");
-	}
+		m_fn_glCreateShader = (PFNGLCREATESHADERPROC)glfwGetProcAddress("glCreateShader");
 
 	if (!m_fn_glCreateShader)
 		LOG_ERROR_RETURN(("No glCreateShader function"),0);
@@ -162,20 +158,21 @@ GLuint Indigo::StateFns::glCreateShader(GLenum shaderType)
 void Indigo::StateFns::glDeleteShader(GLuint shader)
 {
 	if (!m_fn_glDeleteShader)
-	{
-		GLFWwindow* win = glfwGetCurrentContext();
-		if (!win)
-		{
-			LOG_ERROR(("No current context!"));
-			return;
-		}
-		
-		if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 2)
-			m_fn_glDeleteShader = (PFNGLDELETESHADERPROC)glfwGetProcAddress("glDeleteShader");
-	}
+		m_fn_glDeleteShader = (PFNGLDELETESHADERPROC)glfwGetProcAddress("glDeleteShader");
 
 	if (!m_fn_glDeleteShader)
 		LOG_ERROR(("No glDeleteShader function"));
 	else
 		(*m_fn_glDeleteShader)(shader);
+}
+
+void Indigo::StateFns::glShaderSource(GLuint shader, GLsizei count, const GLchar *const *string, const GLint *length)
+{
+	if (!m_fn_glShaderSource)
+		m_fn_glShaderSource = (PFNGLSHADERSOURCEPROC)glfwGetProcAddress("glShaderSource");
+
+	if (!m_fn_glShaderSource)
+		LOG_ERROR(("No glShaderSource function"));
+	else
+		(*m_fn_glShaderSource)(shader,count,string,length);
 }

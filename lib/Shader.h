@@ -31,7 +31,24 @@ namespace Indigo
 	public:
 		virtual ~ShaderBase();
 
-		void load(const GLchar* sz, GLint len = -1);
+		void load(const GLchar* sz, bool add_gstap = false);
+		void load(const GLchar* sz, GLint len, bool add_gstap = false);
+		void load(const GLchar *const *strings, GLsizei count);
+		void load(const GLchar *const *strings, const GLint* lengths, GLsizei count);
+
+		template <GLsizei S>
+		void load(const GLchar *const strings[S], const GLint lengths[S])
+		{
+			load(strings,lengths,S);
+		}
+
+		template <GLsizei S>
+		void load(const GLchar *const strings[S])
+		{
+			load(strings,S);
+		}
+
+		static const GLchar* get_gstap();
 
 	protected:
 		ShaderBase(GLenum shaderType);

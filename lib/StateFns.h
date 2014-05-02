@@ -40,6 +40,7 @@ namespace Indigo
 
 		GLuint glCreateShader(GLenum shaderType);
 		void glDeleteShader(GLuint shader);
+		void glShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length);
 
 	private:
 		StateFns();
@@ -51,6 +52,7 @@ namespace Indigo
 
 		PFNGLCREATESHADERPROC m_fn_glCreateShader;
 		PFNGLDELETESHADERPROC m_fn_glDeleteShader;
+		PFNGLSHADERSOURCEPROC m_fn_glShaderSource;
 	};
 }
 

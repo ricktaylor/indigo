@@ -30,6 +30,8 @@ indigo_SOURCES = \
 	../lib/Window.cpp \
 	../lib/Framebuffer.cpp \
 	../lib/State.cpp \
+	../lib/StateFns.cpp \
+	../lib/Shader.cpp \
 	../lib/Texture.cpp \
 	LogicThread.cpp \
 	Main.cpp \
