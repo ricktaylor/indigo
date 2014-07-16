@@ -63,14 +63,14 @@ void Indigo::Window::on_size(GLFWwindow* window, int width, int height)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
-		pThis->signal_sized.fire(pThis->shared_from_this(),glm::ivec2(width,height));
+		pThis->signal_sized.fire(*pThis,glm::ivec2(width,height));
 }
 
 void Indigo::Window::on_close(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
-		pThis->signal_close.fire(pThis->shared_from_this());
+		pThis->signal_close.fire(*pThis);
 }
 
 void Indigo::Window::on_focus(GLFWwindow* window, int focused)
@@ -116,7 +116,7 @@ bool Indigo::Window::draw()
 	// Make this context current
 	glfwMakeContextCurrent(m_glfw_window);
 
-	signal_draw.fire(shared_from_this(),*m_state);
+	signal_draw.fire(*this,*m_state);
 
 	return true;
 }

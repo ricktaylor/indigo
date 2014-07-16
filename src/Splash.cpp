@@ -1,4 +1,3 @@
-
 ///////////////////////////////////////////////////////////////////////////////////
 //
 // Copyright (C) 2014 Rick Taylor
@@ -25,8 +24,13 @@
 static OOBase::SharedPtr<Indigo::Window> s_ptrSplash;
 static float ratio;
 
-static void on_window_draw(const OOBase::SharedPtr<Indigo::Window>&, Indigo::State& glState)
+static void on_window_draw(const Indigo::Window& win, Indigo::State& glState)
 {
+	glState.bind(win.get_default_frame_buffer());
+
+	// Always clear everything
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
@@ -43,7 +47,7 @@ static void on_window_draw(const OOBase::SharedPtr<Indigo::Window>&, Indigo::Sta
 	glEnd();
 }
 
-static void on_window_close(const OOBase::SharedPtr<Indigo::Window>&)
+static void on_window_close(const Indigo::Window& win)
 {
 	s_ptrSplash.reset();
 }

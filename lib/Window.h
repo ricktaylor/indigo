@@ -61,9 +61,9 @@ namespace Indigo
 
 	// Signals
 	public:
-		OOBase::Signal1<const OOBase::SharedPtr<Window>&,OOBase::ThreadLocalAllocator> signal_close;
-		OOBase::Signal2<const OOBase::SharedPtr<Window>&,State&,OOBase::ThreadLocalAllocator> signal_draw;
-		OOBase::Signal2<const OOBase::SharedPtr<Window>&,const glm::ivec2&,OOBase::ThreadLocalAllocator> signal_sized;
+		OOBase::Signal1<const Window&,OOBase::ThreadLocalAllocator> signal_close;
+		OOBase::Signal2<const Window&,State&,OOBase::ThreadLocalAllocator> signal_draw;
+		OOBase::Signal2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> signal_sized;
 
 	private:
 		GLFWwindow* m_glfw_window;
