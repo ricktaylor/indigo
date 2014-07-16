@@ -12,13 +12,3 @@ echo Bootstrapping OOBase...
 cd oobase
 ./bootstrap.sh
 cd ..
-
-echo Bootstrapping OOXML...
-cd ooxml
-./bootstrap.sh
-cd ..
-
-echo Bootstrapping 3rdparty/freetype2...
-cd 3rdparty/freetype2
-./autogen.sh
-cd ../..
