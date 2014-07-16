@@ -49,8 +49,6 @@ namespace Indigo
 
 		bool is_valid() const;
 
-		State& make_current() const;
-
 		bool is_visible() const;
 		void visible(bool show);
 

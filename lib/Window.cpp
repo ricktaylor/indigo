@@ -21,14 +21,6 @@
 
 #include "Window.h"
 
-Indigo::State& Indigo::Window::make_current() const
-{
-	if (glfwGetCurrentContext() != m_glfw_window)
-		glfwMakeContextCurrent(m_glfw_window);
-
-	return *m_state;
-}
-
 bool Indigo::Window::is_visible() const
 {
 	if (!m_glfw_window)
@@ -105,9 +97,6 @@ bool Indigo::Window::is_valid() const
 
 const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::get_default_frame_buffer() const
 {
-	if (!m_default_fb)
-		const_cast<Window*>(this)->m_default_fb = Framebuffer::get_default(const_cast<Window*>(this)->shared_from_this());
-
 	return m_default_fb;
 }
 
@@ -121,16 +110,11 @@ glm::ivec2 Indigo::Window::size() const
 
 bool Indigo::Window::draw()
 {
-	// Make this context current
 	if (!m_glfw_window || !is_visible() || is_iconified())
 		return false;
 
-	make_current();
-
-	m_state->bind(get_default_frame_buffer());
-
-	// Always clear everything
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	// Make this context current
+	glfwMakeContextCurrent(m_glfw_window);
 
 	signal_draw.fire(shared_from_this(),*m_state);
 
