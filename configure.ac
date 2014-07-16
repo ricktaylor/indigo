@@ -14,7 +14,7 @@ AC_CONFIG_FILES([
 	src/Makefile
 ])
 
-AM_INIT_AUTOMAKE([foreign 1.10 no-define])
+AM_INIT_AUTOMAKE([foreign 1.10 no-define subdir-objects])
 
 # Use the latest short output macro if available
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
