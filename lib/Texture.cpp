@@ -21,12 +21,27 @@
 
 #include "Texture.h"
 
-Indigo::TextureBase::TextureBase() : m_tex(0)
+Indigo::Texture::Texture(GLenum type) : m_tex(0), m_type(type)
 {
 	glGenTextures(1,&m_tex);
 }
 
-void Indigo::TextureBase::bind(GLenum target)
+Indigo::Texture::~Texture()
 {
-	glBindTexture(target,m_tex);
+	glDeleteTextures(1,&m_tex);
+}
+
+GLenum Indigo::Texture::type() const
+{
+	return m_type;
+}
+
+bool Indigo::Texture::is_valid() const
+{
+	return (glIsTexture(m_tex) == GL_TRUE);
+}
+
+void Indigo::Texture::bind()
+{
+	glBindTexture(m_type,m_tex);
 }

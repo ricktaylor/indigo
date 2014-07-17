@@ -26,14 +26,21 @@
 
 namespace Indigo
 {
-	class TextureBase : public OOBase::EnableSharedFromThis<TextureBase>
+	class Texture : public OOBase::NonCopyable
 	{
-	protected:
-		TextureBase();
+	public:
+		Texture(GLenum type);
+		~Texture();
 
-		void bind(GLenum target);
+		GLenum type() const;
 
+		void bind();
+
+		bool is_valid() const;
+
+	private:
 		GLuint m_tex;
+		GLenum m_type;
 	};
 }
 
