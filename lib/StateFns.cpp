@@ -28,7 +28,9 @@ Indigo::StateFns::StateFns() :
 		m_fn_glCheckFramebufferStatus(NULL),
 		m_fn_glCreateShader(NULL),
 		m_fn_glDeleteShader(NULL),
-		m_fn_glShaderSource(NULL)
+		m_fn_glShaderSource(NULL),
+		m_thunk_glBindMultiTexture(&StateFns::check_glBindMultiTexture),
+		m_fn_glBindMultiTexture(NULL)
 {
 }
 
@@ -109,7 +111,7 @@ void Indigo::StateFns::glBindFramebuffer(GLenum target, GLuint framebuffer)
 			LOG_ERROR(("No current context!"));
 			return;
 		}
-			
+
 		if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
 			m_fn_glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)glfwGetProcAddress("glBindFramebuffer");
 
@@ -151,7 +153,7 @@ GLuint Indigo::StateFns::glCreateShader(GLenum shaderType)
 
 	if (!m_fn_glCreateShader)
 		LOG_ERROR_RETURN(("No glCreateShader function"),0);
-	
+
 	return (*m_fn_glCreateShader)(shaderType);
 }
 
@@ -175,4 +177,40 @@ void Indigo::StateFns::glShaderSource(GLuint shader, GLsizei count, const GLchar
 		LOG_ERROR(("No glShaderSource function"));
 	else
 		(*m_fn_glShaderSource)(shader,count,string,length);
+}
+
+void Indigo::StateFns::check_glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture)
+{
+	GLFWwindow* win = glfwGetCurrentContext();
+	if (!win)
+	{
+		LOG_ERROR(("No current context!"));
+		return;
+	}
+
+	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+		m_fn_glBindMultiTexture = (PFNGLBINDMULTITEXTUREEXTPROC)glfwGetProcAddress("glBindMultiTextureEXT");
+
+	if (!m_fn_glBindMultiTexture)
+		m_thunk_glBindMultiTexture = &StateFns::emulate_glBindMultiTexture;
+	else
+		m_thunk_glBindMultiTexture = &StateFns::call_glBindMultiTexture;
+
+	(this->*m_thunk_glBindMultiTexture)(state,unit,target,texture);
+}
+
+void Indigo::StateFns::call_glBindMultiTexture(State*, GLenum unit, GLenum target, GLuint texture)
+{
+	(*m_fn_glBindMultiTexture)(unit,target,texture);
+}
+
+void Indigo::StateFns::emulate_glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture)
+{
+	state->activate_texture_unit(unit);
+	glBindTexture(target,texture);
+}
+
+void Indigo::StateFns::glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture)
+{
+	(this->*m_thunk_glBindMultiTexture)(state,unit,target,texture);
 }

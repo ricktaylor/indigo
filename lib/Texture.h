@@ -26,6 +26,8 @@
 
 namespace Indigo
 {
+	class State;
+
 	class Texture : public OOBase::NonCopyable
 	{
 	public:
@@ -34,7 +36,7 @@ namespace Indigo
 
 		GLenum type() const;
 
-		void bind();
+		void bind(State* state, GLenum unit) const;
 
 		bool is_valid() const;
 

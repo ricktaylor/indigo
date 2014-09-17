@@ -26,10 +26,12 @@
 
 namespace Indigo
 {
+	class State;
+
 	class StateFns : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<StateFns>
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
-		
+
 	public:
 		static OOBase::SharedPtr<StateFns> get_current();
 
@@ -42,6 +44,8 @@ namespace Indigo
 		void glDeleteShader(GLuint shader);
 		void glShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length);
 
+		void glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture);
+
 	private:
 		StateFns();
 
@@ -53,6 +57,12 @@ namespace Indigo
 		PFNGLCREATESHADERPROC m_fn_glCreateShader;
 		PFNGLDELETESHADERPROC m_fn_glDeleteShader;
 		PFNGLSHADERSOURCEPROC m_fn_glShaderSource;
+
+		void (StateFns::*m_thunk_glBindMultiTexture)(State*,GLenum,GLenum,GLuint);
+		PFNGLBINDMULTITEXTUREEXTPROC m_fn_glBindMultiTexture;
+		void check_glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture);
+		void emulate_glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture);
+		void call_glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture);
 	};
 }
 

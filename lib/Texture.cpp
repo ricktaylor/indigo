@@ -20,6 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Texture.h"
+#include "State.h"
 
 Indigo::Texture::Texture(GLenum type) : m_tex(0), m_type(type)
 {
@@ -41,7 +42,7 @@ bool Indigo::Texture::is_valid() const
 	return (glIsTexture(m_tex) == GL_TRUE);
 }
 
-void Indigo::Texture::bind()
+void Indigo::Texture::bind(State* state, GLenum unit) const
 {
-	glBindTexture(m_type,m_tex);
+	state->bind_multi_texture(unit,m_type,m_tex);
 }

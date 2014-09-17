@@ -20,9 +20,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Window.h"
+#include "Texture.h"
 
 Indigo::State::State(const OOBase::SharedPtr<Window>& window) :
-		m_window(window)
+		m_window(window),
+		m_active_texture_unit(-1)
 {
 }
 
@@ -56,4 +58,31 @@ OOBase::SharedPtr<Indigo::Framebuffer> Indigo::State::bind(const OOBase::SharedP
 	}
 
 	return prev;
+}
+
+GLenum Indigo::State::activate_texture_unit(GLenum unit)
+{
+	GLenum prev = m_active_texture_unit;
+	if (unit != m_active_texture_unit)
+	{
+		glActiveTexture(unit);
+		m_active_texture_unit = unit;
+	}
+
+	if (prev == GLenum(-1))
+		prev = unit;
+
+	return prev;
+}
+
+void Indigo::State::bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture)
+{
+	texture->bind(this,unit);
+}
+
+void Indigo::State::bind_multi_texture(GLenum unit, GLenum target, GLuint texture)
+{
+	OOBase::SharedPtr<Window> win = m_window.lock();
+	if (win)
+		win->m_state_fns->glBindMultiTexture(this,unit,target,texture);
 }
