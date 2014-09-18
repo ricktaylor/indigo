@@ -29,6 +29,16 @@ Indigo::StateFns::StateFns() :
 		m_fn_glCreateShader(NULL),
 		m_fn_glDeleteShader(NULL),
 		m_fn_glShaderSource(NULL),
+		m_fn_glCompileShader(NULL),
+		m_fn_glGetShaderiv(NULL),
+		m_fn_glGetShaderInfoLog(NULL),
+		m_fn_glGetProgramiv(NULL),
+		m_fn_glGetProgramInfoLog(NULL),
+		m_fn_glAttachShader(NULL),
+		m_fn_glDetachShader(NULL),
+		m_fn_glLinkProgram(NULL),
+		m_thunk_glUseProgram(&StateFns::check_glUseProgram),
+		m_fn_glUseProgram(NULL),
 		m_thunk_glBindMultiTexture(&StateFns::check_glBindMultiTexture),
 		m_fn_glBindMultiTexture(NULL)
 {
@@ -177,6 +187,115 @@ void Indigo::StateFns::glShaderSource(GLuint shader, GLsizei count, const GLchar
 		LOG_ERROR(("No glShaderSource function"));
 	else
 		(*m_fn_glShaderSource)(shader,count,string,length);
+}
+
+void Indigo::StateFns::glCompileShader(GLuint shader)
+{
+	if (!m_fn_glCompileShader)
+		m_fn_glCompileShader = (PFNGLCOMPILESHADERPROC)glfwGetProcAddress("glCompileShader");
+
+	if (!m_fn_glCompileShader)
+		LOG_ERROR(("No glCompileShader function"));
+	else
+		(*m_fn_glCompileShader)(shader);
+}
+
+void Indigo::StateFns::glGetShaderiv(GLuint shader, GLenum pname, GLint* params)
+{
+	if (!m_fn_glGetShaderiv)
+		m_fn_glGetShaderiv = (PFNGLGETSHADERIVPROC)glfwGetProcAddress("glGetShaderiv");
+
+	if (!m_fn_glGetShaderiv)
+		LOG_ERROR(("No glGetShaderiv function"));
+	else
+		(*m_fn_glGetShaderiv)(shader,pname,params);
+}
+
+void Indigo::StateFns::glGetShaderInfoLog(GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog)
+{
+	if (!m_fn_glGetShaderInfoLog)
+		m_fn_glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)glfwGetProcAddress("glGetShaderInfoLog");
+
+	if (!m_fn_glGetShaderInfoLog)
+		LOG_ERROR(("No glGetShaderInfoLog function"));
+	else
+		(*m_fn_glGetShaderInfoLog)(shader,maxLength,length,infoLog);
+}
+
+void Indigo::StateFns::glGetProgramiv(GLuint shader, GLenum pname, GLint* params)
+{
+	if (!m_fn_glGetProgramiv)
+		m_fn_glGetProgramiv = (PFNGLGETPROGRAMIVPROC)glfwGetProcAddress("glGetProgramiv");
+
+	if (!m_fn_glGetProgramiv)
+		LOG_ERROR(("No glGetProgramiv function"));
+	else
+		(*m_fn_glGetProgramiv)(shader,pname,params);
+}
+
+void Indigo::StateFns::glGetProgramInfoLog(GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog)
+{
+	if (!m_fn_glGetProgramInfoLog)
+		m_fn_glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)glfwGetProcAddress("glGetProgramInfoLog");
+
+	if (!m_fn_glGetProgramInfoLog)
+		LOG_ERROR(("No glGetProgramInfoLog function"));
+	else
+		(*m_fn_glGetProgramInfoLog)(program,maxLength,length,infoLog);
+}
+
+void Indigo::StateFns::check_glUseProgram(GLuint program)
+{
+	if (!m_fn_glUseProgram)
+		m_fn_glUseProgram = (PFNGLUSEPROGRAMPROC)glfwGetProcAddress("glUseProgram");
+
+	if (!m_fn_glUseProgram)
+		LOG_ERROR(("No glUseProgram function"));
+	else
+		(*m_fn_glUseProgram)(program);
+}
+
+void Indigo::StateFns::call_glUseProgram(GLuint program)
+{
+	(*m_fn_glUseProgram)(program);
+}
+
+void Indigo::StateFns::glUseProgram(GLuint program)
+{
+	(this->*m_thunk_glUseProgram)(program);
+}
+
+void Indigo::StateFns::glAttachShader(GLuint program, GLuint shader)
+{
+	if (!m_fn_glAttachShader)
+		m_fn_glAttachShader = (PFNGLATTACHSHADERPROC)glfwGetProcAddress("glAttachShader");
+
+	if (!m_fn_glAttachShader)
+		LOG_ERROR(("No glAttachShader function"));
+	else
+		(*m_fn_glAttachShader)(program,shader);
+}
+
+void Indigo::StateFns::glDetachShader(GLuint program, GLuint shader)
+{
+	if (!m_fn_glDetachShader)
+		m_fn_glDetachShader = (PFNGLDETACHSHADERPROC)glfwGetProcAddress("glDetachShader");
+
+	if (!m_fn_glDetachShader)
+		LOG_ERROR(("No glDetachShader function"));
+	else
+		(*m_fn_glDetachShader)(program,shader);
+}
+
+void Indigo::StateFns::glLinkProgram(GLuint program)
+{
+	if (!m_fn_glLinkProgram)
+		m_fn_glLinkProgram = (PFNGLLINKPROGRAMPROC)glfwGetProcAddress("glLinkProgram");
+
+	if (!m_fn_glLinkProgram)
+		LOG_ERROR(("No glLinkProgram function"));
+	else
+		(*m_fn_glLinkProgram)(program);
 }
 
 void Indigo::StateFns::check_glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture)

@@ -34,14 +34,13 @@ namespace Indigo
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		friend class Window;
+		friend class State;
 
 	public:
 		Framebuffer(const OOBase::SharedPtr<Window>& window);
 		~Framebuffer();
 
 		OOBase::SharedPtr<Window> window() const;
-
-		void bind();
 
 		GLenum check() const;
 
@@ -52,6 +51,8 @@ namespace Indigo
 
 		Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id);
 		static OOBase::SharedPtr<Framebuffer> get_default(const OOBase::SharedPtr<Window>& window);
+
+		void bind();
 	};
 }
 

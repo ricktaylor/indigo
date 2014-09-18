@@ -21,6 +21,7 @@
 
 #include "Window.h"
 #include "Texture.h"
+#include "Shader.h"
 
 Indigo::State::State(const OOBase::SharedPtr<Window>& window) :
 		m_window(window),
@@ -85,4 +86,17 @@ void Indigo::State::bind_multi_texture(GLenum unit, GLenum target, GLuint textur
 	OOBase::SharedPtr<Window> win = m_window.lock();
 	if (win)
 		win->m_state_fns->glBindMultiTexture(this,unit,target,texture);
+}
+
+OOBase::SharedPtr<Indigo::Program> Indigo::State::use(const OOBase::SharedPtr<Program>& program)
+{
+	OOBase::SharedPtr<Program> prev = m_program;
+
+	if (m_program != program)
+	{
+		program->use();
+		m_program = program;
+	}
+
+	return prev;
 }

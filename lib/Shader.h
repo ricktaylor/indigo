@@ -26,57 +26,84 @@
 
 namespace Indigo
 {
-	class ShaderBase : public OOBase::EnableSharedFromThis<ShaderBase>
+	class Shader : public OOBase::EnableSharedFromThis<Shader>
 	{
-	public:
-		virtual ~ShaderBase();
+		friend class Program;
 
-		void load(const GLchar* sz, bool add_gstap = false);
-		void load(const GLchar* sz, GLint len, bool add_gstap = false);
-		void load(const GLchar *const *strings, GLsizei count);
-		void load(const GLchar *const *strings, const GLint* lengths, GLsizei count);
+	public:
+		Shader(GLenum shaderType);
+		virtual ~Shader();
+
+		void compile(const GLchar* sz, GLint len = 0);
+		void compile(const GLchar *const *strings, GLsizei count);
+		void compile(const GLchar *const *strings, const GLint* lengths, GLsizei count);
 
 		template <GLsizei S>
-		void load(const GLchar *const strings[S], const GLint lengths[S])
+		void compile(const GLchar *const strings[S], const GLint lengths[S])
 		{
-			load(strings,lengths,S);
+			compile(strings,lengths,S);
 		}
 
 		template <GLsizei S>
-		void load(const GLchar *const strings[S])
+		void compile(const GLchar *const strings[S])
 		{
-			load(strings,S);
+			compile(strings,S);
 		}
 
 		static const GLchar* get_gstap();
 
-	protected:
-		ShaderBase(GLenum shaderType);
-
-		GLuint m_id;
-	};
-
-	class VertexShader : public ShaderBase
-	{
-	public:
-		VertexShader() : ShaderBase(GL_VERTEX_SHADER)
-		{}
-	};
-
-	class FragmentShader : public ShaderBase
-	{
-	public:
-		FragmentShader() : ShaderBase(GL_FRAGMENT_SHADER)
-		{}
-	};
-
-	class ShaderProgram : public OOBase::EnableSharedFromThis<ShaderProgram>
-	{
-	public:
-		ShaderProgram();
+		bool compile_status() const;
+		OOBase::String info_log() const;
 
 	private:
 		GLuint m_id;
+	};
+
+	class Program : public OOBase::EnableSharedFromThis<Program>
+	{
+		friend class State;
+
+	public:
+		Program();
+
+		void link(const OOBase::SharedPtr<Shader>* shaders, size_t count);
+		bool link_status() const;
+		OOBase::String info_log() const;
+
+		bool in_use() const;
+
+		void set_fragdata_location(const char* name, GLuint color);
+		void set_fragdata_location(const char* name, GLuint color, GLuint dual_index);
+		void set_attribute_location(const char* name, GLuint index);
+
+		GLint get_uniform_location(const char* name) const;
+
+		void set_uniform(GLint location, GLfloat v);
+		void set_uniform(GLint location, GLint v);
+		void set_uniform(GLint location, GLuint v);
+		void set_uniform(GLint location, const glm::vec2& v);
+		void set_uniform(GLint location, const glm::vec3& v);
+		void set_uniform(GLint location, const glm::vec4& v);
+		void set_uniform(GLint location, const glm::ivec2& v);
+		void set_uniform(GLint location, const glm::ivec3& v);
+		void set_uniform(GLint location, const glm::ivec4& v);
+		void set_uniform(GLint location, const glm::uvec2& v);
+		void set_uniform(GLint location, const glm::uvec3& v);
+		void set_uniform(GLint location, const glm::uvec4& v);
+		void set_uniform(GLint location, const glm::mat2& v, bool transpose = false);
+		void set_uniform(GLint location, const glm::mat2x3& v, bool transpose = false);
+		void set_uniform(GLint location, const glm::mat2x4& v, bool transpose = false);
+		void set_uniform(GLint location, const glm::mat3& v, bool transpose = false);
+		void set_uniform(GLint location, const glm::mat3x2& v, bool transpose = false);
+		void set_uniform(GLint location, const glm::mat3x4& v, bool transpose = false);
+		void set_uniform(GLint location, const glm::mat4& v, bool transpose = false);
+		void set_uniform(GLint location, const glm::mat4x2& v, bool transpose = false);
+		void set_uniform(GLint location, const glm::mat4x3& v, bool transpose = false);
+
+	private:
+		GLuint m_id;
+
+		void use();
 	};
 }
 

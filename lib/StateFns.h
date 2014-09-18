@@ -42,7 +42,17 @@ namespace Indigo
 
 		GLuint glCreateShader(GLenum shaderType);
 		void glDeleteShader(GLuint shader);
-		void glShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length);
+		void glShaderSource(GLuint shader, GLsizei count, const GLchar* const* string, const GLint* length);
+		void glCompileShader(GLuint shader);
+		void glGetShaderiv(GLuint shader, GLenum pname, GLint* params);
+		void glGetShaderInfoLog(GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog);
+
+		void glGetProgramiv(GLuint program, GLenum pname, GLint* params);
+		void glGetProgramInfoLog(GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog);
+		void glAttachShader(GLuint program, GLuint shader);
+		void glDetachShader(GLuint program, GLuint shader);
+		void glLinkProgram(GLuint program);
+		void glUseProgram(GLuint program);
 
 		void glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture);
 
@@ -57,6 +67,19 @@ namespace Indigo
 		PFNGLCREATESHADERPROC m_fn_glCreateShader;
 		PFNGLDELETESHADERPROC m_fn_glDeleteShader;
 		PFNGLSHADERSOURCEPROC m_fn_glShaderSource;
+		PFNGLCOMPILESHADERPROC m_fn_glCompileShader;
+		PFNGLGETSHADERIVPROC m_fn_glGetShaderiv;
+		PFNGLGETSHADERINFOLOGPROC m_fn_glGetShaderInfoLog;
+		PFNGLGETPROGRAMIVPROC m_fn_glGetProgramiv;
+		PFNGLGETPROGRAMINFOLOGPROC m_fn_glGetProgramInfoLog;
+		PFNGLATTACHSHADERPROC m_fn_glAttachShader;
+		PFNGLDETACHSHADERPROC m_fn_glDetachShader;
+		PFNGLLINKPROGRAMPROC m_fn_glLinkProgram;
+
+		void (StateFns::*m_thunk_glUseProgram)(GLuint program);
+		PFNGLUSEPROGRAMPROC m_fn_glUseProgram;
+		void check_glUseProgram(GLuint program);
+		void call_glUseProgram(GLuint program);
 
 		void (StateFns::*m_thunk_glBindMultiTexture)(State*,GLenum,GLenum,GLuint);
 		PFNGLBINDMULTITEXTUREEXTPROC m_fn_glBindMultiTexture;

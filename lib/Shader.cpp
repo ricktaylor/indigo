@@ -61,50 +61,130 @@ static const GLchar* s_gstap =
 		"\n"
 		"#endif	// #ifndef GSTAP_H\n";
 
-Indigo::ShaderBase::ShaderBase(GLenum shaderType) : m_id(StateFns::get_current()->glCreateShader(shaderType))
+Indigo::Shader::Shader(GLenum shaderType) : m_id(StateFns::get_current()->glCreateShader(shaderType))
 {
 }
 
-Indigo::ShaderBase::~ShaderBase()
+Indigo::Shader::~Shader()
 {
 	StateFns::get_current()->glDeleteShader(m_id);
 }
 
-const GLchar* Indigo::ShaderBase::get_gstap()
+const GLchar* Indigo::Shader::get_gstap()
 {
 	return s_gstap;
 }
 
-void Indigo::ShaderBase::load(const GLchar* sz, bool add_gstap)
+void Indigo::Shader::compile(const GLchar* sz, GLint len)
 {
-	if (add_gstap)
-	{
-		const GLchar* strings[] = { s_gstap, sz };
-		const GLint lengths[] = { -1, -1 };
-		load(strings,lengths,2);
-	}
+	if (len)
+		compile(&sz,&len,1);
 	else
-		load(&sz,NULL,1);
+		compile(&sz,NULL,1);
 }
 
-void Indigo::ShaderBase::load(const GLchar* sz, GLint len, bool add_gstap)
+void Indigo::Shader::compile(const GLchar *const *strings, GLsizei count)
 {
-	if (add_gstap)
+	compile(strings,NULL,count);
+}
+
+void Indigo::Shader::compile(const GLchar *const *strings, const GLint* lengths, GLsizei count)
+{
+	OOBase::SharedPtr<Indigo::StateFns> fns = StateFns::get_current();
+
+	fns->glShaderSource(m_id,count,strings,lengths);
+	fns->glCompileShader(m_id);
+}
+
+bool Indigo::Shader::compile_status() const
+{
+	GLint status = GL_FALSE;
+	StateFns::get_current()->glGetShaderiv(m_id,GL_COMPILE_STATUS,&status);
+	return (status == GL_TRUE);
+}
+
+OOBase::String Indigo::Shader::info_log() const
+{
+	OOBase::SharedPtr<Indigo::StateFns> fns = StateFns::get_current();
+
+	OOBase::String ret;
+	GLint len = 0;
+	fns->glGetShaderiv(m_id,GL_INFO_LOG_LENGTH,&len);
+	if (len)
 	{
-		const GLchar* strings[] = { s_gstap, sz };
-		const GLint lengths[] = { -1, len };
-		load(strings,lengths,2);
+		OOBase::StackAllocator<256> allocator;
+		char* buf = static_cast<char*>(allocator.allocate(len,16));
+		if (!buf)
+			LOG_ERROR(("Failed to allocate buffer"));
+		else
+		{
+			fns->glGetShaderInfoLog(m_id,len,NULL,buf);
+			int err = ret.assign(buf,len);
+			if (err)
+				LOG_ERROR(("Failed to assign string: %s",OOBase::system_error_text(err)));
+
+			allocator.free(buf);
+		}
 	}
-	else
-		load(&sz,&len,1);
+
+	return ret;
 }
 
-void Indigo::ShaderBase::load(const GLchar *const *strings, GLsizei count)
+bool Indigo::Program::link_status() const
 {
-	load(strings,NULL,count);
+	GLint status;
+	StateFns::get_current()->glGetProgramiv(m_id,GL_LINK_STATUS,&status);
+	return (status == GL_TRUE);
 }
 
-void Indigo::ShaderBase::load(const GLchar *const *strings, const GLint* lengths, GLsizei count)
+OOBase::String Indigo::Program::info_log() const
 {
-	StateFns::get_current()->glShaderSource(m_id,count,strings,lengths);
+	OOBase::SharedPtr<Indigo::StateFns> fns = StateFns::get_current();
+
+	OOBase::String ret;
+	GLint len = 0;
+	fns->glGetProgramiv(m_id,GL_INFO_LOG_LENGTH,&len);
+	if (len)
+	{
+		OOBase::StackAllocator<256> allocator;
+		char* buf = static_cast<char*>(allocator.allocate(len,1));
+		if (!buf)
+			LOG_ERROR(("Failed to allocate buffer"));
+		else
+		{
+			fns->glGetProgramInfoLog(m_id,len,NULL,buf);
+			int err = ret.assign(buf,len);
+			if (err)
+				LOG_ERROR(("Failed to assign string: %s",OOBase::system_error_text(err)));
+
+			allocator.free(buf);
+		}
+	}
+
+	return ret;
+}
+
+void Indigo::Program::link(const OOBase::SharedPtr<Shader>* shaders, size_t count)
+{
+	OOBase::SharedPtr<Indigo::StateFns> fns = StateFns::get_current();
+
+	for (size_t i=0;i<count;++i)
+		fns->glAttachShader(m_id,shaders[i]->m_id);
+
+	fns->glLinkProgram(m_id);
+
+	for (size_t i=0;i<count;++i)
+		fns->glDetachShader(m_id,shaders[i]->m_id);
+}
+
+bool Indigo::Program::in_use() const
+{
+	GLint id = 0;
+	glGetIntegerv(GL_CURRENT_PROGRAM,&id);
+	return (static_cast<GLuint>(id) == m_id);
+}
+
+void Indigo::Program::use()
+{
+	StateFns::get_current()->glUseProgram(m_id);
 }
