@@ -23,7 +23,8 @@
 #include "Texture.h"
 #include "Shader.h"
 
-Indigo::State::State() :
+Indigo::State::State(StateFns& fns) :
+		m_state_fns(fns),
 		m_active_texture_unit(-1)
 {
 }
@@ -127,7 +128,7 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase
 
 void Indigo::State::bind_multi_texture(GLenum unit, GLenum target, GLuint texture)
 {
-	StateFns::get_current()->glBindMultiTexture(this,unit,target,texture);
+	m_state_fns.glBindMultiTexture(this,unit,target,texture);
 }
 
 OOBase::SharedPtr<Indigo::Program> Indigo::State::use(const OOBase::SharedPtr<Program>& program)
@@ -139,7 +140,7 @@ OOBase::SharedPtr<Indigo::Program> Indigo::State::use(const OOBase::SharedPtr<Pr
 		if (program)
 			program->use();
 		else
-			StateFns::get_current()->glUseProgram(0);
+			m_state_fns.glUseProgram(0);
 
 		m_program = program;
 	}

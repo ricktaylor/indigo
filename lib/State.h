@@ -26,6 +26,7 @@
 
 namespace Indigo
 {
+	class StateFns;
 	class Framebuffer;
 	class Texture;
 	class Program;
@@ -46,6 +47,7 @@ namespace Indigo
 		OOBase::SharedPtr<Program> use(const OOBase::SharedPtr<Program>& program);
 
 	private:
+		StateFns&                      m_state_fns;
 		OOBase::SharedPtr<Framebuffer> m_fb;
 		GLenum                         m_active_texture_unit;
 		OOBase::SharedPtr<Program>     m_program;
@@ -53,7 +55,7 @@ namespace Indigo
 		typedef OOBase::Table<GLenum,OOBase::SharedPtr<Texture>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator> tex_unit_t;
 		OOBase::Vector<tex_unit_t,OOBase::ThreadLocalAllocator> m_vecTexUnits;
 
-		State();
+		State(StateFns& fns);
 
 		void bind_multi_texture(GLenum unit, GLenum target, GLuint texture);
 		GLenum activate_texture_unit(GLenum unit);

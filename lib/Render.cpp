@@ -334,24 +334,28 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 
 		glfwMakeContextCurrent(m_glfw_window);
 
-		m_state = OOBase::allocate_shared<State,OOBase::ThreadLocalAllocator>();
-		if (!m_state)
-			LOG_ERROR(("Failed to allocate GL state object"));
-
 		m_state_fns = OOBase::allocate_shared<StateFns,OOBase::ThreadLocalAllocator>();
 		if (!m_state_fns)
 			LOG_ERROR(("Failed to allocate GL state functions object"));
+		else
+		{
+			m_state = OOBase::allocate_shared<State,OOBase::ThreadLocalAllocator>(*m_state_fns.get());
+			if (!m_state)
+				LOG_ERROR(("Failed to allocate GL state object"));
+			else
+			{
+				m_default_fb = Framebuffer::get_default();
 
-		m_default_fb = Framebuffer::get_default();
+				glfwSetWindowUserPointer(m_glfw_window,this);
+				glfwSetFramebufferSizeCallback(m_glfw_window,&on_size);
+				glfwSetWindowCloseCallback(m_glfw_window,&on_close);
+				glfwSetWindowFocusCallback(m_glfw_window,&on_focus);
+				glfwSetWindowIconifyCallback(m_glfw_window,&on_iconify);
+				glfwSetWindowRefreshCallback(m_glfw_window,&on_refresh);
 
-		glfwSetWindowUserPointer(m_glfw_window,this);
-		glfwSetFramebufferSizeCallback(m_glfw_window,&on_size);
-		glfwSetWindowCloseCallback(m_glfw_window,&on_close);
-		glfwSetWindowFocusCallback(m_glfw_window,&on_focus);
-		glfwSetWindowIconifyCallback(m_glfw_window,&on_iconify);
-		glfwSetWindowRefreshCallback(m_glfw_window,&on_refresh);
-
-		s_vecWindows->push_back(this);
+				s_vecWindows->push_back(this);
+			}
+		}
 	}
 }
 
