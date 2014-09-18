@@ -22,60 +22,41 @@
 #include "Framebuffer.h"
 #include "Window.h"
 
-Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window) :
-		m_window(window),
+Indigo::Framebuffer::Framebuffer() :
 		m_id(GL_INVALID_VALUE),
 		m_default(false)
 {
-	OOBase::SharedPtr<Window> win = m_window.lock();
-	if (win)
-		win->m_state_fns->glGenFramebuffers(1,&m_id);
+	StateFns::get_current()->glGenFramebuffers(1,&m_id);
 }
 
-Indigo::Framebuffer::Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id) :
-		m_window(window),
+Indigo::Framebuffer::Framebuffer(GLuint id) :
 		m_id(id),
 		m_default(true)
 {
 }
 
-OOBase::SharedPtr<Indigo::Framebuffer> Indigo::Framebuffer::get_default(const OOBase::SharedPtr<Window>& window)
+OOBase::SharedPtr<Indigo::Framebuffer> Indigo::Framebuffer::get_default()
 {
 	OOBase::SharedPtr<Framebuffer> ret;
 	GLint fb_id = GL_INVALID_VALUE;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING,&fb_id);
 	if (fb_id != GL_INVALID_VALUE)
-		ret = OOBase::allocate_shared<Framebuffer,OOBase::ThreadLocalAllocator>(window,fb_id);
+		ret = OOBase::allocate_shared<Framebuffer,OOBase::ThreadLocalAllocator>(fb_id);
 	return ret;
 }
 
 Indigo::Framebuffer::~Framebuffer()
 {
 	if (!m_default && m_id != GL_INVALID_VALUE)
-	{
-		OOBase::SharedPtr<Window> win = m_window.lock();
-		if (win)
-			win->m_state_fns->glDeleteFramebuffers(1,&m_id);
-	}
-}
-
-OOBase::SharedPtr<Indigo::Window> Indigo::Framebuffer::window() const
-{
-	return m_window.lock();
+		StateFns::get_current()->glDeleteFramebuffers(1,&m_id);
 }
 
 GLenum Indigo::Framebuffer::check() const
 {
-	OOBase::SharedPtr<Window> win = m_window.lock();
-	if (!win)
-		return GL_FRAMEBUFFER_UNSUPPORTED;
-
-	return win->m_state_fns->glCheckFramebufferStatus(m_id);
+	return StateFns::get_current()->glCheckFramebufferStatus(m_id);
 }
 
 void Indigo::Framebuffer::bind()
 {
-	OOBase::SharedPtr<Window> win = m_window.lock();
-	if (win)
-		win->m_state_fns->glBindFramebuffer(GL_FRAMEBUFFER,m_id);
+	StateFns::get_current()->glBindFramebuffer(GL_FRAMEBUFFER,m_id);
 }

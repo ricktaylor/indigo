@@ -26,7 +26,6 @@
 
 namespace Indigo
 {
-	class Window;
 	class Framebuffer;
 	class Texture;
 	class Program;
@@ -42,18 +41,19 @@ namespace Indigo
 		static OOBase::SharedPtr<State> get_current();
 
 		OOBase::SharedPtr<Framebuffer> bind(const OOBase::SharedPtr<Framebuffer>& fb);
-
-		void bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture);
+		OOBase::SharedPtr<Indigo::Texture> bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture);
 
 		OOBase::SharedPtr<Program> use(const OOBase::SharedPtr<Program>& program);
 
 	private:
-		OOBase::WeakPtr<Window>        m_window;
 		OOBase::SharedPtr<Framebuffer> m_fb;
 		GLenum                         m_active_texture_unit;
 		OOBase::SharedPtr<Program>     m_program;
 
-		State(const OOBase::SharedPtr<Window>& window);
+		typedef OOBase::Table<GLenum,OOBase::SharedPtr<Texture>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator> tex_unit_t;
+		OOBase::Vector<tex_unit_t,OOBase::ThreadLocalAllocator> m_vecTexUnits;
+
+		State();
 
 		void bind_multi_texture(GLenum unit, GLenum target, GLuint texture);
 		GLenum activate_texture_unit(GLenum unit);

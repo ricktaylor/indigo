@@ -148,10 +148,10 @@ GLenum Indigo::StateFns::glCheckFramebufferStatus(GLenum target)
 
 		if (!m_fn_glCheckFramebufferStatus && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
 			m_fn_glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)glfwGetProcAddress("glCheckFramebufferStatusEXT");
-	}
 
-	if (!m_fn_glCheckFramebufferStatus)
-		LOG_ERROR_RETURN(("No glCheckFramebufferStatus function"),GL_FRAMEBUFFER_UNSUPPORTED);
+		if (!m_fn_glCheckFramebufferStatus)
+			LOG_ERROR_RETURN(("No glCheckFramebufferStatus function"),GL_FRAMEBUFFER_UNSUPPORTED);
+	}
 
 	return (*m_fn_glCheckFramebufferStatus)(target);
 }
@@ -159,10 +159,11 @@ GLenum Indigo::StateFns::glCheckFramebufferStatus(GLenum target)
 GLuint Indigo::StateFns::glCreateShader(GLenum shaderType)
 {
 	if (!m_fn_glCreateShader)
+	{
 		m_fn_glCreateShader = (PFNGLCREATESHADERPROC)glfwGetProcAddress("glCreateShader");
-
-	if (!m_fn_glCreateShader)
-		LOG_ERROR_RETURN(("No glCreateShader function"),0);
+		if (!m_fn_glCreateShader)
+			LOG_ERROR_RETURN(("No glCreateShader function"),0);
+	}
 
 	return (*m_fn_glCreateShader)(shaderType);
 }

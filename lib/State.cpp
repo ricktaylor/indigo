@@ -23,8 +23,7 @@
 #include "Texture.h"
 #include "Shader.h"
 
-Indigo::State::State(const OOBase::SharedPtr<Window>& window) :
-		m_window(window),
+Indigo::State::State() :
 		m_active_texture_unit(-1)
 {
 }
@@ -54,7 +53,9 @@ OOBase::SharedPtr<Indigo::Framebuffer> Indigo::State::bind(const OOBase::SharedP
 
 	if (m_fb != fb)
 	{
-		fb->bind();
+		if (fb)
+			fb->bind();
+
 		m_fb = fb;
 	}
 
@@ -76,16 +77,57 @@ GLenum Indigo::State::activate_texture_unit(GLenum unit)
 	return prev;
 }
 
-void Indigo::State::bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture)
+OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture)
 {
-	texture->bind(this,unit);
+	OOBase::SharedPtr<Indigo::Texture> prev;
+
+	tex_unit_t* tu = m_vecTexUnits.at(unit - GL_TEXTURE0);
+	if (!tu)
+	{
+		int err = m_vecTexUnits.resize(unit - GL_TEXTURE0 + 1);
+		if (err)
+		{
+			LOG_WARNING(("Failed to resize texture unit cache: %s",OOBase::system_error_text(err)));
+
+			if (texture)
+				texture->bind(this,unit);
+
+			return prev;
+		}
+
+		tu = m_vecTexUnits.at(unit - GL_TEXTURE0);
+	}
+
+	tex_unit_t::iterator i = tu->find(texture->type());
+	if (i == tu->end())
+	{
+		if (texture)
+		{
+			texture->bind(this,unit);
+
+			int err = tu->insert(texture->type(),texture);
+			if (err)
+				LOG_WARNING(("Failed to add to texture unit cache: %s",OOBase::system_error_text(err)));
+		}
+	}
+	else
+	{
+		prev = i->second;
+		if (prev != texture)
+		{
+			if (texture)
+				texture->bind(this,unit);
+
+			i->second = texture;
+		}
+	}
+
+	return prev;
 }
 
 void Indigo::State::bind_multi_texture(GLenum unit, GLenum target, GLuint texture)
 {
-	OOBase::SharedPtr<Window> win = m_window.lock();
-	if (win)
-		win->m_state_fns->glBindMultiTexture(this,unit,target,texture);
+	StateFns::get_current()->glBindMultiTexture(this,unit,target,texture);
 }
 
 OOBase::SharedPtr<Indigo::Program> Indigo::State::use(const OOBase::SharedPtr<Program>& program)
@@ -94,7 +136,11 @@ OOBase::SharedPtr<Indigo::Program> Indigo::State::use(const OOBase::SharedPtr<Pr
 
 	if (m_program != program)
 	{
-		program->use();
+		if (program)
+			program->use();
+		else
+			StateFns::get_current()->glUseProgram(0);
+
 		m_program = program;
 	}
 

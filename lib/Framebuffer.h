@@ -26,8 +26,6 @@
 
 namespace Indigo
 {
-	class Window;
-
 	class Framebuffer :
 			public OOBase::NonCopyable,
 			public OOBase::EnableSharedFromThis<Framebuffer>
@@ -37,20 +35,17 @@ namespace Indigo
 		friend class State;
 
 	public:
-		Framebuffer(const OOBase::SharedPtr<Window>& window);
+		Framebuffer();
 		~Framebuffer();
-
-		OOBase::SharedPtr<Window> window() const;
 
 		GLenum check() const;
 
 	private:
-		OOBase::WeakPtr<Window>  m_window;
 		GLuint       m_id;
 		bool         m_default;
 
-		Framebuffer(const OOBase::SharedPtr<Window>& window, GLuint id);
-		static OOBase::SharedPtr<Framebuffer> get_default(const OOBase::SharedPtr<Window>& window);
+		Framebuffer(GLuint id);
+		static OOBase::SharedPtr<Framebuffer> get_default();
 
 		void bind();
 	};

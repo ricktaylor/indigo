@@ -334,7 +334,7 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 
 		glfwMakeContextCurrent(m_glfw_window);
 
-		m_state = OOBase::allocate_shared<State,OOBase::ThreadLocalAllocator>(shared_from_this());
+		m_state = OOBase::allocate_shared<State,OOBase::ThreadLocalAllocator>();
 		if (!m_state)
 			LOG_ERROR(("Failed to allocate GL state object"));
 
@@ -342,7 +342,7 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 		if (!m_state_fns)
 			LOG_ERROR(("Failed to allocate GL state functions object"));
 
-		m_default_fb = Framebuffer::get_default(shared_from_this());
+		m_default_fb = Framebuffer::get_default();
 
 		glfwSetWindowUserPointer(m_glfw_window,this);
 		glfwSetFramebufferSizeCallback(m_glfw_window,&on_size);
