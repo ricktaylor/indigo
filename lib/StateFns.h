@@ -28,7 +28,7 @@ namespace Indigo
 {
 	class State;
 
-	class StateFns : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<StateFns>
+	class StateFns : public OOBase::NonCopyable
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 

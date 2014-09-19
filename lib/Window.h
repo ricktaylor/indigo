@@ -29,7 +29,7 @@
 
 namespace Indigo
 {
-	class Window : public OOBase::EnableSharedFromThis<Window>
+	class Window
 	{
 		friend class State;
 		friend class StateFns;

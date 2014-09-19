@@ -42,7 +42,7 @@ bool Indigo::Texture::is_valid() const
 	return (glIsTexture(m_tex) == GL_TRUE);
 }
 
-void Indigo::Texture::bind(State* state, GLenum unit) const
+void Indigo::Texture::bind(State& state, GLenum unit) const
 {
-	state->bind_multi_texture(unit,m_type,m_tex);
+	state.bind_multi_texture(unit,m_type,m_tex);
 }

@@ -26,7 +26,7 @@
 
 namespace Indigo
 {
-	class Shader : public OOBase::EnableSharedFromThis<Shader>
+	class Shader
 	{
 		friend class Program;
 
@@ -59,7 +59,7 @@ namespace Indigo
 		GLuint m_id;
 	};
 
-	class Program : public OOBase::EnableSharedFromThis<Program>
+	class Program
 	{
 		friend class State;
 

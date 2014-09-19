@@ -31,7 +31,7 @@ namespace Indigo
 	class Texture;
 	class Program;
 
-	class State : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<State>
+	class State : public OOBase::NonCopyable
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		friend class StateFns;

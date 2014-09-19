@@ -26,9 +26,7 @@
 
 namespace Indigo
 {
-	class Framebuffer :
-			public OOBase::NonCopyable,
-			public OOBase::EnableSharedFromThis<Framebuffer>
+	class Framebuffer : public OOBase::NonCopyable
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		friend class Window;

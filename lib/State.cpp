@@ -91,7 +91,7 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase
 			LOG_WARNING(("Failed to resize texture unit cache: %s",OOBase::system_error_text(err)));
 
 			if (texture)
-				texture->bind(this,unit);
+				texture->bind(*this,unit);
 
 			return prev;
 		}
@@ -104,7 +104,7 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase
 	{
 		if (texture)
 		{
-			texture->bind(this,unit);
+			texture->bind(*this,unit);
 
 			int err = tu->insert(texture->type(),texture);
 			if (err)
@@ -117,7 +117,7 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase
 		if (prev != texture)
 		{
 			if (texture)
-				texture->bind(this,unit);
+				texture->bind(*this,unit);
 
 			i->second = texture;
 		}

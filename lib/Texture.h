@@ -36,7 +36,7 @@ namespace Indigo
 
 		GLenum type() const;
 
-		void bind(State* state, GLenum unit) const;
+		void bind(State& state, GLenum unit) const;
 
 		bool is_valid() const;
 
