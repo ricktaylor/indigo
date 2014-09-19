@@ -30,19 +30,21 @@ namespace Indigo
 
 	class Texture : public OOBase::NonCopyable
 	{
+		friend class State;
+
 	public:
 		Texture(GLenum type);
 		~Texture();
 
 		GLenum type() const;
 
-		void bind(State& state, GLenum unit) const;
-
 		bool is_valid() const;
 
 	private:
 		GLuint m_tex;
 		GLenum m_type;
+
+		void bind(State& state, GLenum unit) const;
 	};
 }
 
