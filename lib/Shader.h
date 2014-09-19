@@ -72,33 +72,35 @@ namespace Indigo
 
 		bool in_use() const;
 
-		void set_fragdata_location(const char* name, GLuint color);
-		void set_fragdata_location(const char* name, GLuint color, GLuint dual_index);
-		void set_attribute_location(const char* name, GLuint index);
+		void attribute_location(const char* name, GLuint index);
+		GLint attribute_location(const char* name) const;
 
-		GLint get_uniform_location(const char* name) const;
+		void fragdata_location(const char* name, GLuint color);
+		GLint fragdata_location(const char* name) const;
 
-		void set_uniform(GLint location, GLfloat v);
-		void set_uniform(GLint location, GLint v);
-		void set_uniform(GLint location, GLuint v);
-		void set_uniform(GLint location, const glm::vec2& v);
-		void set_uniform(GLint location, const glm::vec3& v);
-		void set_uniform(GLint location, const glm::vec4& v);
-		void set_uniform(GLint location, const glm::ivec2& v);
-		void set_uniform(GLint location, const glm::ivec3& v);
-		void set_uniform(GLint location, const glm::ivec4& v);
-		void set_uniform(GLint location, const glm::uvec2& v);
-		void set_uniform(GLint location, const glm::uvec3& v);
-		void set_uniform(GLint location, const glm::uvec4& v);
-		void set_uniform(GLint location, const glm::mat2& v, bool transpose = false);
-		void set_uniform(GLint location, const glm::mat2x3& v, bool transpose = false);
-		void set_uniform(GLint location, const glm::mat2x4& v, bool transpose = false);
-		void set_uniform(GLint location, const glm::mat3& v, bool transpose = false);
-		void set_uniform(GLint location, const glm::mat3x2& v, bool transpose = false);
-		void set_uniform(GLint location, const glm::mat3x4& v, bool transpose = false);
-		void set_uniform(GLint location, const glm::mat4& v, bool transpose = false);
-		void set_uniform(GLint location, const glm::mat4x2& v, bool transpose = false);
-		void set_uniform(GLint location, const glm::mat4x3& v, bool transpose = false);
+		GLint uniform_location(const char* name) const;
+
+		void uniform(GLint location, GLfloat v);
+		void uniform(GLint location, GLint v);
+		void uniform(GLint location, GLuint v);
+		void uniform(GLint location, const glm::vec2& v);
+		void uniform(GLint location, const glm::vec3& v);
+		void uniform(GLint location, const glm::vec4& v);
+		void uniform(GLint location, const glm::ivec2& v);
+		void uniform(GLint location, const glm::ivec3& v);
+		void uniform(GLint location, const glm::ivec4& v);
+		void uniform(GLint location, const glm::uvec2& v);
+		void uniform(GLint location, const glm::uvec3& v);
+		void uniform(GLint location, const glm::uvec4& v);
+		void uniform(GLint location, const glm::mat2& v, bool transpose = false);
+		void uniform(GLint location, const glm::mat2x3& v, bool transpose = false);
+		void uniform(GLint location, const glm::mat2x4& v, bool transpose = false);
+		void uniform(GLint location, const glm::mat3& v, bool transpose = false);
+		void uniform(GLint location, const glm::mat3x2& v, bool transpose = false);
+		void uniform(GLint location, const glm::mat3x4& v, bool transpose = false);
+		void uniform(GLint location, const glm::mat4& v, bool transpose = false);
+		void uniform(GLint location, const glm::mat4x2& v, bool transpose = false);
+		void uniform(GLint location, const glm::mat4x3& v, bool transpose = false);
 
 	private:
 		GLuint m_id;
