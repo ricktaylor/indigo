@@ -34,23 +34,23 @@ namespace Indigo
 		Shader(GLenum shaderType);
 		virtual ~Shader();
 
-		void compile(const GLchar* sz, GLint len = 0);
-		void compile(const GLchar *const *strings, GLsizei count);
-		void compile(const GLchar *const *strings, const GLint* lengths, GLsizei count);
+		void compile(const char* sz, GLint len = 0);
+		void compile(const char *const *strings, GLsizei count);
+		void compile(const char *const *strings, const GLint* lengths, GLsizei count);
 
 		template <GLsizei S>
-		void compile(const GLchar *const strings[S], const GLint lengths[S])
+		void compile(const char *const strings[S], const GLint lengths[S])
 		{
 			compile(strings,lengths,S);
 		}
 
 		template <GLsizei S>
-		void compile(const GLchar *const strings[S])
+		void compile(const char *const strings[S])
 		{
 			compile(strings,S);
 		}
 
-		static const GLchar* get_gstap();
+		static const char* get_gstap();
 
 		bool compile_status() const;
 		OOBase::String info_log() const;

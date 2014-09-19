@@ -33,6 +33,7 @@ indigo_SOURCES = \
 	../lib/StateFns.cpp \
 	../lib/Shader.cpp \
 	../lib/Texture.cpp \
+	../lib/Font.cpp \
 	LogicThread.cpp \
 	Main.cpp \
 	Splash.cpp \

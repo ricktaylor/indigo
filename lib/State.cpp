@@ -133,16 +133,16 @@ void Indigo::State::bind_multi_texture(GLenum unit, GLenum target, GLuint textur
 
 OOBase::SharedPtr<Indigo::Program> Indigo::State::use(const OOBase::SharedPtr<Program>& program)
 {
-	OOBase::SharedPtr<Program> prev = m_program;
+	OOBase::SharedPtr<Program> prev = m_current_program;
 
-	if (m_program != program)
+	if (m_current_program != program)
 	{
 		if (program)
 			program->use();
 		else
 			m_state_fns.glUseProgram(0);
 
-		m_program = program;
+		m_current_program = program;
 	}
 
 	return prev;

@@ -30,6 +30,7 @@ namespace Indigo
 	class Framebuffer;
 	class Texture;
 	class Program;
+	class FontManager;
 
 	class State : public OOBase::NonCopyable
 	{
@@ -37,6 +38,7 @@ namespace Indigo
 		friend class StateFns;
 		friend class Window;
 		friend class Texture;
+		friend class Font;
 
 	public:
 		static OOBase::SharedPtr<State> get_current();
@@ -50,7 +52,8 @@ namespace Indigo
 		StateFns&                      m_state_fns;
 		OOBase::SharedPtr<Framebuffer> m_fb;
 		GLenum                         m_active_texture_unit;
-		OOBase::SharedPtr<Program>     m_program;
+		OOBase::SharedPtr<Program>     m_current_program;
+		OOBase::SharedPtr<FontManager> m_font_manager;
 
 		typedef OOBase::Table<GLenum,OOBase::SharedPtr<Texture>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator> tex_unit_t;
 		OOBase::Vector<tex_unit_t,OOBase::ThreadLocalAllocator> m_vecTexUnits;

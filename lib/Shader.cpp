@@ -130,6 +130,10 @@ OOBase::String Indigo::Shader::info_log() const
 	return ret;
 }
 
+Indigo::Program::Program() : m_id(0)
+{
+}
+
 bool Indigo::Program::link_status() const
 {
 	GLint status;
