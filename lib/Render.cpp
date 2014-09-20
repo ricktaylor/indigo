@@ -339,7 +339,7 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 			LOG_ERROR(("Failed to allocate GL state functions object"));
 		else
 		{
-			m_state = OOBase::allocate_shared<State,OOBase::ThreadLocalAllocator>(*m_state_fns.get());
+			m_state = OOBase::allocate_shared<State,OOBase::ThreadLocalAllocator>(OOBase::Ref<StateFns>(*m_state_fns.get()));
 			if (!m_state)
 				LOG_ERROR(("Failed to allocate GL state object"));
 			else

@@ -65,8 +65,8 @@ namespace
 
 		manager->m_program->link(shaders,2);
 
-		manager->m_mvp = static_cast<GLuint>(manager->m_program->uniform_location("uMVP"));
-		manager->m_colour = static_cast<GLuint>(manager->m_program->uniform_location("uColour"));
+		//manager->m_mvp = static_cast<GLuint>(manager->m_program->uniform_location("uMVP"));
+		//manager->m_colour = static_cast<GLuint>(manager->m_program->uniform_location("uColour"));
 
 		return true;
 	}
@@ -82,8 +82,8 @@ void Indigo::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& col
 	state.use(state.m_font_manager->m_program);
 
 	// Set the uniforms for MVP and colour
-	state.m_font_manager->m_program->uniform(state.m_font_manager->m_mvp,mvp);
-	state.m_font_manager->m_program->uniform(state.m_font_manager->m_colour,colour);
+	//state.m_font_manager->m_program->uniform(state.m_font_manager->m_mvp,mvp);
+	//state.m_font_manager->m_program->uniform(state.m_font_manager->m_colour,colour);
 
 	// Bind the Vertex Array Object
 }
