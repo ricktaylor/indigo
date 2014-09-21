@@ -54,6 +54,7 @@ namespace Indigo
 		void glLinkProgram(GLuint program);
 		void glUseProgram(GLuint program);
 
+		void glActiveTexture(GLenum texture);
 		void glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture);
 
 	private:
@@ -80,6 +81,11 @@ namespace Indigo
 		PFNGLUSEPROGRAMPROC m_fn_glUseProgram;
 		void check_glUseProgram(GLuint program);
 		void call_glUseProgram(GLuint program);
+
+		void (StateFns::*m_thunk_glActiveTexture)(GLenum texture);
+		PFNGLACTIVETEXTUREPROC m_fn_glActiveTexture;
+		void check_glActiveTexture(GLenum texture);
+		void call_glActiveTexture(GLenum texture);
 
 		void (StateFns::*m_thunk_glBindMultiTexture)(State*,GLenum,GLenum,GLuint);
 		PFNGLBINDMULTITEXTUREEXTPROC m_fn_glBindMultiTexture;

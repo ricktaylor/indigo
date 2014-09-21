@@ -39,6 +39,8 @@ Indigo::StateFns::StateFns() :
 		m_fn_glLinkProgram(NULL),
 		m_thunk_glUseProgram(&StateFns::check_glUseProgram),
 		m_fn_glUseProgram(NULL),
+		m_thunk_glActiveTexture(&StateFns::check_glActiveTexture),
+		m_fn_glActiveTexture(NULL),
 		m_thunk_glBindMultiTexture(&StateFns::check_glBindMultiTexture),
 		m_fn_glBindMultiTexture(NULL)
 {
@@ -297,6 +299,27 @@ void Indigo::StateFns::glLinkProgram(GLuint program)
 		LOG_ERROR(("No glLinkProgram function"));
 	else
 		(*m_fn_glLinkProgram)(program);
+}
+
+void Indigo::StateFns::check_glActiveTexture(GLenum texture)
+{
+	if (!m_fn_glActiveTexture)
+		m_fn_glActiveTexture = (PFNGLACTIVETEXTUREPROC)glfwGetProcAddress("glActiveTexture");
+
+	if (!m_fn_glActiveTexture)
+		LOG_ERROR(("No glActiveTexture function"));
+	else
+		(*m_fn_glActiveTexture)(texture);
+}
+
+void Indigo::StateFns::call_glActiveTexture(GLenum texture)
+{
+	(*m_fn_glActiveTexture)(texture);
+}
+
+void Indigo::StateFns::glActiveTexture(GLenum texture)
+{
+	(this->*m_thunk_glActiveTexture)(texture);
 }
 
 void Indigo::StateFns::check_glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture)
