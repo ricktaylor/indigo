@@ -48,6 +48,8 @@ namespace Indigo
 
 		OOBase::SharedPtr<Program> use(const OOBase::SharedPtr<Program>& program);
 
+		GLenum active_texture_unit() const;
+
 	private:
 		StateFns&                      m_state_fns;
 		OOBase::SharedPtr<Framebuffer> m_fb;
@@ -62,6 +64,10 @@ namespace Indigo
 
 		void bind_multi_texture(GLenum unit, GLenum target, GLuint texture);
 		GLenum activate_texture_unit(GLenum unit);
+
+		void texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
+		void texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		void texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 	};
 }
 

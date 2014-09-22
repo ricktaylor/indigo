@@ -55,7 +55,11 @@ namespace Indigo
 		void glUseProgram(GLuint program);
 
 		void glActiveTexture(GLenum texture);
-		void glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture);
+		void glBindMultiTexture(State& state, GLenum unit, GLenum target, GLuint texture);
+		void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels);
+		void glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
+		void glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		void glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 
 	private:
 		StateFns();
@@ -87,11 +91,34 @@ namespace Indigo
 		void check_glActiveTexture(GLenum texture);
 		void call_glActiveTexture(GLenum texture);
 
-		void (StateFns::*m_thunk_glBindMultiTexture)(State*,GLenum,GLenum,GLuint);
+		void (StateFns::*m_thunk_glBindMultiTexture)(State&,GLenum,GLenum,GLuint);
 		PFNGLBINDMULTITEXTUREEXTPROC m_fn_glBindMultiTexture;
-		void check_glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture);
-		void emulate_glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture);
-		void call_glBindMultiTexture(State* state, GLenum unit, GLenum target, GLuint texture);
+		void check_glBindMultiTexture(State& state, GLenum unit, GLenum target, GLuint texture);
+		void emulate_glBindMultiTexture(State& state, GLenum unit, GLenum target, GLuint texture);
+		void call_glBindMultiTexture(State& state, GLenum unit, GLenum target, GLuint texture);
+
+		PFNGLTEXIMAGE3DPROC m_fn_glTexImage3D;
+
+		void (StateFns::*m_thunk_glTextureStorage1D)(State&,GLuint,GLenum,GLsizei,GLenum,GLsizei);
+		GLFWglproc m_fn_glTextureStorage1D;
+		void check_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
+		void emulate_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
+		void call_glTextureStorage1DEXT(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
+		void call_glTexStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
+
+		void (StateFns::*m_thunk_glTextureStorage2D)(State&,GLuint,GLenum,GLsizei,GLenum,GLsizei,GLsizei);
+		GLFWglproc m_fn_glTextureStorage2D;
+		void check_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		void emulate_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		void call_glTextureStorage2DEXT(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		void call_glTexStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+
+		void (StateFns::*m_thunk_glTextureStorage3D)(State&,GLuint,GLenum,GLsizei,GLenum,GLsizei,GLsizei,GLsizei);
+		GLFWglproc m_fn_glTextureStorage3D;
+		void check_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+		void emulate_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+		void call_glTextureStorage3DEXT(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+		void call_glTexStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 	};
 }
 

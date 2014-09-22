@@ -14,6 +14,7 @@
     <ClInclude Include="..\lib\Font.h" />
     <ClInclude Include="..\lib\Framebuffer.h" />
     <ClInclude Include="..\lib\glext.h" />
+    <ClInclude Include="..\lib\Image.h" />
     <ClInclude Include="..\lib\OOGL.h" />
     <ClInclude Include="..\lib\Render.h" />
     <ClInclude Include="..\lib\Shader.h" />
@@ -27,6 +28,7 @@
   <ItemGroup>
     <ClCompile Include="..\lib\Font.cpp" />
     <ClCompile Include="..\lib\Framebuffer.cpp" />
+    <ClCompile Include="..\lib\Image.cpp" />
     <ClCompile Include="..\lib\Render.cpp" />
     <ClCompile Include="..\lib\Shader.cpp" />
     <ClCompile Include="..\lib\State.cpp" />

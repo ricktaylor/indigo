@@ -25,7 +25,7 @@
 
 Indigo::State::State(StateFns& fns) :
 		m_state_fns(fns),
-		m_active_texture_unit(-1)
+		m_active_texture_unit(GL_TEXTURE0)
 {
 }
 
@@ -78,6 +78,11 @@ GLenum Indigo::State::activate_texture_unit(GLenum unit)
 	return prev;
 }
 
+GLenum Indigo::State::active_texture_unit() const
+{
+	return m_active_texture_unit;
+}
+
 OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture)
 {
 	OOBase::SharedPtr<Indigo::Texture> prev;
@@ -128,7 +133,7 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase
 
 void Indigo::State::bind_multi_texture(GLenum unit, GLenum target, GLuint texture)
 {
-	m_state_fns.glBindMultiTexture(this,unit,target,texture);
+	m_state_fns.glBindMultiTexture(*this,unit,target,texture);
 }
 
 OOBase::SharedPtr<Indigo::Program> Indigo::State::use(const OOBase::SharedPtr<Program>& program)
@@ -146,4 +151,19 @@ OOBase::SharedPtr<Indigo::Program> Indigo::State::use(const OOBase::SharedPtr<Pr
 	}
 
 	return prev;
+}
+
+void Indigo::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+{
+	m_state_fns.glTextureStorage1D(*this,texture,target,levels,internalFormat,width);
+}
+
+void Indigo::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+{
+	m_state_fns.glTextureStorage2D(*this,texture,target,levels,internalFormat,width,height);
+}
+
+void Indigo::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+{
+	m_state_fns.glTextureStorage3D(*this,texture,target,levels,internalFormat,width,height,depth);
 }

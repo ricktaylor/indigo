@@ -21,8 +21,16 @@
 
 #include "Texture.h"
 #include "State.h"
+#include "StateFns.h"
 
-Indigo::Texture::Texture(GLenum type) : m_tex(0), m_type(type)
+Indigo::Texture::Texture(GLenum type) : 
+		m_tex(0), 
+		m_type(type),
+		m_levels(0),
+		m_internalFormat(0),
+		m_width(0),
+		m_height(0),
+		m_depth(0)
 {
 	glGenTextures(1,&m_tex);
 }
@@ -30,6 +38,127 @@ Indigo::Texture::Texture(GLenum type) : m_tex(0), m_type(type)
 Indigo::Texture::~Texture()
 {
 	glDeleteTextures(1,&m_tex);
+}
+
+void Indigo::Texture::create(GLsizei levels, GLenum internalFormat, GLsizei width)
+{
+	State::get_current()->texture_storage(m_tex,m_type,m_levels,internalFormat,width);
+
+	m_levels = levels;
+	m_internalFormat = internalFormat;
+	m_width = width;
+}
+
+void Indigo::Texture::create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+{
+	State::get_current()->texture_storage(m_tex,m_type,m_levels,internalFormat,width,height);
+
+	m_levels = levels;
+	m_internalFormat = internalFormat;
+	m_width = width;
+	m_height = height;
+}
+
+void Indigo::Texture::create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+{
+	State::get_current()->texture_storage(m_tex,m_type,m_levels,internalFormat,width,height,depth);
+
+	m_levels = levels;
+	m_internalFormat = internalFormat;
+	m_width = width;
+	m_height = height;
+	m_depth = depth;
+}
+
+void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width)
+{
+	OOBase::SharedPtr<State> state = State::get_current();
+	state->bind(state->active_texture_unit(),shared_from_this());
+
+	m_levels = levels;
+	m_internalFormat = internalFormat;
+	m_width = width;
+
+	// Keep in line with StateFns::emulate_glTextureStorage1D
+	for (GLsizei i = 0; i < levels; ++i)
+	{
+		glTexImage1D(m_type,i,internalFormat,width,0,0,0,NULL);
+		width /= 2;
+		if (!width)
+			width = 1;
+	}
+}
+
+void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height)
+{
+	OOBase::SharedPtr<State> state = State::get_current();
+	state->bind(state->active_texture_unit(),shared_from_this());
+
+	m_levels = levels;
+	m_internalFormat = internalFormat;
+	m_width = width;
+	m_height = height;
+
+	// Keep in line with StateFns::emulate_glTextureStorage2D
+	for (GLsizei i = 0; i < levels; ++i)
+	{
+		if (m_type == GL_TEXTURE_CUBE_MAP)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,i,internalFormat,width,height,0,0,0,NULL);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,i,internalFormat,width,height,0,0,0,NULL);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,i,internalFormat,width,height,0,0,0,NULL);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,i,internalFormat,width,height,0,0,0,NULL);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,i,internalFormat,width,height,0,0,0,NULL);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,i,internalFormat,width,height,0,0,0,NULL);
+		}
+		else
+			glTexImage2D(m_type,i,internalFormat,width,height,0,0,0,NULL);
+		
+		width /= 2;
+		if (!width)
+			width = 1;
+
+		if (m_type != GL_TEXTURE_1D && m_type != GL_TEXTURE_1D_ARRAY)
+		{
+			height /= 2;
+			if (!height)
+				height = 1;
+		}
+	}
+}
+
+void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+{
+	OOBase::SharedPtr<StateFns> fns = StateFns::get_current();
+	OOBase::SharedPtr<State> state = State::get_current();
+	state->bind(state->active_texture_unit(),shared_from_this());
+
+	m_levels = levels;
+	m_internalFormat = internalFormat;
+	m_width = width;
+	m_height = height;
+	m_depth = depth;
+
+	// Keep in line with StateFns::emulate_glTextureStorage3D
+	for (GLsizei i = 0; i < levels; ++i)
+	{
+		fns->glTexImage3D(m_type,i,internalFormat,width,height,depth,0,0,0,NULL);
+		
+		width /= 2;
+		if (!width)
+			width = 1;
+
+		height /= 2;
+		if (!height)
+			height = 1;
+
+		if (m_type != GL_TEXTURE_2D_ARRAY && m_type != GL_PROXY_TEXTURE_2D_ARRAY && m_type != GL_TEXTURE_CUBE_MAP_ARRAY && m_type != GL_PROXY_TEXTURE_CUBE_MAP_ARRAY)
+		{
+			depth /= 2;
+			if (!depth)
+				depth = 1;
+		}
+	}
 }
 
 GLenum Indigo::Texture::type() const

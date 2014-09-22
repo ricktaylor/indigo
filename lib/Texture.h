@@ -28,7 +28,7 @@ namespace Indigo
 {
 	class State;
 
-	class Texture : public OOBase::NonCopyable
+	class Texture : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<Texture>
 	{
 		friend class State;
 
@@ -36,6 +36,17 @@ namespace Indigo
 		Texture(GLenum type);
 		~Texture();
 
+		// Immutable create
+		void create(GLsizei levels, GLenum internalFormat, GLsizei width);
+		void create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		void create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+
+		// Mutable create
+		void init(GLsizei levels, GLint internalFormat, GLsizei width);
+		void init(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height);
+		void init(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+
+		
 		GLenum type() const;
 
 		bool is_valid() const;
@@ -43,6 +54,11 @@ namespace Indigo
 	private:
 		GLuint m_tex;
 		GLenum m_type;
+		GLsizei m_levels;
+		GLenum m_internalFormat;
+		GLsizei m_width;
+		GLsizei m_height;
+		GLsizei m_depth;
 
 		void bind(State& state, GLenum unit) const;
 	};
