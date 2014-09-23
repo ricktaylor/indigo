@@ -226,9 +226,9 @@ bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase
 	EventQueue event_queue;
 	s_event_queue = &event_queue;
 
-	OOBase::Thread logic(false);
-	int err = logic.run(&logic_thread_start,&ti);
-	if (err)
+	int err = 0;
+	OOBase::SharedPtr<OOBase::Thread> logic = OOBase::Thread::run(&logic_thread_start,&ti,err);
+	if (!logic)
 		LOG_ERROR_RETURN(("Failed to start thread: %s",OOBase::system_error_text(err)),false);
 
 	started.wait();
@@ -240,7 +240,7 @@ bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase
 	if (event_queue.enqueue(NULL,reinterpret_cast<void*>(1)))
 	{
 		// Wait for logic thread to end
-		logic.join();
+		logic->join();
 	}
 
 	return res;

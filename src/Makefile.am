@@ -34,6 +34,7 @@ indigo_SOURCES = \
 	../lib/Shader.cpp \
 	../lib/Texture.cpp \
 	../lib/Font.cpp \
+	../lib/Image.cpp \
 	LogicThread.cpp \
 	Main.cpp \
 	Splash.cpp \
