@@ -167,3 +167,18 @@ void Indigo::State::texture_storage(GLuint texture, GLenum target, GLsizei level
 {
 	m_state_fns.glTextureStorage3D(*this,texture,target,levels,internalFormat,width,height,depth);
 }
+
+void Indigo::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+{
+	m_state_fns.glTextureSubImage1D(*this,texture,target,level,xoffset,width,format,type,pixels);
+}
+
+void Indigo::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+{
+	m_state_fns.glTextureSubImage2D(*this,texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
+}
+
+void Indigo::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+{
+	m_state_fns.glTextureSubImage3D(*this,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+}

@@ -23,8 +23,8 @@
 #include "State.h"
 #include "StateFns.h"
 
-Indigo::Texture::Texture(GLenum type) : 
-		m_tex(0), 
+Indigo::Texture::Texture(GLenum type) :
+		m_tex(0),
 		m_type(type),
 		m_levels(0),
 		m_internalFormat(0),
@@ -113,7 +113,7 @@ void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width, 
 		}
 		else
 			glTexImage2D(m_type,i,internalFormat,width,height,0,0,0,NULL);
-		
+
 		width /= 2;
 		if (!width)
 			width = 1;
@@ -143,7 +143,7 @@ void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width, 
 	for (GLsizei i = 0; i < levels; ++i)
 	{
 		fns->glTexImage3D(m_type,i,internalFormat,width,height,depth,0,0,0,NULL);
-		
+
 		width /= 2;
 		if (!width)
 			width = 1;
@@ -159,6 +159,26 @@ void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width, 
 				depth = 1;
 		}
 	}
+}
+
+void Indigo::Texture::sub_image(GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+{
+	State::get_current()->texture_subimage(m_tex,m_type,level,xoffset,width,format,type,pixels);
+}
+
+void Indigo::Texture::sub_image(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+{
+	State::get_current()->texture_subimage(m_tex,m_type,level,xoffset,yoffset,width,height,format,type,pixels);
+}
+
+void Indigo::Texture::sub_image_cube(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+{
+	State::get_current()->texture_subimage(m_tex,target,level,xoffset,yoffset,width,height,format,type,pixels);
+}
+
+void Indigo::Texture::sub_image(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+{
+	State::get_current()->texture_subimage(m_tex,m_type,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
 GLenum Indigo::Texture::type() const

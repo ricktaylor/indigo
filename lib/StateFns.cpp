@@ -49,7 +49,13 @@ Indigo::StateFns::StateFns() :
 		m_thunk_glTextureStorage2D(&StateFns::check_glTextureStorage2D),
 		m_fn_glTextureStorage2D(NULL),
 		m_thunk_glTextureStorage3D(&StateFns::check_glTextureStorage3D),
-		m_fn_glTextureStorage3D(NULL)
+		m_fn_glTextureStorage3D(NULL),
+		m_thunk_glTextureSubImage1D(&StateFns::check_glTextureSubImage1D),
+		m_fn_glTextureSubImage1D(NULL),
+		m_thunk_glTextureSubImage2D(&StateFns::check_glTextureSubImage2D),
+		m_fn_glTextureSubImage2D(NULL),
+		m_thunk_glTextureSubImage3D(&StateFns::check_glTextureSubImage3D),
+		m_fn_glTextureSubImage3D(NULL)
 {
 }
 
@@ -379,7 +385,7 @@ void Indigo::StateFns::check_glTextureStorage1D(State& state, GLuint texture, GL
 			if (m_thunk_glTextureStorage1D)
 				m_thunk_glTextureStorage1D = &StateFns::call_glTextureStorage1DEXT;
 		}
-		
+
 		if (!m_fn_glTextureStorage1D)
 		{
 			m_fn_glTextureStorage1D = glfwGetProcAddress("glTexStorage1D");
@@ -390,7 +396,7 @@ void Indigo::StateFns::check_glTextureStorage1D(State& state, GLuint texture, GL
 
 	if (!m_fn_glTextureStorage1D)
 		m_thunk_glTextureStorage1D = &StateFns::emulate_glTextureStorage1D;
-	
+
 	(this->*m_thunk_glTextureStorage1D)(state,texture,target,levels,internalFormat,width);
 }
 
@@ -435,7 +441,7 @@ void Indigo::StateFns::check_glTextureStorage2D(State& state, GLuint texture, GL
 			if (m_thunk_glTextureStorage2D)
 				m_thunk_glTextureStorage2D = &StateFns::call_glTextureStorage2DEXT;
 		}
-		
+
 		if (!m_fn_glTextureStorage2D)
 		{
 			m_fn_glTextureStorage2D = glfwGetProcAddress("glTexStorage2D");
@@ -446,7 +452,7 @@ void Indigo::StateFns::check_glTextureStorage2D(State& state, GLuint texture, GL
 
 	if (!m_fn_glTextureStorage2D)
 		m_thunk_glTextureStorage2D = &StateFns::emulate_glTextureStorage2D;
-	
+
 	(this->*m_thunk_glTextureStorage2D)(state,texture,target,levels,internalFormat,width,height);
 }
 
@@ -468,7 +474,7 @@ void Indigo::StateFns::emulate_glTextureStorage2D(State& state, GLuint texture, 
 		}
 		else
 			glTexImage2D(target,i,internalFormat,width,height,0,0,0,NULL);
-		
+
 		width /= 2;
 		if (!width)
 			width = 1;
@@ -509,7 +515,7 @@ void Indigo::StateFns::check_glTextureStorage3D(State& state, GLuint texture, GL
 			if (m_thunk_glTextureStorage3D)
 				m_thunk_glTextureStorage3D = &StateFns::call_glTextureStorage3DEXT;
 		}
-		
+
 		if (!m_fn_glTextureStorage3D)
 		{
 			m_fn_glTextureStorage3D = glfwGetProcAddress("glTexStorage3D");
@@ -520,7 +526,7 @@ void Indigo::StateFns::check_glTextureStorage3D(State& state, GLuint texture, GL
 
 	if (!m_fn_glTextureStorage3D)
 		m_thunk_glTextureStorage3D = &StateFns::emulate_glTextureStorage3D;
-	
+
 	(this->*m_thunk_glTextureStorage3D)(state,texture,target,levels,internalFormat,width,height,depth);
 }
 
@@ -532,7 +538,7 @@ void Indigo::StateFns::emulate_glTextureStorage3D(State& state, GLuint texture, 
 	for (GLsizei i = 0; i < levels; ++i)
 	{
 		this->glTexImage3D(target,i,internalFormat,width,height,depth,0,0,0,NULL);
-		
+
 		width /= 2;
 		if (!width)
 			width = 1;
@@ -565,4 +571,109 @@ void Indigo::StateFns::call_glTexStorage3D(State& state, GLuint texture, GLenum 
 void Indigo::StateFns::glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	(this->*m_thunk_glTextureStorage3D)(state,texture,target,levels,internalFormat,width,height,depth);
+}
+
+void Indigo::StateFns::check_glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+{
+	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glTextureSubImage1D = glfwGetProcAddress("glTextureSubImage1DEXT");
+		if (m_fn_glTextureSubImage1D)
+			m_thunk_glTextureSubImage1D = &StateFns::call_glTextureSubImage1DEXT;
+	}
+
+	if (!m_fn_glTextureSubImage1D)
+		m_thunk_glTextureSubImage1D = &StateFns::call_glTexSubImage1D;
+
+	(this->*m_thunk_glTextureSubImage1D)(state,texture,target,level,xoffset,width,format,type,pixels);
+}
+
+void Indigo::StateFns::call_glTextureSubImage1DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+{
+	(*((PFNGLTEXTURESUBIMAGE1DEXTPROC)m_fn_glTextureSubImage1D))(texture,target,level,xoffset,width,format,type,pixels);
+}
+
+void Indigo::StateFns::call_glTexSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+{
+	state.bind_multi_texture(state.m_active_texture_unit,target,texture);
+
+	glTexSubImage1D(target,level,xoffset,width,format,type,pixels);
+}
+
+void Indigo::StateFns::glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+{
+	(this->*m_thunk_glTextureSubImage1D)(state,texture,target,level,xoffset,width,format,type,pixels);
+}
+
+void Indigo::StateFns::check_glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+{
+	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glTextureSubImage2D = glfwGetProcAddress("glTextureSubImage2DEXT");
+		if (m_fn_glTextureSubImage2D)
+			m_thunk_glTextureSubImage2D = &StateFns::call_glTextureSubImage2DEXT;
+	}
+
+	if (!m_fn_glTextureSubImage2D)
+		m_thunk_glTextureSubImage2D = &StateFns::call_glTexSubImage2D;
+
+	(this->*m_thunk_glTextureSubImage2D)(state,texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
+}
+
+void Indigo::StateFns::call_glTextureSubImage2DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+{
+	(*((PFNGLTEXTURESUBIMAGE2DEXTPROC)m_fn_glTextureSubImage2D))(texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
+}
+
+void Indigo::StateFns::call_glTexSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+{
+	state.bind_multi_texture(state.m_active_texture_unit,target,texture);
+
+	glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
+}
+
+void Indigo::StateFns::glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+{
+	(this->*m_thunk_glTextureSubImage2D)(state,texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
+}
+
+void Indigo::StateFns::check_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+{
+	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glTextureSubImage3D = glfwGetProcAddress("glTextureSubImage3DEXT");
+		if (m_fn_glTextureSubImage3D)
+			m_thunk_glTextureSubImage3D = &StateFns::call_glTextureSubImage3DEXT;
+	}
+
+	if (!m_fn_glTextureSubImage3D)
+	{
+		m_fn_glTextureSubImage3D = glfwGetProcAddress("glTexSubImage3D");
+		if (!m_fn_glTextureSubImage3D)
+		{
+			LOG_ERROR(("No glTexSubImage3D function"));
+			return;
+		}
+
+		m_thunk_glTextureSubImage3D = &StateFns::call_glTexSubImage3D;
+	}
+
+	(this->*m_thunk_glTextureSubImage3D)(state,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+}
+
+void Indigo::StateFns::call_glTextureSubImage3DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+{
+	(*((PFNGLTEXTURESUBIMAGE3DEXTPROC)m_fn_glTextureSubImage3D))(texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+}
+
+void Indigo::StateFns::call_glTexSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+{
+	state.bind_multi_texture(state.m_active_texture_unit,target,texture);
+
+	glTexSubImage3D(target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+}
+
+void Indigo::StateFns::glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+{
+	(this->*m_thunk_glTextureSubImage3D)(state,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
