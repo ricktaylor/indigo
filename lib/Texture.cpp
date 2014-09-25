@@ -171,7 +171,7 @@ void Indigo::Texture::sub_image(GLint level, GLint xoffset, GLint yoffset, GLsiz
 	State::get_current()->texture_subimage(m_tex,m_type,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void Indigo::Texture::sub_image_cube(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void Indigo::Texture::sub_image(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	State::get_current()->texture_subimage(m_tex,target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
