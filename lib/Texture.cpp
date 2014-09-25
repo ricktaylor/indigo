@@ -54,12 +54,7 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::Texture::create(GLenum target, GLsize
 
 Indigo::Texture::Texture(GLenum target) :
 		m_tex(0),
-		m_target(target),
-		m_levels(0),
-		m_internalFormat(0),
-		m_width(0),
-		m_height(0),
-		m_depth(0)
+		m_target(target)
 {
 	glGenTextures(1,&m_tex);
 }
@@ -71,42 +66,23 @@ Indigo::Texture::~Texture()
 
 void Indigo::Texture::do_create(GLsizei levels, GLenum internalFormat, GLsizei width)
 {
-	State::get_current()->texture_storage(m_tex,m_target,m_levels,internalFormat,width);
-
-	m_levels = levels;
-	m_internalFormat = internalFormat;
-	m_width = width;
+	State::get_current()->texture_storage(m_tex,m_target,levels,internalFormat,width);
 }
 
 void Indigo::Texture::do_create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
-	State::get_current()->texture_storage(m_tex,m_target,m_levels,internalFormat,width,height);
-
-	m_levels = levels;
-	m_internalFormat = internalFormat;
-	m_width = width;
-	m_height = height;
+	State::get_current()->texture_storage(m_tex,m_target,levels,internalFormat,width,height);
 }
 
 void Indigo::Texture::do_create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
-	State::get_current()->texture_storage(m_tex,m_target,m_levels,internalFormat,width,height,depth);
-
-	m_levels = levels;
-	m_internalFormat = internalFormat;
-	m_width = width;
-	m_height = height;
-	m_depth = depth;
+	State::get_current()->texture_storage(m_tex,m_target,levels,internalFormat,width,height,depth);
 }
 
 void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width)
 {
 	OOBase::SharedPtr<State> state = State::get_current();
 	state->bind(state->active_texture_unit(),shared_from_this());
-
-	m_levels = levels;
-	m_internalFormat = internalFormat;
-	m_width = width;
 
 	// Keep in line with StateFns::emulate_glTextureStorage1D
 	for (GLsizei i = 0; i < levels; ++i)
@@ -122,11 +98,6 @@ void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width, 
 {
 	OOBase::SharedPtr<State> state = State::get_current();
 	state->bind(state->active_texture_unit(),shared_from_this());
-
-	m_levels = levels;
-	m_internalFormat = internalFormat;
-	m_width = width;
-	m_height = height;
 
 	// Keep in line with StateFns::emulate_glTextureStorage2D
 	for (GLsizei i = 0; i < levels; ++i)
@@ -161,12 +132,6 @@ void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width, 
 	OOBase::SharedPtr<StateFns> fns = StateFns::get_current();
 	OOBase::SharedPtr<State> state = State::get_current();
 	state->bind(state->active_texture_unit(),shared_from_this());
-
-	m_levels = levels;
-	m_internalFormat = internalFormat;
-	m_width = width;
-	m_height = height;
-	m_depth = depth;
 
 	// Keep in line with StateFns::emulate_glTextureStorage3D
 	for (GLsizei i = 0; i < levels; ++i)

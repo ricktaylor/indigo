@@ -61,11 +61,6 @@ namespace Indigo
 	private:
 		GLuint m_tex;
 		GLenum m_target;
-		GLsizei m_levels;
-		GLenum m_internalFormat;
-		GLsizei m_width;
-		GLsizei m_height;
-		GLsizei m_depth;
 
 		Texture(GLenum target);
 
