@@ -30,18 +30,21 @@ namespace Indigo
 
 	class Texture : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<Texture>
 	{
+		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		friend class State;
 
 	public:
-		Texture(GLenum type);
-		~Texture();
+		// Mutable create
+		static OOBase::SharedPtr<Texture> create(GLenum target);
 
 		// Immutable create
-		void create(GLsizei levels, GLenum internalFormat, GLsizei width);
-		void create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
-		void create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+		static OOBase::SharedPtr<Texture> create(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
+		static OOBase::SharedPtr<Texture> create(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		static OOBase::SharedPtr<Texture> create(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 
-		// Mutable create
+		~Texture();
+
+		// Mutable init
 		void init(GLsizei levels, GLint internalFormat, GLsizei width);
 		void init(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height);
 		void init(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth);
@@ -51,18 +54,24 @@ namespace Indigo
 		void sub_image(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 		void sub_image(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 
-		GLenum type() const;
+		GLenum target() const;
 
 		bool is_valid() const;
 
 	private:
 		GLuint m_tex;
-		GLenum m_type;
+		GLenum m_target;
 		GLsizei m_levels;
 		GLenum m_internalFormat;
 		GLsizei m_width;
 		GLsizei m_height;
 		GLsizei m_depth;
+
+		Texture(GLenum target);
+
+		void do_create(GLsizei levels, GLenum internalFormat, GLsizei width);
+		void do_create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		void do_create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 
 		void bind(State& state, GLenum unit) const;
 	};

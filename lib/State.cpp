@@ -104,14 +104,14 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase
 		tu = m_vecTexUnits.at(unit - GL_TEXTURE0);
 	}
 
-	tex_unit_t::iterator i = tu->find(texture->type());
+	tex_unit_t::iterator i = tu->find(texture->target());
 	if (i == tu->end())
 	{
 		if (texture)
 		{
 			texture->bind(*this,unit);
 
-			int err = tu->insert(texture->type(),texture);
+			int err = tu->insert(texture->target(),texture);
 			if (err)
 				LOG_WARNING(("Failed to add to texture unit cache: %s",OOBase::system_error_text(err)));
 		}
