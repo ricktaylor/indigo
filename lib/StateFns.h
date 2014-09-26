@@ -68,6 +68,11 @@ namespace Indigo
 		void glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val);
 		void glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val);
 
+		void glGenBuffers(GLsizei n, GLuint* buffers);
+		void glBindBuffer(GLenum target, GLuint buffer);
+		void glDeleteBuffers(GLsizei n, GLuint* buffers);
+		void glNamedBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage);
+
 	private:
 		StateFns();
 
@@ -87,16 +92,8 @@ namespace Indigo
 		PFNGLATTACHSHADERPROC m_fn_glAttachShader;
 		PFNGLDETACHSHADERPROC m_fn_glDetachShader;
 		PFNGLLINKPROGRAMPROC m_fn_glLinkProgram;
-
-		void (StateFns::*m_thunk_glUseProgram)(GLuint program);
 		PFNGLUSEPROGRAMPROC m_fn_glUseProgram;
-		void check_glUseProgram(GLuint program);
-		void call_glUseProgram(GLuint program);
-
-		void (StateFns::*m_thunk_glActiveTexture)(GLenum texture);
 		PFNGLACTIVETEXTUREPROC m_fn_glActiveTexture;
-		void check_glActiveTexture(GLenum texture);
-		void call_glActiveTexture(GLenum texture);
 
 		void (StateFns::*m_thunk_glBindMultiTexture)(State&,GLenum,GLenum,GLuint);
 		PFNGLBINDMULTITEXTUREEXTPROC m_fn_glBindMultiTexture;
@@ -169,6 +166,15 @@ namespace Indigo
 		void call_glTextureParameterivEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
 		void call_glTexParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
 
+		PFNGLGENBUFFERSPROC m_fn_glGenBuffers;
+		PFNGLBINDBUFFERPROC m_fn_glBindBuffer;
+		PFNGLDELETEBUFFERSPROC m_fn_glDeleteBuffers;
+
+		void (StateFns::*m_thunk_glNamedBufferData)(State&,GLenum,GLuint,GLsizeiptr,GLenum);
+		GLFWglproc m_fn_glNamedBufferData;
+		void check_glNamedBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage);
+		void call_glNamedBufferDataEXT(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage);
+		void call_glBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage);
 	};
 }
 

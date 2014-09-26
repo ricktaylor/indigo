@@ -49,10 +49,10 @@ namespace Indigo
 		void init(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height);
 		void init(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 
-		void sub_image(GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
-		void sub_image(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
-		void sub_image(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
-		void sub_image(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+		void image(GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		void image(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		void image(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		void image(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 
 		void parameter(GLenum name, GLfloat val);
 		void parameter(GLenum name, const GLfloat* pval);

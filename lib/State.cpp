@@ -202,3 +202,8 @@ void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name
 {
 	m_state_fns.glTextureParameteriv(*this,texture,target,name,pval);
 }
+
+void Indigo::State::buffer_init(GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage)
+{
+	m_state_fns.glNamedBufferData(*this,target,buffer,size,usage);
+}

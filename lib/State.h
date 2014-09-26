@@ -38,6 +38,7 @@ namespace Indigo
 		friend class StateFns;
 		friend class Window;
 		friend class Texture;
+		friend class BufferObject;
 		friend class Font;
 
 	public:
@@ -77,6 +78,8 @@ namespace Indigo
 		void texture_parameter(GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
 		void texture_parameter(GLuint texture, GLenum target, GLenum name, GLint val);
 		void texture_parameter(GLuint texture, GLenum target, GLenum name, const GLint* pval);
+
+		void buffer_init(GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage);
 	};
 }
 

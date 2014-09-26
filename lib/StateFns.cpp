@@ -37,9 +37,7 @@ Indigo::StateFns::StateFns() :
 		m_fn_glAttachShader(NULL),
 		m_fn_glDetachShader(NULL),
 		m_fn_glLinkProgram(NULL),
-		m_thunk_glUseProgram(&StateFns::check_glUseProgram),
 		m_fn_glUseProgram(NULL),
-		m_thunk_glActiveTexture(&StateFns::check_glActiveTexture),
 		m_fn_glActiveTexture(NULL),
 		m_thunk_glBindMultiTexture(&StateFns::check_glBindMultiTexture),
 		m_fn_glBindMultiTexture(NULL),
@@ -63,7 +61,12 @@ Indigo::StateFns::StateFns() :
 		m_thunk_glTextureParameteri(&StateFns::check_glTextureParameteri),
 		m_fn_glTextureParameteri(NULL),
 		m_thunk_glTextureParameteriv(&StateFns::check_glTextureParameteriv),
-		m_fn_glTextureParameteriv(NULL)
+		m_fn_glTextureParameteriv(NULL),
+		m_fn_glGenBuffers(NULL),
+		m_fn_glBindBuffer(NULL),
+		m_fn_glDeleteBuffers(NULL),
+		m_thunk_glNamedBufferData(&StateFns::check_glNamedBufferData),
+		m_fn_glNamedBufferData(NULL)
 {
 }
 
@@ -268,7 +271,7 @@ void Indigo::StateFns::glGetProgramInfoLog(GLuint program, GLsizei maxLength, GL
 		(*m_fn_glGetProgramInfoLog)(program,maxLength,length,infoLog);
 }
 
-void Indigo::StateFns::check_glUseProgram(GLuint program)
+void Indigo::StateFns::glUseProgram(GLuint program)
 {
 	if (!m_fn_glUseProgram)
 		m_fn_glUseProgram = (PFNGLUSEPROGRAMPROC)glfwGetProcAddress("glUseProgram");
@@ -277,16 +280,6 @@ void Indigo::StateFns::check_glUseProgram(GLuint program)
 		LOG_ERROR(("No glUseProgram function"));
 	else
 		(*m_fn_glUseProgram)(program);
-}
-
-void Indigo::StateFns::call_glUseProgram(GLuint program)
-{
-	(*m_fn_glUseProgram)(program);
-}
-
-void Indigo::StateFns::glUseProgram(GLuint program)
-{
-	(this->*m_thunk_glUseProgram)(program);
 }
 
 void Indigo::StateFns::glAttachShader(GLuint program, GLuint shader)
@@ -322,7 +315,7 @@ void Indigo::StateFns::glLinkProgram(GLuint program)
 		(*m_fn_glLinkProgram)(program);
 }
 
-void Indigo::StateFns::check_glActiveTexture(GLenum texture)
+void Indigo::StateFns::glActiveTexture(GLenum texture)
 {
 	if (!m_fn_glActiveTexture)
 		m_fn_glActiveTexture = (PFNGLACTIVETEXTUREPROC)glfwGetProcAddress("glActiveTexture");
@@ -331,16 +324,6 @@ void Indigo::StateFns::check_glActiveTexture(GLenum texture)
 		LOG_ERROR(("No glActiveTexture function"));
 	else
 		(*m_fn_glActiveTexture)(texture);
-}
-
-void Indigo::StateFns::call_glActiveTexture(GLenum texture)
-{
-	(*m_fn_glActiveTexture)(texture);
-}
-
-void Indigo::StateFns::glActiveTexture(GLenum texture)
-{
-	(this->*m_thunk_glActiveTexture)(texture);
 }
 
 void Indigo::StateFns::check_glBindMultiTexture(State& state, GLenum unit, GLenum target, GLuint texture)
@@ -812,4 +795,75 @@ void Indigo::StateFns::call_glTexParameteriv(State& state, GLuint texture, GLenu
 void Indigo::StateFns::glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
 {
 	(this->*m_thunk_glTextureParameteriv)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::glGenBuffers(GLsizei n, GLuint* buffers)
+{
+	if (!m_fn_glGenBuffers)
+		m_fn_glGenBuffers = (PFNGLGENBUFFERSPROC)glfwGetProcAddress("glGenBuffers");
+
+	if (!m_fn_glGenBuffers)
+		LOG_ERROR(("No glGenBuffers function"));
+	else
+		(*m_fn_glGenBuffers)(n,buffers);
+}
+
+void Indigo::StateFns::glBindBuffer(GLenum target, GLuint buffer)
+{
+	if (!m_fn_glBindBuffer)
+		m_fn_glBindBuffer = (PFNGLBINDBUFFERPROC)glfwGetProcAddress("glBindBuffer");
+
+	if (!m_fn_glBindBuffer)
+		LOG_ERROR(("No glBindBuffer function"));
+	else
+		(*m_fn_glBindBuffer)(target,buffer);
+}
+
+void Indigo::StateFns::glDeleteBuffers(GLsizei n, GLuint* buffers)
+{
+	if (!m_fn_glDeleteBuffers)
+		m_fn_glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)glfwGetProcAddress("glDeleteBuffers");
+
+	if (!m_fn_glDeleteBuffers)
+		LOG_ERROR(("No glDeleteBuffers function"));
+	else
+		(*m_fn_glDeleteBuffers)(n,buffers);
+}
+
+void Indigo::StateFns::check_glNamedBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage)
+{
+	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glNamedBufferData = glfwGetProcAddress("glNamedBufferDataEXT");
+		if (m_fn_glNamedBufferData)
+			m_thunk_glNamedBufferData = &StateFns::call_glNamedBufferDataEXT;
+	}
+
+	if (!m_fn_glNamedBufferData)
+	{
+		m_fn_glNamedBufferData = glfwGetProcAddress("glBufferData");
+		if (!m_fn_glNamedBufferData)
+			LOG_ERROR(("No m_fn_glNamedBufferData function"));
+		else
+			m_thunk_glNamedBufferData = &StateFns::call_glBufferData;
+	}
+
+	(this->*m_thunk_glNamedBufferData)(state,target,buffer,size,usage);
+}
+
+void Indigo::StateFns::call_glNamedBufferDataEXT(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage)
+{
+	(*((PFNGLNAMEDBUFFERDATAEXTPROC)m_fn_glNamedBufferData))(buffer,size,NULL,usage);
+}
+
+void Indigo::StateFns::call_glBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage)
+{
+	glBindBuffer(target,buffer);
+
+	(*((PFNGLBUFFERDATAPROC)m_fn_glNamedBufferData))(target,size,NULL,usage);
+}
+
+void Indigo::StateFns::glNamedBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage)
+{
+	(this->*m_thunk_glNamedBufferData)(state,target,buffer,size,usage);
 }
