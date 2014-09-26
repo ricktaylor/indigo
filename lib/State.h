@@ -72,6 +72,11 @@ namespace Indigo
 		void texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
 		void texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 		void texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+
+		void texture_parameter(GLuint texture, GLenum target, GLenum name, GLfloat val);
+		void texture_parameter(GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
+		void texture_parameter(GLuint texture, GLenum target, GLenum name, GLint val);
+		void texture_parameter(GLuint texture, GLenum target, GLenum name, const GLint* pval);
 	};
 }
 

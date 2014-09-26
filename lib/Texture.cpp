@@ -189,3 +189,23 @@ void Indigo::Texture::bind(State& state, GLenum unit) const
 {
 	state.bind_multi_texture(unit,m_target,m_tex);
 }
+
+void Indigo::Texture::parameter(GLenum name, GLfloat val)
+{
+	State::get_current()->texture_parameter(m_tex,m_target,name,val);
+}
+
+void Indigo::Texture::parameter(GLenum name, const GLfloat* pval)
+{
+	State::get_current()->texture_parameter(m_tex,m_target,name,pval);
+}
+
+void Indigo::Texture::parameter(GLenum name, GLint val)
+{
+	State::get_current()->texture_parameter(m_tex,m_target,name,val);
+}
+
+void Indigo::Texture::parameter(GLenum name, const GLint* pval)
+{
+	State::get_current()->texture_parameter(m_tex,m_target,name,pval);
+}

@@ -54,6 +54,11 @@ namespace Indigo
 		void sub_image(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 		void sub_image(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 
+		void parameter(GLenum name, GLfloat val);
+		void parameter(GLenum name, const GLfloat* pval);
+		void parameter(GLenum name, GLint val);
+		void parameter(GLenum name, const GLint* pval);
+
 		GLenum target() const;
 
 		bool is_valid() const;

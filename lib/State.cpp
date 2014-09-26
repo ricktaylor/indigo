@@ -182,3 +182,23 @@ void Indigo::State::texture_subimage(GLuint texture, GLenum target, GLint level,
 {
 	m_state_fns.glTextureSubImage3D(*this,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
+
+void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name, GLfloat val)
+{
+	m_state_fns.glTextureParameterf(*this,texture,target,name,val);
+}
+
+void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name, const GLfloat* pval)
+{
+	m_state_fns.glTextureParameterfv(*this,texture,target,name,pval);
+}
+
+void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name, GLint val)
+{
+	m_state_fns.glTextureParameteri(*this,texture,target,name,val);
+}
+
+void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name, const GLint* pval)
+{
+	m_state_fns.glTextureParameteriv(*this,texture,target,name,pval);
+}

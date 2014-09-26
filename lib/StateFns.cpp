@@ -55,7 +55,15 @@ Indigo::StateFns::StateFns() :
 		m_thunk_glTextureSubImage2D(&StateFns::check_glTextureSubImage2D),
 		m_fn_glTextureSubImage2D(NULL),
 		m_thunk_glTextureSubImage3D(&StateFns::check_glTextureSubImage3D),
-		m_fn_glTextureSubImage3D(NULL)
+		m_fn_glTextureSubImage3D(NULL),
+		m_thunk_glTextureParameterf(&StateFns::check_glTextureParameterf),
+		m_fn_glTextureParameterf(NULL),
+		m_thunk_glTextureParameterfv(&StateFns::check_glTextureParameterfv),
+		m_fn_glTextureParameterfv(NULL),
+		m_thunk_glTextureParameteri(&StateFns::check_glTextureParameteri),
+		m_fn_glTextureParameteri(NULL),
+		m_thunk_glTextureParameteriv(&StateFns::check_glTextureParameteriv),
+		m_fn_glTextureParameteriv(NULL)
 {
 }
 
@@ -676,4 +684,132 @@ void Indigo::StateFns::call_glTexSubImage3D(State& state, GLuint texture, GLenum
 void Indigo::StateFns::glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	(this->*m_thunk_glTextureSubImage3D)(state,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+}
+
+void Indigo::StateFns::check_glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
+{
+	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glTextureParameterf = glfwGetProcAddress("glTextureParameterfEXT");
+		if (m_fn_glTextureParameterf)
+			m_thunk_glTextureParameterf = &StateFns::call_glTextureParameterfEXT;
+	}
+
+	if (!m_fn_glTextureParameterf)
+		m_thunk_glTextureParameterf = &StateFns::call_glTexParameterf;
+
+	(this->*m_thunk_glTextureParameterf)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTextureParameterfEXT(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
+{
+	(*((PFNGLTEXTUREPARAMETERFEXTPROC)m_fn_glTextureParameterf))(texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTexParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
+{
+	state.bind_multi_texture(state.m_active_texture_unit,target,texture);
+
+	glTexParameterf(target,name,val);
+}
+
+void Indigo::StateFns::glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
+{
+	(this->*m_thunk_glTextureParameterf)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::check_glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+{
+	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glTextureParameterfv = glfwGetProcAddress("glTextureParameterfvEXT");
+		if (m_fn_glTextureParameterfv)
+			m_thunk_glTextureParameterfv = &StateFns::call_glTextureParameterfvEXT;
+	}
+
+	if (!m_fn_glTextureParameterfv)
+		m_thunk_glTextureParameterfv = &StateFns::call_glTexParameterfv;
+
+	(this->*m_thunk_glTextureParameterfv)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTextureParameterfvEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+{
+	(*((PFNGLTEXTUREPARAMETERFVEXTPROC)m_fn_glTextureParameterfv))(texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTexParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+{
+	state.bind_multi_texture(state.m_active_texture_unit,target,texture);
+
+	glTexParameterfv(target,name,val);
+}
+
+void Indigo::StateFns::glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+{
+	(this->*m_thunk_glTextureParameterfv)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::check_glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+{
+	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glTextureParameteri = glfwGetProcAddress("glTextureParameteriEXT");
+		if (m_fn_glTextureParameteri)
+			m_thunk_glTextureParameteri = &StateFns::call_glTextureParameteriEXT;
+	}
+
+	if (!m_fn_glTextureParameteri)
+		m_thunk_glTextureParameteri = &StateFns::call_glTexParameteri;
+
+	(this->*m_thunk_glTextureParameteri)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTextureParameteriEXT(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+{
+	(*((PFNGLTEXTUREPARAMETERIEXTPROC)m_fn_glTextureParameteri))(texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTexParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+{
+	state.bind_multi_texture(state.m_active_texture_unit,target,texture);
+
+	glTexParameteri(target,name,val);
+}
+
+void Indigo::StateFns::glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+{
+	(this->*m_thunk_glTextureParameteri)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::check_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+{
+	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glTextureParameteriv = glfwGetProcAddress("glTextureParameterivEXT");
+		if (m_fn_glTextureParameteriv)
+			m_thunk_glTextureParameteriv = &StateFns::call_glTextureParameterivEXT;
+	}
+
+	if (!m_fn_glTextureParameteriv)
+		m_thunk_glTextureParameteriv = &StateFns::call_glTexParameteriv;
+
+	(this->*m_thunk_glTextureParameteriv)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTextureParameterivEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+{
+	(*((PFNGLTEXTUREPARAMETERIVEXTPROC)m_fn_glTextureParameteriv))(texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTexParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+{
+	state.bind_multi_texture(state.m_active_texture_unit,target,texture);
+
+	glTexParameteriv(target,name,val);
+}
+
+void Indigo::StateFns::glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+{
+	(this->*m_thunk_glTextureParameteriv)(state,texture,target,name,val);
 }

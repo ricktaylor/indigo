@@ -63,6 +63,10 @@ namespace Indigo
 		void glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
 		void glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 		void glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+		void glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val);
+		void glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
+		void glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val);
+		void glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val);
 
 	private:
 		StateFns();
@@ -140,6 +144,31 @@ namespace Indigo
 		void check_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 		void call_glTextureSubImage3DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 		void call_glTexSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+
+		void (StateFns::*m_thunk_glTextureParameterf)(State&,GLuint,GLenum,GLenum,GLfloat);
+		GLFWglproc m_fn_glTextureParameterf;
+		void check_glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val);
+		void call_glTextureParameterfEXT(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val);
+		void call_glTexParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val);
+
+		void (StateFns::*m_thunk_glTextureParameterfv)(State&,GLuint,GLenum,GLenum,const GLfloat*);
+		GLFWglproc m_fn_glTextureParameterfv;
+		void check_glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
+		void call_glTextureParameterfvEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
+		void call_glTexParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
+
+		void (StateFns::*m_thunk_glTextureParameteri)(State&,GLuint,GLenum,GLenum,GLint);
+		GLFWglproc m_fn_glTextureParameteri;
+		void check_glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val);
+		void call_glTextureParameteriEXT(State& state, GLuint texture, GLenum target, GLenum name, GLint val);
+		void call_glTexParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val);
+
+		void (StateFns::*m_thunk_glTextureParameteriv)(State&,GLuint,GLenum,GLenum,const GLint*);
+		GLFWglproc m_fn_glTextureParameteriv;
+		void check_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
+		void call_glTextureParameterivEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
+		void call_glTexParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
+
 	};
 }
 
