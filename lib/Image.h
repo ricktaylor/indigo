@@ -26,7 +26,7 @@
 
 namespace Indigo
 {
-	OOBase::SharedPtr<Texture> load_targa(const char* data, size_t len);
+	OOBase::SharedPtr<Texture> load_targa(const unsigned char* data, size_t len, bool mipmap = false);
 }
 
 #endif // INDIGO_IMAGE_H_INCLUDED
