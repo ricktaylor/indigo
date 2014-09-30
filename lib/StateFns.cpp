@@ -661,7 +661,7 @@ void Indigo::StateFns::call_glTexSubImage3D(State& state, GLuint texture, GLenum
 {
 	state.bind_multi_texture(state.m_active_texture_unit,target,texture);
 
-	glTexSubImage3D(target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+	(*((PFNGLTEXSUBIMAGE3DPROC)m_fn_glTextureSubImage3D))(target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
 void Indigo::StateFns::glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
