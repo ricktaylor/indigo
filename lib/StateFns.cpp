@@ -395,6 +395,9 @@ void Indigo::StateFns::emulate_glTextureStorage1D(State& state, GLuint texture, 
 {
 	state.bind_multi_texture(state.m_active_texture_unit,target,texture);
 
+	glTexParameteri(target,GL_TEXTURE_BASE_LEVEL,0);
+	glTexParameteri(target,GL_TEXTURE_MAX_LEVEL,levels-1);
+
 	// Keep in line with Texture::init
 	for (GLsizei i = 0; i < levels; ++i)
 	{
@@ -450,6 +453,9 @@ void Indigo::StateFns::check_glTextureStorage2D(State& state, GLuint texture, GL
 void Indigo::StateFns::emulate_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	state.bind_multi_texture(state.m_active_texture_unit,target,texture);
+
+	glTexParameteri(target,GL_TEXTURE_BASE_LEVEL,0);
+	glTexParameteri(target,GL_TEXTURE_MAX_LEVEL,levels-1);
 
 	// Keep in line with Texture::init
 	for (GLsizei i = 0; i < levels; ++i)
@@ -524,6 +530,9 @@ void Indigo::StateFns::check_glTextureStorage3D(State& state, GLuint texture, GL
 void Indigo::StateFns::emulate_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	state.bind_multi_texture(state.m_active_texture_unit,target,texture);
+
+	glTexParameteri(target,GL_TEXTURE_BASE_LEVEL,0);
+	glTexParameteri(target,GL_TEXTURE_MAX_LEVEL,levels-1);
 
 	// Keep in line with Texture::init
 	for (GLsizei i = 0; i < levels; ++i)

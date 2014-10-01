@@ -81,8 +81,12 @@ void Indigo::Texture::do_create(GLsizei levels, GLenum internalFormat, GLsizei w
 
 void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width)
 {
+	OOBase::SharedPtr<StateFns> fns = StateFns::get_current();
 	OOBase::SharedPtr<State> state = State::get_current();
 	state->bind(state->active_texture_unit(),shared_from_this());
+
+	glTexParameteri(m_target,GL_TEXTURE_BASE_LEVEL,0);
+	glTexParameteri(m_target,GL_TEXTURE_MAX_LEVEL,levels-1);
 
 	// Keep in line with StateFns::emulate_glTextureStorage1D
 	for (GLsizei i = 0; i < levels; ++i)
@@ -98,6 +102,9 @@ void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width, 
 {
 	OOBase::SharedPtr<State> state = State::get_current();
 	state->bind(state->active_texture_unit(),shared_from_this());
+
+	glTexParameteri(m_target,GL_TEXTURE_BASE_LEVEL,0);
+	glTexParameteri(m_target,GL_TEXTURE_MAX_LEVEL,levels-1);
 
 	// Keep in line with StateFns::emulate_glTextureStorage2D
 	for (GLsizei i = 0; i < levels; ++i)
@@ -132,6 +139,9 @@ void Indigo::Texture::init(GLsizei levels, GLint internalFormat, GLsizei width, 
 	OOBase::SharedPtr<StateFns> fns = StateFns::get_current();
 	OOBase::SharedPtr<State> state = State::get_current();
 	state->bind(state->active_texture_unit(),shared_from_this());
+
+	glTexParameteri(m_target,GL_TEXTURE_BASE_LEVEL,0);
+	glTexParameteri(m_target,GL_TEXTURE_MAX_LEVEL,levels-1);
 
 	// Keep in line with StateFns::emulate_glTextureStorage3D
 	for (GLsizei i = 0; i < levels; ++i)
