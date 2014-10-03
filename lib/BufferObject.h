@@ -27,11 +27,45 @@
 namespace Indigo
 {
 	class State;
+	class BufferObject;
 
-	class BufferObject
+	namespace detail
 	{
+		class BufferMapping : public OOBase::detail::SharedCountBase
+		{
+		public:
+			BufferMapping(const OOBase::SharedPtr<BufferObject>& buffer, void* map) :
+				SharedCountBase(), m_buffer(buffer), m_map(map)
+			{
+			}
+
+			void dispose();
+			void destroy();
+
+		private:
+			OOBase::SharedPtr<BufferObject> m_buffer;
+			void* m_map;
+		};
+	}
+
+	class BufferObject : public OOBase::EnableSharedFromThis<BufferObject>
+	{
+		friend class detail::BufferMapping;
+
 	public:
 		void data(GLintptr offset, GLsizeiptr size, const void* data);
+
+		template <typename T>
+		OOBase::SharedPtr<T> map(GLenum access)
+		{
+			return OOBase::reinterpret_pointer_cast<T,char>(map_i(access));
+		}
+
+		template <typename T>
+		OOBase::SharedPtr<T> map(GLintptr offset, GLsizeiptr length, GLenum access)
+		{
+			return OOBase::reinterpret_pointer_cast<T,char>(map_i(offset,length,access));
+		}
 
 	protected:
 		GLuint m_buffer;
@@ -39,6 +73,11 @@ namespace Indigo
 
 		BufferObject(GLenum target, GLsizeiptr size, GLenum usage);
 		~BufferObject();
+
+	private:
+		OOBase::SharedPtr<char> map_i(GLenum access);
+		OOBase::SharedPtr<char> map_i(GLintptr offset, GLsizeiptr length, GLenum access);
+		void unmap();
 	};
 }
 
