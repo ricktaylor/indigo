@@ -56,15 +56,9 @@ namespace Indigo
 		void data(GLintptr offset, GLsizeiptr size, const void* data);
 
 		template <typename T>
-		OOBase::SharedPtr<T> map(GLenum access)
+		OOBase::SharedPtr<T> map(GLenum access, GLintptr offset = 0, GLsizeiptr length = -1)
 		{
-			return OOBase::reinterpret_pointer_cast<T,char>(map_i(access));
-		}
-
-		template <typename T>
-		OOBase::SharedPtr<T> map(GLintptr offset, GLsizeiptr length, GLenum access)
-		{
-			return OOBase::reinterpret_pointer_cast<T,char>(map_i(offset,length,access));
+			return OOBase::reinterpret_pointer_cast<T,char>(map_i(access,offset,length));
 		}
 
 	protected:
@@ -75,8 +69,7 @@ namespace Indigo
 		~BufferObject();
 
 	private:
-		OOBase::SharedPtr<char> map_i(GLenum access);
-		OOBase::SharedPtr<char> map_i(GLintptr offset, GLsizeiptr length, GLenum access);
+		OOBase::SharedPtr<char> map_i(GLenum access, GLintptr offset, GLsizeiptr length);
 		void unmap();
 	};
 }
