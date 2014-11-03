@@ -34,10 +34,10 @@ void Indigo::detail::BufferMapping::destroy()
 	OOBase::ThreadLocalAllocator::delete_free(this);
 }
 
-Indigo::BufferObject::BufferObject(GLenum target, GLsizeiptr size, GLenum usage) : m_buffer(0), m_target(target)
+Indigo::BufferObject::BufferObject(GLenum target, GLenum usage, GLsizeiptr size, const void* data) : m_buffer(0), m_target(target), m_usage(usage), m_size(size)
 {
 	StateFns::get_current()->glGenBuffers(1,&m_buffer);
-	State::get_current()->buffer_init(m_target,m_buffer,size,usage);
+	StateFns::get_current()->glNamedBufferData(m_target,m_buffer,size,data,usage);
 }
 
 Indigo::BufferObject::~BufferObject()
@@ -45,21 +45,31 @@ Indigo::BufferObject::~BufferObject()
 	StateFns::get_current()->glDeleteBuffers(1,&m_buffer);
 }
 
+void Indigo::BufferObject::bind()
+{
+	StateFns::get_current()->glBindBuffer(m_target,m_buffer);
+}
+
 OOBase::SharedPtr<char> Indigo::BufferObject::map_i(GLenum access, GLintptr offset, GLsizeiptr length)
 {
 	OOBase::SharedPtr<char> ret;
 
-	// Do the mapping!
-	void* m = NULL;
-	if (offset == 0 && length == -1)
-		m = glMapBuffer(m_target,access);
-	else
-		m = glMapBufferRange(m_target,offset,length,access);
+	void* m = StateFns::get_current()->glMapBufferRange(m_target,m_buffer,offset,length,m_usage,m_size,access);
+	if (m)
+	{
+		detail::BufferMapping* bm = NULL;
+		OOBase::ThreadLocalAllocator::allocate_new(bm,shared_from_this(),m);
+		if (bm)
+			ret = OOBase::make_shared(reinterpret_cast<char*>(m),bm);
 
-	detail::BufferMapping* bm = NULL;
-	OOBase::ThreadLocalAllocator::allocate_new(bm,shared_from_this(),m);
-	if (bm)
-		ret = OOBase::make_shared(reinterpret_cast<char*>(m),bm);
+		if (!ret)
+			StateFns::get_current()->glUnmapBuffer(m_target,m_buffer);
+	}
 
 	return ret;
+}
+
+void Indigo::BufferObject::unmap()
+{
+	StateFns::get_current()->glUnmapBuffer(m_target,m_buffer);
 }

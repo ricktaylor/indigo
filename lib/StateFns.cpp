@@ -66,7 +66,11 @@ Indigo::StateFns::StateFns() :
 		m_fn_glBindBuffer(NULL),
 		m_fn_glDeleteBuffers(NULL),
 		m_thunk_glNamedBufferData(&StateFns::check_glNamedBufferData),
-		m_fn_glNamedBufferData(NULL)
+		m_fn_glNamedBufferData(NULL),
+		m_thunk_glMapNamedBufferRange(&StateFns::check_glMapNamedBufferRange),
+		m_fn_glMapNamedBufferRange(NULL),
+		m_thunk_glUnmapNamedBuffer(&StateFns::check_glUnmapNamedBuffer),
+		m_fn_glUnmapNamedBuffer(NULL)
 {
 }
 
@@ -839,7 +843,7 @@ void Indigo::StateFns::glDeleteBuffers(GLsizei n, GLuint* buffers)
 		(*m_fn_glDeleteBuffers)(n,buffers);
 }
 
-void Indigo::StateFns::check_glNamedBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage)
+void Indigo::StateFns::check_glNamedBufferData(GLenum target, GLuint buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
 	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
 	{
@@ -852,27 +856,124 @@ void Indigo::StateFns::check_glNamedBufferData(State& state, GLenum target, GLui
 	{
 		m_fn_glNamedBufferData = glfwGetProcAddress("glBufferData");
 		if (!m_fn_glNamedBufferData)
-			LOG_ERROR(("No m_fn_glNamedBufferData function"));
+			LOG_ERROR(("No glBufferData function"));
 		else
 			m_thunk_glNamedBufferData = &StateFns::call_glBufferData;
 	}
 
-	(this->*m_thunk_glNamedBufferData)(state,target,buffer,size,usage);
+	(this->*m_thunk_glNamedBufferData)(target,buffer,size,data,usage);
 }
 
-void Indigo::StateFns::call_glNamedBufferDataEXT(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage)
+void Indigo::StateFns::call_glNamedBufferDataEXT(GLenum target, GLuint buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
-	(*((PFNGLNAMEDBUFFERDATAEXTPROC)m_fn_glNamedBufferData))(buffer,size,NULL,usage);
+	(*((PFNGLNAMEDBUFFERDATAEXTPROC)m_fn_glNamedBufferData))(buffer,size,data,usage);
 }
 
-void Indigo::StateFns::call_glBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage)
+void Indigo::StateFns::call_glBufferData(GLenum target, GLuint buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
 	glBindBuffer(target,buffer);
 
-	(*((PFNGLBUFFERDATAPROC)m_fn_glNamedBufferData))(target,size,NULL,usage);
+	(*((PFNGLBUFFERDATAPROC)m_fn_glNamedBufferData))(target,size,data,usage);
 }
 
-void Indigo::StateFns::glNamedBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage)
+void Indigo::StateFns::glNamedBufferData(GLenum target, GLuint buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
-	(this->*m_thunk_glNamedBufferData)(state,target,buffer,size,usage);
+	(this->*m_thunk_glNamedBufferData)(target,buffer,size,data,usage);
+}
+
+void* Indigo::StateFns::check_glMapNamedBufferRange(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+{
+	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glMapNamedBufferRange = glfwGetProcAddress("glMapNamedBufferRangeEXT");
+		if (m_fn_glMapNamedBufferRange)
+			m_thunk_glMapNamedBufferRange = &StateFns::call_glMapNamedBufferRangeEXT;
+	}
+
+	if (!m_fn_glMapNamedBufferRange)
+	{
+		m_fn_glMapNamedBufferRange = glfwGetProcAddress("glMapBufferRange");
+		if (m_fn_glMapNamedBufferRange)
+			m_thunk_glMapNamedBufferRange = &StateFns::call_glMapBufferRange;
+	}
+
+	if (!m_fn_glMapNamedBufferRange)
+	{
+		m_fn_glMapNamedBufferRange = glfwGetProcAddress("glMapBuffer");
+		if (!m_fn_glMapNamedBufferRange)
+			LOG_ERROR(("No glMapBuffer function"));
+		else
+			m_thunk_glMapNamedBufferRange = &StateFns::call_glMapBuffer;
+	}
+
+	return (this->*m_thunk_glMapNamedBufferRange)(target,buffer,offset,length,orig_usage,orig_size,access);
+}
+
+void* Indigo::StateFns::call_glMapNamedBufferRangeEXT(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+{
+	return (*((PFNGLMAPNAMEDBUFFERRANGEEXTPROC)m_fn_glMapNamedBufferRange))(buffer,offset,length,access);
+}
+
+void* Indigo::StateFns::call_glMapBufferRange(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+{
+	glBindBuffer(target,buffer);
+
+	return (*((PFNGLMAPBUFFERRANGEPROC)m_fn_glMapNamedBufferRange))(target,offset,length,access);
+}
+
+void* Indigo::StateFns::call_glMapBuffer(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+{
+	if (access & GL_MAP_INVALIDATE_BUFFER_BIT)
+		glNamedBufferData(target,buffer,orig_size,NULL,orig_usage);
+	else
+		glBindBuffer(target,buffer);
+
+	uint8_t* ret = static_cast<uint8_t*>((*((PFNGLMAPBUFFERPROC)m_fn_glMapNamedBufferRange))(target,access));
+	if (ret)
+		ret += offset;
+
+	return ret;
+}
+
+void* Indigo::StateFns::glMapBufferRange(GLenum target, GLuint buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+{
+	return (this->*m_thunk_glMapNamedBufferRange)(target,buffer,offset,length,orig_usage,orig_size,access);
+}
+
+void Indigo::StateFns::check_glUnmapNamedBuffer(GLenum target, GLuint buffer)
+{
+	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glUnmapNamedBuffer = glfwGetProcAddress("glUnmapNamedBufferEXT");
+		if (m_fn_glUnmapNamedBuffer)
+			m_thunk_glUnmapNamedBuffer = &StateFns::call_glUnmapNamedBufferEXT;
+	}
+
+	if (!m_fn_glUnmapNamedBuffer)
+	{
+		m_fn_glUnmapNamedBuffer = glfwGetProcAddress("glUnmapBuffer");
+		if (!m_fn_glUnmapNamedBuffer)
+			LOG_ERROR(("No glUnmapBuffer function"));
+		else
+			m_thunk_glUnmapNamedBuffer = &StateFns::call_glUnmapBuffer;
+	}
+
+	(this->*m_thunk_glUnmapNamedBuffer)(target,buffer);
+}
+
+void Indigo::StateFns::call_glUnmapNamedBufferEXT(GLenum target, GLuint buffer)
+{
+	(*((PFNGLUNMAPNAMEDBUFFEREXTPROC)m_fn_glUnmapNamedBuffer))(buffer);
+}
+
+void Indigo::StateFns::call_glUnmapBuffer(GLenum target, GLuint buffer)
+{
+	glBindBuffer(target,buffer);
+
+	(*((PFNGLUNMAPBUFFERPROC)m_fn_glUnmapNamedBuffer))(target);
+}
+
+void Indigo::StateFns::glUnmapBuffer(GLenum target, GLuint buffer)
+{
+	(this->*m_thunk_glUnmapNamedBuffer)(target,buffer);
 }

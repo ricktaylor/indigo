@@ -71,7 +71,9 @@ namespace Indigo
 		void glGenBuffers(GLsizei n, GLuint* buffers);
 		void glBindBuffer(GLenum target, GLuint buffer);
 		void glDeleteBuffers(GLsizei n, GLuint* buffers);
-		void glNamedBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage);
+		void glNamedBufferData(GLenum target, GLuint buffer, GLsizeiptr size, const void* data, GLenum usage);
+		void* glMapBufferRange(GLenum target, GLuint buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void glUnmapBuffer(GLenum target, GLuint buffer);
 
 	private:
 		StateFns();
@@ -170,11 +172,24 @@ namespace Indigo
 		PFNGLBINDBUFFERPROC m_fn_glBindBuffer;
 		PFNGLDELETEBUFFERSPROC m_fn_glDeleteBuffers;
 
-		void (StateFns::*m_thunk_glNamedBufferData)(State&,GLenum,GLuint,GLsizeiptr,GLenum);
+		void (StateFns::*m_thunk_glNamedBufferData)(GLenum,GLuint,GLsizeiptr,const void*,GLenum);
 		GLFWglproc m_fn_glNamedBufferData;
-		void check_glNamedBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage);
-		void call_glNamedBufferDataEXT(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage);
-		void call_glBufferData(State& state, GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage);
+		void check_glNamedBufferData(GLenum target, GLuint buffer, GLsizeiptr size, const void *data, GLenum usage);
+		void call_glNamedBufferDataEXT(GLenum target, GLuint buffer, GLsizeiptr size, const void *data, GLenum usage);
+		void call_glBufferData(GLenum target, GLuint buffer, GLsizeiptr size, const void *data, GLenum usage);
+
+		void* (StateFns::*m_thunk_glMapNamedBufferRange)(GLenum,GLuint,GLintptr,GLsizei,GLenum,GLsizeiptr,GLbitfield);
+		GLFWglproc m_fn_glMapNamedBufferRange;
+		void* check_glMapNamedBufferRange(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void* call_glMapNamedBufferRangeEXT(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void* call_glMapBufferRange(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void* call_glMapBuffer(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+
+		void (StateFns::*m_thunk_glUnmapNamedBuffer)(GLenum,GLuint);
+		GLFWglproc m_fn_glUnmapNamedBuffer;
+		void check_glUnmapNamedBuffer(GLenum target, GLuint buffer);
+		void call_glUnmapNamedBufferEXT(GLenum target, GLuint buffer);
+		void call_glUnmapBuffer(GLenum target, GLuint buffer);
 	};
 }
 

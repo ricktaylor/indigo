@@ -53,19 +53,27 @@ namespace Indigo
 		friend class detail::BufferMapping;
 
 	public:
-		void data(GLintptr offset, GLsizeiptr size, const void* data);
+		template <typename T>
+		OOBase::SharedPtr<T> map(GLenum access, GLintptr offset = 0)
+		{
+			return OOBase::reinterpret_pointer_cast<T,char>(map_i(access,offset,m_size - offset));
+		}
 
 		template <typename T>
-		OOBase::SharedPtr<T> map(GLenum access, GLintptr offset = 0, GLsizeiptr length = -1)
+		OOBase::SharedPtr<T> map(GLenum access, GLintptr offset, GLsizeiptr length)
 		{
 			return OOBase::reinterpret_pointer_cast<T,char>(map_i(access,offset,length));
 		}
 
-	protected:
-		GLuint m_buffer;
-		GLenum m_target;
+		void bind();
 
-		BufferObject(GLenum target, GLsizeiptr size, GLenum usage);
+	protected:
+		GLuint     m_buffer;
+		GLenum     m_target;
+		GLenum     m_usage;
+		GLsizeiptr m_size;
+
+		BufferObject(GLenum target, GLenum usage, GLsizeiptr size, const void* data = NULL);
 		~BufferObject();
 
 	private:

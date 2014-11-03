@@ -22,6 +22,7 @@
 #include "Window.h"
 #include "Texture.h"
 #include "Shader.h"
+#include "BufferObject.h"
 
 Indigo::State::State(StateFns& fns) :
 		m_state_fns(fns),
@@ -201,9 +202,4 @@ void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name
 void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name, const GLint* pval)
 {
 	m_state_fns.glTextureParameteriv(*this,texture,target,name,pval);
-}
-
-void Indigo::State::buffer_init(GLenum target, GLuint buffer, GLsizeiptr size, GLenum usage)
-{
-	m_state_fns.glNamedBufferData(*this,target,buffer,size,usage);
 }
