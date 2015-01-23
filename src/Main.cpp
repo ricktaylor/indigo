@@ -201,7 +201,10 @@ int main(int argc, const char* argv[])
 		return help();
 
 	// Start the logger
-	OOBase::Logger::open_console_log(__FILE__);
+	OOBase::Logger::set_source_file(__FILE__);
+	OOBase::Logger::connect_stderr_log();
+	OOBase::Logger::connect_stdout_log();
+	OOBase::Logger::connect_debug_log();
 
 #if defined(HAVE_UNISTD_H)
 	// Ignore SIGCHLD and SIGPIPE
