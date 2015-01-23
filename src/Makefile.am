@@ -53,5 +53,5 @@ if WIN32
 #indigo_SOURCES += Indigo.rc
 indigo_LDADD += -lole32 -lrpcrt4
 else
-indigo_LDADD += -lX11 -lXrandr -lXi -lXxf86vm
+indigo_LDADD += -lX11 -lXrandr -lXi -lXxf86vm -lXcursor -lXinerama
 endif
