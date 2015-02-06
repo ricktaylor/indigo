@@ -132,6 +132,39 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase
 	return prev;
 }
 
+OOBase::SharedPtr<Indigo::BufferObject> Indigo::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object)
+{
+	return bind(buffer_object,buffer_object->m_target);
+}
+
+OOBase::SharedPtr<Indigo::BufferObject> Indigo::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
+{
+	OOBase::SharedPtr<BufferObject> prev;
+	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
+	if (i == m_buffer_objects.end())
+	{
+		if (buffer_object)
+			buffer_object->bind(target);
+
+		int err = m_buffer_objects.insert(target,buffer_object);
+		if (err)
+			LOG_WARNING(("Failed to add to buffer object cache: %s",OOBase::system_error_text(err)));
+	}
+	else 
+	{
+		prev = i->second;
+		if (i->second != buffer_object)
+		{
+			if (buffer_object)
+				buffer_object->bind(target);
+
+			i->second = buffer_object;
+		}
+	}
+
+	return prev;
+}
+
 void Indigo::State::bind_multi_texture(GLenum unit, GLenum target, GLuint texture)
 {
 	m_state_fns.glBindMultiTexture(*this,unit,target,texture);
@@ -202,4 +235,19 @@ void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name
 void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name, const GLint* pval)
 {
 	m_state_fns.glTextureParameteriv(*this,texture,target,name,pval);
+}
+
+void Indigo::State::named_buffer_data(OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
+{
+	m_state_fns.glNamedBufferData(*this,buffer,size,data,usage);
+}
+
+void* Indigo::State::map_buffer_range(OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+{
+	return m_state_fns.glMapBufferRange(*this,buffer,offset,length,orig_usage,orig_size,access);
+}
+
+void Indigo::State::unmap_buffer(OOBase::SharedPtr<BufferObject>& buffer)
+{
+	m_state_fns.glUnmapBuffer(*this,buffer);
 }

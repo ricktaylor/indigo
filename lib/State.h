@@ -30,21 +30,22 @@ namespace Indigo
 	class Framebuffer;
 	class Texture;
 	class Program;
-	class FontManager;
-
+	class BufferObject;
+	
 	class State : public OOBase::NonCopyable
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		friend class StateFns;
 		friend class Window;
 		friend class Texture;
-		friend class Font;
-
+		friend class BufferObject;
+		
 	public:
 		static OOBase::SharedPtr<State> get_current();
 
 		OOBase::SharedPtr<Framebuffer> bind(const OOBase::SharedPtr<Framebuffer>& fb);
-		OOBase::SharedPtr<Indigo::Texture> bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture);
+		OOBase::SharedPtr<Texture> bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture);
+		OOBase::SharedPtr<BufferObject> bind(const OOBase::SharedPtr<BufferObject>& buffer_object);
 
 		OOBase::SharedPtr<Program> use(const OOBase::SharedPtr<Program>& program);
 
@@ -55,10 +56,11 @@ namespace Indigo
 		OOBase::SharedPtr<Framebuffer> m_fb;
 		GLenum                         m_active_texture_unit;
 		OOBase::SharedPtr<Program>     m_current_program;
-		OOBase::SharedPtr<FontManager> m_font_manager;
-
+		
 		typedef OOBase::Table<GLenum,OOBase::SharedPtr<Texture>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator> tex_unit_t;
 		OOBase::Vector<tex_unit_t,OOBase::ThreadLocalAllocator> m_vecTexUnits;
+
+		OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator> m_buffer_objects;
 
 		State(StateFns& fns);
 
@@ -77,6 +79,11 @@ namespace Indigo
 		void texture_parameter(GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
 		void texture_parameter(GLuint texture, GLenum target, GLenum name, GLint val);
 		void texture_parameter(GLuint texture, GLenum target, GLenum name, const GLint* pval);
+
+		OOBase::SharedPtr<BufferObject> bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
+		void named_buffer_data(OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage);
+		void* map_buffer_range(OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void unmap_buffer(OOBase::SharedPtr<BufferObject>& buffer);
 	};
 }
 

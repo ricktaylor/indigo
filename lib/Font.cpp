@@ -75,11 +75,11 @@ namespace
 
 void Indigo::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour)
 {
-	if (!state.m_font_manager && !init_manager(state.m_font_manager))
-		return;
+	//if (!state.m_font_manager && !init_manager(state.m_font_manager))
+	//	return;
 
 	// Use the state's font program
-	state.use(state.m_font_manager->m_program);
+	//state.use(state.m_font_manager->m_program);
 
 	// Set the uniforms for MVP and colour
 	//state.m_font_manager->m_program->uniform(state.m_font_manager->m_mvp,mvp);

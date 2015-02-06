@@ -23,6 +23,7 @@
 #define INDIGO_STATE_FNS_H_INCLUDED
 
 #include "OOGL.h"
+#include "BufferObject.h"
 
 namespace Indigo
 {
@@ -71,9 +72,9 @@ namespace Indigo
 		void glGenBuffers(GLsizei n, GLuint* buffers);
 		void glBindBuffer(GLenum target, GLuint buffer);
 		void glDeleteBuffers(GLsizei n, GLuint* buffers);
-		void glNamedBufferData(GLenum target, GLuint buffer, GLsizeiptr size, const void* data, GLenum usage);
-		void* glMapBufferRange(GLenum target, GLuint buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
-		void glUnmapBuffer(GLenum target, GLuint buffer);
+		void glNamedBufferData(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void* data, GLenum usage);
+		void* glMapBufferRange(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void glUnmapBuffer(State& state, OOBase::SharedPtr<BufferObject>& buffer);
 
 	private:
 		StateFns();
@@ -172,24 +173,24 @@ namespace Indigo
 		PFNGLBINDBUFFERPROC m_fn_glBindBuffer;
 		PFNGLDELETEBUFFERSPROC m_fn_glDeleteBuffers;
 
-		void (StateFns::*m_thunk_glNamedBufferData)(GLenum,GLuint,GLsizeiptr,const void*,GLenum);
+		void (StateFns::*m_thunk_glNamedBufferData)(State&,OOBase::SharedPtr<BufferObject>&,GLsizeiptr,const void*,GLenum);
 		GLFWglproc m_fn_glNamedBufferData;
-		void check_glNamedBufferData(GLenum target, GLuint buffer, GLsizeiptr size, const void *data, GLenum usage);
-		void call_glNamedBufferDataEXT(GLenum target, GLuint buffer, GLsizeiptr size, const void *data, GLenum usage);
-		void call_glBufferData(GLenum target, GLuint buffer, GLsizeiptr size, const void *data, GLenum usage);
+		void check_glNamedBufferData(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage);
+		void call_glNamedBufferDataEXT(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage);
+		void call_glBufferData(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage);
 
-		void* (StateFns::*m_thunk_glMapNamedBufferRange)(GLenum,GLuint,GLintptr,GLsizei,GLenum,GLsizeiptr,GLbitfield);
+		void* (StateFns::*m_thunk_glMapNamedBufferRange)(State&,OOBase::SharedPtr<BufferObject>&,GLintptr,GLsizei,GLenum,GLsizeiptr,GLbitfield);
 		GLFWglproc m_fn_glMapNamedBufferRange;
-		void* check_glMapNamedBufferRange(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
-		void* call_glMapNamedBufferRangeEXT(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
-		void* call_glMapBufferRange(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
-		void* call_glMapBuffer(GLenum target, GLuint buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void* check_glMapNamedBufferRange(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void* call_glMapNamedBufferRangeEXT(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void* call_glMapBufferRange(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void* call_glMapBuffer(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
 
-		void (StateFns::*m_thunk_glUnmapNamedBuffer)(GLenum,GLuint);
+		void (StateFns::*m_thunk_glUnmapNamedBuffer)(State&,OOBase::SharedPtr<BufferObject>&);
 		GLFWglproc m_fn_glUnmapNamedBuffer;
-		void check_glUnmapNamedBuffer(GLenum target, GLuint buffer);
-		void call_glUnmapNamedBufferEXT(GLenum target, GLuint buffer);
-		void call_glUnmapBuffer(GLenum target, GLuint buffer);
+		void check_glUnmapNamedBuffer(State& state, OOBase::SharedPtr<BufferObject>& buffer);
+		void call_glUnmapNamedBufferEXT(State& state, OOBase::SharedPtr<BufferObject>& buffer);
+		void call_glUnmapBuffer(State& state, OOBase::SharedPtr<BufferObject>& buffer);
 	};
 }
 
