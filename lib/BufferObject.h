@@ -85,7 +85,7 @@ namespace Indigo
 			return m_size;
 		}
 
-		void copy(GLintptr writeoffset​, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset​, GLsizeiptr size​);
+		void copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size);
 
 	private:
 		GLuint     m_buffer;

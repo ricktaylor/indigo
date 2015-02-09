@@ -237,17 +237,17 @@ void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name
 	m_state_fns.glTextureParameteriv(*this,texture,target,name,pval);
 }
 
-void Indigo::State::named_buffer_data(OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
+void Indigo::State::named_buffer_data(const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
 	m_state_fns.glNamedBufferData(*this,buffer,size,data,usage);
 }
 
-void* Indigo::State::map_buffer_range(OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* Indigo::State::map_buffer_range(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	return m_state_fns.glMapBufferRange(*this,buffer,offset,length,orig_usage,orig_size,access);
 }
 
-void Indigo::State::unmap_buffer(OOBase::SharedPtr<BufferObject>& buffer)
+void Indigo::State::unmap_buffer(const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	m_state_fns.glUnmapBuffer(*this,buffer);
 }

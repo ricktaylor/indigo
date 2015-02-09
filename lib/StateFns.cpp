@@ -843,7 +843,7 @@ void Indigo::StateFns::glDeleteBuffers(GLsizei n, GLuint* buffers)
 		(*m_fn_glDeleteBuffers)(n,buffers);
 }
 
-void Indigo::StateFns::check_glNamedBufferData(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
+void Indigo::StateFns::check_glNamedBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
 	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
 	{
@@ -864,24 +864,24 @@ void Indigo::StateFns::check_glNamedBufferData(State& state, OOBase::SharedPtr<B
 	(this->*m_thunk_glNamedBufferData)(state,buffer,size,data,usage);
 }
 
-void Indigo::StateFns::call_glNamedBufferDataEXT(State&, OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
+void Indigo::StateFns::call_glNamedBufferDataEXT(State&, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
 	(*((PFNGLNAMEDBUFFERDATAEXTPROC)m_fn_glNamedBufferData))(buffer->m_buffer,size,data,usage);
 }
 
-void Indigo::StateFns::call_glBufferData(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
+void Indigo::StateFns::call_glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
 	state.bind(buffer);
 
 	(*((PFNGLBUFFERDATAPROC)m_fn_glNamedBufferData))(buffer->m_target,size,data,usage);
 }
 
-void Indigo::StateFns::glNamedBufferData(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
+void Indigo::StateFns::glNamedBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
 	(this->*m_thunk_glNamedBufferData)(state,buffer,size,data,usage);
 }
 
-void* Indigo::StateFns::check_glMapNamedBufferRange(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* Indigo::StateFns::check_glMapNamedBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
 	{
@@ -909,19 +909,19 @@ void* Indigo::StateFns::check_glMapNamedBufferRange(State& state, OOBase::Shared
 	return (this->*m_thunk_glMapNamedBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
 }
 
-void* Indigo::StateFns::call_glMapNamedBufferRangeEXT(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* Indigo::StateFns::call_glMapNamedBufferRangeEXT(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	return (*((PFNGLMAPNAMEDBUFFERRANGEEXTPROC)m_fn_glMapNamedBufferRange))(buffer->m_buffer,offset,length,access);
 }
 
-void* Indigo::StateFns::call_glMapBufferRange(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* Indigo::StateFns::call_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	state.bind(buffer);
 
 	return (*((PFNGLMAPBUFFERRANGEPROC)m_fn_glMapNamedBufferRange))(buffer->m_target,offset,length,access);
 }
 
-void* Indigo::StateFns::call_glMapBuffer(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* Indigo::StateFns::call_glMapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	if (access & GL_MAP_INVALIDATE_BUFFER_BIT)
 		glNamedBufferData(state,buffer,orig_size,NULL,orig_usage);
@@ -935,12 +935,12 @@ void* Indigo::StateFns::call_glMapBuffer(State& state, OOBase::SharedPtr<BufferO
 	return ret;
 }
 
-void* Indigo::StateFns::glMapBufferRange(State& state, OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* Indigo::StateFns::glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	return (this->*m_thunk_glMapNamedBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
 }
 
-void Indigo::StateFns::check_glUnmapNamedBuffer(State& state, OOBase::SharedPtr<BufferObject>& buffer)
+void Indigo::StateFns::check_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
 	{
@@ -961,19 +961,19 @@ void Indigo::StateFns::check_glUnmapNamedBuffer(State& state, OOBase::SharedPtr<
 	(this->*m_thunk_glUnmapNamedBuffer)(state,buffer);
 }
 
-void Indigo::StateFns::call_glUnmapNamedBufferEXT(State& state, OOBase::SharedPtr<BufferObject>& buffer)
+void Indigo::StateFns::call_glUnmapNamedBufferEXT(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	(*((PFNGLUNMAPNAMEDBUFFEREXTPROC)m_fn_glUnmapNamedBuffer))(buffer->m_buffer);
 }
 
-void Indigo::StateFns::call_glUnmapBuffer(State& state, OOBase::SharedPtr<BufferObject>& buffer)
+void Indigo::StateFns::call_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	state.bind(buffer);
 
 	(*((PFNGLUNMAPBUFFERPROC)m_fn_glUnmapNamedBuffer))(buffer->m_target);
 }
 
-void Indigo::StateFns::glUnmapBuffer(State& state, OOBase::SharedPtr<BufferObject>& buffer)
+void Indigo::StateFns::glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	(this->*m_thunk_glUnmapNamedBuffer)(state,buffer);
 }

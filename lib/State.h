@@ -81,9 +81,9 @@ namespace Indigo
 		void texture_parameter(GLuint texture, GLenum target, GLenum name, const GLint* pval);
 
 		OOBase::SharedPtr<BufferObject> bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
-		void named_buffer_data(OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage);
-		void* map_buffer_range(OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
-		void unmap_buffer(OOBase::SharedPtr<BufferObject>& buffer);
+		void named_buffer_data(const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage);
+		void* map_buffer_range(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void unmap_buffer(const OOBase::SharedPtr<BufferObject>& buffer);
 	};
 }
 

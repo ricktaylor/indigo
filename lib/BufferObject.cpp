@@ -80,7 +80,7 @@ void Indigo::BufferObject::unmap()
 	State::get_current()->unmap_buffer(shared_from_this());
 }
 
-void Indigo::BufferObject::copy(GLintptr writeoffset​, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset​, GLsizeiptr size​)
+void Indigo::BufferObject::copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
 	//State::get_current()->copy_buffer_data(shared_from_this(),writeoffset​,read,readoffset​,size);
 }
