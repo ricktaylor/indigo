@@ -42,7 +42,7 @@ OOBase::SharedPtr<Indigo::BufferObject> Indigo::BufferObject::create(GLenum targ
 Indigo::BufferObject::BufferObject(GLenum target, GLenum usage, GLsizeiptr size, const void* data) : m_buffer(0), m_target(target), m_usage(usage), m_size(size)
 {
 	StateFns::get_current()->glGenBuffers(1,&m_buffer);
-	State::get_current()->named_buffer_data(shared_from_this(),size,data,usage);
+	State::get_current()->buffer_data(shared_from_this(),size,data,usage);
 }
 
 Indigo::BufferObject::~BufferObject()
@@ -82,5 +82,5 @@ void Indigo::BufferObject::unmap()
 
 void Indigo::BufferObject::copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
-	//State::get_current()->copy_buffer_data(shared_from_this(),writeoffset​,read,readoffset​,size);
+	State::get_current()->copy_buffer_data(shared_from_this(),writeoffset,read,readoffset,size);
 }

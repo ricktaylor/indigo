@@ -41,16 +41,13 @@
 #error Need some kind of configure scipt!
 #endif
 
+#define GL_GLEXT_LEGACY
 #include <GLFW/glfw3.h>
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
-#if defined(HAVE_GL_GLEXT_H)
-#include <GL/glext.h>
-#else
 // Include our own glext.h
-#include "glext.h"
-#endif
+#include "./glext.h"
 
 #endif // OOGL_H_INCLUDED

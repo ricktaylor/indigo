@@ -21,6 +21,26 @@
 
 #include "Window.h"
 
+namespace
+{
+	static bool isGLversion(GLFWwindow* win, int major, int minor)
+	{
+		int actual_major = glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR);
+		int actual_minor = glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MINOR);
+
+		return (actual_major > major || (actual_major == major && actual_minor >= minor));
+	}
+
+	static bool isGLversion(int major, int minor)
+	{
+		GLFWwindow* win = glfwGetCurrentContext();
+		if (!win)
+			LOG_ERROR_RETURN(("No current context!"),false);
+
+		return isGLversion(win,major,minor);
+	}
+}
+
 Indigo::StateFns::StateFns() :
 		m_fn_glGenFramebuffers(NULL),
 		m_fn_glDeleteFramebuffers(NULL),
@@ -65,12 +85,14 @@ Indigo::StateFns::StateFns() :
 		m_fn_glGenBuffers(NULL),
 		m_fn_glBindBuffer(NULL),
 		m_fn_glDeleteBuffers(NULL),
-		m_thunk_glNamedBufferData(&StateFns::check_glNamedBufferData),
-		m_fn_glNamedBufferData(NULL),
-		m_thunk_glMapNamedBufferRange(&StateFns::check_glMapNamedBufferRange),
-		m_fn_glMapNamedBufferRange(NULL),
-		m_thunk_glUnmapNamedBuffer(&StateFns::check_glUnmapNamedBuffer),
-		m_fn_glUnmapNamedBuffer(NULL)
+		m_thunk_glBufferData(&StateFns::check_glBufferData),
+		m_fn_glBufferData(NULL),
+		m_thunk_glMapBufferRange(&StateFns::check_glMapBufferRange),
+		m_fn_glMapBufferRange(NULL),
+		m_thunk_glUnmapBuffer(&StateFns::check_glUnmapBuffer),
+		m_fn_glUnmapBuffer(NULL),
+		m_thunk_glCopyBufferSubData(&StateFns::check_glCopyBufferSubData),
+		m_fn_glCopyBufferSubData(NULL)
 {
 }
 
@@ -104,7 +126,7 @@ void Indigo::StateFns::glGenFramebuffers(GLsizei n, GLuint *framebuffers)
 			return;
 		}
 
-		if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
+		if (isGLversion(win,3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
 			m_fn_glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)glfwGetProcAddress("glGenFramebuffers");
 
 		if (!m_fn_glGenFramebuffers && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
@@ -128,7 +150,7 @@ void Indigo::StateFns::glDeleteFramebuffers(GLsizei n, GLuint *framebuffers)
 			return;
 		}
 
-		if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
+		if (isGLversion(win,3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
 			m_fn_glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)glfwGetProcAddress("glDeleteFramebuffers");
 
 		if (!m_fn_glDeleteFramebuffers && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
@@ -152,7 +174,7 @@ void Indigo::StateFns::glBindFramebuffer(GLenum target, GLuint framebuffer)
 			return;
 		}
 
-		if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
+		if (isGLversion(win,3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
 			m_fn_glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)glfwGetProcAddress("glBindFramebuffer");
 
 		if (!m_fn_glBindFramebuffer && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
@@ -173,7 +195,7 @@ GLenum Indigo::StateFns::glCheckFramebufferStatus(GLenum target)
 		if (!win)
 			LOG_ERROR_RETURN(("No current context!"),GL_FRAMEBUFFER_UNSUPPORTED);
 
-		if (glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR) >= 3 || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
+		if (isGLversion(win,3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
 			m_fn_glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)glfwGetProcAddress("glCheckFramebufferStatus");
 
 		if (!m_fn_glCheckFramebufferStatus && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
@@ -684,7 +706,14 @@ void Indigo::StateFns::glTextureSubImage3D(State& state, GLuint texture, GLenum 
 
 void Indigo::StateFns::check_glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
 {
-	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	if (isGLversion(4,5))
+	{
+		m_fn_glTextureParameterf = glfwGetProcAddress("glTextureParameterf");
+		if (m_fn_glTextureParameterf)
+			m_thunk_glTextureParameterf = &StateFns::call_glTextureParameterf;
+	}
+
+	if (!m_fn_glTextureParameterf && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
 	{
 		m_fn_glTextureParameterf = glfwGetProcAddress("glTextureParameterfEXT");
 		if (m_fn_glTextureParameterf)
@@ -695,6 +724,11 @@ void Indigo::StateFns::check_glTextureParameterf(State& state, GLuint texture, G
 		m_thunk_glTextureParameterf = &StateFns::call_glTexParameterf;
 
 	(this->*m_thunk_glTextureParameterf)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTextureParameterf(State& state, GLuint texture, GLenum, GLenum name, GLfloat val)
+{
+	(*((PFNGLTEXTUREPARAMETERFPROC)m_fn_glTextureParameterf))(texture,name,val);
 }
 
 void Indigo::StateFns::call_glTextureParameterfEXT(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
@@ -716,7 +750,14 @@ void Indigo::StateFns::glTextureParameterf(State& state, GLuint texture, GLenum 
 
 void Indigo::StateFns::check_glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
 {
-	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	if (isGLversion(4,5))
+	{
+		m_fn_glTextureParameterfv = glfwGetProcAddress("glTextureParameterfv");
+		if (m_fn_glTextureParameterfv)
+			m_thunk_glTextureParameterfv = &StateFns::call_glTextureParameterfv;
+	}
+
+	if (!m_fn_glTextureParameterfv && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
 	{
 		m_fn_glTextureParameterfv = glfwGetProcAddress("glTextureParameterfvEXT");
 		if (m_fn_glTextureParameterfv)
@@ -727,6 +768,11 @@ void Indigo::StateFns::check_glTextureParameterfv(State& state, GLuint texture, 
 		m_thunk_glTextureParameterfv = &StateFns::call_glTexParameterfv;
 
 	(this->*m_thunk_glTextureParameterfv)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+{
+	(*((PFNGLTEXTUREPARAMETERFVPROC)m_fn_glTextureParameterfv))(texture,name,val);
 }
 
 void Indigo::StateFns::call_glTextureParameterfvEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
@@ -748,7 +794,14 @@ void Indigo::StateFns::glTextureParameterfv(State& state, GLuint texture, GLenum
 
 void Indigo::StateFns::check_glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
 {
-	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	if (isGLversion(4,5))
+	{
+		m_fn_glTextureParameteri = glfwGetProcAddress("glTextureParameteri");
+		if (m_fn_glTextureParameteri)
+			m_thunk_glTextureParameteri = &StateFns::call_glTextureParameteri;
+	}
+
+	if (!m_fn_glTextureParameteri && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
 	{
 		m_fn_glTextureParameteri = glfwGetProcAddress("glTextureParameteriEXT");
 		if (m_fn_glTextureParameteri)
@@ -759,6 +812,11 @@ void Indigo::StateFns::check_glTextureParameteri(State& state, GLuint texture, G
 		m_thunk_glTextureParameteri = &StateFns::call_glTexParameteri;
 
 	(this->*m_thunk_glTextureParameteri)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+{
+	(*((PFNGLTEXTUREPARAMETERIPROC)m_fn_glTextureParameteri))(texture,name,val);
 }
 
 void Indigo::StateFns::call_glTextureParameteriEXT(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
@@ -780,7 +838,14 @@ void Indigo::StateFns::glTextureParameteri(State& state, GLuint texture, GLenum 
 
 void Indigo::StateFns::check_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
 {
-	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	if (isGLversion(4,5))
+	{
+		m_fn_glTextureParameteriv = glfwGetProcAddress("glTextureParameteriv");
+		if (m_fn_glTextureParameteriv)
+			m_thunk_glTextureParameteriv = &StateFns::call_glTextureParameteriv;
+	}
+
+	if (!m_fn_glTextureParameteriv && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
 	{
 		m_fn_glTextureParameteriv = glfwGetProcAddress("glTextureParameterivEXT");
 		if (m_fn_glTextureParameteriv)
@@ -791,6 +856,11 @@ void Indigo::StateFns::check_glTextureParameteriv(State& state, GLuint texture, 
 		m_thunk_glTextureParameteriv = &StateFns::call_glTexParameteriv;
 
 	(this->*m_thunk_glTextureParameteriv)(state,texture,target,name,val);
+}
+
+void Indigo::StateFns::call_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+{
+	(*((PFNGLTEXTUREPARAMETERIVPROC)m_fn_glTextureParameteriv))(texture,name,val);
 }
 
 void Indigo::StateFns::call_glTextureParameterivEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
@@ -843,92 +913,106 @@ void Indigo::StateFns::glDeleteBuffers(GLsizei n, GLuint* buffers)
 		(*m_fn_glDeleteBuffers)(n,buffers);
 }
 
-void Indigo::StateFns::check_glNamedBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
+void Indigo::StateFns::check_glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
-	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	if (isGLversion(4,5))
 	{
-		m_fn_glNamedBufferData = glfwGetProcAddress("glNamedBufferDataEXT");
-		if (m_fn_glNamedBufferData)
-			m_thunk_glNamedBufferData = &StateFns::call_glNamedBufferDataEXT;
+		m_fn_glBufferData = glfwGetProcAddress("glNamedBufferData");
+		if (m_fn_glBufferData)
+			m_thunk_glBufferData = &StateFns::call_glNamedBufferData;
 	}
 
-	if (!m_fn_glNamedBufferData)
+	if (!m_fn_glBufferData && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
 	{
-		m_fn_glNamedBufferData = glfwGetProcAddress("glBufferData");
-		if (!m_fn_glNamedBufferData)
+		m_fn_glBufferData = glfwGetProcAddress("glNamedBufferDataEXT");
+		if (m_fn_glBufferData)
+			m_thunk_glBufferData = &StateFns::call_glNamedBufferData;
+	}
+
+	if (!m_fn_glBufferData)
+	{
+		m_fn_glBufferData = glfwGetProcAddress("glBufferData");
+		if (!m_fn_glBufferData)
 			LOG_ERROR(("No glBufferData function"));
 		else
-			m_thunk_glNamedBufferData = &StateFns::call_glBufferData;
+			m_thunk_glBufferData = &StateFns::call_glBufferData;
 	}
 
-	(this->*m_thunk_glNamedBufferData)(state,buffer,size,data,usage);
+	(this->*m_thunk_glBufferData)(state,buffer,size,data,usage);
 }
 
-void Indigo::StateFns::call_glNamedBufferDataEXT(State&, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
+void Indigo::StateFns::call_glNamedBufferData(State&, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
-	(*((PFNGLNAMEDBUFFERDATAEXTPROC)m_fn_glNamedBufferData))(buffer->m_buffer,size,data,usage);
+	(*((PFNGLNAMEDBUFFERDATAPROC)m_fn_glBufferData))(buffer->m_buffer,size,data,usage);
 }
 
 void Indigo::StateFns::call_glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
 	state.bind(buffer);
 
-	(*((PFNGLBUFFERDATAPROC)m_fn_glNamedBufferData))(buffer->m_target,size,data,usage);
+	(*((PFNGLBUFFERDATAPROC)m_fn_glBufferData))(buffer->m_target,size,data,usage);
 }
 
-void Indigo::StateFns::glNamedBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
+void Indigo::StateFns::glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
 {
-	(this->*m_thunk_glNamedBufferData)(state,buffer,size,data,usage);
+	(this->*m_thunk_glBufferData)(state,buffer,size,data,usage);
 }
 
-void* Indigo::StateFns::check_glMapNamedBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* Indigo::StateFns::check_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
-	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	if (isGLversion(4,5))
 	{
-		m_fn_glMapNamedBufferRange = glfwGetProcAddress("glMapNamedBufferRangeEXT");
-		if (m_fn_glMapNamedBufferRange)
-			m_thunk_glMapNamedBufferRange = &StateFns::call_glMapNamedBufferRangeEXT;
+		m_fn_glMapBufferRange = glfwGetProcAddress("glMapNamedBufferRange");
+		if (m_fn_glMapBufferRange)
+			m_thunk_glMapBufferRange = &StateFns::call_glMapNamedBufferRange;
 	}
 
-	if (!m_fn_glMapNamedBufferRange)
+	if (!m_fn_glMapBufferRange && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
 	{
-		m_fn_glMapNamedBufferRange = glfwGetProcAddress("glMapBufferRange");
-		if (m_fn_glMapNamedBufferRange)
-			m_thunk_glMapNamedBufferRange = &StateFns::call_glMapBufferRange;
+		m_fn_glMapBufferRange = glfwGetProcAddress("glMapNamedBufferRangeEXT");
+		if (m_fn_glMapBufferRange)
+			m_thunk_glMapBufferRange = &StateFns::call_glMapNamedBufferRange;
 	}
 
-	if (!m_fn_glMapNamedBufferRange)
+	if (!m_fn_glMapBufferRange)
 	{
-		m_fn_glMapNamedBufferRange = glfwGetProcAddress("glMapBuffer");
-		if (!m_fn_glMapNamedBufferRange)
+		m_fn_glMapBufferRange = glfwGetProcAddress("glMapBufferRange");
+		if (m_fn_glMapBufferRange)
+			m_thunk_glMapBufferRange = &StateFns::call_glMapBufferRange;
+	}
+
+	if (!m_fn_glMapBufferRange)
+	{
+		m_fn_glMapBufferRange = glfwGetProcAddress("glMapBuffer");
+		if (!m_fn_glMapBufferRange)
 			LOG_ERROR(("No glMapBuffer function"));
 		else
-			m_thunk_glMapNamedBufferRange = &StateFns::call_glMapBuffer;
+			m_thunk_glMapBufferRange = &StateFns::call_glMapBuffer;
 	}
 
-	return (this->*m_thunk_glMapNamedBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
+	return (this->*m_thunk_glMapBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
 }
 
-void* Indigo::StateFns::call_glMapNamedBufferRangeEXT(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* Indigo::StateFns::call_glMapNamedBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
-	return (*((PFNGLMAPNAMEDBUFFERRANGEEXTPROC)m_fn_glMapNamedBufferRange))(buffer->m_buffer,offset,length,access);
+	return (*((PFNGLMAPNAMEDBUFFERRANGEPROC)m_fn_glMapBufferRange))(buffer->m_buffer,offset,length,access);
 }
 
 void* Indigo::StateFns::call_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	state.bind(buffer);
 
-	return (*((PFNGLMAPBUFFERRANGEPROC)m_fn_glMapNamedBufferRange))(buffer->m_target,offset,length,access);
+	return (*((PFNGLMAPBUFFERRANGEPROC)m_fn_glMapBufferRange))(buffer->m_target,offset,length,access);
 }
 
 void* Indigo::StateFns::call_glMapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	if (access & GL_MAP_INVALIDATE_BUFFER_BIT)
-		glNamedBufferData(state,buffer,orig_size,NULL,orig_usage);
+		glBufferData(state,buffer,orig_size,NULL,orig_usage);
 	
 	state.bind(buffer);
 	
-	OOBase::uint8_t* ret = static_cast<OOBase::uint8_t*>((*((PFNGLMAPBUFFERPROC)m_fn_glMapNamedBufferRange))(buffer->m_target,access));
+	OOBase::uint8_t* ret = static_cast<OOBase::uint8_t*>((*((PFNGLMAPBUFFERPROC)m_fn_glMapBufferRange))(buffer->m_target,access));
 	if (ret)
 		ret += offset;
 
@@ -937,43 +1021,96 @@ void* Indigo::StateFns::call_glMapBuffer(State& state, const OOBase::SharedPtr<B
 
 void* Indigo::StateFns::glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
-	return (this->*m_thunk_glMapNamedBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
+	return (this->*m_thunk_glMapBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
 }
 
-void Indigo::StateFns::check_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+void Indigo::StateFns::check_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
-	if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	if (isGLversion(4,5))
 	{
-		m_fn_glUnmapNamedBuffer = glfwGetProcAddress("glUnmapNamedBufferEXT");
-		if (m_fn_glUnmapNamedBuffer)
-			m_thunk_glUnmapNamedBuffer = &StateFns::call_glUnmapNamedBufferEXT;
+		m_fn_glUnmapBuffer = glfwGetProcAddress("glUnmapNamedBuffer");
+		if (m_fn_glUnmapBuffer)
+			m_thunk_glUnmapBuffer = &StateFns::call_glUnmapNamedBuffer;
 	}
 
-	if (!m_fn_glUnmapNamedBuffer)
+	if (!m_fn_glUnmapBuffer && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
 	{
-		m_fn_glUnmapNamedBuffer = glfwGetProcAddress("glUnmapBuffer");
-		if (!m_fn_glUnmapNamedBuffer)
+		m_fn_glUnmapBuffer = glfwGetProcAddress("glUnmapNamedBufferEXT");
+		if (m_fn_glUnmapBuffer)
+			m_thunk_glUnmapBuffer = &StateFns::call_glUnmapNamedBuffer;
+	}
+
+	if (!m_fn_glUnmapBuffer)
+	{
+		m_fn_glUnmapBuffer = glfwGetProcAddress("glUnmapBuffer");
+		if (!m_fn_glUnmapBuffer)
 			LOG_ERROR(("No glUnmapBuffer function"));
 		else
-			m_thunk_glUnmapNamedBuffer = &StateFns::call_glUnmapBuffer;
+			m_thunk_glUnmapBuffer = &StateFns::call_glUnmapBuffer;
 	}
 
-	(this->*m_thunk_glUnmapNamedBuffer)(state,buffer);
+	(this->*m_thunk_glUnmapBuffer)(state,buffer);
 }
 
-void Indigo::StateFns::call_glUnmapNamedBufferEXT(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+void Indigo::StateFns::call_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
-	(*((PFNGLUNMAPNAMEDBUFFEREXTPROC)m_fn_glUnmapNamedBuffer))(buffer->m_buffer);
+	(*((PFNGLUNMAPNAMEDBUFFERPROC)m_fn_glUnmapBuffer))(buffer->m_buffer);
 }
 
 void Indigo::StateFns::call_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	state.bind(buffer);
 
-	(*((PFNGLUNMAPBUFFERPROC)m_fn_glUnmapNamedBuffer))(buffer->m_target);
+	(*((PFNGLUNMAPBUFFERPROC)m_fn_glUnmapBuffer))(buffer->m_target);
 }
 
 void Indigo::StateFns::glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
-	(this->*m_thunk_glUnmapNamedBuffer)(state,buffer);
+	(this->*m_thunk_glUnmapBuffer)(state,buffer);
+}
+
+void Indigo::StateFns::check_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+{
+	if (isGLversion(4,5))
+	{
+		m_fn_glCopyBufferSubData = glfwGetProcAddress("glCopyNamedBufferSubData");
+		if (m_fn_glCopyBufferSubData)
+			m_thunk_glCopyBufferSubData = &StateFns::call_glCopyNamedBufferSubData;
+	}
+
+	if (!m_fn_glCopyBufferSubData && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glCopyBufferSubData = glfwGetProcAddress("glCopyNamedBufferSubDataEXT");
+		if (m_fn_glCopyBufferSubData)
+			m_thunk_glCopyBufferSubData = &StateFns::call_glCopyNamedBufferSubData;
+	}
+
+	if (!m_fn_glCopyBufferSubData)
+	{
+		m_fn_glCopyBufferSubData = glfwGetProcAddress("glCopyBufferSubData");
+		if (!m_fn_glCopyBufferSubData)
+			LOG_ERROR(("No glCopyBufferSubData function"));
+		else
+			m_thunk_glCopyBufferSubData = &StateFns::call_glCopyBufferSubData;
+	}
+
+	(this->*m_thunk_glCopyBufferSubData)(state,write,writeoffset,read,readoffset,size);
+}
+
+void Indigo::StateFns::call_glCopyNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+{
+	(*((PFNGLCOPYNAMEDBUFFERSUBDATAPROC)m_fn_glCopyBufferSubData))(read->m_buffer,write->m_buffer,readoffset,writeoffset,size);
+}
+
+void Indigo::StateFns::call_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+{
+	state.bind(read,GL_COPY_READ_BUFFER);
+	state.bind(write,GL_COPY_WRITE_BUFFER);
+
+	(*((PFNGLCOPYBUFFERSUBDATAPROC)m_fn_glCopyBufferSubData))(GL_COPY_READ_BUFFER,GL_COPY_WRITE_BUFFER,readoffset,writeoffset,size);
+}
+
+void Indigo::StateFns::glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+{
+	(this->*m_thunk_glCopyBufferSubData)(state,write,writeoffset,read,readoffset,size);
 }
