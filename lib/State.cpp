@@ -247,9 +247,9 @@ void* Indigo::State::map_buffer_range(const OOBase::SharedPtr<BufferObject>& buf
 	return m_state_fns.glMapBufferRange(*this,buffer,offset,length,orig_usage,orig_size,access);
 }
 
-void Indigo::State::unmap_buffer(const OOBase::SharedPtr<BufferObject>& buffer)
+bool Indigo::State::unmap_buffer(const OOBase::SharedPtr<BufferObject>& buffer)
 {
-	m_state_fns.glUnmapBuffer(*this,buffer);
+	return m_state_fns.glUnmapBuffer(*this,buffer);
 }
 
 void Indigo::State::copy_buffer_data(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)

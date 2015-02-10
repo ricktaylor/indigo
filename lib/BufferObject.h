@@ -51,7 +51,6 @@ namespace Indigo
 	class BufferObject : public OOBase::EnableSharedFromThis<BufferObject>
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
-		friend class detail::BufferMapping;
 		friend class State;
 		friend class StateFns;
 
@@ -59,16 +58,24 @@ namespace Indigo
 		static OOBase::SharedPtr<BufferObject> create(GLenum target, GLenum usage, GLsizeiptr size, const void* data = NULL);
 
 		template <typename T>
-		OOBase::SharedPtr<T> map(GLenum access, GLintptr offset = 0)
+		OOBase::SharedPtr<T> auto_map(GLenum access, GLintptr offset = 0)
 		{
-			return OOBase::reinterpret_pointer_cast<T,char>(map_i(access,offset,m_size - offset));
+			return OOBase::reinterpret_pointer_cast<T,char>(auto_map_i(access,offset,m_size - offset));
 		}
 
 		template <typename T>
-		OOBase::SharedPtr<T> map(GLenum access, GLintptr offset, GLsizeiptr length)
+		OOBase::SharedPtr<T> auto_map(GLenum access, GLintptr offset, GLsizeiptr length)
 		{
-			return OOBase::reinterpret_pointer_cast<T,char>(map_i(access,offset,length));
+			return OOBase::reinterpret_pointer_cast<T,char>(auto_map_i(access,offset,length));
 		}
+
+		void* map(GLenum access, GLintptr offset = 0)
+		{
+			return map(access,offset,m_size - offset);
+		}
+
+		void* map(GLenum access, GLintptr offset, GLsizeiptr length);
+		bool unmap();
 
 		GLenum target() const
 		{
@@ -96,8 +103,7 @@ namespace Indigo
 		BufferObject(GLenum target, GLenum usage, GLsizeiptr size, const void* data = NULL);
 		~BufferObject();
 
-		OOBase::SharedPtr<char> map_i(GLenum access, GLintptr offset, GLsizeiptr length);
-		void unmap();
+		OOBase::SharedPtr<char> auto_map_i(GLenum access, GLintptr offset, GLsizeiptr length);
 		void bind(GLenum target);
 	};
 }

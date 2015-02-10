@@ -55,7 +55,17 @@ void Indigo::BufferObject::bind(GLenum target)
 	StateFns::get_current()->glBindBuffer(target,m_buffer);
 }
 
-OOBase::SharedPtr<char> Indigo::BufferObject::map_i(GLenum access, GLintptr offset, GLsizeiptr length)
+void* Indigo::BufferObject::map(GLenum access, GLintptr offset, GLsizeiptr length)
+{
+	return State::get_current()->map_buffer_range(shared_from_this(),offset,length,m_usage,m_size,access);
+}
+
+bool Indigo::BufferObject::unmap()
+{
+	return State::get_current()->unmap_buffer(shared_from_this());
+}
+
+OOBase::SharedPtr<char> Indigo::BufferObject::auto_map_i(GLenum access, GLintptr offset, GLsizeiptr length)
 {
 	OOBase::SharedPtr<char> ret;
 	OOBase::SharedPtr<BufferObject> self(shared_from_this());
@@ -73,11 +83,6 @@ OOBase::SharedPtr<char> Indigo::BufferObject::map_i(GLenum access, GLintptr offs
 	}
 
 	return ret;
-}
-
-void Indigo::BufferObject::unmap()
-{
-	State::get_current()->unmap_buffer(shared_from_this());
 }
 
 void Indigo::BufferObject::copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)

@@ -74,7 +74,7 @@ namespace Indigo
 		void glDeleteBuffers(GLsizei n, GLuint* buffers);
 		void glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void* data, GLenum usage);
 		void* glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
-		void glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
+		bool glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
 		void glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size);
 
 	private:
@@ -191,11 +191,11 @@ namespace Indigo
 		void* call_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
 		void* call_glMapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
 
-		void (StateFns::*m_thunk_glUnmapBuffer)(State&,const OOBase::SharedPtr<BufferObject>&);
+		bool (StateFns::*m_thunk_glUnmapBuffer)(State&,const OOBase::SharedPtr<BufferObject>&);
 		GLFWglproc m_fn_glUnmapBuffer;
-		void check_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
-		void call_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
-		void call_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
+		bool check_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
+		bool call_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
+		bool call_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
 
 		void (StateFns::*m_thunk_glCopyBufferSubData)(State&,const OOBase::SharedPtr<BufferObject>&,GLintptr,const OOBase::SharedPtr<BufferObject>&,GLintptr,GLsizeiptr);
 		GLFWglproc m_fn_glCopyBufferSubData;

@@ -1024,7 +1024,7 @@ void* Indigo::StateFns::glMapBufferRange(State& state, const OOBase::SharedPtr<B
 	return (this->*m_thunk_glMapBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
 }
 
-void Indigo::StateFns::check_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool Indigo::StateFns::check_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	if (isGLversion(4,5))
 	{
@@ -1049,24 +1049,24 @@ void Indigo::StateFns::check_glUnmapBuffer(State& state, const OOBase::SharedPtr
 			m_thunk_glUnmapBuffer = &StateFns::call_glUnmapBuffer;
 	}
 
-	(this->*m_thunk_glUnmapBuffer)(state,buffer);
+	return (this->*m_thunk_glUnmapBuffer)(state,buffer);
 }
 
-void Indigo::StateFns::call_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool Indigo::StateFns::call_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
-	(*((PFNGLUNMAPNAMEDBUFFERPROC)m_fn_glUnmapBuffer))(buffer->m_buffer);
+	return (*((PFNGLUNMAPNAMEDBUFFERPROC)m_fn_glUnmapBuffer))(buffer->m_buffer) == GL_TRUE;
 }
 
-void Indigo::StateFns::call_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool Indigo::StateFns::call_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	state.bind(buffer);
 
-	(*((PFNGLUNMAPBUFFERPROC)m_fn_glUnmapBuffer))(buffer->m_target);
+	return (*((PFNGLUNMAPBUFFERPROC)m_fn_glUnmapBuffer))(buffer->m_target) == GL_TRUE;
 }
 
-void Indigo::StateFns::glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool Indigo::StateFns::glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
-	(this->*m_thunk_glUnmapBuffer)(state,buffer);
+	return (this->*m_thunk_glUnmapBuffer)(state,buffer);
 }
 
 void Indigo::StateFns::check_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
