@@ -45,7 +45,7 @@ namespace Indigo
 		Framebuffer(GLuint id);
 		static OOBase::SharedPtr<Framebuffer> get_default();
 
-		void bind();
+		void bind(GLenum target);
 	};
 }
 

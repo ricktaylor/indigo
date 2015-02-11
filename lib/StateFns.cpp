@@ -119,14 +119,7 @@ void Indigo::StateFns::glGenFramebuffers(GLsizei n, GLuint *framebuffers)
 {
 	if (!m_fn_glGenFramebuffers)
 	{
-		GLFWwindow* win = glfwGetCurrentContext();
-		if (!win)
-		{
-			LOG_ERROR(("No current context!"));
-			return;
-		}
-
-		if (isGLversion(win,3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
+		if (isGLversion(3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
 			m_fn_glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)glfwGetProcAddress("glGenFramebuffers");
 
 		if (!m_fn_glGenFramebuffers && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
@@ -143,14 +136,7 @@ void Indigo::StateFns::glDeleteFramebuffers(GLsizei n, GLuint *framebuffers)
 {
 	if (!m_fn_glDeleteFramebuffers)
 	{
-		GLFWwindow* win = glfwGetCurrentContext();
-		if (!win)
-		{
-			LOG_ERROR(("No current context!"));
-			return;
-		}
-
-		if (isGLversion(win,3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
+		if (isGLversion(3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
 			m_fn_glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)glfwGetProcAddress("glDeleteFramebuffers");
 
 		if (!m_fn_glDeleteFramebuffers && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
@@ -167,14 +153,7 @@ void Indigo::StateFns::glBindFramebuffer(GLenum target, GLuint framebuffer)
 {
 	if (!m_fn_glBindFramebuffer)
 	{
-		GLFWwindow* win = glfwGetCurrentContext();
-		if (!win)
-		{
-			LOG_ERROR(("No current context!"));
-			return;
-		}
-
-		if (isGLversion(win,3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
+		if (isGLversion(3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
 			m_fn_glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)glfwGetProcAddress("glBindFramebuffer");
 
 		if (!m_fn_glBindFramebuffer && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
@@ -191,11 +170,7 @@ GLenum Indigo::StateFns::glCheckFramebufferStatus(GLenum target)
 {
 	if (!m_fn_glCheckFramebufferStatus)
 	{
-		GLFWwindow* win = glfwGetCurrentContext();
-		if (!win)
-			LOG_ERROR_RETURN(("No current context!"),GL_FRAMEBUFFER_UNSUPPORTED);
-
-		if (isGLversion(win,3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
+		if (isGLversion(3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE)
 			m_fn_glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)glfwGetProcAddress("glCheckFramebufferStatus");
 
 		if (!m_fn_glCheckFramebufferStatus && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)

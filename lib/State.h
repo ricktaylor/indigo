@@ -43,7 +43,7 @@ namespace Indigo
 	public:
 		static OOBase::SharedPtr<State> get_current();
 
-		OOBase::SharedPtr<Framebuffer> bind(const OOBase::SharedPtr<Framebuffer>& fb);
+		OOBase::SharedPtr<Framebuffer> bind(GLenum target, const OOBase::SharedPtr<Framebuffer>& fb);
 		OOBase::SharedPtr<Texture> bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture);
 		OOBase::SharedPtr<BufferObject> bind(const OOBase::SharedPtr<BufferObject>& buffer_object);
 
@@ -53,7 +53,8 @@ namespace Indigo
 
 	private:
 		StateFns&                      m_state_fns;
-		OOBase::SharedPtr<Framebuffer> m_fb;
+		OOBase::SharedPtr<Framebuffer> m_draw_fb;
+		OOBase::SharedPtr<Framebuffer> m_read_fb;
 		GLenum                         m_active_texture_unit;
 		OOBase::SharedPtr<Program>     m_current_program;
 		

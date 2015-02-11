@@ -26,7 +26,7 @@ static float ratio;
 
 static void on_window_draw(const Indigo::Window& win, Indigo::State& glState)
 {
-	glState.bind(win.get_default_frame_buffer());
+	glState.bind(GL_FRAMEBUFFER,win.get_default_frame_buffer());
 
 	// Always clear everything
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

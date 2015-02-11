@@ -49,16 +49,42 @@ OOBase::SharedPtr<Indigo::State> Indigo::State::get_current()
 	return window->m_state;
 }
 
-OOBase::SharedPtr<Indigo::Framebuffer> Indigo::State::bind(const OOBase::SharedPtr<Framebuffer>& fb)
+OOBase::SharedPtr<Indigo::Framebuffer> Indigo::State::bind(GLenum target, const OOBase::SharedPtr<Framebuffer>& fb)
 {
-	OOBase::SharedPtr<Framebuffer> prev = m_fb;
-
-	if (m_fb != fb)
+	OOBase::SharedPtr<Framebuffer> prev;
+	if (target == GL_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER)
 	{
-		if (fb)
-			fb->bind();
+		prev = m_draw_fb;
+		if (m_draw_fb != fb || m_read_fb != fb)
+		{
+			if (fb)
+				fb->bind(GL_FRAMEBUFFER);
 
-		m_fb = fb;
+			m_draw_fb = fb;
+			m_read_fb = fb;
+		}
+	}
+	else if (target == GL_DRAW_FRAMEBUFFER)
+	{
+		prev = m_draw_fb;
+		if (m_draw_fb != fb)
+		{
+			if (fb)
+				fb->bind(GL_DRAW_FRAMEBUFFER);
+
+			m_draw_fb = fb;
+		}
+	}
+	else if (target == GL_READ_FRAMEBUFFER)
+	{
+		prev = m_read_fb;
+		if (m_read_fb != fb)
+		{
+			if (fb)
+				fb->bind(GL_READ_FRAMEBUFFER);
+
+			m_read_fb = fb;
+		}
 	}
 
 	return prev;

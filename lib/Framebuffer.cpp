@@ -56,7 +56,7 @@ GLenum Indigo::Framebuffer::check() const
 	return StateFns::get_current()->glCheckFramebufferStatus(m_id);
 }
 
-void Indigo::Framebuffer::bind()
+void Indigo::Framebuffer::bind(GLenum target)
 {
-	StateFns::get_current()->glBindFramebuffer(GL_FRAMEBUFFER,m_id);
+	StateFns::get_current()->glBindFramebuffer(target,m_id);
 }
