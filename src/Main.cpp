@@ -20,7 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
-#include "../lib/Render.h"
+#include "Render.h"
 
 #include <stdlib.h>
 #include <limits.h>

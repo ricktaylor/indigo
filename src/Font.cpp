@@ -20,7 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Font.h"
-#include "Shader.h"
+#include "../lib/Shader.h"
 
 static const char s_font_vertex_shader[] =
 		"";

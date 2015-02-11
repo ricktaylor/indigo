@@ -22,7 +22,7 @@
 #ifndef INDIGO_RENDER_H_INCLUDED
 #define INDIGO_RENDER_H_INCLUDED
 
-#include "OOGL.h"
+#include "../lib/Window.h"
 
 namespace Indigo
 {
@@ -168,6 +168,8 @@ namespace Indigo
 	}
 
 	bool handle_events();
+
+	int add_window(const OOBase::WeakPtr<Indigo::Window>& win);
 }
 
 #endif // INDIGO_RENDER_H_INCLUDED

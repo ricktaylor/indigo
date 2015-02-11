@@ -26,16 +26,16 @@ bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
 
 indigo_SOURCES = \
-	../lib/Render.cpp \
 	../lib/Window.cpp \
 	../lib/Framebuffer.cpp \
 	../lib/State.cpp \
 	../lib/StateFns.cpp \
 	../lib/Shader.cpp \
 	../lib/Texture.cpp \
-	../lib/Font.cpp \
 	../lib/BufferObject.cpp \
 	../lib/Image.cpp \
+	Render.cpp \
+	Font.cpp \
 	LogicThread.cpp \
 	Main.cpp \
 	Splash.cpp \

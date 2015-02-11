@@ -22,7 +22,6 @@
 #ifndef INDIGO_WINDOWS_H_INCLUDED
 #define INDIGO_WINDOWS_H_INCLUDED
 
-#include "Render.h"
 #include "Framebuffer.h"
 #include "State.h"
 #include "StateFns.h"
@@ -58,6 +57,9 @@ namespace Indigo
 
 		const OOBase::SharedPtr<Framebuffer>& get_default_frame_buffer() const;
 
+		bool draw();
+		void swap();
+
 	// Signals
 	public:
 		OOBase::Signal1<const Window&,OOBase::ThreadLocalAllocator> signal_close;
@@ -76,10 +78,6 @@ namespace Indigo
 		static void on_focus(GLFWwindow* window, int focused);
 		static void on_iconify(GLFWwindow* window, int iconified);
 		static void on_refresh(GLFWwindow* window);
-
-		static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
-		bool draw();
-		void swap();
 	};
 }
 

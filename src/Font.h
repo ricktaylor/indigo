@@ -22,7 +22,7 @@
 #ifndef INDIGO_FONT_H_INCLUDED
 #define INDIGO_FONT_H_INCLUDED
 
-#include "State.h"
+#include "../lib/State.h"
 
 namespace Indigo
 {

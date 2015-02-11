@@ -19,7 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../lib/Window.h"
+#include "Render.h"
 
 static OOBase::SharedPtr<Indigo::Window> s_ptrSplash;
 static float ratio;
@@ -67,6 +67,10 @@ static bool create_splash(void*)
 	glm::ivec2 sz = ptrSplash->size();
 	ratio = sz.x / (float)sz.y;
 	glViewport(0, 0, sz.x, sz.y);
+
+	err = Indigo::add_window(ptrSplash);
+	if (err)
+		LOG_ERROR_RETURN(("Failed to add window: %s",OOBase::system_error_text(err)),false);
 
 	ptrSplash->visible(true);
 	s_ptrSplash.swap(ptrSplash);

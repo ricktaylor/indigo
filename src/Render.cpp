@@ -20,9 +20,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Render.h"
-#include "State.h"
-#include "StateFns.h"
-#include "Window.h"
+#include "../lib/State.h"
+#include "../lib/StateFns.h"
 
 #include <stdlib.h>
 
@@ -156,7 +155,7 @@ namespace
 
 	static EventQueue* s_event_queue = NULL;
 	static RenderQueue* s_render_queue = NULL;
-	static OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>* s_vecWindows;
+	static OOBase::Vector<OOBase::WeakPtr<Indigo::Window>,OOBase::ThreadLocalAllocator>* s_vecWindows;
 
 	struct thread_info
 	{
@@ -181,6 +180,78 @@ namespace
 static void on_glfw_error(int code, const char* message)
 {
 	OOBase::Logger::log(OOBase::Logger::Error,"GLFW error %d: %s",code,message);
+}
+
+static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
+{
+	OOBase::Vector<OOBase::WeakPtr<Indigo::Window>,OOBase::ThreadLocalAllocator> vecWindows;
+	s_vecWindows = &vecWindows;
+
+	// Not sure if we need to set this first...
+	glfwSetErrorCallback(&on_glfw_error);
+
+	if (!glfwInit())
+		LOG_ERROR_RETURN(("glfwInit failed"),false);
+
+	// Set defaults
+	glfwDefaultWindowHints();
+
+//	if (!Indigo::is_debug())
+//		glfwSwapInterval(1);
+
+	// Loop blocking until we have windows
+	bool res = true;
+	while (vecWindows.empty())
+	{
+		res = s_render_queue->dequeue_block();
+		if (!res)
+			break;
+	}
+
+	while (res)
+	{
+		// Draw all windows
+		bool visible_window = false;
+		for (OOBase::Vector<OOBase::WeakPtr<Indigo::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();)
+		{
+			if (i->expired())
+				i = vecWindows.erase(i);
+			else
+			{
+				if (i->lock()->draw())
+					visible_window = true;
+				++i;
+			}
+		}
+
+		// Update animations
+
+		// Get render commands
+		if (vecWindows.empty() || !(res = s_render_queue->dequeue()))
+			break;
+
+		// Swap all windows (this collects events)
+		for (OOBase::Vector<OOBase::WeakPtr<Indigo::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();)
+		{
+			if (i->expired())
+				i = vecWindows.erase(i);
+			else
+			{
+				i->lock()->swap();
+				++i;
+			}
+		}
+
+		// Poll for UI events
+		if (visible_window)
+			glfwPollEvents();
+		else
+			glfwWaitEvents();
+	}
+
+	glfwTerminate();
+
+	return res;
 }
 
 static bool stop_thread(void*)
@@ -234,7 +305,7 @@ bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase
 	started.wait();
 
 	// Now run the draw_thread (it must be the main thread)
-	bool res = Window::draw_thread(config_args);
+	bool res = draw_thread(config_args);
 
 	// Send a quit to the logic_thread
 	if (event_queue.enqueue(NULL,reinterpret_cast<void*>(1)))
@@ -316,113 +387,7 @@ bool Indigo::handle_events()
 	return s_event_queue->dequeue();
 }
 
-Indigo::Window::Window(int width, int height, const char* title, unsigned int style, GLFWmonitor* monitor) :
-		m_glfw_window(NULL)
+int Indigo::add_window(const OOBase::WeakPtr<Indigo::Window>& win)
 {
-	glfwWindowHint(GLFW_VISIBLE,(style & eWSvisible) ? GL_TRUE : GL_FALSE);
-	glfwWindowHint(GLFW_RESIZABLE,(style & eWSresizable) ? GL_TRUE : GL_FALSE);
-	glfwWindowHint(GLFW_DECORATED,(style & eWSdecorated) ? GL_TRUE : GL_FALSE);
-
-	// Now try to create the window
-	m_glfw_window = glfwCreateWindow(width,height,title,monitor,NULL);
-	if (!m_glfw_window)
-		LOG_ERROR(("Failed to create window"));
-	else
-	{
-		// Wait for window manager to do its thing
-		//glfwWaitEvents();
-
-		glfwMakeContextCurrent(m_glfw_window);
-
-		m_state_fns = OOBase::allocate_shared<StateFns,OOBase::ThreadLocalAllocator>();
-		if (!m_state_fns)
-			LOG_ERROR(("Failed to allocate GL state functions object"));
-		else
-		{
-			m_state = OOBase::allocate_shared<State,OOBase::ThreadLocalAllocator>(OOBase::Ref<StateFns>(*m_state_fns.get()));
-			if (!m_state)
-				LOG_ERROR(("Failed to allocate GL state object"));
-			else
-			{
-				m_default_fb = Framebuffer::get_default();
-
-				glfwSetWindowUserPointer(m_glfw_window,this);
-				glfwSetFramebufferSizeCallback(m_glfw_window,&on_size);
-				glfwSetWindowCloseCallback(m_glfw_window,&on_close);
-				glfwSetWindowFocusCallback(m_glfw_window,&on_focus);
-				glfwSetWindowIconifyCallback(m_glfw_window,&on_iconify);
-				glfwSetWindowRefreshCallback(m_glfw_window,&on_refresh);
-
-				s_vecWindows->push_back(this);
-			}
-		}
-	}
-}
-
-Indigo::Window::~Window()
-{
-	if (m_glfw_window)
-	{
-		s_vecWindows->erase(this);
-
-		glfwDestroyWindow(m_glfw_window);
-	}
-}
-
-bool Indigo::Window::draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
-{
-	OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator> vecWindows;
-	s_vecWindows = &vecWindows;
-
-	// Not sure if we need to set this first...
-	glfwSetErrorCallback(&on_glfw_error);
-
-	if (!glfwInit())
-		LOG_ERROR_RETURN(("glfwInit failed"),false);
-
-	// Set defaults
-	glfwDefaultWindowHints();
-
-//	if (!Indigo::is_debug())
-//		glfwSwapInterval(1);
-
-	// Loop blocking until we have windows
-	bool res = true;
-	while (vecWindows.empty())
-	{
-		res = s_render_queue->dequeue_block();
-		if (!res)
-			break;
-	}
-
-	while (res)
-	{
-		// Draw all windows
-		bool visible_window = false;
-		for (OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();++i)
-		{
-			if ((*i)->draw())
-				visible_window = true;
-		}
-
-		// Update animations
-
-		// Get render commands
-		if (vecWindows.empty() || !(res = s_render_queue->dequeue()))
-			break;
-
-		// Swap all windows (this collects events)
-		for (OOBase::Vector<Indigo::Window*,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();++i)
-			(*i)->swap();
-
-		// Poll for UI events
-		if (visible_window)
-			glfwPollEvents();
-		else
-			glfwWaitEvents();
-	}
-
-	glfwTerminate();
-
-	return res;
+	return s_vecWindows->push_back(win);
 }

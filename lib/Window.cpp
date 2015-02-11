@@ -21,6 +21,53 @@
 
 #include "Window.h"
 
+Indigo::Window::Window(int width, int height, const char* title, unsigned int style, GLFWmonitor* monitor) :
+		m_glfw_window(NULL)
+{
+	glfwWindowHint(GLFW_VISIBLE,(style & eWSvisible) ? GL_TRUE : GL_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE,(style & eWSresizable) ? GL_TRUE : GL_FALSE);
+	glfwWindowHint(GLFW_DECORATED,(style & eWSdecorated) ? GL_TRUE : GL_FALSE);
+
+	// Now try to create the window
+	m_glfw_window = glfwCreateWindow(width,height,title,monitor,NULL);
+	if (!m_glfw_window)
+		LOG_ERROR(("Failed to create window"));
+	else
+	{
+		// Wait for window manager to do its thing
+		//glfwWaitEvents();
+
+		glfwMakeContextCurrent(m_glfw_window);
+
+		m_state_fns = OOBase::allocate_shared<StateFns,OOBase::ThreadLocalAllocator>();
+		if (!m_state_fns)
+			LOG_ERROR(("Failed to allocate GL state functions object"));
+		else
+		{
+			m_state = OOBase::allocate_shared<State,OOBase::ThreadLocalAllocator>(OOBase::Ref<StateFns>(*m_state_fns.get()));
+			if (!m_state)
+				LOG_ERROR(("Failed to allocate GL state object"));
+			else
+			{
+				m_default_fb = Framebuffer::get_default();
+
+				glfwSetWindowUserPointer(m_glfw_window,this);
+				glfwSetFramebufferSizeCallback(m_glfw_window,&on_size);
+				glfwSetWindowCloseCallback(m_glfw_window,&on_close);
+				glfwSetWindowFocusCallback(m_glfw_window,&on_focus);
+				glfwSetWindowIconifyCallback(m_glfw_window,&on_iconify);
+				glfwSetWindowRefreshCallback(m_glfw_window,&on_refresh);
+			}
+		}
+	}
+}
+
+Indigo::Window::~Window()
+{
+	if (m_glfw_window)
+		glfwDestroyWindow(m_glfw_window);
+}
+
 bool Indigo::Window::is_visible() const
 {
 	if (!m_glfw_window)
