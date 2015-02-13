@@ -55,26 +55,27 @@ namespace Indigo
 		friend class StateFns;
 
 	public:
-		static OOBase::SharedPtr<BufferObject> create(GLenum target, GLenum usage, GLsizeiptr size, const void* data = NULL);
-
+		BufferObject(GLenum target, GLenum usage, GLsizei size, const void* data = NULL);
+		~BufferObject();
+		
 		template <typename T>
 		OOBase::SharedPtr<T> auto_map(GLenum access, GLintptr offset = 0)
 		{
-			return OOBase::reinterpret_pointer_cast<T,char>(auto_map_i(access,offset,m_size - offset));
+			return OOBase::reinterpret_pointer_cast<T,char>(auto_map_i(access,offset,static_cast<GLsizei>(m_size - offset)));
 		}
 
 		template <typename T>
-		OOBase::SharedPtr<T> auto_map(GLenum access, GLintptr offset, GLsizeiptr length)
+		OOBase::SharedPtr<T> auto_map(GLenum access, GLintptr offset, GLsizei length)
 		{
 			return OOBase::reinterpret_pointer_cast<T,char>(auto_map_i(access,offset,length));
 		}
 
 		void* map(GLenum access, GLintptr offset = 0)
 		{
-			return map(access,offset,m_size - offset);
+			return map(access,offset,static_cast<GLsizei>(m_size - offset));
 		}
 
-		void* map(GLenum access, GLintptr offset, GLsizeiptr length);
+		void* map(GLenum access, GLintptr offset, GLsizei length);
 		bool unmap();
 
 		GLenum target() const
@@ -87,23 +88,20 @@ namespace Indigo
 			return m_usage;
 		}
 
-		GLsizeiptr size() const
+		GLsizei size() const
 		{
 			return m_size;
 		}
 
-		void copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size);
+		void copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
 
 	private:
 		GLuint     m_buffer;
 		GLenum     m_target;
 		GLenum     m_usage;
-		GLsizeiptr m_size;
+		GLsizei    m_size;
 
-		BufferObject(GLenum target, GLenum usage, GLsizeiptr size, const void* data = NULL);
-		~BufferObject();
-
-		OOBase::SharedPtr<char> auto_map_i(GLenum access, GLintptr offset, GLsizeiptr length);
+		OOBase::SharedPtr<char> auto_map_i(GLenum access, GLintptr offset, GLsizei length);
 		void bind(GLenum target);
 	};
 }

@@ -34,12 +34,7 @@ void Indigo::detail::BufferMapping::destroy()
 	OOBase::ThreadLocalAllocator::delete_free(this);
 }
 
-OOBase::SharedPtr<Indigo::BufferObject> Indigo::BufferObject::create(GLenum target, GLenum usage, GLsizeiptr size, const void* data)
-{
-	return OOBase::allocate_shared<BufferObject,OOBase::ThreadLocalAllocator>(target,usage,size,data);
-}
-
-Indigo::BufferObject::BufferObject(GLenum target, GLenum usage, GLsizeiptr size, const void* data) : m_buffer(0), m_target(target), m_usage(usage), m_size(size)
+Indigo::BufferObject::BufferObject(GLenum target, GLenum usage, GLsizei size, const void* data) : m_buffer(0), m_target(target), m_usage(usage), m_size(size)
 {
 	StateFns::get_current()->glGenBuffers(1,&m_buffer);
 	State::get_current()->buffer_data(shared_from_this(),size,data,usage);
@@ -55,7 +50,7 @@ void Indigo::BufferObject::bind(GLenum target)
 	StateFns::get_current()->glBindBuffer(target,m_buffer);
 }
 
-void* Indigo::BufferObject::map(GLenum access, GLintptr offset, GLsizeiptr length)
+void* Indigo::BufferObject::map(GLenum access, GLintptr offset, GLsizei length)
 {
 	return State::get_current()->map_buffer_range(shared_from_this(),offset,length,m_usage,m_size,access);
 }
@@ -65,7 +60,7 @@ bool Indigo::BufferObject::unmap()
 	return State::get_current()->unmap_buffer(shared_from_this());
 }
 
-OOBase::SharedPtr<char> Indigo::BufferObject::auto_map_i(GLenum access, GLintptr offset, GLsizeiptr length)
+OOBase::SharedPtr<char> Indigo::BufferObject::auto_map_i(GLenum access, GLintptr offset, GLsizei length)
 {
 	OOBase::SharedPtr<char> ret;
 	OOBase::SharedPtr<BufferObject> self(shared_from_this());
@@ -85,7 +80,7 @@ OOBase::SharedPtr<char> Indigo::BufferObject::auto_map_i(GLenum access, GLintptr
 	return ret;
 }
 
-void Indigo::BufferObject::copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+void Indigo::BufferObject::copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
 	State::get_current()->copy_buffer_data(shared_from_this(),writeoffset,read,readoffset,size);
 }

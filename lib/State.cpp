@@ -263,12 +263,12 @@ void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name
 	m_state_fns.glTextureParameteriv(*this,texture,target,name,pval);
 }
 
-void Indigo::State::buffer_data(const OOBase::SharedPtr<BufferObject>& buffer, GLsizeiptr size, const void *data, GLenum usage)
+void Indigo::State::buffer_data(const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
 {
 	m_state_fns.glBufferData(*this,buffer,size,data,usage);
 }
 
-void* Indigo::State::map_buffer_range(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* Indigo::State::map_buffer_range(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
 {
 	return m_state_fns.glMapBufferRange(*this,buffer,offset,length,orig_usage,orig_size,access);
 }
@@ -278,7 +278,7 @@ bool Indigo::State::unmap_buffer(const OOBase::SharedPtr<BufferObject>& buffer)
 	return m_state_fns.glUnmapBuffer(*this,buffer);
 }
 
-void Indigo::State::copy_buffer_data(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+void Indigo::State::copy_buffer_data(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
 	m_state_fns.glCopyBufferSubData(*this,write,writeoffset,read,readoffset,size);
 }
