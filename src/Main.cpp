@@ -33,6 +33,8 @@
 #include <signal.h>
 #endif
 
+#include <OOBase/BTree.h>
+
 static bool s_is_debug = false;
 
 // Forward declare the thread functions
@@ -226,6 +228,29 @@ int main(int argc, const char* argv[])
 	OOBase::Table<OOBase::String,OOBase::String> config_args;
 	if (!load_config(args,config_args))
 		return EXIT_FAILURE;
+
+	OOBase::BTree<char,bool,OOBase::Less<char>,5> bt;
+
+	//for (char c = 'Z';c >= 'A'; --c)
+	for (char c = 'A';c <= 'Z'; ++c)
+	{
+		bt.insert(c,true);
+		bt.dump();
+	}
+
+	bt.find('D');
+
+	for (char c = 'A';c <= 'Z'; ++c)
+	{
+		assert(bt.find(c));
+	}
+
+	for (char c = 'a';c <= 'z'; ++c)
+	{
+		assert(!bt.find(c));
+	}
+
+	bt.remove('A');
 
 	// Start our two main threads
 	return Indigo::start_render_thread(&logic_thread,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
