@@ -169,7 +169,7 @@ namespace Indigo
 
 	bool handle_events();
 
-	int add_window(const OOBase::WeakPtr<Indigo::Window>& win);
+	bool monitor_window(const OOBase::WeakPtr<Indigo::Window>& win);
 }
 
 #endif // INDIGO_RENDER_H_INCLUDED

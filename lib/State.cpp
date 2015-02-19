@@ -117,10 +117,9 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase
 	tex_unit_t* tu = m_vecTexUnits.at(unit - GL_TEXTURE0);
 	if (!tu)
 	{
-		int err = m_vecTexUnits.resize(unit - GL_TEXTURE0 + 1);
-		if (err)
+		if (!m_vecTexUnits.resize(unit - GL_TEXTURE0 + 1))
 		{
-			LOG_WARNING(("Failed to resize texture unit cache: %s",OOBase::system_error_text(err)));
+			LOG_WARNING(("Failed to resize texture unit cache"));
 
 			if (texture)
 				texture->bind(*this,unit);
@@ -138,9 +137,8 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase
 		{
 			texture->bind(*this,unit);
 
-			int err = tu->insert(texture->target(),texture);
-			if (err)
-				LOG_WARNING(("Failed to add to texture unit cache: %s",OOBase::system_error_text(err)));
+			if (!tu->insert(texture->target(),texture))
+				LOG_WARNING(("Failed to add to texture unit cache"));
 		}
 	}
 	else
@@ -172,9 +170,8 @@ OOBase::SharedPtr<Indigo::BufferObject> Indigo::State::bind(const OOBase::Shared
 		if (buffer_object)
 			buffer_object->bind(target);
 
-		int err = m_buffer_objects.insert(target,buffer_object);
-		if (err)
-			LOG_WARNING(("Failed to add to buffer object cache: %s",OOBase::system_error_text(err)));
+		if (!m_buffer_objects.insert(target,buffer_object))
+			LOG_WARNING(("Failed to add to buffer object cache"));
 	}
 	else 
 	{

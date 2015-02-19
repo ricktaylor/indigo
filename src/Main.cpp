@@ -86,9 +86,8 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 	int err = 0;
 
 	// Copy command line args
-	err = config_args.insert(cmd_args.begin(),cmd_args.end());
-	if (err)
-		LOG_ERROR_RETURN(("Failed to copy command args: %s",OOBase::system_error_text(err)),false);
+	if (!config_args.insert(cmd_args.begin(),cmd_args.end()))
+		LOG_ERROR_RETURN(("Failed to copy command args: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 #if defined(_WIN32)
 	// Read from WIN32 registry
@@ -103,29 +102,30 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 	{
 #if defined(HAVE_UNISTD_H)
 		if (access(".indigo.conf",F_OK) == 0)
-			err = strFile.assign(".indigo.conf");
+		{
+			if (!strFile.assign(".indigo.conf"))
+				LOG_ERROR_RETURN(("Failed assign string"),false);
+		}
 		else
 		{
 			// Get user directory and check for .indigo.conf there
 			OOBase::POSIX::pw_info info(getuid());
 			if (!(!info) && info->pw_dir)
 			{
-				err = strFile.assign(info->pw_dir);
-				if (!err)
-					err = strFile.append("/.indigo.conf");
-				if (!err && access(strFile.c_str(),F_OK) != 0)
+				if (!strFile.assign(info->pw_dir) || !strFile.append("/.indigo.conf"))
+					LOG_ERROR_RETURN(("Failed assign string"),false);
+
+				if (access(strFile.c_str(),F_OK) != 0)
 					strFile.clear();
 			}
 
-			if (!err && strFile.empty())
+			if (strFile.empty())
 			{
 				if (access("/etc/indigo.conf",F_OK) == 0)
-					err = strFile.assign("/etc/indigo.conf");
+					if (!strFile.assign("/etc/indigo.conf"))
+						LOG_ERROR_RETURN(("Failed assign string"),false);
 			}
 		}
-
-		if (err)
-			LOG_ERROR_RETURN(("Failed assign string: %s",OOBase::system_error_text(err)),false);
 #endif
 	}
 

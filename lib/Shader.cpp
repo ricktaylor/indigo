@@ -119,9 +119,8 @@ OOBase::String Indigo::Shader::info_log() const
 		else
 		{
 			fns->glGetShaderInfoLog(m_id,len,NULL,buf);
-			int err = ret.assign(buf,len);
-			if (err)
-				LOG_ERROR(("Failed to assign string: %s",OOBase::system_error_text(err)));
+			if (!ret.assign(buf,len))
+				LOG_ERROR(("Failed to assign string: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 
 			allocator.free(buf);
 		}
@@ -157,9 +156,8 @@ OOBase::String Indigo::Program::info_log() const
 		else
 		{
 			fns->glGetProgramInfoLog(m_id,len,NULL,buf);
-			int err = ret.assign(buf,len);
-			if (err)
-				LOG_ERROR(("Failed to assign string: %s",OOBase::system_error_text(err)));
+			if (!ret.assign(buf,len))
+				LOG_ERROR(("Failed to assign string: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 
 			allocator.free(buf);
 		}

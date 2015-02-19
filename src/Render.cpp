@@ -36,9 +36,8 @@ namespace
 		{
 			OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
 
-			int err = m_queue.push(Item(callback,param));
-			if (err)
-				LOG_ERROR_RETURN(("Failed to enqueue command: %s",OOBase::system_error_text(err)),false);
+			if (!m_queue.push(Item(callback,param)))
+				LOG_ERROR_RETURN(("Failed to enqueue command: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 			m_cond.signal();
 			return true;
@@ -387,7 +386,7 @@ bool Indigo::handle_events()
 	return s_event_queue->dequeue();
 }
 
-int Indigo::add_window(const OOBase::WeakPtr<Indigo::Window>& win)
+bool Indigo::monitor_window(const OOBase::WeakPtr<Indigo::Window>& win)
 {
 	return s_vecWindows->push_back(win);
 }

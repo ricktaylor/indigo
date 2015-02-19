@@ -58,19 +58,16 @@ static bool create_splash(void*)
 	if (!ptrSplash || !ptrSplash->is_valid())
 		return false;
 
-	int err = ptrSplash->signal_close.connect(&on_window_close);
-	if (!err)
-		err = ptrSplash->signal_draw.connect(&on_window_draw);
-	if (err)
-		LOG_ERROR_RETURN(("Failed to attach signal: %s",OOBase::system_error_text(err)),false);
+	if (!ptrSplash->signal_close.connect(&on_window_close) ||
+			!ptrSplash->signal_draw.connect(&on_window_draw))
+		LOG_ERROR_RETURN(("Failed to attach signal"),false);
 
 	glm::ivec2 sz = ptrSplash->size();
 	ratio = sz.x / (float)sz.y;
 	glViewport(0, 0, sz.x, sz.y);
 
-	err = Indigo::add_window(ptrSplash);
-	if (err)
-		LOG_ERROR_RETURN(("Failed to add window: %s",OOBase::system_error_text(err)),false);
+	if (!Indigo::monitor_window(ptrSplash))
+		LOG_ERROR_RETURN(("Failed to monitor window"),false);
 
 	ptrSplash->visible(true);
 	s_ptrSplash.swap(ptrSplash);
