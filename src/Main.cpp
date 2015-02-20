@@ -204,9 +204,12 @@ int main(int argc, const char* argv[])
 
 	// Start the logger
 	OOBase::Logger::set_source_file(__FILE__);
+#if defined(_WIN32)
+	OOBase::Logger::connect_debug_log();
+#else
 	OOBase::Logger::connect_stderr_log();
 	OOBase::Logger::connect_stdout_log();
-	OOBase::Logger::connect_debug_log();
+#endif
 
 #if defined(HAVE_UNISTD_H)
 	// Ignore SIGCHLD and SIGPIPE
