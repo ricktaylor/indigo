@@ -34,6 +34,7 @@
 #endif
 
 #include <OOBase/BTree.h>
+#include <OOBase/Morton.h>
 
 static bool s_is_debug = false;
 
@@ -232,30 +233,34 @@ int main(int argc, const char* argv[])
 	if (!load_config(args,config_args))
 		return EXIT_FAILURE;
 
-	OOBase::BTree<char,bool,OOBase::Less<char>,3> bt;
+	OOBase::BTree<char,bool,OOBase::Less<char>,5> bt;
 
 	char s[] = "thequickbrownfoxjumpsoverthelazydog";
+	char r[] = "godyzalehtrevospmujxofnworbkciuqeht";
 	for (char* c = s;*c != 0; ++c)
-	{
 		bt.insert(*c,true);
-		bt.dump();
-	}
+
+	for (char c = 'A';c <= 'Z'; ++c)
+		bt.insert(c,true);
+
+	bt.dump();
 
 	for (char c = 'a';c <= 'z'; ++c)
 	{
 		assert(bt.find(c));
 	}
 
-	/*for (char c = 'A';c <= 'Z'; ++c)
-	{
-		assert(!bt.find(c));
-	}*/
-
-	/*for (char c = 'z';c >= 'a'; --c)
+	for (char c = 'A';c <= 'Z'; ++c)
 	{
 		bt.remove(c);
 		bt.dump();
-	}*/
+	}
+
+	for (char* c = s;*c != 0; ++c)
+	{
+		bt.remove(*c);
+		bt.dump();
+	}
 
 	// Start our two main threads
 	return Indigo::start_render_thread(&logic_thread,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
