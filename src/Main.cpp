@@ -252,14 +252,14 @@ int main(int argc, const char* argv[])
 
 	for (char c = 'A';c <= 'Z'; ++c)
 	{
-		bt.remove(c);
-		bt.dump();
+		if (bt.remove(c))
+			bt.dump();
 	}
 
 	for (char* c = s;*c != 0; ++c)
 	{
-		bt.remove(*c);
-		bt.dump();
+		if (bt.remove(*c))
+			bt.dump();
 	}
 
 	// Start our two main threads
