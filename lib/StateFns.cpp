@@ -1044,6 +1044,51 @@ bool Indigo::StateFns::glUnmapBuffer(State& state, const OOBase::SharedPtr<Buffe
 	return (this->*m_thunk_glUnmapBuffer)(state,buffer);
 }
 
+void Indigo::StateFns::check_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+{
+	if (isGLversion(4,5))
+	{
+		m_fn_glBufferSubData = glfwGetProcAddress("glNamedBufferSubData");
+		if (m_fn_glBufferSubData)
+			m_thunk_glBufferSubData = &StateFns::call_glNamedBufferSubData;
+	}
+
+	if (!m_fn_glBufferSubData && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glBufferSubData = glfwGetProcAddress("glNamedBufferSubDataEXT");
+		if (m_fn_glBufferSubData)
+			m_thunk_glBufferSubData = &StateFns::call_glNamedBufferSubData;
+	}
+
+	if (!m_fn_glBufferSubData)
+	{
+		m_fn_glBufferSubData = glfwGetProcAddress("glBufferSubData");
+		if (!m_fn_glBufferSubData)
+			LOG_ERROR(("No glBufferSubData function"));
+		else
+			m_thunk_glBufferSubData = &StateFns::call_glBufferSubData;
+	}
+
+	(this->*m_thunk_glBufferSubData)(state,buffer,offset,size,data);
+}
+
+void Indigo::StateFns::call_glNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+{
+	(*((PFNGLNAMEDBUFFERSUBDATAPROC)m_fn_glBufferSubData))(buffer->m_buffer,offset,size,data);
+}
+
+void Indigo::StateFns::call_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+{
+	state.bind(buffer);
+
+	(*((PFNGLBUFFERSUBDATAPROC)m_fn_glBufferSubData))(buffer->m_target,offset,size,data);
+}
+
+void Indigo::StateFns::glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+{
+	(this->*m_thunk_glBufferSubData)(state,buffer,offset,size,data);
+}
+
 void Indigo::StateFns::check_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
 	if (isGLversion(4,5))

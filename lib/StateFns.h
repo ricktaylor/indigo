@@ -75,6 +75,7 @@ namespace Indigo
 		void glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void* data, GLenum usage);
 		void* glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access);
 		bool glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
+		void glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
 		void glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
 
 	private:
@@ -196,6 +197,12 @@ namespace Indigo
 		bool check_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
 		bool call_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
 		bool call_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
+
+		void (StateFns::*m_thunk_glBufferSubData)(State&,const OOBase::SharedPtr<BufferObject>&,GLintptr,GLsizei,const void*);
+		GLFWglproc m_fn_glBufferSubData;
+		void check_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
+		void call_glNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
+		void call_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
 
 		void (StateFns::*m_thunk_glCopyBufferSubData)(State&,const OOBase::SharedPtr<BufferObject>&,GLintptr,const OOBase::SharedPtr<BufferObject>&,GLintptr,GLsizei);
 		GLFWglproc m_fn_glCopyBufferSubData;

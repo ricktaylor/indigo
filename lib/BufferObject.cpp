@@ -80,6 +80,11 @@ OOBase::SharedPtr<char> Indigo::BufferObject::auto_map_i(GLenum access, GLintptr
 	return ret;
 }
 
+void Indigo::BufferObject::write(GLintptr offset, GLsizei size, const void* data)
+{
+	State::get_current()->buffer_sub_data(shared_from_this(),offset,size,data);
+}
+
 void Indigo::BufferObject::copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
 	State::get_current()->copy_buffer_data(shared_from_this(),writeoffset,read,readoffset,size);

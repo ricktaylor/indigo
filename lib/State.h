@@ -85,6 +85,7 @@ namespace Indigo
 		void buffer_data(const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage);
 		void* map_buffer_range(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access);
 		bool unmap_buffer(const OOBase::SharedPtr<BufferObject>& buffer);
+		void buffer_sub_data(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
 		void copy_buffer_data(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
 	};
 }
