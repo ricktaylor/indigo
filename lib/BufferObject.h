@@ -48,7 +48,7 @@ namespace Indigo
 		};
 	}
 
-	class BufferObject : public OOBase::EnableSharedFromThis<BufferObject>
+	class BufferObject : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<BufferObject>
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		friend class State;

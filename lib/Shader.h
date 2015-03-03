@@ -26,7 +26,7 @@
 
 namespace Indigo
 {
-	class Shader
+	class Shader : public OOBase::NonCopyable
 	{
 		friend class Program;
 
@@ -59,7 +59,7 @@ namespace Indigo
 		GLuint m_id;
 	};
 
-	class Program
+	class Program : public OOBase::NonCopyable
 	{
 		friend class State;
 

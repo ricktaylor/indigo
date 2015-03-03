@@ -28,7 +28,7 @@
 
 namespace Indigo
 {
-	class Window
+	class Window : public OOBase::NonCopyable
 	{
 		friend class State;
 		friend class StateFns;
