@@ -169,6 +169,8 @@ OOBase::SharedPtr<Indigo::BufferObject> Indigo::State::bind(const OOBase::Shared
 	{
 		if (buffer_object)
 			buffer_object->bind(target);
+		else
+			m_state_fns.glBindBuffer(target,0);
 
 		if (!m_buffer_objects.insert(target,buffer_object))
 			LOG_WARNING(("Failed to add to buffer object cache"));
@@ -180,6 +182,8 @@ OOBase::SharedPtr<Indigo::BufferObject> Indigo::State::bind(const OOBase::Shared
 		{
 			if (buffer_object)
 				buffer_object->bind(target);
+			else
+				m_state_fns.glBindBuffer(target,0);
 
 			i->second = buffer_object;
 		}

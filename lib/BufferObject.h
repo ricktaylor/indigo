@@ -61,6 +61,9 @@ namespace Indigo
 		template <typename T>
 		OOBase::SharedPtr<T> auto_map(GLenum access, GLintptr offset = 0)
 		{
+			if (offset >= m_size)
+				return OOBase::SharedPtr<T>();
+
 			return OOBase::reinterpret_pointer_cast<T,char>(auto_map_i(access,offset,static_cast<GLsizei>(m_size - offset)));
 		}
 
@@ -72,6 +75,9 @@ namespace Indigo
 
 		void* map(GLenum access, GLintptr offset = 0)
 		{
+			if (offset >= m_size)
+				return NULL;
+
 			return map(access,offset,static_cast<GLsizei>(m_size - offset));
 		}
 
