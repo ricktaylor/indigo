@@ -57,6 +57,8 @@ namespace Indigo
 	public:
 		BufferObject(GLenum target, GLenum usage, GLsizei size, const void* data = NULL);
 		~BufferObject();
+
+		static OOBase::SharedPtr<BufferObject> none(GLenum target);
 		
 		template <typename T>
 		OOBase::SharedPtr<T> auto_map(GLenum access, GLintptr offset = 0)
@@ -108,6 +110,8 @@ namespace Indigo
 		GLenum     m_target;
 		GLenum     m_usage;
 		GLsizei    m_size;
+
+		BufferObject(GLenum target);
 
 		OOBase::SharedPtr<char> auto_map_i(GLenum access, GLintptr offset, GLsizei length);
 		void bind(GLenum target);

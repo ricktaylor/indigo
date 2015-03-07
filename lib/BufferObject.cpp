@@ -34,15 +34,31 @@ void Indigo::detail::BufferMapping::destroy()
 	OOBase::ThreadLocalAllocator::delete_free(this);
 }
 
-Indigo::BufferObject::BufferObject(GLenum target, GLenum usage, GLsizei size, const void* data) : m_buffer(0), m_target(target), m_usage(usage), m_size(size)
+Indigo::BufferObject::BufferObject(GLenum target, GLenum usage, GLsizei size, const void* data) : 
+		m_buffer(0), 
+		m_target(target),
+		m_usage(usage),
+		m_size(size)
 {
 	StateFns::get_current()->glGenBuffers(1,&m_buffer);
 	State::get_current()->buffer_data(shared_from_this(),size,data,usage);
 }
 
+Indigo::BufferObject::BufferObject(GLenum target) : 
+		m_buffer(0), 
+		m_target(target)
+{
+}
+
 Indigo::BufferObject::~BufferObject()
 {
-	StateFns::get_current()->glDeleteBuffers(1,&m_buffer);
+	if (m_buffer)
+		StateFns::get_current()->glDeleteBuffers(1,&m_buffer);
+}
+
+OOBase::SharedPtr<Indigo::BufferObject> Indigo::BufferObject::none(GLenum target)
+{
+	return OOBase::allocate_shared<BufferObject,OOBase::ThreadLocalAllocator>(target);
 }
 
 void Indigo::BufferObject::bind(GLenum target)
