@@ -23,6 +23,7 @@
 #include "Texture.h"
 #include "Shader.h"
 #include "BufferObject.h"
+#include "VertexArrayObject.h"
 
 Indigo::State::State(StateFns& fns) :
 		m_state_fns(fns),
@@ -192,9 +193,24 @@ OOBase::SharedPtr<Indigo::BufferObject> Indigo::State::bind(const OOBase::Shared
 	return prev;
 }
 
-void Indigo::State::bind_multi_texture(GLenum unit, GLenum target, GLuint texture)
+OOBase::SharedPtr<Indigo::VertexArrayObject> Indigo::State::bind(const OOBase::SharedPtr<VertexArrayObject>& vao)
 {
-	m_state_fns.glBindMultiTexture(*this,unit,target,texture);
+	OOBase::SharedPtr<VertexArrayObject> prev = m_current_vao;
+
+	if (m_current_vao != vao)
+	{
+		if (vao)
+			vao->bind();
+		
+		m_current_vao = vao;
+	}
+
+	return prev;
+}
+
+void Indigo::State::bind_texture(GLenum unit, GLenum target, GLuint texture)
+{
+	m_state_fns.glBindTextureUnit(*this,unit,target,texture);
 }
 
 OOBase::SharedPtr<Indigo::Program> Indigo::State::use(const OOBase::SharedPtr<Program>& program)

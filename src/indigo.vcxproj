@@ -28,6 +28,7 @@
     <ClInclude Include="..\lib\State.h" />
     <ClInclude Include="..\lib\StateFns.h" />
     <ClInclude Include="..\lib\Texture.h" />
+    <ClInclude Include="..\lib\VertexArrayObject.h" />
     <ClInclude Include="..\lib\Window.h" />
     <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="Common.h" />
@@ -42,6 +43,7 @@
     <ClCompile Include="..\lib\State.cpp" />
     <ClCompile Include="..\lib\StateFns.cpp" />
     <ClCompile Include="..\lib\Texture.cpp" />
+    <ClCompile Include="..\lib\VertexArrayObject.cpp" />
     <ClCompile Include="..\lib\Window.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="LogicThread.cpp" />

@@ -35,12 +35,14 @@ namespace Indigo
 
 	public:
 		// Mutable create
-		static OOBase::SharedPtr<Texture> create(GLenum target);
+		Texture(GLenum target);
 
 		// Immutable create
-		static OOBase::SharedPtr<Texture> create(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
-		static OOBase::SharedPtr<Texture> create(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
-		static OOBase::SharedPtr<Texture> create(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+		Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
+		Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+
+		static OOBase::SharedPtr<Texture> none(GLenum target); 
 
 		~Texture();
 
@@ -61,21 +63,18 @@ namespace Indigo
 
 		GLenum target() const;
 
-		bool is_valid() const;
-
 	private:
 		GLuint m_tex;
 		GLenum m_target;
 
-		Texture(GLenum target);
+		Texture(GLuint tex, GLenum target);
 
-		void do_create(GLsizei levels, GLenum internalFormat, GLsizei width);
-		void do_create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
-		void do_create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+		void create(GLsizei levels, GLenum internalFormat, GLsizei width);
+		void create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		void create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 
 		void bind(State& state, GLenum unit) const;
 	};
 }
-
 
 #endif // INDIGO_TEXTURE_H_INCLUDED

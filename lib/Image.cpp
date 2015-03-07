@@ -61,11 +61,11 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::load_targa(const unsigned char* data,
 	data += 18 + data[0];
 
 	if (bpp == 2)
-		tex = Texture::create(GL_TEXTURE_2D,1,GL_RGB5_A1,width,height);
+		tex = OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,1,GL_RGB5_A1,width,height);
 	else if (bpp == 3)
-		tex = Texture::create(GL_TEXTURE_2D,1,GL_RGB8,width,height);
+		tex = OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,1,GL_RGB8,width,height);
 	else if (bpp == 4)
-		tex = Texture::create(GL_TEXTURE_2D,1,GL_RGBA8,width,height);
+		tex = OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,1,GL_RGBA8,width,height);
 	else
 		LOG_ERROR_RETURN(("Unexpected BPP for TGA data"),tex);
 

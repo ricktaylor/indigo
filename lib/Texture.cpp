@@ -23,35 +23,6 @@
 #include "State.h"
 #include "StateFns.h"
 
-OOBase::SharedPtr<Indigo::Texture> Indigo::Texture::create(GLenum target)
-{
-	return OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(target);
-}
-
-OOBase::SharedPtr<Indigo::Texture> Indigo::Texture::create(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
-{
-	OOBase::SharedPtr<Texture> tex = OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(target);
-	if (tex)
-		tex->do_create(levels,internalFormat,width);
-	return tex;
-}
-
-OOBase::SharedPtr<Indigo::Texture> Indigo::Texture::create(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
-{
-	OOBase::SharedPtr<Texture> tex = OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(target);
-	if (tex)
-		tex->do_create(levels,internalFormat,width,height);
-	return tex;
-}
-
-OOBase::SharedPtr<Indigo::Texture> Indigo::Texture::create(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
-{
-	OOBase::SharedPtr<Texture> tex = OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(target);
-	if (tex)
-		tex->do_create(levels,internalFormat,width,height,depth);
-	return tex;
-}
-
 Indigo::Texture::Texture(GLenum target) :
 		m_tex(0),
 		m_target(target)
@@ -59,22 +30,55 @@ Indigo::Texture::Texture(GLenum target) :
 	glGenTextures(1,&m_tex);
 }
 
-Indigo::Texture::~Texture()
+Indigo::Texture::Texture(GLuint tex, GLenum target) :
+		m_tex(tex),
+		m_target(target)
 {
-	glDeleteTextures(1,&m_tex);
 }
 
-void Indigo::Texture::do_create(GLsizei levels, GLenum internalFormat, GLsizei width)
+Indigo::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width) :
+		m_tex(0),
+		m_target(target)
+{
+	create(levels,internalFormat,width);
+}
+
+Indigo::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height) :
+		m_tex(0),
+		m_target(target)
+{
+	create(levels,internalFormat,width,height);
+}
+
+Indigo::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth) :
+		m_tex(0),
+		m_target(target)
+{
+	create(levels,internalFormat,width,height,depth);
+}
+
+Indigo::Texture::~Texture()
+{
+	if (m_tex)
+		glDeleteTextures(1,&m_tex);
+}
+
+OOBase::SharedPtr<Indigo::Texture> Indigo::Texture::none(GLenum target)
+{
+	return OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(0,target);
+}
+
+void Indigo::Texture::create(GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	State::get_current()->texture_storage(m_tex,m_target,levels,internalFormat,width);
 }
 
-void Indigo::Texture::do_create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void Indigo::Texture::create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	State::get_current()->texture_storage(m_tex,m_target,levels,internalFormat,width,height);
 }
 
-void Indigo::Texture::do_create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void Indigo::Texture::create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	State::get_current()->texture_storage(m_tex,m_target,levels,internalFormat,width,height,depth);
 }
@@ -190,14 +194,9 @@ GLenum Indigo::Texture::target() const
 	return m_target;
 }
 
-bool Indigo::Texture::is_valid() const
-{
-	return (glIsTexture(m_tex) == GL_TRUE);
-}
-
 void Indigo::Texture::bind(State& state, GLenum unit) const
 {
-	state.bind_multi_texture(unit,m_target,m_tex);
+	state.bind_texture(unit,m_target,m_tex);
 }
 
 void Indigo::Texture::parameter(GLenum name, GLfloat val)

@@ -37,7 +37,7 @@ namespace Indigo
 		static OOBase::SharedPtr<StateFns> get_current();
 
 		void glGenFramebuffers(GLsizei n, GLuint *framebuffers);
-		void glDeleteFramebuffers(GLsizei n, GLuint *framebuffers);
+		void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers);
 		void glBindFramebuffer(GLenum target, GLuint framebuffer);
 		GLenum glCheckFramebufferStatus(GLenum target);
 
@@ -55,8 +55,9 @@ namespace Indigo
 		void glLinkProgram(GLuint program);
 		void glUseProgram(GLuint program);
 
+		bool check_glTexImage3D();
 		void glActiveTexture(GLenum texture);
-		void glBindMultiTexture(State& state, GLenum unit, GLenum target, GLuint texture);
+		void glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture);
 		void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels);
 		void glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
 		void glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
@@ -71,12 +72,33 @@ namespace Indigo
 
 		void glGenBuffers(GLsizei n, GLuint* buffers);
 		void glBindBuffer(GLenum target, GLuint buffer);
-		void glDeleteBuffers(GLsizei n, GLuint* buffers);
+		void glDeleteBuffers(GLsizei n, const GLuint* buffers);
 		void glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void* data, GLenum usage);
 		void* glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access);
 		bool glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
 		void glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
 		void glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
+
+		void glGenVertexArrays(GLsizei n, GLuint* arrays);
+		void glBindVertexArray(GLuint array);
+		void glDeleteVertexArrays(GLsizei n, const GLuint* arrays);
+
+		void glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount);
+		void glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
+		void glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex);
+		bool check_glDrawElementsBaseVertex();
+		void glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
+		void glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset);
+		void glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
+		bool check_glDrawInstanced();
+		void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instances);
+		bool check_glDrawInstancedBaseInstance();
+		void glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance);
+		void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances);
+		void glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex);
+		void glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance);
+		void glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance);
+		
 
 	private:
 		StateFns();
@@ -100,11 +122,12 @@ namespace Indigo
 		PFNGLUSEPROGRAMPROC m_fn_glUseProgram;
 		PFNGLACTIVETEXTUREPROC m_fn_glActiveTexture;
 
-		void (StateFns::*m_thunk_glBindMultiTexture)(State&,GLenum,GLenum,GLuint);
-		PFNGLBINDMULTITEXTUREEXTPROC m_fn_glBindMultiTexture;
-		void check_glBindMultiTexture(State& state, GLenum unit, GLenum target, GLuint texture);
-		void emulate_glBindMultiTexture(State& state, GLenum unit, GLenum target, GLuint texture);
-		void call_glBindMultiTexture(State& state, GLenum unit, GLenum target, GLuint texture);
+		void (StateFns::*m_thunk_glBindTextureUnit)(State&,GLenum,GLenum,GLuint);
+		GLFWglproc m_fn_glBindTextureUnit;
+		void check_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture);
+		void emulate_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture);
+		void call_glMultiBindTexture(State& state, GLenum unit, GLenum target, GLuint texture);
+		void call_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture);
 
 		PFNGLTEXIMAGE3DPROC m_fn_glTexImage3D;
 
@@ -112,6 +135,7 @@ namespace Indigo
 		GLFWglproc m_fn_glTextureStorage1D;
 		void check_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
 		void emulate_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
+		void call_glTextureStorage1D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
 		void call_glTextureStorage1DEXT(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
 		void call_glTexStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
 
@@ -119,6 +143,7 @@ namespace Indigo
 		GLFWglproc m_fn_glTextureStorage2D;
 		void check_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
 		void emulate_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		void call_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
 		void call_glTextureStorage2DEXT(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
 		void call_glTexStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
 
@@ -126,24 +151,28 @@ namespace Indigo
 		GLFWglproc m_fn_glTextureStorage3D;
 		void check_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 		void emulate_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+		void call_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 		void call_glTextureStorage3DEXT(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 		void call_glTexStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 
 		void (StateFns::*m_thunk_glTextureSubImage1D)(State&,GLuint,GLenum,GLint,GLint,GLsizei,GLenum,GLenum,const void*);
 		GLFWglproc m_fn_glTextureSubImage1D;
 		void check_glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		void call_glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
 		void call_glTextureSubImage1DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
 		void call_glTexSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
 
 		void (StateFns::*m_thunk_glTextureSubImage2D)(State&,GLuint,GLenum,GLint,GLint,GLint,GLsizei,GLsizei,GLenum,GLenum,const void*);
 		GLFWglproc m_fn_glTextureSubImage2D;
 		void check_glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		void call_glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 		void call_glTextureSubImage2DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 		void call_glTexSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 
 		void (StateFns::*m_thunk_glTextureSubImage3D)(State&,GLuint,GLenum,GLint,GLint,GLint,GLint,GLsizei,GLsizei,GLsizei,GLenum,GLenum,const void*);
 		GLFWglproc m_fn_glTextureSubImage3D;
 		void check_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+		void call_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 		void call_glTextureSubImage3DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 		void call_glTexSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 
@@ -209,6 +238,48 @@ namespace Indigo
 		void check_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
 		void call_glCopyNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
 		void call_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
+
+		PFNGLGENVERTEXARRAYSPROC m_fn_glGenVertexArrays;
+		PFNGLDELETEVERTEXARRAYSPROC m_fn_glDeleteVertexArrays;
+		PFNGLBINDVERTEXARRAYPROC m_fn_glBindVertexArray;
+
+		void (StateFns::*m_thunk_glMultiDrawArrays)(GLenum,const GLint*,const GLsizei*,GLsizei);
+		GLFWglproc m_fn_glMultiDrawArrays;
+		void check_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount);
+		void call_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount);
+		void emulate_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount);
+
+		void (StateFns::*m_thunk_glDrawArraysInstanced)(GLenum,GLint,GLsizei,GLsizei);
+		GLFWglproc m_fn_glDrawArraysInstanced;
+		void check_glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instances);
+		void call_glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instances);
+
+		void (StateFns::*m_thunk_glDrawArraysInstancedBaseInstance)(GLenum,GLint,GLsizei,GLsizei,GLuint);
+		GLFWglproc m_fn_glDrawArraysInstancedBaseInstance;
+		void check_glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance);
+		void call_glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance);
+
+		void (StateFns::*m_thunk_glDrawElementsBaseVertex)(GLenum,GLsizei,GLenum,GLsizeiptr,GLint);
+		GLFWglproc m_fn_glDrawElementsBaseVertex;
+		void check_glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
+		void call_glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
+		
+		void (StateFns::*m_thunk_glMultiDrawElements)(GLenum,const GLsizei*,GLenum,const GLsizeiptr*,GLsizei);
+		GLFWglproc m_fn_glMultiDrawElements;
+		void check_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
+		void call_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
+		void emulate_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
+
+		void (StateFns::*m_thunk_glMultiDrawElementsBaseVertex)(GLenum,const GLsizei*,GLenum,const GLsizeiptr*,GLsizei,const GLint*);
+		GLFWglproc m_fn_glMultiDrawElementsBaseVertex;
+		void check_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex);
+		void call_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex);
+		void emulate_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex);
+
+		void (StateFns::*m_thunk_glDrawElementsInstanced)(GLenum,GLsizei,GLenum,GLsizeiptr,GLsizei);
+		GLFWglproc m_fn_glDrawElementsInstanced;
+		void check_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances);
+		void call_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances);
 	};
 }
 

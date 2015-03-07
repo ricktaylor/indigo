@@ -5,7 +5,7 @@
 
 namespace Indigo
 {
-	class VertexArrayObject : public OOBase::NonCopyable
+	class VertexArrayObject : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<VertexArrayObject>
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		friend class State;
@@ -14,6 +14,8 @@ namespace Indigo
 	public:
 		VertexArrayObject();
 		~VertexArrayObject();
+
+		static OOBase::SharedPtr<VertexArrayObject> none();
 
 		void attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, bool normalized, GLsizei stride, const void *pointer);
 		void attributeI(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, GLsizei stride, const void *pointer);
@@ -27,16 +29,28 @@ namespace Indigo
 		}
 
 		void draw(GLenum mode, GLint first, GLsizei count);
-		void draw(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance = 0);
 		void draw(GLenum mode, const GLint* firsts, const GLsizei* counts, GLsizei primcount);
 
-		void draw_elements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset = 0, GLint basevertex = 0);
-		void draw_elements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances, GLint basevertex = 0, GLuint baseinstance = 0);
-		void draw_elements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset = 0, GLint basevertex = 0);
-		void draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint* basevertices = NULL);
+		void draw_instanced(GLenum mode, GLint first, GLsizei count, GLsizei instances);
+		void draw_instanced(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance);
+
+		void draw_elements(GLenum mode, GLsizei count, GLenum type);
+		void draw_elements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset);
+		void draw_elements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
+		void draw_elements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type);
+		void draw_elements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset);
+		void draw_elements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
+		void draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
+		void draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint* basevertices);
+
+		void draw_elements_instanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances);
+		void draw_elements_instanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances, GLint basevertex);
+		void draw_elements_instanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances, GLint basevertex, GLuint baseinstance);
 
 	private:
 		GLuint m_array;
+
+		VertexArrayObject(GLuint array);
 
 		void bind();
 	};

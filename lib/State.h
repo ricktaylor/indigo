@@ -31,6 +31,7 @@ namespace Indigo
 	class Texture;
 	class Program;
 	class BufferObject;
+	class VertexArrayObject;
 	
 	class State : public OOBase::NonCopyable
 	{
@@ -39,6 +40,7 @@ namespace Indigo
 		friend class Window;
 		friend class Texture;
 		friend class BufferObject;
+		friend class VertexArrayObject;
 		
 	public:
 		static OOBase::SharedPtr<State> get_current();
@@ -46,17 +48,19 @@ namespace Indigo
 		OOBase::SharedPtr<Framebuffer> bind(GLenum target, const OOBase::SharedPtr<Framebuffer>& fb);
 		OOBase::SharedPtr<Texture> bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture);
 		OOBase::SharedPtr<BufferObject> bind(const OOBase::SharedPtr<BufferObject>& buffer_object);
+		OOBase::SharedPtr<VertexArrayObject> bind(const OOBase::SharedPtr<VertexArrayObject>& vao);
 
 		OOBase::SharedPtr<Program> use(const OOBase::SharedPtr<Program>& program);
 
 		GLenum active_texture_unit() const;
 
 	private:
-		StateFns&                      m_state_fns;
-		OOBase::SharedPtr<Framebuffer> m_draw_fb;
-		OOBase::SharedPtr<Framebuffer> m_read_fb;
-		GLenum                         m_active_texture_unit;
-		OOBase::SharedPtr<Program>     m_current_program;
+		StateFns&                            m_state_fns;
+		OOBase::SharedPtr<Framebuffer>       m_draw_fb;
+		OOBase::SharedPtr<Framebuffer>       m_read_fb;
+		GLenum                               m_active_texture_unit;
+		OOBase::SharedPtr<Program>           m_current_program;
+		OOBase::SharedPtr<VertexArrayObject> m_current_vao;
 		
 		typedef OOBase::Table<GLenum,OOBase::SharedPtr<Texture>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator> tex_unit_t;
 		OOBase::Vector<tex_unit_t,OOBase::ThreadLocalAllocator> m_vecTexUnits;
@@ -65,7 +69,7 @@ namespace Indigo
 
 		State(StateFns& fns);
 
-		void bind_multi_texture(GLenum unit, GLenum target, GLuint texture);
+		void bind_texture(GLenum unit, GLenum target, GLuint texture);
 		GLenum activate_texture_unit(GLenum unit);
 
 		void texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
