@@ -102,6 +102,10 @@ Indigo::StateFns::StateFns() :
 		m_thunk_glDrawArraysInstanced(&StateFns::check_glDrawArraysInstanced),
 		m_fn_glDrawArraysInstancedBaseInstance(NULL),
 		m_thunk_glDrawArraysInstancedBaseInstance(&StateFns::check_glDrawArraysInstancedBaseInstance),
+		m_fn_glDrawRangeElements(NULL),
+		m_thunk_glDrawRangeElements(&StateFns::check_glDrawRangeElements),
+		m_fn_glDrawRangeElementsBaseVertex(NULL),
+		m_thunk_glDrawRangeElementsBaseVertex(&StateFns::check_glDrawRangeElementsBaseVertex),
 		m_fn_glDrawElementsBaseVertex(NULL),
 		m_thunk_glDrawElementsBaseVertex(&StateFns::check_glDrawElementsBaseVertex),
 		m_fn_glMultiDrawElements(NULL),
@@ -109,7 +113,13 @@ Indigo::StateFns::StateFns() :
 		m_fn_glMultiDrawElementsBaseVertex(NULL),
 		m_thunk_glMultiDrawElementsBaseVertex(&StateFns::check_glMultiDrawElementsBaseVertex),
 		m_fn_glDrawElementsInstanced(NULL),
-		m_thunk_glDrawElementsInstanced(&StateFns::check_glDrawElementsInstanced)
+		m_thunk_glDrawElementsInstanced(&StateFns::check_glDrawElementsInstanced),
+		m_fn_glDrawElementsInstancedBaseVertex(NULL),
+		m_thunk_glDrawElementsInstancedBaseVertex(&StateFns::check_glDrawElementsInstancedBaseVertex),
+		m_fn_glDrawElementsInstancedBaseInstance(NULL),
+		m_thunk_glDrawElementsInstancedBaseInstance(&StateFns::check_glDrawElementsInstancedBaseInstance),
+		m_fn_glDrawElementsInstancedBaseVertexBaseInstance(NULL),
+		m_thunk_glDrawElementsInstancedBaseVertexBaseInstance(&StateFns::check_glDrawElementsInstancedBaseVertexBaseInstance)
 {
 }
 
@@ -1378,7 +1388,7 @@ bool Indigo::StateFns::check_glDrawInstancedBaseInstance()
 {
 	if (!m_fn_glDrawArraysInstancedBaseInstance && (isGLversion(4,2) || glfwExtensionSupported("GL_ARB_draw_instanced") == GL_TRUE))
 	{
-		m_fn_glDrawArraysInstancedBaseInstance = glfwGetProcAddress("glDrawArraysInstancedBaseInstance");
+		m_fn_glDrawArraysInstancedBaseInstance = (PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC)glfwGetProcAddress("glDrawArraysInstancedBaseInstance");
 		if (m_fn_glDrawArraysInstancedBaseInstance)
 			m_thunk_glDrawArraysInstancedBaseInstance = &StateFns::call_glDrawArraysInstancedBaseInstance;
 	}
@@ -1396,7 +1406,7 @@ void Indigo::StateFns::check_glDrawArraysInstancedBaseInstance(GLenum mode, GLin
 
 void Indigo::StateFns::call_glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance)
 {
-	(*((PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC)m_fn_glDrawArraysInstancedBaseInstance))(mode,first,count,instances,baseinstance);
+	(*m_fn_glDrawArraysInstancedBaseInstance)(mode,first,count,instances,baseinstance);
 }
 
 void Indigo::StateFns::glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance)
@@ -1404,11 +1414,70 @@ void Indigo::StateFns::glDrawArraysInstancedBaseInstance(GLenum mode, GLint firs
 	(this->*m_thunk_glDrawArraysInstancedBaseInstance)(mode,first,count,instances,baseinstance);
 }
 
+void Indigo::StateFns::check_glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset)
+{
+	m_fn_glDrawRangeElements = glfwGetProcAddress("glDrawRangeElements");
+	if (m_fn_glDrawRangeElements)
+		m_thunk_glDrawRangeElements = &StateFns::call_glDrawRangeElements;
+	
+	if (!m_fn_glDrawRangeElements && glfwExtensionSupported("GL_EXT_draw_range_elements") == GL_TRUE)
+	{
+		m_fn_glDrawRangeElements = glfwGetProcAddress("glDrawRangeElementsEXT");
+		if (m_fn_glDrawRangeElements)
+			m_thunk_glDrawRangeElements = &StateFns::call_glDrawRangeElements;
+	}
+
+	if (!m_fn_glDrawRangeElements)
+		LOG_ERROR(("No glDrawRangeElements function"));
+	else
+		(this->*m_thunk_glDrawRangeElements)(mode,start,end,count,type,offset);
+}
+
+void Indigo::StateFns::call_glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset)
+{
+	(*((PFNGLDRAWRANGEELEMENTSPROC)m_fn_glDrawRangeElements))(mode,start,end,count,type,(const void*)offset);
+}
+
+void Indigo::StateFns::glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset)
+{
+	(this->*m_thunk_glDrawRangeElements)(mode,start,end,count,type,offset);
+}
+
+bool Indigo::StateFns::check_glDrawRangeElementsBaseVertex()
+{
+	if (!m_fn_glDrawRangeElementsBaseVertex && (isGLversion(3,2) || glfwExtensionSupported("GL_ARB_draw_elements_base_vertex") == GL_TRUE))
+	{
+		m_fn_glDrawRangeElementsBaseVertex = (PFNGLDRAWRANGEELEMENTSBASEVERTEXPROC)glfwGetProcAddress("glDrawRangeElementsBaseVertex");
+		if (m_fn_glDrawRangeElementsBaseVertex)
+			m_thunk_glDrawRangeElementsBaseVertex = &StateFns::call_glDrawRangeElementsBaseVertex;
+	}
+
+	return (m_fn_glDrawRangeElementsBaseVertex != NULL);
+}
+
+void Indigo::StateFns::check_glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
+{
+	if (!check_glDrawRangeElementsBaseVertex())
+		LOG_ERROR(("No glDrawRangeElementsBaseVertex function"));
+	else
+		(this->*m_thunk_glDrawRangeElementsBaseVertex)(mode,start,end,count,type,offset,basevertex);
+}
+
+void Indigo::StateFns::call_glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
+{
+	(*m_fn_glDrawRangeElementsBaseVertex)(mode,start,end,count,type,(const void*)offset,basevertex);
+}
+
+void Indigo::StateFns::glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
+{
+	(this->*m_thunk_glDrawRangeElementsBaseVertex)(mode,start,end,count,type,offset,basevertex);
+}
+
 bool Indigo::StateFns::check_glDrawElementsBaseVertex()
 {
 	if (!m_fn_glDrawElementsBaseVertex && (isGLversion(3,2) || glfwExtensionSupported("GL_ARB_draw_elements_base_vertex") == GL_TRUE))
 	{
-		m_fn_glDrawElementsBaseVertex = glfwGetProcAddress("glDrawElementsBaseVertex");
+		m_fn_glDrawElementsBaseVertex = (PFNGLDRAWELEMENTSBASEVERTEXPROC)glfwGetProcAddress("glDrawElementsBaseVertex");
 		if (m_fn_glDrawElementsBaseVertex)
 			m_thunk_glDrawElementsBaseVertex = &StateFns::call_glDrawElementsBaseVertex;
 	}
@@ -1426,7 +1495,7 @@ void Indigo::StateFns::check_glDrawElementsBaseVertex(GLenum mode, GLsizei count
 
 void Indigo::StateFns::call_glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
 {
-	(*((PFNGLDRAWELEMENTSBASEVERTEXPROC)m_fn_glDrawElementsBaseVertex))(mode,count,type,(const void*)offset,basevertex);
+	(*m_fn_glDrawElementsBaseVertex)(mode,count,type,(const void*)offset,basevertex);
 }
 
 void Indigo::StateFns::glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
@@ -1479,7 +1548,7 @@ void Indigo::StateFns::check_glMultiDrawElementsBaseVertex(GLenum mode, const GL
 {
 	if (isGLversion(3,2) || glfwExtensionSupported("GL_ARB_draw_elements_base_vertex") == GL_TRUE)
 	{
-		m_fn_glMultiDrawElementsBaseVertex = glfwGetProcAddress("glMultiDrawElementsBaseVertex");
+		m_fn_glMultiDrawElementsBaseVertex = (PFNGLMULTIDRAWELEMENTSBASEVERTEXPROC)glfwGetProcAddress("glMultiDrawElementsBaseVertex");
 		if (m_fn_glMultiDrawElementsBaseVertex)
 			m_thunk_glMultiDrawElementsBaseVertex = &StateFns::call_glMultiDrawElementsBaseVertex;
 	}
@@ -1492,7 +1561,7 @@ void Indigo::StateFns::check_glMultiDrawElementsBaseVertex(GLenum mode, const GL
 
 void Indigo::StateFns::call_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
 {
-	(*((PFNGLMULTIDRAWELEMENTSBASEVERTEXPROC)m_fn_glMultiDrawElementsBaseVertex))(mode,count,type,(const void* const*)offsets,primcount,basevertex);
+	(*m_fn_glMultiDrawElementsBaseVertex)(mode,count,type,(const void* const*)offsets,primcount,basevertex);
 }
 
 void Indigo::StateFns::emulate_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
@@ -1553,4 +1622,94 @@ void Indigo::StateFns::call_glDrawElementsInstanced(GLenum mode, GLsizei count, 
 void Indigo::StateFns::glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances)
 {
 	(this->*m_thunk_glDrawElementsInstanced)(mode,count,type,offset,instances);
+}
+
+bool Indigo::StateFns::check_glDrawElementsInstancedBaseVertex()
+{
+	if (!m_fn_glDrawElementsInstancedBaseVertex && (isGLversion(3,2) || glfwExtensionSupported("GL_ARB_draw_elements_base_vertex") == GL_TRUE))
+	{
+		m_fn_glDrawElementsInstancedBaseVertex = (PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXPROC)glfwGetProcAddress("glDrawElementsInstancedBaseVertex");
+		if (m_fn_glDrawElementsInstancedBaseVertex)
+			m_thunk_glDrawElementsInstancedBaseVertex = &StateFns::call_glDrawElementsInstancedBaseVertex;
+	}
+
+	return (m_fn_glDrawElementsInstancedBaseVertex != NULL);
+}
+
+void Indigo::StateFns::check_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex)
+{
+	if (!check_glDrawElementsInstancedBaseVertex())
+		LOG_ERROR(("No glDrawElementsInstancedBaseVertex function"));
+	else
+		(this->*m_thunk_glDrawElementsInstancedBaseVertex)(mode,count,type,offset,instancecount,basevertex);
+}
+
+void Indigo::StateFns::call_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex)
+{
+	(*m_fn_glDrawElementsInstancedBaseVertex)(mode,count,type,(const void*)offset,instancecount,basevertex);
+}
+
+void Indigo::StateFns::glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex)
+{
+	(this->*m_thunk_glDrawElementsInstancedBaseVertex)(mode,count,type,offset,instancecount,basevertex);
+}
+
+bool Indigo::StateFns::check_glDrawElementsInstancedBaseInstance()
+{
+	if (!m_fn_glDrawElementsInstancedBaseInstance && (isGLversion(4,2) || glfwExtensionSupported("GL_ARB_base_instance") == GL_TRUE))
+	{
+		m_fn_glDrawElementsInstancedBaseInstance = (PFNGLDRAWELEMENTSINSTANCEDBASEINSTANCEPROC)glfwGetProcAddress("glDrawElementsInstancedBaseInstance");
+		if (m_fn_glDrawElementsInstancedBaseInstance)
+			m_thunk_glDrawElementsInstancedBaseInstance = &StateFns::call_glDrawElementsInstancedBaseInstance;
+	}
+
+	return (m_fn_glDrawElementsInstancedBaseInstance != NULL);
+}
+
+void Indigo::StateFns::check_glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance)
+{
+	if (!check_glDrawElementsInstancedBaseInstance())
+		LOG_ERROR(("No glDrawElementsInstancedBaseInstance function"));
+	else
+		(this->*m_thunk_glDrawElementsInstancedBaseInstance)(mode,count,type,offset,instancecount,baseinstance);
+}
+
+void Indigo::StateFns::call_glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance)
+{
+	(*m_fn_glDrawElementsInstancedBaseInstance)(mode,count,type,(const void*)offset,instancecount,baseinstance);
+}
+
+void Indigo::StateFns::glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance)
+{
+	(this->*m_thunk_glDrawElementsInstancedBaseInstance)(mode,count,type,offset,instancecount,baseinstance);
+}
+
+bool Indigo::StateFns::check_glDrawElementsInstancedBaseVertexBaseInstance()
+{
+	if (!m_fn_glDrawElementsInstancedBaseVertexBaseInstance && (isGLversion(4,2) || glfwExtensionSupported("GL_ARB_base_instance") == GL_TRUE))
+	{
+		m_fn_glDrawElementsInstancedBaseVertexBaseInstance = (PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEPROC)glfwGetProcAddress("glDrawElementsInstancedBaseVertexBaseInstance");
+		if (m_fn_glDrawElementsInstancedBaseVertexBaseInstance)
+			m_thunk_glDrawElementsInstancedBaseVertexBaseInstance = &StateFns::call_glDrawElementsInstancedBaseVertexBaseInstance;
+	}
+
+	return (m_fn_glDrawElementsInstancedBaseVertexBaseInstance != NULL);
+}
+
+void Indigo::StateFns::check_glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance)
+{
+	if (!check_glDrawElementsInstancedBaseInstance())
+		LOG_ERROR(("No glDrawElementsInstancedBaseVertexBaseInstance function"));
+	else
+		(this->*m_thunk_glDrawElementsInstancedBaseVertexBaseInstance)(mode,count,type,offset,instancecount,basevertex,baseinstance);
+}
+
+void Indigo::StateFns::call_glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance)
+{
+	(*m_fn_glDrawElementsInstancedBaseVertexBaseInstance)(mode,count,type,(const void*)offset,instancecount,basevertex,baseinstance);
+}
+
+void Indigo::StateFns::glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance)
+{
+	(this->*m_thunk_glDrawElementsInstancedBaseVertexBaseInstance)(mode,count,type,offset,instancecount,basevertex,baseinstance);
 }

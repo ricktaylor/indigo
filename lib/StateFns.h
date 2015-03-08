@@ -89,14 +89,18 @@ namespace Indigo
 		bool check_glDrawElementsBaseVertex();
 		void glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
 		void glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset);
+		bool check_glDrawRangeElementsBaseVertex();
 		void glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
 		bool check_glDrawInstanced();
 		void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instances);
 		bool check_glDrawInstancedBaseInstance();
 		void glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance);
 		void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances);
+		bool check_glDrawElementsInstancedBaseVertex();
 		void glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex);
+		bool check_glDrawElementsInstancedBaseInstance();
 		void glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance);
+		bool check_glDrawElementsInstancedBaseVertexBaseInstance();
 		void glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance);
 		
 
@@ -255,12 +259,22 @@ namespace Indigo
 		void call_glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instances);
 
 		void (StateFns::*m_thunk_glDrawArraysInstancedBaseInstance)(GLenum,GLint,GLsizei,GLsizei,GLuint);
-		GLFWglproc m_fn_glDrawArraysInstancedBaseInstance;
+		PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC m_fn_glDrawArraysInstancedBaseInstance;
 		void check_glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance);
 		void call_glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance);
 
+		void (StateFns::*m_thunk_glDrawRangeElements)(GLenum,GLuint,GLuint,GLsizei,GLenum,GLsizeiptr);
+		GLFWglproc m_fn_glDrawRangeElements;
+		void check_glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset);
+		void call_glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset);
+
+		void (StateFns::*m_thunk_glDrawRangeElementsBaseVertex)(GLenum,GLuint,GLuint,GLsizei,GLenum,GLsizeiptr,GLint);
+		PFNGLDRAWRANGEELEMENTSBASEVERTEXPROC m_fn_glDrawRangeElementsBaseVertex;
+		void check_glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertext);
+		void call_glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
+		
 		void (StateFns::*m_thunk_glDrawElementsBaseVertex)(GLenum,GLsizei,GLenum,GLsizeiptr,GLint);
-		GLFWglproc m_fn_glDrawElementsBaseVertex;
+		PFNGLDRAWELEMENTSBASEVERTEXPROC m_fn_glDrawElementsBaseVertex;
 		void check_glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
 		void call_glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
 		
@@ -271,7 +285,7 @@ namespace Indigo
 		void emulate_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
 
 		void (StateFns::*m_thunk_glMultiDrawElementsBaseVertex)(GLenum,const GLsizei*,GLenum,const GLsizeiptr*,GLsizei,const GLint*);
-		GLFWglproc m_fn_glMultiDrawElementsBaseVertex;
+		PFNGLMULTIDRAWELEMENTSBASEVERTEXPROC m_fn_glMultiDrawElementsBaseVertex;
 		void check_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex);
 		void call_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex);
 		void emulate_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex);
@@ -280,6 +294,21 @@ namespace Indigo
 		GLFWglproc m_fn_glDrawElementsInstanced;
 		void check_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances);
 		void call_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances);
+
+		void (StateFns::*m_thunk_glDrawElementsInstancedBaseVertex)(GLenum,GLsizei,GLenum,GLsizeiptr,GLsizei,GLint);
+		PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXPROC m_fn_glDrawElementsInstancedBaseVertex;
+		void check_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex);
+		void call_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex);
+
+		void (StateFns::*m_thunk_glDrawElementsInstancedBaseInstance)(GLenum,GLsizei,GLenum,GLsizeiptr,GLsizei,GLuint);
+		PFNGLDRAWELEMENTSINSTANCEDBASEINSTANCEPROC m_fn_glDrawElementsInstancedBaseInstance;
+		void check_glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance);
+		void call_glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance);
+
+		void (StateFns::*m_thunk_glDrawElementsInstancedBaseVertexBaseInstance)(GLenum,GLsizei,GLenum,GLsizeiptr,GLsizei,GLint,GLuint);
+		PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEPROC m_fn_glDrawElementsInstancedBaseVertexBaseInstance;
+		void check_glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance);
+		void call_glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance);
 	};
 }
 

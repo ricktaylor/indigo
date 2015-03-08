@@ -18,14 +18,14 @@ namespace Indigo
 		static OOBase::SharedPtr<VertexArrayObject> none();
 
 		void attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, bool normalized, GLsizei stride, const void *pointer);
-		void attributeI(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, GLsizei stride, const void *pointer);
+		void attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, GLsizei stride, const void *pointer);
 
 		void attribute_divisor(GLuint index, GLuint divisor);
 
-		void enable(GLuint index, bool enable = true);
-		void disable(GLuint index)
+		void enable_attribute(GLuint index, bool enable = true);
+		void disable_attribute(GLuint index)
 		{
-			return enable(index,false);
+			return enable_attribute(index,false);
 		}
 
 		void draw(GLenum mode, GLint first, GLsizei count);
