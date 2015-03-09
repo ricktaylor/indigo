@@ -1228,11 +1228,12 @@ void Indigo::StateFns::check_glCopyBufferSubData(State& state, const OOBase::Sha
 	if (!m_fn_glCopyBufferSubData)
 	{
 		m_fn_glCopyBufferSubData = glfwGetProcAddress("glCopyBufferSubData");
-		if (!m_fn_glCopyBufferSubData)
-			LOG_ERROR(("No glCopyBufferSubData function"));
-		else
+		if (m_fn_glCopyBufferSubData)
 			m_thunk_glCopyBufferSubData = &StateFns::call_glCopyBufferSubData;
 	}
+
+	if (!m_fn_glCopyBufferSubData)
+		m_thunk_glCopyBufferSubData = &StateFns::emulate_glCopyBufferSubData;
 
 	(this->*m_thunk_glCopyBufferSubData)(state,write,writeoffset,read,readoffset,size);
 }
@@ -1248,6 +1249,14 @@ void Indigo::StateFns::call_glCopyBufferSubData(State& state, const OOBase::Shar
 	state.bind(write,GL_COPY_WRITE_BUFFER);
 
 	(*((PFNGLCOPYBUFFERSUBDATAPROC)m_fn_glCopyBufferSubData))(GL_COPY_READ_BUFFER,GL_COPY_WRITE_BUFFER,readoffset,writeoffset,size);
+}
+
+void Indigo::StateFns::emulate_glCopyBufferSubData(State&, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+{
+	OOBase::SharedPtr<OOBase::uint8_t> r = read->auto_map<OOBase::uint8_t>(GL_READ_ONLY,readoffset);
+	OOBase::SharedPtr<OOBase::uint8_t> w = write->auto_map<OOBase::uint8_t>(GL_WRITE_ONLY,writeoffset);
+
+	memcpy(w.get(),r.get(),size);
 }
 
 void Indigo::StateFns::glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
