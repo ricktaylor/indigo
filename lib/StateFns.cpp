@@ -1233,7 +1233,10 @@ void Indigo::StateFns::check_glCopyBufferSubData(State& state, const OOBase::Sha
 	}
 
 	if (!m_fn_glCopyBufferSubData)
+	{
+		LOG_DEBUG(("Using emulated glCopyBufferSubData function"));
 		m_thunk_glCopyBufferSubData = &StateFns::emulate_glCopyBufferSubData;
+	}
 
 	(this->*m_thunk_glCopyBufferSubData)(state,write,writeoffset,read,readoffset,size);
 }
