@@ -33,6 +33,7 @@ indigo_SOURCES = \
 	../lib/Shader.cpp \
 	../lib/Texture.cpp \
 	../lib/BufferObject.cpp \
+	../lib/VertexArrayObject.cpp \
 	../lib/Image.cpp \
 	Render.cpp \
 	Font.cpp \
