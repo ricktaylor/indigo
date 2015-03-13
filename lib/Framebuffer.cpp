@@ -4,38 +4,38 @@
 //
 // This file is part of the Indigo boardgame engine.
 //
-// Indigo is free software: you can redistribute it and/or modify
+// OOGL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Indigo is distributed in the hope that it will be useful,
+// OOGL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Indigo.  If not, see <http://www.gnu.org/licenses/>.
+// along with OOGL.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Framebuffer.h"
 #include "Window.h"
 
-Indigo::Framebuffer::Framebuffer() :
+OOGL::Framebuffer::Framebuffer() :
 		m_id(GL_INVALID_VALUE),
 		m_default(false)
 {
 	StateFns::get_current()->glGenFramebuffers(1,&m_id);
 }
 
-Indigo::Framebuffer::Framebuffer(GLuint id) :
+OOGL::Framebuffer::Framebuffer(GLuint id) :
 		m_id(id),
 		m_default(true)
 {
 }
 
-OOBase::SharedPtr<Indigo::Framebuffer> Indigo::Framebuffer::get_default()
+OOBase::SharedPtr<OOGL::Framebuffer> OOGL::Framebuffer::get_default()
 {
 	OOBase::SharedPtr<Framebuffer> ret;
 	GLint fb_id = GL_INVALID_VALUE;
@@ -45,18 +45,18 @@ OOBase::SharedPtr<Indigo::Framebuffer> Indigo::Framebuffer::get_default()
 	return ret;
 }
 
-Indigo::Framebuffer::~Framebuffer()
+OOGL::Framebuffer::~Framebuffer()
 {
 	if (!m_default && m_id != GL_INVALID_VALUE)
 		StateFns::get_current()->glDeleteFramebuffers(1,&m_id);
 }
 
-GLenum Indigo::Framebuffer::check() const
+GLenum OOGL::Framebuffer::check() const
 {
 	return StateFns::get_current()->glCheckFramebufferStatus(m_id);
 }
 
-void Indigo::Framebuffer::bind(GLenum target)
+void OOGL::Framebuffer::bind(GLenum target)
 {
 	StateFns::get_current()->glBindFramebuffer(target,m_id);
 }

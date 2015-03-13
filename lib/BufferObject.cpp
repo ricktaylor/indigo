@@ -4,18 +4,18 @@
 //
 // This file is part of the Indigo boardgame engine.
 //
-// Indigo is free software: you can redistribute it and/or modify
+// OOGL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Indigo is distributed in the hope that it will be useful,
+// OOGL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Indigo.  If not, see <http://www.gnu.org/licenses/>.
+// along with OOGL.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -23,18 +23,18 @@
 #include "State.h"
 #include "StateFns.h"
 
-void Indigo::detail::BufferMapping::dispose()
+void OOGL::detail::BufferMapping::dispose()
 {
 	// Unmap the buffer
 	m_buffer->unmap();
 }
 
-void Indigo::detail::BufferMapping::destroy()
+void OOGL::detail::BufferMapping::destroy()
 {
 	OOBase::ThreadLocalAllocator::delete_free(this);
 }
 
-Indigo::BufferObject::BufferObject(GLenum target, GLenum usage, GLsizei size, const void* data) : 
+OOGL::BufferObject::BufferObject(GLenum target, GLenum usage, GLsizei size, const void* data) : 
 		m_buffer(0), 
 		m_target(target),
 		m_usage(usage),
@@ -44,39 +44,39 @@ Indigo::BufferObject::BufferObject(GLenum target, GLenum usage, GLsizei size, co
 	State::get_current()->buffer_data(shared_from_this(),size,data,usage);
 }
 
-Indigo::BufferObject::BufferObject(GLenum target) : 
+OOGL::BufferObject::BufferObject(GLenum target) : 
 		m_buffer(0), 
 		m_target(target)
 {
 }
 
-Indigo::BufferObject::~BufferObject()
+OOGL::BufferObject::~BufferObject()
 {
 	if (m_buffer)
 		StateFns::get_current()->glDeleteBuffers(1,&m_buffer);
 }
 
-OOBase::SharedPtr<Indigo::BufferObject> Indigo::BufferObject::none(GLenum target)
+OOBase::SharedPtr<OOGL::BufferObject> OOGL::BufferObject::none(GLenum target)
 {
 	return OOBase::allocate_shared<BufferObject,OOBase::ThreadLocalAllocator>(target);
 }
 
-void Indigo::BufferObject::bind(GLenum target)
+void OOGL::BufferObject::bind(GLenum target)
 {
 	StateFns::get_current()->glBindBuffer(target,m_buffer);
 }
 
-void* Indigo::BufferObject::map(GLenum access, GLintptr offset, GLsizei length)
+void* OOGL::BufferObject::map(GLenum access, GLintptr offset, GLsizei length)
 {
 	return State::get_current()->map_buffer_range(shared_from_this(),offset,length,m_usage,m_size,access);
 }
 
-bool Indigo::BufferObject::unmap()
+bool OOGL::BufferObject::unmap()
 {
 	return State::get_current()->unmap_buffer(shared_from_this());
 }
 
-OOBase::SharedPtr<char> Indigo::BufferObject::auto_map_i(GLenum access, GLintptr offset, GLsizei length)
+OOBase::SharedPtr<char> OOGL::BufferObject::auto_map_i(GLenum access, GLintptr offset, GLsizei length)
 {
 	OOBase::SharedPtr<char> ret;
 	OOBase::SharedPtr<BufferObject> self(shared_from_this());
@@ -96,12 +96,12 @@ OOBase::SharedPtr<char> Indigo::BufferObject::auto_map_i(GLenum access, GLintptr
 	return ret;
 }
 
-void Indigo::BufferObject::write(GLintptr offset, GLsizei size, const void* data)
+void OOGL::BufferObject::write(GLintptr offset, GLsizei size, const void* data)
 {
 	State::get_current()->buffer_sub_data(shared_from_this(),offset,size,data);
 }
 
-void Indigo::BufferObject::copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::BufferObject::copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
 	State::get_current()->copy_buffer_data(shared_from_this(),writeoffset,read,readoffset,size);
 }

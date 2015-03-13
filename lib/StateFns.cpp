@@ -4,18 +4,18 @@
 //
 // This file is part of the Indigo boardgame engine.
 //
-// Indigo is free software: you can redistribute it and/or modify
+// OOGL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Indigo is distributed in the hope that it will be useful,
+// OOGL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Indigo.  If not, see <http://www.gnu.org/licenses/>.
+// along with OOGL.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +41,7 @@ namespace
 	}
 }
 
-Indigo::StateFns::StateFns() :
+OOGL::StateFns::StateFns() :
 		m_fn_glGenFramebuffers(NULL),
 		m_fn_glDeleteFramebuffers(NULL),
 		m_fn_glBindFramebuffer(NULL),
@@ -125,7 +125,7 @@ Indigo::StateFns::StateFns() :
 {
 }
 
-OOBase::SharedPtr<Indigo::StateFns> Indigo::StateFns::get_current()
+OOBase::SharedPtr<OOGL::StateFns> OOGL::StateFns::get_current()
 {
 	GLFWwindow* win = glfwGetCurrentContext();
 	if (!win)
@@ -144,7 +144,7 @@ OOBase::SharedPtr<Indigo::StateFns> Indigo::StateFns::get_current()
 	return window->m_state_fns;
 }
 
-void Indigo::StateFns::glGenFramebuffers(GLsizei n, GLuint *framebuffers)
+void OOGL::StateFns::glGenFramebuffers(GLsizei n, GLuint *framebuffers)
 {
 	if (!m_fn_glGenFramebuffers)
 	{
@@ -161,7 +161,7 @@ void Indigo::StateFns::glGenFramebuffers(GLsizei n, GLuint *framebuffers)
 		(*m_fn_glGenFramebuffers)(n,framebuffers);
 }
 
-void Indigo::StateFns::glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
+void OOGL::StateFns::glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers)
 {
 	if (!m_fn_glDeleteFramebuffers)
 	{
@@ -178,7 +178,7 @@ void Indigo::StateFns::glDeleteFramebuffers(GLsizei n, const GLuint *framebuffer
 		(*m_fn_glDeleteFramebuffers)(n,framebuffers);
 }
 
-void Indigo::StateFns::glBindFramebuffer(GLenum target, GLuint framebuffer)
+void OOGL::StateFns::glBindFramebuffer(GLenum target, GLuint framebuffer)
 {
 	if (!m_fn_glBindFramebuffer)
 	{
@@ -195,7 +195,7 @@ void Indigo::StateFns::glBindFramebuffer(GLenum target, GLuint framebuffer)
 		(*m_fn_glBindFramebuffer)(target,framebuffer);
 }
 
-GLenum Indigo::StateFns::glCheckFramebufferStatus(GLenum target)
+GLenum OOGL::StateFns::glCheckFramebufferStatus(GLenum target)
 {
 	if (!m_fn_glCheckFramebufferStatus)
 	{
@@ -212,7 +212,7 @@ GLenum Indigo::StateFns::glCheckFramebufferStatus(GLenum target)
 	return (*m_fn_glCheckFramebufferStatus)(target);
 }
 
-GLuint Indigo::StateFns::glCreateShader(GLenum shaderType)
+GLuint OOGL::StateFns::glCreateShader(GLenum shaderType)
 {
 	if (!m_fn_glCreateShader)
 	{
@@ -224,7 +224,7 @@ GLuint Indigo::StateFns::glCreateShader(GLenum shaderType)
 	return (*m_fn_glCreateShader)(shaderType);
 }
 
-void Indigo::StateFns::glDeleteShader(GLuint shader)
+void OOGL::StateFns::glDeleteShader(GLuint shader)
 {
 	if (!m_fn_glDeleteShader)
 		m_fn_glDeleteShader = (PFNGLDELETESHADERPROC)glfwGetProcAddress("glDeleteShader");
@@ -235,7 +235,7 @@ void Indigo::StateFns::glDeleteShader(GLuint shader)
 		(*m_fn_glDeleteShader)(shader);
 }
 
-void Indigo::StateFns::glShaderSource(GLuint shader, GLsizei count, const GLchar *const *string, const GLint *length)
+void OOGL::StateFns::glShaderSource(GLuint shader, GLsizei count, const GLchar *const *string, const GLint *length)
 {
 	if (!m_fn_glShaderSource)
 		m_fn_glShaderSource = (PFNGLSHADERSOURCEPROC)glfwGetProcAddress("glShaderSource");
@@ -246,7 +246,7 @@ void Indigo::StateFns::glShaderSource(GLuint shader, GLsizei count, const GLchar
 		(*m_fn_glShaderSource)(shader,count,string,length);
 }
 
-void Indigo::StateFns::glCompileShader(GLuint shader)
+void OOGL::StateFns::glCompileShader(GLuint shader)
 {
 	if (!m_fn_glCompileShader)
 		m_fn_glCompileShader = (PFNGLCOMPILESHADERPROC)glfwGetProcAddress("glCompileShader");
@@ -257,7 +257,7 @@ void Indigo::StateFns::glCompileShader(GLuint shader)
 		(*m_fn_glCompileShader)(shader);
 }
 
-void Indigo::StateFns::glGetShaderiv(GLuint shader, GLenum pname, GLint* params)
+void OOGL::StateFns::glGetShaderiv(GLuint shader, GLenum pname, GLint* params)
 {
 	if (!m_fn_glGetShaderiv)
 		m_fn_glGetShaderiv = (PFNGLGETSHADERIVPROC)glfwGetProcAddress("glGetShaderiv");
@@ -268,7 +268,7 @@ void Indigo::StateFns::glGetShaderiv(GLuint shader, GLenum pname, GLint* params)
 		(*m_fn_glGetShaderiv)(shader,pname,params);
 }
 
-void Indigo::StateFns::glGetShaderInfoLog(GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog)
+void OOGL::StateFns::glGetShaderInfoLog(GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog)
 {
 	if (!m_fn_glGetShaderInfoLog)
 		m_fn_glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)glfwGetProcAddress("glGetShaderInfoLog");
@@ -279,7 +279,7 @@ void Indigo::StateFns::glGetShaderInfoLog(GLuint shader, GLsizei maxLength, GLsi
 		(*m_fn_glGetShaderInfoLog)(shader,maxLength,length,infoLog);
 }
 
-void Indigo::StateFns::glGetProgramiv(GLuint shader, GLenum pname, GLint* params)
+void OOGL::StateFns::glGetProgramiv(GLuint shader, GLenum pname, GLint* params)
 {
 	if (!m_fn_glGetProgramiv)
 		m_fn_glGetProgramiv = (PFNGLGETPROGRAMIVPROC)glfwGetProcAddress("glGetProgramiv");
@@ -290,7 +290,7 @@ void Indigo::StateFns::glGetProgramiv(GLuint shader, GLenum pname, GLint* params
 		(*m_fn_glGetProgramiv)(shader,pname,params);
 }
 
-void Indigo::StateFns::glGetProgramInfoLog(GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog)
+void OOGL::StateFns::glGetProgramInfoLog(GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog)
 {
 	if (!m_fn_glGetProgramInfoLog)
 		m_fn_glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)glfwGetProcAddress("glGetProgramInfoLog");
@@ -301,7 +301,7 @@ void Indigo::StateFns::glGetProgramInfoLog(GLuint program, GLsizei maxLength, GL
 		(*m_fn_glGetProgramInfoLog)(program,maxLength,length,infoLog);
 }
 
-void Indigo::StateFns::glUseProgram(GLuint program)
+void OOGL::StateFns::glUseProgram(GLuint program)
 {
 	if (!m_fn_glUseProgram)
 		m_fn_glUseProgram = (PFNGLUSEPROGRAMPROC)glfwGetProcAddress("glUseProgram");
@@ -312,7 +312,7 @@ void Indigo::StateFns::glUseProgram(GLuint program)
 		(*m_fn_glUseProgram)(program);
 }
 
-void Indigo::StateFns::glAttachShader(GLuint program, GLuint shader)
+void OOGL::StateFns::glAttachShader(GLuint program, GLuint shader)
 {
 	if (!m_fn_glAttachShader)
 		m_fn_glAttachShader = (PFNGLATTACHSHADERPROC)glfwGetProcAddress("glAttachShader");
@@ -323,7 +323,7 @@ void Indigo::StateFns::glAttachShader(GLuint program, GLuint shader)
 		(*m_fn_glAttachShader)(program,shader);
 }
 
-void Indigo::StateFns::glDetachShader(GLuint program, GLuint shader)
+void OOGL::StateFns::glDetachShader(GLuint program, GLuint shader)
 {
 	if (!m_fn_glDetachShader)
 		m_fn_glDetachShader = (PFNGLDETACHSHADERPROC)glfwGetProcAddress("glDetachShader");
@@ -334,7 +334,7 @@ void Indigo::StateFns::glDetachShader(GLuint program, GLuint shader)
 		(*m_fn_glDetachShader)(program,shader);
 }
 
-void Indigo::StateFns::glLinkProgram(GLuint program)
+void OOGL::StateFns::glLinkProgram(GLuint program)
 {
 	if (!m_fn_glLinkProgram)
 		m_fn_glLinkProgram = (PFNGLLINKPROGRAMPROC)glfwGetProcAddress("glLinkProgram");
@@ -345,7 +345,7 @@ void Indigo::StateFns::glLinkProgram(GLuint program)
 		(*m_fn_glLinkProgram)(program);
 }
 
-void Indigo::StateFns::glActiveTexture(GLenum texture)
+void OOGL::StateFns::glActiveTexture(GLenum texture)
 {
 	if (!m_fn_glActiveTexture)
 		m_fn_glActiveTexture = (PFNGLACTIVETEXTUREPROC)glfwGetProcAddress("glActiveTexture");
@@ -356,7 +356,7 @@ void Indigo::StateFns::glActiveTexture(GLenum texture)
 		(*m_fn_glActiveTexture)(texture);
 }
 
-void Indigo::StateFns::check_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture)
+void OOGL::StateFns::check_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -378,28 +378,28 @@ void Indigo::StateFns::check_glBindTextureUnit(State& state, GLenum unit, GLenum
 	(this->*m_thunk_glBindTextureUnit)(state,unit,target,texture);
 }
 
-void Indigo::StateFns::call_glBindTextureUnit(State&, GLenum unit, GLenum target, GLuint texture)
+void OOGL::StateFns::call_glBindTextureUnit(State&, GLenum unit, GLenum target, GLuint texture)
 {
 	(*((PFNGLBINDTEXTUREUNITPROC)m_fn_glBindTextureUnit))(unit,texture);
 }
 
-void Indigo::StateFns::emulate_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture)
+void OOGL::StateFns::emulate_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture)
 {
 	state.activate_texture_unit(unit);
 	glBindTexture(target,texture);
 }
 
-void Indigo::StateFns::call_glMultiBindTexture(State& state, GLenum unit, GLenum target, GLuint texture)
+void OOGL::StateFns::call_glMultiBindTexture(State& state, GLenum unit, GLenum target, GLuint texture)
 {
 	(*((PFNGLBINDMULTITEXTUREEXTPROC)m_fn_glBindTextureUnit))(unit,target,texture);
 }
 
-void Indigo::StateFns::glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture)
+void OOGL::StateFns::glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture)
 {
 	(this->*m_thunk_glBindTextureUnit)(state,unit,target,texture);
 }
 
-bool Indigo::StateFns::check_glTexImage3D()
+bool OOGL::StateFns::check_glTexImage3D()
 {
 	if (!m_fn_glTexImage3D)
 		m_fn_glTexImage3D = (PFNGLTEXIMAGE3DPROC)glfwGetProcAddress("glTexImage3D");
@@ -407,7 +407,7 @@ bool Indigo::StateFns::check_glTexImage3D()
 	return (m_fn_glTexImage3D != NULL);
 }
 
-void Indigo::StateFns::glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels)
+void OOGL::StateFns::glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels)
 {
 	if (!check_glTexImage3D())
 		LOG_ERROR(("No glTexImage3D function"));
@@ -415,7 +415,7 @@ void Indigo::StateFns::glTexImage3D(GLenum target, GLint level, GLint internalfo
 		(*m_fn_glTexImage3D)(target,level,internalformat,width,height,depth,border,format,type,pixels);
 }
 
-void Indigo::StateFns::check_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::check_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -447,7 +447,7 @@ void Indigo::StateFns::check_glTextureStorage1D(State& state, GLuint texture, GL
 	(this->*m_thunk_glTextureStorage1D)(state,texture,target,levels,internalFormat,width);
 }
 
-void Indigo::StateFns::emulate_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::emulate_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
@@ -464,29 +464,29 @@ void Indigo::StateFns::emulate_glTextureStorage1D(State& state, GLuint texture, 
 	}
 }
 
-void Indigo::StateFns::call_glTextureStorage1D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::call_glTextureStorage1D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	(*((PFNGLTEXTURESTORAGE1DPROC)m_fn_glTextureStorage1D))(texture,levels,internalFormat,width);
 }
 
-void Indigo::StateFns::call_glTextureStorage1DEXT(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::call_glTextureStorage1DEXT(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	(*((PFNGLTEXTURESTORAGE1DEXTPROC)m_fn_glTextureStorage1D))(texture,target,levels,internalFormat,width);
 }
 
-void Indigo::StateFns::call_glTexStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::call_glTexStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
 	(*((PFNGLTEXSTORAGE1DPROC)m_fn_glTextureStorage1D))(target,levels,internalFormat,width);
 }
 
-void Indigo::StateFns::glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	(this->*m_thunk_glTextureStorage1D)(state,texture,target,levels,internalFormat,width);
 }
 
-void Indigo::StateFns::check_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::StateFns::check_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -518,7 +518,7 @@ void Indigo::StateFns::check_glTextureStorage2D(State& state, GLuint texture, GL
 	(this->*m_thunk_glTextureStorage2D)(state,texture,target,levels,internalFormat,width,height);
 }
 
-void Indigo::StateFns::emulate_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::StateFns::emulate_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
@@ -553,29 +553,29 @@ void Indigo::StateFns::emulate_glTextureStorage2D(State& state, GLuint texture, 
 	}
 }
 
-void Indigo::StateFns::call_glTextureStorage2D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::StateFns::call_glTextureStorage2D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	(*((PFNGLTEXTURESTORAGE2DPROC)m_fn_glTextureStorage2D))(texture,levels,internalFormat,width,height);
 }
 
-void Indigo::StateFns::call_glTextureStorage2DEXT(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::StateFns::call_glTextureStorage2DEXT(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	(*((PFNGLTEXTURESTORAGE2DEXTPROC)m_fn_glTextureStorage2D))(texture,target,levels,internalFormat,width,height);
 }
 
-void Indigo::StateFns::call_glTexStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::StateFns::call_glTexStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
 	(*((PFNGLTEXSTORAGE2DPROC)m_fn_glTextureStorage2D))(target,levels,internalFormat,width,height);
 }
 
-void Indigo::StateFns::glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::StateFns::glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	(this->*m_thunk_glTextureStorage2D)(state,texture,target,levels,internalFormat,width,height);
 }
 
-void Indigo::StateFns::check_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::StateFns::check_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -607,7 +607,7 @@ void Indigo::StateFns::check_glTextureStorage3D(State& state, GLuint texture, GL
 	(this->*m_thunk_glTextureStorage3D)(state,texture,target,levels,internalFormat,width,height,depth);
 }
 
-void Indigo::StateFns::emulate_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::StateFns::emulate_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
@@ -636,29 +636,29 @@ void Indigo::StateFns::emulate_glTextureStorage3D(State& state, GLuint texture, 
 	}
 }
 
-void Indigo::StateFns::call_glTextureStorage3D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::StateFns::call_glTextureStorage3D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	(*((PFNGLTEXTURESTORAGE3DPROC)m_fn_glTextureStorage3D))(texture,levels,internalFormat,width,height,depth);
 }
 
-void Indigo::StateFns::call_glTextureStorage3DEXT(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::StateFns::call_glTextureStorage3DEXT(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	(*((PFNGLTEXTURESTORAGE3DEXTPROC)m_fn_glTextureStorage3D))(texture,target,levels,internalFormat,width,height,depth);
 }
 
-void Indigo::StateFns::call_glTexStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::StateFns::call_glTexStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
 	(*((PFNGLTEXSTORAGE3DPROC)m_fn_glTextureStorage3D))(target,levels,internalFormat,width,height,depth);
 }
 
-void Indigo::StateFns::glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::StateFns::glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	(this->*m_thunk_glTextureStorage3D)(state,texture,target,levels,internalFormat,width,height,depth);
 }
 
-void Indigo::StateFns::check_glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::check_glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -680,29 +680,29 @@ void Indigo::StateFns::check_glTextureSubImage1D(State& state, GLuint texture, G
 	(this->*m_thunk_glTextureSubImage1D)(state,texture,target,level,xoffset,width,format,type,pixels);
 }
 
-void Indigo::StateFns::call_glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE1DPROC)m_fn_glTextureSubImage1D))(texture,level,xoffset,width,format,type,pixels);
 }
 
-void Indigo::StateFns::call_glTextureSubImage1DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage1DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE1DEXTPROC)m_fn_glTextureSubImage1D))(texture,target,level,xoffset,width,format,type,pixels);
 }
 
-void Indigo::StateFns::call_glTexSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTexSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
 	glTexSubImage1D(target,level,xoffset,width,format,type,pixels);
 }
 
-void Indigo::StateFns::glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	(this->*m_thunk_glTextureSubImage1D)(state,texture,target,level,xoffset,width,format,type,pixels);
 }
 
-void Indigo::StateFns::check_glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::check_glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -724,29 +724,29 @@ void Indigo::StateFns::check_glTextureSubImage2D(State& state, GLuint texture, G
 	(this->*m_thunk_glTextureSubImage2D)(state,texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void Indigo::StateFns::call_glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE2DPROC)m_fn_glTextureSubImage2D))(texture,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void Indigo::StateFns::call_glTextureSubImage2DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage2DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE2DEXTPROC)m_fn_glTextureSubImage2D))(texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void Indigo::StateFns::call_glTexSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTexSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
 	glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void Indigo::StateFns::glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	(this->*m_thunk_glTextureSubImage2D)(state,texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void Indigo::StateFns::check_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::check_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -777,29 +777,29 @@ void Indigo::StateFns::check_glTextureSubImage3D(State& state, GLuint texture, G
 	(this->*m_thunk_glTextureSubImage3D)(state,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void Indigo::StateFns::call_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE3DPROC)m_fn_glTextureSubImage3D))(texture,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void Indigo::StateFns::call_glTextureSubImage3DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage3DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE3DEXTPROC)m_fn_glTextureSubImage3D))(texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void Indigo::StateFns::call_glTexSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTexSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
 	(*((PFNGLTEXSUBIMAGE3DPROC)m_fn_glTextureSubImage3D))(target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void Indigo::StateFns::glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	(this->*m_thunk_glTextureSubImage3D)(state,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void Indigo::StateFns::check_glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
+void OOGL::StateFns::check_glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -821,29 +821,29 @@ void Indigo::StateFns::check_glTextureParameterf(State& state, GLuint texture, G
 	(this->*m_thunk_glTextureParameterf)(state,texture,target,name,val);
 }
 
-void Indigo::StateFns::call_glTextureParameterf(State& state, GLuint texture, GLenum, GLenum name, GLfloat val)
+void OOGL::StateFns::call_glTextureParameterf(State& state, GLuint texture, GLenum, GLenum name, GLfloat val)
 {
 	(*((PFNGLTEXTUREPARAMETERFPROC)m_fn_glTextureParameterf))(texture,name,val);
 }
 
-void Indigo::StateFns::call_glTextureParameterfEXT(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
+void OOGL::StateFns::call_glTextureParameterfEXT(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
 {
 	(*((PFNGLTEXTUREPARAMETERFEXTPROC)m_fn_glTextureParameterf))(texture,target,name,val);
 }
 
-void Indigo::StateFns::call_glTexParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
+void OOGL::StateFns::call_glTexParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
 	glTexParameterf(target,name,val);
 }
 
-void Indigo::StateFns::glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
+void OOGL::StateFns::glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
 {
 	(this->*m_thunk_glTextureParameterf)(state,texture,target,name,val);
 }
 
-void Indigo::StateFns::check_glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+void OOGL::StateFns::check_glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -865,29 +865,29 @@ void Indigo::StateFns::check_glTextureParameterfv(State& state, GLuint texture, 
 	(this->*m_thunk_glTextureParameterfv)(state,texture,target,name,val);
 }
 
-void Indigo::StateFns::call_glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+void OOGL::StateFns::call_glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
 {
 	(*((PFNGLTEXTUREPARAMETERFVPROC)m_fn_glTextureParameterfv))(texture,name,val);
 }
 
-void Indigo::StateFns::call_glTextureParameterfvEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+void OOGL::StateFns::call_glTextureParameterfvEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
 {
 	(*((PFNGLTEXTUREPARAMETERFVEXTPROC)m_fn_glTextureParameterfv))(texture,target,name,val);
 }
 
-void Indigo::StateFns::call_glTexParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+void OOGL::StateFns::call_glTexParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
 	glTexParameterfv(target,name,val);
 }
 
-void Indigo::StateFns::glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+void OOGL::StateFns::glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
 {
 	(this->*m_thunk_glTextureParameterfv)(state,texture,target,name,val);
 }
 
-void Indigo::StateFns::check_glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+void OOGL::StateFns::check_glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -909,29 +909,29 @@ void Indigo::StateFns::check_glTextureParameteri(State& state, GLuint texture, G
 	(this->*m_thunk_glTextureParameteri)(state,texture,target,name,val);
 }
 
-void Indigo::StateFns::call_glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+void OOGL::StateFns::call_glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
 {
 	(*((PFNGLTEXTUREPARAMETERIPROC)m_fn_glTextureParameteri))(texture,name,val);
 }
 
-void Indigo::StateFns::call_glTextureParameteriEXT(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+void OOGL::StateFns::call_glTextureParameteriEXT(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
 {
 	(*((PFNGLTEXTUREPARAMETERIEXTPROC)m_fn_glTextureParameteri))(texture,target,name,val);
 }
 
-void Indigo::StateFns::call_glTexParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+void OOGL::StateFns::call_glTexParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
 	glTexParameteri(target,name,val);
 }
 
-void Indigo::StateFns::glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+void OOGL::StateFns::glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
 {
 	(this->*m_thunk_glTextureParameteri)(state,texture,target,name,val);
 }
 
-void Indigo::StateFns::check_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+void OOGL::StateFns::check_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -953,29 +953,29 @@ void Indigo::StateFns::check_glTextureParameteriv(State& state, GLuint texture, 
 	(this->*m_thunk_glTextureParameteriv)(state,texture,target,name,val);
 }
 
-void Indigo::StateFns::call_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+void OOGL::StateFns::call_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
 {
 	(*((PFNGLTEXTUREPARAMETERIVPROC)m_fn_glTextureParameteriv))(texture,name,val);
 }
 
-void Indigo::StateFns::call_glTextureParameterivEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+void OOGL::StateFns::call_glTextureParameterivEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
 {
 	(*((PFNGLTEXTUREPARAMETERIVEXTPROC)m_fn_glTextureParameteriv))(texture,target,name,val);
 }
 
-void Indigo::StateFns::call_glTexParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+void OOGL::StateFns::call_glTexParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
 {
 	state.bind_texture(state.m_active_texture_unit,target,texture);
 
 	glTexParameteriv(target,name,val);
 }
 
-void Indigo::StateFns::glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+void OOGL::StateFns::glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
 {
 	(this->*m_thunk_glTextureParameteriv)(state,texture,target,name,val);
 }
 
-void Indigo::StateFns::glGenBuffers(GLsizei n, GLuint* buffers)
+void OOGL::StateFns::glGenBuffers(GLsizei n, GLuint* buffers)
 {
 	if (!m_fn_glGenBuffers)
 		m_fn_glGenBuffers = (PFNGLGENBUFFERSPROC)glfwGetProcAddress("glGenBuffers");
@@ -986,7 +986,7 @@ void Indigo::StateFns::glGenBuffers(GLsizei n, GLuint* buffers)
 		(*m_fn_glGenBuffers)(n,buffers);
 }
 
-void Indigo::StateFns::glBindBuffer(GLenum target, GLuint buffer)
+void OOGL::StateFns::glBindBuffer(GLenum target, GLuint buffer)
 {
 	if (!m_fn_glBindBuffer)
 		m_fn_glBindBuffer = (PFNGLBINDBUFFERPROC)glfwGetProcAddress("glBindBuffer");
@@ -997,7 +997,7 @@ void Indigo::StateFns::glBindBuffer(GLenum target, GLuint buffer)
 		(*m_fn_glBindBuffer)(target,buffer);
 }
 
-void Indigo::StateFns::glDeleteBuffers(GLsizei n, const GLuint* buffers)
+void OOGL::StateFns::glDeleteBuffers(GLsizei n, const GLuint* buffers)
 {
 	if (!m_fn_glDeleteBuffers)
 		m_fn_glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)glfwGetProcAddress("glDeleteBuffers");
@@ -1008,7 +1008,7 @@ void Indigo::StateFns::glDeleteBuffers(GLsizei n, const GLuint* buffers)
 		(*m_fn_glDeleteBuffers)(n,buffers);
 }
 
-void Indigo::StateFns::check_glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
+void OOGL::StateFns::check_glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1036,24 +1036,24 @@ void Indigo::StateFns::check_glBufferData(State& state, const OOBase::SharedPtr<
 	(this->*m_thunk_glBufferData)(state,buffer,size,data,usage);
 }
 
-void Indigo::StateFns::call_glNamedBufferData(State&, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
+void OOGL::StateFns::call_glNamedBufferData(State&, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
 {
 	(*((PFNGLNAMEDBUFFERDATAPROC)m_fn_glBufferData))(buffer->m_buffer,size,data,usage);
 }
 
-void Indigo::StateFns::call_glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
+void OOGL::StateFns::call_glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
 {
 	state.bind(buffer);
 
 	(*((PFNGLBUFFERDATAPROC)m_fn_glBufferData))(buffer->m_target,size,data,usage);
 }
 
-void Indigo::StateFns::glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
+void OOGL::StateFns::glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
 {
 	(this->*m_thunk_glBufferData)(state,buffer,size,data,usage);
 }
 
-void* Indigo::StateFns::check_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
+void* OOGL::StateFns::check_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1088,19 +1088,19 @@ void* Indigo::StateFns::check_glMapBufferRange(State& state, const OOBase::Share
 	return (this->*m_thunk_glMapBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
 }
 
-void* Indigo::StateFns::call_glMapNamedBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
+void* OOGL::StateFns::call_glMapNamedBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
 {
 	return (*((PFNGLMAPNAMEDBUFFERRANGEPROC)m_fn_glMapBufferRange))(buffer->m_buffer,offset,length,access);
 }
 
-void* Indigo::StateFns::call_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
+void* OOGL::StateFns::call_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
 {
 	state.bind(buffer);
 
 	return (*((PFNGLMAPBUFFERRANGEPROC)m_fn_glMapBufferRange))(buffer->m_target,offset,length,access);
 }
 
-void* Indigo::StateFns::call_glMapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
+void* OOGL::StateFns::call_glMapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
 {
 	if (access & GL_MAP_INVALIDATE_BUFFER_BIT)
 		glBufferData(state,buffer,orig_size,NULL,orig_usage);
@@ -1114,12 +1114,12 @@ void* Indigo::StateFns::call_glMapBuffer(State& state, const OOBase::SharedPtr<B
 	return ret;
 }
 
-void* Indigo::StateFns::glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
+void* OOGL::StateFns::glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
 {
 	return (this->*m_thunk_glMapBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
 }
 
-bool Indigo::StateFns::check_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool OOGL::StateFns::check_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1147,24 +1147,24 @@ bool Indigo::StateFns::check_glUnmapBuffer(State& state, const OOBase::SharedPtr
 	return (this->*m_thunk_glUnmapBuffer)(state,buffer);
 }
 
-bool Indigo::StateFns::call_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool OOGL::StateFns::call_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	return (*((PFNGLUNMAPNAMEDBUFFERPROC)m_fn_glUnmapBuffer))(buffer->m_buffer) == GL_TRUE;
 }
 
-bool Indigo::StateFns::call_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool OOGL::StateFns::call_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	state.bind(buffer);
 
 	return (*((PFNGLUNMAPBUFFERPROC)m_fn_glUnmapBuffer))(buffer->m_target) == GL_TRUE;
 }
 
-bool Indigo::StateFns::glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool OOGL::StateFns::glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	return (this->*m_thunk_glUnmapBuffer)(state,buffer);
 }
 
-void Indigo::StateFns::check_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+void OOGL::StateFns::check_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1192,24 +1192,24 @@ void Indigo::StateFns::check_glBufferSubData(State& state, const OOBase::SharedP
 	(this->*m_thunk_glBufferSubData)(state,buffer,offset,size,data);
 }
 
-void Indigo::StateFns::call_glNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+void OOGL::StateFns::call_glNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
 {
 	(*((PFNGLNAMEDBUFFERSUBDATAPROC)m_fn_glBufferSubData))(buffer->m_buffer,offset,size,data);
 }
 
-void Indigo::StateFns::call_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+void OOGL::StateFns::call_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
 {
 	state.bind(buffer);
 
 	(*((PFNGLBUFFERSUBDATAPROC)m_fn_glBufferSubData))(buffer->m_target,offset,size,data);
 }
 
-void Indigo::StateFns::glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+void OOGL::StateFns::glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
 {
 	(this->*m_thunk_glBufferSubData)(state,buffer,offset,size,data);
 }
 
-void Indigo::StateFns::check_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::StateFns::check_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1241,12 +1241,12 @@ void Indigo::StateFns::check_glCopyBufferSubData(State& state, const OOBase::Sha
 	(this->*m_thunk_glCopyBufferSubData)(state,write,writeoffset,read,readoffset,size);
 }
 
-void Indigo::StateFns::call_glCopyNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::StateFns::call_glCopyNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
 	(*((PFNGLCOPYNAMEDBUFFERSUBDATAPROC)m_fn_glCopyBufferSubData))(read->m_buffer,write->m_buffer,readoffset,writeoffset,size);
 }
 
-void Indigo::StateFns::call_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::StateFns::call_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
 	state.bind(read,GL_COPY_READ_BUFFER);
 	state.bind(write,GL_COPY_WRITE_BUFFER);
@@ -1254,7 +1254,7 @@ void Indigo::StateFns::call_glCopyBufferSubData(State& state, const OOBase::Shar
 	(*((PFNGLCOPYBUFFERSUBDATAPROC)m_fn_glCopyBufferSubData))(GL_COPY_READ_BUFFER,GL_COPY_WRITE_BUFFER,readoffset,writeoffset,size);
 }
 
-void Indigo::StateFns::emulate_glCopyBufferSubData(State&, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::StateFns::emulate_glCopyBufferSubData(State&, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
 	OOBase::SharedPtr<OOBase::uint8_t> r = read->auto_map<OOBase::uint8_t>(GL_READ_ONLY,readoffset);
 	OOBase::SharedPtr<OOBase::uint8_t> w = write->auto_map<OOBase::uint8_t>(GL_WRITE_ONLY,writeoffset);
@@ -1262,12 +1262,12 @@ void Indigo::StateFns::emulate_glCopyBufferSubData(State&, const OOBase::SharedP
 	memcpy(w.get(),r.get(),size);
 }
 
-void Indigo::StateFns::glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::StateFns::glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
 	(this->*m_thunk_glCopyBufferSubData)(state,write,writeoffset,read,readoffset,size);
 }
 
-void Indigo::StateFns::glGenVertexArrays(GLsizei n, GLuint* arrays)
+void OOGL::StateFns::glGenVertexArrays(GLsizei n, GLuint* arrays)
 {
 	if (!m_fn_glGenVertexArrays)
 	{
@@ -1281,7 +1281,7 @@ void Indigo::StateFns::glGenVertexArrays(GLsizei n, GLuint* arrays)
 		(*m_fn_glGenVertexArrays)(n,arrays);
 }
 
-void Indigo::StateFns::glBindVertexArray(GLuint array)
+void OOGL::StateFns::glBindVertexArray(GLuint array)
 {
 	if (!m_fn_glBindVertexArray)
 	{
@@ -1295,7 +1295,7 @@ void Indigo::StateFns::glBindVertexArray(GLuint array)
 		(*m_fn_glBindVertexArray)(array);
 }
 
-void Indigo::StateFns::glDeleteVertexArrays(GLsizei n, const GLuint* arrays)
+void OOGL::StateFns::glDeleteVertexArrays(GLsizei n, const GLuint* arrays)
 {
 	if (!m_fn_glDeleteVertexArrays)
 	{
@@ -1309,7 +1309,7 @@ void Indigo::StateFns::glDeleteVertexArrays(GLsizei n, const GLuint* arrays)
 		(*m_fn_glDeleteVertexArrays)(n,arrays);
 }
 
-void Indigo::StateFns::check_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
+void OOGL::StateFns::check_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
 {
 	m_fn_glMultiDrawArrays = glfwGetProcAddress("glMultiDrawArrays");
 	if (m_fn_glMultiDrawArrays)
@@ -1328,12 +1328,12 @@ void Indigo::StateFns::check_glMultiDrawArrays(GLenum mode, const GLint *first, 
 	(this->*m_thunk_glMultiDrawArrays)(mode,first,count,primcount);
 }
 
-void Indigo::StateFns::call_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
+void OOGL::StateFns::call_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
 {
 	(*((PFNGLMULTIDRAWARRAYSPROC)m_fn_glMultiDrawArrays))(mode,first,count,primcount);
 }
 
-void Indigo::StateFns::emulate_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
+void OOGL::StateFns::emulate_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
 {
 	for (GLsizei i = 0; i < primcount; ++i)
 	{
@@ -1342,12 +1342,12 @@ void Indigo::StateFns::emulate_glMultiDrawArrays(GLenum mode, const GLint *first
 	}
 }
 
-void Indigo::StateFns::glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
+void OOGL::StateFns::glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
 {
 	(this->*m_thunk_glMultiDrawArrays)(mode,first,count,primcount);
 }
 
-bool Indigo::StateFns::check_glDrawInstanced()
+bool OOGL::StateFns::check_glDrawInstanced()
 {
 	if (!m_fn_glDrawArraysInstanced && isGLversion(3,1))
 	{
@@ -1380,7 +1380,7 @@ bool Indigo::StateFns::check_glDrawInstanced()
 	return (m_fn_glDrawArraysInstanced != NULL);
 }
 
-void Indigo::StateFns::check_glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instances)
+void OOGL::StateFns::check_glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instances)
 {
 	if (!check_glDrawInstanced())
 		LOG_ERROR(("No glDrawArraysInstanced function"));
@@ -1388,17 +1388,17 @@ void Indigo::StateFns::check_glDrawArraysInstanced(GLenum mode, GLint first, GLs
 		(this->*m_thunk_glDrawArraysInstanced)(mode,first,count,instances);
 }
 
-void Indigo::StateFns::call_glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instances)
+void OOGL::StateFns::call_glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instances)
 {
 	(*((PFNGLDRAWARRAYSINSTANCEDPROC)m_fn_glDrawArraysInstanced))(mode,first,count,instances);
 }
 
-void Indigo::StateFns::glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instances)
+void OOGL::StateFns::glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instances)
 {
 	(this->*m_thunk_glDrawArraysInstanced)(mode,first,count,instances);
 }
 
-bool Indigo::StateFns::check_glDrawInstancedBaseInstance()
+bool OOGL::StateFns::check_glDrawInstancedBaseInstance()
 {
 	if (!m_fn_glDrawArraysInstancedBaseInstance && (isGLversion(4,2) || glfwExtensionSupported("GL_ARB_draw_instanced") == GL_TRUE))
 	{
@@ -1410,7 +1410,7 @@ bool Indigo::StateFns::check_glDrawInstancedBaseInstance()
 	return (m_fn_glDrawArraysInstancedBaseInstance != NULL);
 }
 
-void Indigo::StateFns::check_glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance)
+void OOGL::StateFns::check_glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance)
 {
 	if (!check_glDrawInstancedBaseInstance())
 		LOG_ERROR(("No glDrawArraysInstancedBaseInstance function"));
@@ -1418,17 +1418,17 @@ void Indigo::StateFns::check_glDrawArraysInstancedBaseInstance(GLenum mode, GLin
 		(this->*m_thunk_glDrawArraysInstancedBaseInstance)(mode,first,count,instances,baseinstance);
 }
 
-void Indigo::StateFns::call_glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance)
+void OOGL::StateFns::call_glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance)
 {
 	(*m_fn_glDrawArraysInstancedBaseInstance)(mode,first,count,instances,baseinstance);
 }
 
-void Indigo::StateFns::glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance)
+void OOGL::StateFns::glDrawArraysInstancedBaseInstance(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance)
 {
 	(this->*m_thunk_glDrawArraysInstancedBaseInstance)(mode,first,count,instances,baseinstance);
 }
 
-void Indigo::StateFns::check_glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset)
+void OOGL::StateFns::check_glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset)
 {
 	m_fn_glDrawRangeElements = glfwGetProcAddress("glDrawRangeElements");
 	if (m_fn_glDrawRangeElements)
@@ -1447,17 +1447,17 @@ void Indigo::StateFns::check_glDrawRangeElements(GLenum mode, GLuint start, GLui
 		(this->*m_thunk_glDrawRangeElements)(mode,start,end,count,type,offset);
 }
 
-void Indigo::StateFns::call_glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset)
+void OOGL::StateFns::call_glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset)
 {
 	(*((PFNGLDRAWRANGEELEMENTSPROC)m_fn_glDrawRangeElements))(mode,start,end,count,type,(const void*)offset);
 }
 
-void Indigo::StateFns::glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset)
+void OOGL::StateFns::glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset)
 {
 	(this->*m_thunk_glDrawRangeElements)(mode,start,end,count,type,offset);
 }
 
-bool Indigo::StateFns::check_glDrawRangeElementsBaseVertex()
+bool OOGL::StateFns::check_glDrawRangeElementsBaseVertex()
 {
 	if (!m_fn_glDrawRangeElementsBaseVertex && (isGLversion(3,2) || glfwExtensionSupported("GL_ARB_draw_elements_base_vertex") == GL_TRUE))
 	{
@@ -1469,7 +1469,7 @@ bool Indigo::StateFns::check_glDrawRangeElementsBaseVertex()
 	return (m_fn_glDrawRangeElementsBaseVertex != NULL);
 }
 
-void Indigo::StateFns::check_glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
+void OOGL::StateFns::check_glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
 {
 	if (!check_glDrawRangeElementsBaseVertex())
 		LOG_ERROR(("No glDrawRangeElementsBaseVertex function"));
@@ -1477,17 +1477,17 @@ void Indigo::StateFns::check_glDrawRangeElementsBaseVertex(GLenum mode, GLuint s
 		(this->*m_thunk_glDrawRangeElementsBaseVertex)(mode,start,end,count,type,offset,basevertex);
 }
 
-void Indigo::StateFns::call_glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
+void OOGL::StateFns::call_glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
 {
 	(*m_fn_glDrawRangeElementsBaseVertex)(mode,start,end,count,type,(const void*)offset,basevertex);
 }
 
-void Indigo::StateFns::glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
+void OOGL::StateFns::glDrawRangeElementsBaseVertex(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
 {
 	(this->*m_thunk_glDrawRangeElementsBaseVertex)(mode,start,end,count,type,offset,basevertex);
 }
 
-bool Indigo::StateFns::check_glDrawElementsBaseVertex()
+bool OOGL::StateFns::check_glDrawElementsBaseVertex()
 {
 	if (!m_fn_glDrawElementsBaseVertex && (isGLversion(3,2) || glfwExtensionSupported("GL_ARB_draw_elements_base_vertex") == GL_TRUE))
 	{
@@ -1499,7 +1499,7 @@ bool Indigo::StateFns::check_glDrawElementsBaseVertex()
 	return (m_fn_glDrawElementsBaseVertex != NULL);
 }
 
-void Indigo::StateFns::check_glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
+void OOGL::StateFns::check_glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
 {
 	if (!check_glDrawElementsBaseVertex())
 		LOG_ERROR(("No glDrawElementsBaseVertex function"));
@@ -1507,17 +1507,17 @@ void Indigo::StateFns::check_glDrawElementsBaseVertex(GLenum mode, GLsizei count
 		(this->*m_thunk_glDrawElementsBaseVertex)(mode,count,type,offset,basevertex);
 }
 
-void Indigo::StateFns::call_glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
+void OOGL::StateFns::call_glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
 {
 	(*m_fn_glDrawElementsBaseVertex)(mode,count,type,(const void*)offset,basevertex);
 }
 
-void Indigo::StateFns::glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
+void OOGL::StateFns::glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
 {
 	(this->*m_thunk_glDrawElementsBaseVertex)(mode,count,type,offset,basevertex);
 }
 
-void Indigo::StateFns::check_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
+void OOGL::StateFns::check_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
 {
 	if (!m_fn_glMultiDrawElements)
 	{
@@ -1539,12 +1539,12 @@ void Indigo::StateFns::check_glMultiDrawElements(GLenum mode, const GLsizei *cou
 	(this->*m_thunk_glMultiDrawElements)(mode,count,type,offsets,primcount);
 }
 
-void Indigo::StateFns::call_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
+void OOGL::StateFns::call_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
 {
 	(*((PFNGLMULTIDRAWELEMENTSPROC)m_fn_glMultiDrawElements))(mode,count,type,(const void* const*)offsets,primcount);
 }
 
-void Indigo::StateFns::emulate_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
+void OOGL::StateFns::emulate_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
 {
 	for (GLsizei i = 0; i < primcount; ++i)
 	{
@@ -1553,12 +1553,12 @@ void Indigo::StateFns::emulate_glMultiDrawElements(GLenum mode, const GLsizei *c
 	}
 }
 
-void Indigo::StateFns::glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
+void OOGL::StateFns::glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
 {
 	(this->*m_thunk_glMultiDrawElements)(mode,count,type,offsets,primcount);
 }
 
-void Indigo::StateFns::check_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
+void OOGL::StateFns::check_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
 {
 	if (isGLversion(3,2) || glfwExtensionSupported("GL_ARB_draw_elements_base_vertex") == GL_TRUE)
 	{
@@ -1573,12 +1573,12 @@ void Indigo::StateFns::check_glMultiDrawElementsBaseVertex(GLenum mode, const GL
 	(this->*m_thunk_glMultiDrawElementsBaseVertex)(mode,count,type,offsets,primcount,basevertex);
 }
 
-void Indigo::StateFns::call_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
+void OOGL::StateFns::call_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
 {
 	(*m_fn_glMultiDrawElementsBaseVertex)(mode,count,type,(const void* const*)offsets,primcount,basevertex);
 }
 
-void Indigo::StateFns::emulate_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
+void OOGL::StateFns::emulate_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
 {
 	for (GLsizei i = 0; i < primcount; ++i)
 	{
@@ -1587,12 +1587,12 @@ void Indigo::StateFns::emulate_glMultiDrawElementsBaseVertex(GLenum mode, const 
 	}
 }
 
-void Indigo::StateFns::glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
+void OOGL::StateFns::glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
 {
 	(this->*m_thunk_glMultiDrawElementsBaseVertex)(mode,count,type,offsets,primcount,basevertex);
 }
 
-void Indigo::StateFns::check_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances)
+void OOGL::StateFns::check_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances)
 {
 	if (isGLversion(3,1))
 	{
@@ -1628,17 +1628,17 @@ void Indigo::StateFns::check_glDrawElementsInstanced(GLenum mode, GLsizei count,
 		(this->*m_thunk_glDrawElementsInstanced)(mode,count,type,offset,instances);
 }
 
-void Indigo::StateFns::call_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances)
+void OOGL::StateFns::call_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances)
 {
 	(*((PFNGLDRAWELEMENTSINSTANCEDPROC)m_fn_glDrawElementsInstanced))(mode,count,type,(const void*)offset,instances);
 }
 
-void Indigo::StateFns::glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances)
+void OOGL::StateFns::glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances)
 {
 	(this->*m_thunk_glDrawElementsInstanced)(mode,count,type,offset,instances);
 }
 
-bool Indigo::StateFns::check_glDrawElementsInstancedBaseVertex()
+bool OOGL::StateFns::check_glDrawElementsInstancedBaseVertex()
 {
 	if (!m_fn_glDrawElementsInstancedBaseVertex && (isGLversion(3,2) || glfwExtensionSupported("GL_ARB_draw_elements_base_vertex") == GL_TRUE))
 	{
@@ -1650,7 +1650,7 @@ bool Indigo::StateFns::check_glDrawElementsInstancedBaseVertex()
 	return (m_fn_glDrawElementsInstancedBaseVertex != NULL);
 }
 
-void Indigo::StateFns::check_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex)
+void OOGL::StateFns::check_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex)
 {
 	if (!check_glDrawElementsInstancedBaseVertex())
 		LOG_ERROR(("No glDrawElementsInstancedBaseVertex function"));
@@ -1658,17 +1658,17 @@ void Indigo::StateFns::check_glDrawElementsInstancedBaseVertex(GLenum mode, GLsi
 		(this->*m_thunk_glDrawElementsInstancedBaseVertex)(mode,count,type,offset,instancecount,basevertex);
 }
 
-void Indigo::StateFns::call_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex)
+void OOGL::StateFns::call_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex)
 {
 	(*m_fn_glDrawElementsInstancedBaseVertex)(mode,count,type,(const void*)offset,instancecount,basevertex);
 }
 
-void Indigo::StateFns::glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex)
+void OOGL::StateFns::glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex)
 {
 	(this->*m_thunk_glDrawElementsInstancedBaseVertex)(mode,count,type,offset,instancecount,basevertex);
 }
 
-bool Indigo::StateFns::check_glDrawElementsInstancedBaseInstance()
+bool OOGL::StateFns::check_glDrawElementsInstancedBaseInstance()
 {
 	if (!m_fn_glDrawElementsInstancedBaseInstance && (isGLversion(4,2) || glfwExtensionSupported("GL_ARB_base_instance") == GL_TRUE))
 	{
@@ -1680,7 +1680,7 @@ bool Indigo::StateFns::check_glDrawElementsInstancedBaseInstance()
 	return (m_fn_glDrawElementsInstancedBaseInstance != NULL);
 }
 
-void Indigo::StateFns::check_glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance)
+void OOGL::StateFns::check_glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance)
 {
 	if (!check_glDrawElementsInstancedBaseInstance())
 		LOG_ERROR(("No glDrawElementsInstancedBaseInstance function"));
@@ -1688,17 +1688,17 @@ void Indigo::StateFns::check_glDrawElementsInstancedBaseInstance(GLenum mode, GL
 		(this->*m_thunk_glDrawElementsInstancedBaseInstance)(mode,count,type,offset,instancecount,baseinstance);
 }
 
-void Indigo::StateFns::call_glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance)
+void OOGL::StateFns::call_glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance)
 {
 	(*m_fn_glDrawElementsInstancedBaseInstance)(mode,count,type,(const void*)offset,instancecount,baseinstance);
 }
 
-void Indigo::StateFns::glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance)
+void OOGL::StateFns::glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance)
 {
 	(this->*m_thunk_glDrawElementsInstancedBaseInstance)(mode,count,type,offset,instancecount,baseinstance);
 }
 
-bool Indigo::StateFns::check_glDrawElementsInstancedBaseVertexBaseInstance()
+bool OOGL::StateFns::check_glDrawElementsInstancedBaseVertexBaseInstance()
 {
 	if (!m_fn_glDrawElementsInstancedBaseVertexBaseInstance && (isGLversion(4,2) || glfwExtensionSupported("GL_ARB_base_instance") == GL_TRUE))
 	{
@@ -1710,7 +1710,7 @@ bool Indigo::StateFns::check_glDrawElementsInstancedBaseVertexBaseInstance()
 	return (m_fn_glDrawElementsInstancedBaseVertexBaseInstance != NULL);
 }
 
-void Indigo::StateFns::check_glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance)
+void OOGL::StateFns::check_glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance)
 {
 	if (!check_glDrawElementsInstancedBaseInstance())
 		LOG_ERROR(("No glDrawElementsInstancedBaseVertexBaseInstance function"));
@@ -1718,12 +1718,12 @@ void Indigo::StateFns::check_glDrawElementsInstancedBaseVertexBaseInstance(GLenu
 		(this->*m_thunk_glDrawElementsInstancedBaseVertexBaseInstance)(mode,count,type,offset,instancecount,basevertex,baseinstance);
 }
 
-void Indigo::StateFns::call_glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance)
+void OOGL::StateFns::call_glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance)
 {
 	(*m_fn_glDrawElementsInstancedBaseVertexBaseInstance)(mode,count,type,(const void*)offset,instancecount,basevertex,baseinstance);
 }
 
-void Indigo::StateFns::glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance)
+void OOGL::StateFns::glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance)
 {
 	(this->*m_thunk_glDrawElementsInstancedBaseVertexBaseInstance)(mode,count,type,offset,instancecount,basevertex,baseinstance);
 }

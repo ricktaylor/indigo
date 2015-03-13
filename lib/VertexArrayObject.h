@@ -3,7 +3,7 @@
 
 #include "BufferObject.h"
 
-namespace Indigo
+namespace OOGL
 {
 	class VertexArrayObject : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<VertexArrayObject>
 	{

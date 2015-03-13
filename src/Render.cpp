@@ -154,7 +154,7 @@ namespace
 
 	static EventQueue* s_event_queue = NULL;
 	static RenderQueue* s_render_queue = NULL;
-	static OOBase::Vector<OOBase::WeakPtr<Indigo::Window>,OOBase::ThreadLocalAllocator>* s_vecWindows;
+	static OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>* s_vecWindows;
 
 	struct thread_info
 	{
@@ -183,7 +183,7 @@ static void on_glfw_error(int code, const char* message)
 
 static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
-	OOBase::Vector<OOBase::WeakPtr<Indigo::Window>,OOBase::ThreadLocalAllocator> vecWindows;
+	OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator> vecWindows;
 	s_vecWindows = &vecWindows;
 
 	// Not sure if we need to set this first...
@@ -211,7 +211,7 @@ static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& conf
 	{
 		// Draw all windows
 		bool visible_window = false;
-		for (OOBase::Vector<OOBase::WeakPtr<Indigo::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();)
+		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();)
 		{
 			if (i->expired())
 				i = vecWindows.erase(i);
@@ -230,7 +230,7 @@ static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& conf
 			break;
 
 		// Swap all windows (this collects events)
-		for (OOBase::Vector<OOBase::WeakPtr<Indigo::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();)
+		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();)
 		{
 			if (i->expired())
 				i = vecWindows.erase(i);
@@ -386,7 +386,7 @@ bool Indigo::handle_events()
 	return s_event_queue->dequeue();
 }
 
-bool Indigo::monitor_window(const OOBase::WeakPtr<Indigo::Window>& win)
+bool Indigo::monitor_window(const OOBase::WeakPtr<OOGL::Window>& win)
 {
 	return s_vecWindows->push_back(win);
 }

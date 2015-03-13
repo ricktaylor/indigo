@@ -4,18 +4,18 @@
 //
 // This file is part of the Indigo boardgame engine.
 //
-// Indigo is free software: you can redistribute it and/or modify
+// OOGL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Indigo is distributed in the hope that it will be useful,
+// OOGL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Indigo.  If not, see <http://www.gnu.org/licenses/>.
+// along with OOGL.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +28,7 @@ static const char s_font_vertex_shader[] =
 static const char s_font_frag_shader[] =
 		"";
 
-namespace Indigo
+namespace OOGL
 {
 	class FontManager
 	{
@@ -41,22 +41,22 @@ namespace Indigo
 
 namespace
 {
-	bool init_manager(OOBase::SharedPtr<Indigo::FontManager>& manager)
+	bool init_manager(OOBase::SharedPtr<OOGL::FontManager>& manager)
 	{
-		manager = OOBase::allocate_shared<Indigo::FontManager,OOBase::ThreadLocalAllocator>();
+		manager = OOBase::allocate_shared<OOGL::FontManager,OOBase::ThreadLocalAllocator>();
 		if (!manager)
 			LOG_ERROR_RETURN(("Failed to allocate font manager"),false);
 
-		manager->m_program = OOBase::allocate_shared<Indigo::Program,OOBase::ThreadLocalAllocator>();
+		manager->m_program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
 		if (!manager->m_program)
 			LOG_ERROR_RETURN(("Failed to allocate font program"),false);
 
-		OOBase::SharedPtr<Indigo::Shader> shaders[2];
+		OOBase::SharedPtr<OOGL::Shader> shaders[2];
 
-		shaders[0] = OOBase::allocate_shared<Indigo::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
+		shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
 		if (!shaders[0])
 			LOG_ERROR_RETURN(("Failed to allocate font shader"),false);
-		shaders[1] = OOBase::allocate_shared<Indigo::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
+		shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
 		if (!shaders[1])
 			LOG_ERROR_RETURN(("Failed to allocate font shader"),false);
 
@@ -73,7 +73,7 @@ namespace
 }
 
 
-void Indigo::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour)
+void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour)
 {
 	//if (!state.m_font_manager && !init_manager(state.m_font_manager))
 	//	return;
@@ -88,13 +88,13 @@ void Indigo::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& col
 	// Bind the Vertex Array Object
 }
 
-Indigo::Text::Text(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len) :
+OOGL::Text::Text(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len) :
 		m_font(font)
 {
 
 }
 
-void Indigo::Text::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start, size_t end)
+void OOGL::Text::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start, size_t end)
 {
 	m_font->draw(state,mvp,colour);
 

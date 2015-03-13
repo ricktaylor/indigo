@@ -4,24 +4,24 @@
 //
 // This file is part of the Indigo boardgame engine.
 //
-// Indigo is free software: you can redistribute it and/or modify
+// OOGL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Indigo is distributed in the hope that it will be useful,
+// OOGL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Indigo.  If not, see <http://www.gnu.org/licenses/>.
+// along with OOGL.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Window.h"
 
-Indigo::Window::Window(int width, int height, const char* title, unsigned int style, GLFWmonitor* monitor) :
+OOGL::Window::Window(int width, int height, const char* title, unsigned int style, GLFWmonitor* monitor) :
 		m_glfw_window(NULL)
 {
 	glfwWindowHint(GLFW_VISIBLE,(style & eWSvisible) ? GL_TRUE : GL_FALSE);
@@ -62,13 +62,13 @@ Indigo::Window::Window(int width, int height, const char* title, unsigned int st
 	}
 }
 
-Indigo::Window::~Window()
+OOGL::Window::~Window()
 {
 	if (m_glfw_window)
 		glfwDestroyWindow(m_glfw_window);
 }
 
-bool Indigo::Window::is_visible() const
+bool OOGL::Window::is_visible() const
 {
 	if (!m_glfw_window)
 		return false;
@@ -76,7 +76,7 @@ bool Indigo::Window::is_visible() const
 	return glfwGetWindowAttrib(m_glfw_window,GLFW_VISIBLE) != 0;
 }
 
-void Indigo::Window::visible(bool show)
+void OOGL::Window::visible(bool show)
 {
 	if (m_glfw_window)
 	{
@@ -87,7 +87,7 @@ void Indigo::Window::visible(bool show)
 	}
 }
 
-bool Indigo::Window::is_iconified() const
+bool OOGL::Window::is_iconified() const
 {
 	if (!m_glfw_window)
 		return false;
@@ -95,7 +95,7 @@ bool Indigo::Window::is_iconified() const
 	return glfwGetWindowAttrib(m_glfw_window,GLFW_ICONIFIED) != 0;
 }
 
-void Indigo::Window::iconify(bool minimize)
+void OOGL::Window::iconify(bool minimize)
 {
 	if (m_glfw_window)
 	{
@@ -106,48 +106,48 @@ void Indigo::Window::iconify(bool minimize)
 	}
 }
 
-void Indigo::Window::on_size(GLFWwindow* window, int width, int height)
+void OOGL::Window::on_size(GLFWwindow* window, int width, int height)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
 		pThis->signal_sized.fire(*pThis,glm::ivec2(width,height));
 }
 
-void Indigo::Window::on_close(GLFWwindow* window)
+void OOGL::Window::on_close(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
 		pThis->signal_close.fire(*pThis);
 }
 
-void Indigo::Window::on_focus(GLFWwindow* window, int focused)
+void OOGL::Window::on_focus(GLFWwindow* window, int focused)
 {
 	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
 }
 
-void Indigo::Window::on_iconify(GLFWwindow* window, int iconified)
+void OOGL::Window::on_iconify(GLFWwindow* window, int iconified)
 {
 	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
 }
 
-void Indigo::Window::on_refresh(GLFWwindow* window)
+void OOGL::Window::on_refresh(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->draw())
 		pThis->swap();
 }
 
-bool Indigo::Window::is_valid() const
+bool OOGL::Window::is_valid() const
 {
 	return m_glfw_window != NULL;
 }
 
-const OOBase::SharedPtr<Indigo::Framebuffer>& Indigo::Window::get_default_frame_buffer() const
+const OOBase::SharedPtr<OOGL::Framebuffer>& OOGL::Window::get_default_frame_buffer() const
 {
 	return m_default_fb;
 }
 
-glm::ivec2 Indigo::Window::size() const
+glm::ivec2 OOGL::Window::size() const
 {
 	int width,height;
 	glfwGetFramebufferSize(m_glfw_window,&width,&height);
@@ -155,7 +155,7 @@ glm::ivec2 Indigo::Window::size() const
 	return glm::ivec2(width,height);
 }
 
-bool Indigo::Window::draw()
+bool OOGL::Window::draw()
 {
 	if (!m_glfw_window || !is_visible() || is_iconified())
 		return false;
@@ -168,7 +168,7 @@ bool Indigo::Window::draw()
 	return true;
 }
 
-void Indigo::Window::swap()
+void OOGL::Window::swap()
 {
 	if (m_glfw_window)
 		glfwSwapBuffers(m_glfw_window);

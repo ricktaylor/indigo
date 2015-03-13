@@ -4,18 +4,18 @@
 //
 // This file is part of the Indigo boardgame engine.
 //
-// Indigo is free software: you can redistribute it and/or modify
+// OOGL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Indigo is distributed in the hope that it will be useful,
+// OOGL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Indigo.  If not, see <http://www.gnu.org/licenses/>.
+// along with OOGL.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -61,21 +61,21 @@ static const GLchar* s_gstap =
 		"\n"
 		"#endif	// #ifndef GSTAP_H\n";
 
-Indigo::Shader::Shader(GLenum shaderType) : m_id(StateFns::get_current()->glCreateShader(shaderType))
+OOGL::Shader::Shader(GLenum shaderType) : m_id(StateFns::get_current()->glCreateShader(shaderType))
 {
 }
 
-Indigo::Shader::~Shader()
+OOGL::Shader::~Shader()
 {
 	StateFns::get_current()->glDeleteShader(m_id);
 }
 
-const GLchar* Indigo::Shader::get_gstap()
+const GLchar* OOGL::Shader::get_gstap()
 {
 	return s_gstap;
 }
 
-void Indigo::Shader::compile(const GLchar* sz, GLint len)
+void OOGL::Shader::compile(const GLchar* sz, GLint len)
 {
 	if (len)
 		compile(&sz,&len,1);
@@ -83,29 +83,29 @@ void Indigo::Shader::compile(const GLchar* sz, GLint len)
 		compile(&sz,NULL,1);
 }
 
-void Indigo::Shader::compile(const GLchar *const *strings, GLsizei count)
+void OOGL::Shader::compile(const GLchar *const *strings, GLsizei count)
 {
 	compile(strings,NULL,count);
 }
 
-void Indigo::Shader::compile(const GLchar *const *strings, const GLint* lengths, GLsizei count)
+void OOGL::Shader::compile(const GLchar *const *strings, const GLint* lengths, GLsizei count)
 {
-	OOBase::SharedPtr<Indigo::StateFns> fns = StateFns::get_current();
+	OOBase::SharedPtr<OOGL::StateFns> fns = StateFns::get_current();
 
 	fns->glShaderSource(m_id,count,strings,lengths);
 	fns->glCompileShader(m_id);
 }
 
-bool Indigo::Shader::compile_status() const
+bool OOGL::Shader::compile_status() const
 {
 	GLint status = GL_FALSE;
 	StateFns::get_current()->glGetShaderiv(m_id,GL_COMPILE_STATUS,&status);
 	return (status == GL_TRUE);
 }
 
-OOBase::String Indigo::Shader::info_log() const
+OOBase::String OOGL::Shader::info_log() const
 {
-	OOBase::SharedPtr<Indigo::StateFns> fns = StateFns::get_current();
+	OOBase::SharedPtr<OOGL::StateFns> fns = StateFns::get_current();
 
 	OOBase::String ret;
 	GLint len = 0;
@@ -129,20 +129,20 @@ OOBase::String Indigo::Shader::info_log() const
 	return ret;
 }
 
-Indigo::Program::Program() : m_id(0)
+OOGL::Program::Program() : m_id(0)
 {
 }
 
-bool Indigo::Program::link_status() const
+bool OOGL::Program::link_status() const
 {
 	GLint status;
 	StateFns::get_current()->glGetProgramiv(m_id,GL_LINK_STATUS,&status);
 	return (status == GL_TRUE);
 }
 
-OOBase::String Indigo::Program::info_log() const
+OOBase::String OOGL::Program::info_log() const
 {
-	OOBase::SharedPtr<Indigo::StateFns> fns = StateFns::get_current();
+	OOBase::SharedPtr<OOGL::StateFns> fns = StateFns::get_current();
 
 	OOBase::String ret;
 	GLint len = 0;
@@ -166,9 +166,9 @@ OOBase::String Indigo::Program::info_log() const
 	return ret;
 }
 
-void Indigo::Program::link(const OOBase::SharedPtr<Shader>* shaders, size_t count)
+void OOGL::Program::link(const OOBase::SharedPtr<Shader>* shaders, size_t count)
 {
-	OOBase::SharedPtr<Indigo::StateFns> fns = StateFns::get_current();
+	OOBase::SharedPtr<OOGL::StateFns> fns = StateFns::get_current();
 
 	for (size_t i=0;i<count;++i)
 		fns->glAttachShader(m_id,shaders[i]->m_id);
@@ -179,14 +179,14 @@ void Indigo::Program::link(const OOBase::SharedPtr<Shader>* shaders, size_t coun
 		fns->glDetachShader(m_id,shaders[i]->m_id);
 }
 
-bool Indigo::Program::in_use() const
+bool OOGL::Program::in_use() const
 {
 	GLint id = 0;
 	glGetIntegerv(GL_CURRENT_PROGRAM,&id);
 	return (static_cast<GLuint>(id) == m_id);
 }
 
-void Indigo::Program::use()
+void OOGL::Program::use()
 {
 	StateFns::get_current()->glUseProgram(m_id);
 }

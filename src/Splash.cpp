@@ -21,10 +21,10 @@
 
 #include "Render.h"
 
-static OOBase::SharedPtr<Indigo::Window> s_ptrSplash;
+static OOBase::SharedPtr<OOGL::Window> s_ptrSplash;
 static float ratio;
 
-static void on_window_draw(const Indigo::Window& win, Indigo::State& glState)
+static void on_window_draw(const OOGL::Window& win, OOGL::State& glState)
 {
 	glState.bind(GL_FRAMEBUFFER,win.get_default_frame_buffer());
 
@@ -47,14 +47,14 @@ static void on_window_draw(const Indigo::Window& win, Indigo::State& glState)
 	glEnd();
 }
 
-static void on_window_close(const Indigo::Window& win)
+static void on_window_close(const OOGL::Window& win)
 {
 	s_ptrSplash.reset();
 }
 
 static bool create_splash(void*)
 {
-	OOBase::SharedPtr<Indigo::Window> ptrSplash = OOBase::allocate_shared<Indigo::Window,OOBase::ThreadLocalAllocator>(320,200,"Test");
+	OOBase::SharedPtr<OOGL::Window> ptrSplash = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test");
 	if (!ptrSplash || !ptrSplash->is_valid())
 		return false;
 

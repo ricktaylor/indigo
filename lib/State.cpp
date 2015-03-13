@@ -4,18 +4,18 @@
 //
 // This file is part of the Indigo boardgame engine.
 //
-// Indigo is free software: you can redistribute it and/or modify
+// OOGL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Indigo is distributed in the hope that it will be useful,
+// OOGL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Indigo.  If not, see <http://www.gnu.org/licenses/>.
+// along with OOGL.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -25,13 +25,13 @@
 #include "BufferObject.h"
 #include "VertexArrayObject.h"
 
-Indigo::State::State(StateFns& fns) :
+OOGL::State::State(StateFns& fns) :
 		m_state_fns(fns),
 		m_active_texture_unit(GL_TEXTURE0)
 {
 }
 
-OOBase::SharedPtr<Indigo::State> Indigo::State::get_current()
+OOBase::SharedPtr<OOGL::State> OOGL::State::get_current()
 {
 	GLFWwindow* win = glfwGetCurrentContext();
 	if (!win)
@@ -50,7 +50,7 @@ OOBase::SharedPtr<Indigo::State> Indigo::State::get_current()
 	return window->m_state;
 }
 
-OOBase::SharedPtr<Indigo::Framebuffer> Indigo::State::bind(GLenum target, const OOBase::SharedPtr<Framebuffer>& fb)
+OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBase::SharedPtr<Framebuffer>& fb)
 {
 	OOBase::SharedPtr<Framebuffer> prev;
 	if (target == GL_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER)
@@ -91,7 +91,7 @@ OOBase::SharedPtr<Indigo::Framebuffer> Indigo::State::bind(GLenum target, const 
 	return prev;
 }
 
-GLenum Indigo::State::activate_texture_unit(GLenum unit)
+GLenum OOGL::State::activate_texture_unit(GLenum unit)
 {
 	GLenum prev = m_active_texture_unit;
 	if (unit != m_active_texture_unit)
@@ -106,14 +106,14 @@ GLenum Indigo::State::activate_texture_unit(GLenum unit)
 	return prev;
 }
 
-GLenum Indigo::State::active_texture_unit() const
+GLenum OOGL::State::active_texture_unit() const
 {
 	return m_active_texture_unit;
 }
 
-OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture)
+OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture)
 {
-	OOBase::SharedPtr<Indigo::Texture> prev;
+	OOBase::SharedPtr<OOGL::Texture> prev;
 
 	tex_unit_t* tu = m_vecTexUnits.at(unit - GL_TEXTURE0);
 	if (!tu)
@@ -157,12 +157,12 @@ OOBase::SharedPtr<Indigo::Texture> Indigo::State::bind(GLenum unit, const OOBase
 	return prev;
 }
 
-OOBase::SharedPtr<Indigo::BufferObject> Indigo::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object)
+OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object)
 {
 	return bind(buffer_object,buffer_object->m_target);
 }
 
-OOBase::SharedPtr<Indigo::BufferObject> Indigo::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
+OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
 {
 	OOBase::SharedPtr<BufferObject> prev;
 	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
@@ -193,7 +193,7 @@ OOBase::SharedPtr<Indigo::BufferObject> Indigo::State::bind(const OOBase::Shared
 	return prev;
 }
 
-OOBase::SharedPtr<Indigo::VertexArrayObject> Indigo::State::bind(const OOBase::SharedPtr<VertexArrayObject>& vao)
+OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::State::bind(const OOBase::SharedPtr<VertexArrayObject>& vao)
 {
 	OOBase::SharedPtr<VertexArrayObject> prev = m_current_vao;
 
@@ -208,12 +208,12 @@ OOBase::SharedPtr<Indigo::VertexArrayObject> Indigo::State::bind(const OOBase::S
 	return prev;
 }
 
-void Indigo::State::bind_texture(GLenum unit, GLenum target, GLuint texture)
+void OOGL::State::bind_texture(GLenum unit, GLenum target, GLuint texture)
 {
 	m_state_fns.glBindTextureUnit(*this,unit,target,texture);
 }
 
-OOBase::SharedPtr<Indigo::Program> Indigo::State::use(const OOBase::SharedPtr<Program>& program)
+OOBase::SharedPtr<OOGL::Program> OOGL::State::use(const OOBase::SharedPtr<Program>& program)
 {
 	OOBase::SharedPtr<Program> prev = m_current_program;
 
@@ -230,77 +230,77 @@ OOBase::SharedPtr<Indigo::Program> Indigo::State::use(const OOBase::SharedPtr<Pr
 	return prev;
 }
 
-void Indigo::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	m_state_fns.glTextureStorage1D(*this,texture,target,levels,internalFormat,width);
 }
 
-void Indigo::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	m_state_fns.glTextureStorage2D(*this,texture,target,levels,internalFormat,width,height);
 }
 
-void Indigo::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	m_state_fns.glTextureStorage3D(*this,texture,target,levels,internalFormat,width,height,depth);
 }
 
-void Indigo::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	m_state_fns.glTextureSubImage1D(*this,texture,target,level,xoffset,width,format,type,pixels);
 }
 
-void Indigo::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	m_state_fns.glTextureSubImage2D(*this,texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void Indigo::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	m_state_fns.glTextureSubImage3D(*this,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name, GLfloat val)
+void OOGL::State::texture_parameter(GLuint texture, GLenum target, GLenum name, GLfloat val)
 {
 	m_state_fns.glTextureParameterf(*this,texture,target,name,val);
 }
 
-void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name, const GLfloat* pval)
+void OOGL::State::texture_parameter(GLuint texture, GLenum target, GLenum name, const GLfloat* pval)
 {
 	m_state_fns.glTextureParameterfv(*this,texture,target,name,pval);
 }
 
-void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name, GLint val)
+void OOGL::State::texture_parameter(GLuint texture, GLenum target, GLenum name, GLint val)
 {
 	m_state_fns.glTextureParameteri(*this,texture,target,name,val);
 }
 
-void Indigo::State::texture_parameter(GLuint texture, GLenum target, GLenum name, const GLint* pval)
+void OOGL::State::texture_parameter(GLuint texture, GLenum target, GLenum name, const GLint* pval)
 {
 	m_state_fns.glTextureParameteriv(*this,texture,target,name,pval);
 }
 
-void Indigo::State::buffer_data(const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
+void OOGL::State::buffer_data(const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
 {
 	m_state_fns.glBufferData(*this,buffer,size,data,usage);
 }
 
-void* Indigo::State::map_buffer_range(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
+void* OOGL::State::map_buffer_range(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
 {
 	return m_state_fns.glMapBufferRange(*this,buffer,offset,length,orig_usage,orig_size,access);
 }
 
-bool Indigo::State::unmap_buffer(const OOBase::SharedPtr<BufferObject>& buffer)
+bool OOGL::State::unmap_buffer(const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	return m_state_fns.glUnmapBuffer(*this,buffer);
 }
 
-void Indigo::State::buffer_sub_data(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+void OOGL::State::buffer_sub_data(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
 {
 	m_state_fns.glBufferSubData(*this,buffer,offset,size,data);
 }
 
-void Indigo::State::copy_buffer_data(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::State::copy_buffer_data(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
 	m_state_fns.glCopyBufferSubData(*this,write,writeoffset,read,readoffset,size);
 }
