@@ -106,13 +106,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\resources\DejaVu_Sans.fnt">
+    <None Include="..\resources\Titillium-Regular.bin">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\resources\DejaVu_Sans_0.tga">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\resources\DejaVu_Sans_1.tga">
+    <None Include="..\resources\Titillium-Regular_0.png">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

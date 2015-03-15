@@ -65,9 +65,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\resources\DejaVu_Sans.fnt" />
-    <None Include="..\resources\DejaVu_Sans_0.tga" />
-    <None Include="..\resources\DejaVu_Sans_1.tga" />
+    <None Include="..\resources\Titillium-Regular.bin" />
+    <None Include="..\resources\Titillium-Regular_0.png" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\indigo.rc" />
