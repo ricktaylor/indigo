@@ -59,6 +59,7 @@ namespace OOGL
 		void glActiveTexture(GLenum texture);
 		void glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture);
 		void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels);
+		bool check_glTextureStorage();
 		void glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
 		void glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
 		void glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
@@ -69,6 +70,8 @@ namespace OOGL
 		void glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
 		void glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val);
 		void glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val);
+		bool check_glGenerateMipmap();
+		void glGenerateTextureMipmap(State& state, GLuint texture, GLenum target);
 
 		void glGenBuffers(GLsizei n, GLuint* buffers);
 		void glBindBuffer(GLenum target, GLuint buffer);
@@ -138,7 +141,6 @@ namespace OOGL
 		void (StateFns::*m_thunk_glTextureStorage1D)(State&,GLuint,GLenum,GLsizei,GLenum,GLsizei);
 		GLFWglproc m_fn_glTextureStorage1D;
 		void check_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
-		void emulate_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
 		void call_glTextureStorage1D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
 		void call_glTextureStorage1DEXT(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
 		void call_glTexStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
@@ -146,7 +148,6 @@ namespace OOGL
 		void (StateFns::*m_thunk_glTextureStorage2D)(State&,GLuint,GLenum,GLsizei,GLenum,GLsizei,GLsizei);
 		GLFWglproc m_fn_glTextureStorage2D;
 		void check_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
-		void emulate_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
 		void call_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
 		void call_glTextureStorage2DEXT(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
 		void call_glTexStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
@@ -154,7 +155,6 @@ namespace OOGL
 		void (StateFns::*m_thunk_glTextureStorage3D)(State&,GLuint,GLenum,GLsizei,GLenum,GLsizei,GLsizei,GLsizei);
 		GLFWglproc m_fn_glTextureStorage3D;
 		void check_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
-		void emulate_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 		void call_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 		void call_glTextureStorage3DEXT(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 		void call_glTexStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
@@ -207,6 +207,13 @@ namespace OOGL
 		void call_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
 		void call_glTextureParameterivEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
 		void call_glTexParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
+
+		void (StateFns::*m_thunk_glGenerateTextureMipmap)(State&,GLuint,GLenum);
+		GLFWglproc m_fn_glGenerateTextureMipmap;
+		void check_glGenerateTextureMipmap(State& state, GLuint texture, GLenum target);
+		void call_glGenerateTextureMipmap(State& state, GLuint texture, GLenum target);
+		void call_glGenerateTextureMipmapEXT(State& state, GLuint texture, GLenum target);
+		void call_glGenerateMipmap(State& state, GLuint texture, GLenum target);
 
 		PFNGLGENBUFFERSPROC m_fn_glGenBuffers;
 		PFNGLBINDBUFFERPROC m_fn_glBindBuffer;

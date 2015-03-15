@@ -50,4 +50,9 @@
 // Include our own glext.h
 #include "./glext.h"
 
+namespace OOGL
+{
+	void glPrimitiveRestartIndex(GLuint index);
+}
+
 #endif // OOGL_H_INCLUDED

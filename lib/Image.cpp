@@ -122,7 +122,7 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::load_targa(const unsigned char* data, siz
 	{
 		if (old_align)
 			glPixelStorei(GL_UNPACK_ALIGNMENT,2);
-		tex->image(0,0,0,width,height,GL_BGRA,GL_UNSIGNED_SHORT_1_5_5_5_REV,data);
+		tex->sub_image(0,0,0,width,height,GL_BGRA,GL_UNSIGNED_SHORT_1_5_5_5_REV,data);
 		if (old_align)
 			glPixelStorei(GL_UNPACK_ALIGNMENT,old_align);
 	}
@@ -130,7 +130,7 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::load_targa(const unsigned char* data, siz
 	{
 		if (old_align)
 			glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		tex->image(0,0,0,width,height,GL_BGR,GL_UNSIGNED_BYTE,data);
+		tex->sub_image(0,0,0,width,height,GL_BGR,GL_UNSIGNED_BYTE,data);
 		if (old_align)
 			glPixelStorei(GL_UNPACK_ALIGNMENT,old_align);
 	}
@@ -138,7 +138,7 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::load_targa(const unsigned char* data, siz
 	{
 		if (old_align)
 			glPixelStorei(GL_UNPACK_ALIGNMENT,4);
-		tex->image(0,0,0,width,height,GL_BGRA,GL_UNSIGNED_BYTE,data);
+		tex->sub_image(0,0,0,width,height,GL_BGRA,GL_UNSIGNED_BYTE,data);
 		if (old_align)
 			glPixelStorei(GL_UNPACK_ALIGNMENT,old_align);
 	}

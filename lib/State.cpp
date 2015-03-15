@@ -280,6 +280,11 @@ void OOGL::State::texture_parameter(GLuint texture, GLenum target, GLenum name, 
 	m_state_fns.glTextureParameteriv(*this,texture,target,name,pval);
 }
 
+void OOGL::State::generate_mipmap(GLuint texture, GLenum target)
+{
+	m_state_fns.glGenerateTextureMipmap(*this,texture,target);
+}
+
 void OOGL::State::buffer_data(const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
 {
 	m_state_fns.glBufferData(*this,buffer,size,data,usage);

@@ -34,27 +34,22 @@ namespace OOGL
 		friend class State;
 
 	public:
-		// Mutable create
-		Texture(GLenum target);
-
-		// Immutable create
 		Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
 		Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
 		Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+		
+		Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 
 		static OOBase::SharedPtr<Texture> none(GLenum target); 
 
 		~Texture();
 
-		// Mutable init
-		void init(GLsizei levels, GLint internalFormat, GLsizei width);
-		void init(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height);
-		void init(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth);
-
-		void image(GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
-		void image(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
-		void image(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
-		void image(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+		void sub_image(GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		void sub_image(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		void sub_image(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+		void sub_image(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 
 		void parameter(GLenum name, GLfloat val);
 		void parameter(GLenum name, const GLfloat* pval);
@@ -63,17 +58,44 @@ namespace OOGL
 
 		GLenum target() const;
 
-	private:
+		void bind(State& state, GLenum unit) const;
+
+		void invalidate(GLint level);
+		void invalidate(GLint level, GLint xoffset, GLsizei width);
+		void invalidate(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height);
+		void invalidate(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth);
+
+		void clear(GLint level, GLenum format, GLenum type, const void* pixels);
+		void clear(GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		void clear(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		void clear(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+
+	protected:
 		GLuint m_tex;
 		GLenum m_target;
 
+		Texture(GLenum target);
+
+		void init_mutable(GLsizei levels, GLenum internalFormat, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		void init_mutable(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		void init_mutable(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+
+	private:
 		Texture(GLuint tex, GLenum target);
 
-		void create(GLsizei levels, GLenum internalFormat, GLsizei width);
-		void create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
-		void create(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+		void init();
+	};
 
-		void bind(State& state, GLenum unit) const;
+	class MutableTexture : public Texture
+	{
+	public:
+		MutableTexture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
+		MutableTexture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
+		MutableTexture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+
+		MutableTexture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		MutableTexture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		MutableTexture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 	};
 }
 

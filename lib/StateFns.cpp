@@ -82,6 +82,8 @@ OOGL::StateFns::StateFns() :
 		m_fn_glTextureParameteri(NULL),
 		m_thunk_glTextureParameteriv(&StateFns::check_glTextureParameteriv),
 		m_fn_glTextureParameteriv(NULL),
+		m_thunk_glGenerateTextureMipmap(&StateFns::check_glGenerateTextureMipmap),
+		m_fn_glGenerateTextureMipmap(NULL),
 		m_fn_glGenBuffers(NULL),
 		m_fn_glBindBuffer(NULL),
 		m_fn_glDeleteBuffers(NULL),
@@ -415,53 +417,44 @@ void OOGL::StateFns::glTexImage3D(GLenum target, GLint level, GLint internalform
 		(*m_fn_glTexImage3D)(target,level,internalformat,width,height,depth,border,format,type,pixels);
 }
 
-void OOGL::StateFns::check_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+bool OOGL::StateFns::check_glTextureStorage()
 {
-	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
-	{
-		m_fn_glTextureStorage1D = glfwGetProcAddress("glTextureStorage1D");
-		if (m_fn_glTextureStorage1D)
-			m_thunk_glTextureStorage1D = &StateFns::call_glTextureStorage1D;
-	}
-
-	if (!m_fn_glTextureStorage1D && glfwExtensionSupported("GL_ARB_texture_storage") == GL_TRUE)
-	{
-		if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
-		{
-			m_fn_glTextureStorage1D = glfwGetProcAddress("glTextureStorage1DEXT");
-			if (m_fn_glTextureStorage1D)
-				m_thunk_glTextureStorage1D = &StateFns::call_glTextureStorage1DEXT;
-		}
-
-		if (!m_fn_glTextureStorage1D)
-		{
-			m_fn_glTextureStorage1D = glfwGetProcAddress("glTexStorage1D");
-			if (m_fn_glTextureStorage1D)
-				m_thunk_glTextureStorage1D = &StateFns::call_glTexStorage1D;
-		}
-	}
-
 	if (!m_fn_glTextureStorage1D)
-		m_thunk_glTextureStorage1D = &StateFns::emulate_glTextureStorage1D;
+	{
+		if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
+		{
+			m_fn_glTextureStorage1D = glfwGetProcAddress("glTextureStorage1D");
+			if (m_fn_glTextureStorage1D)
+				m_thunk_glTextureStorage1D = &StateFns::call_glTextureStorage1D;
+		}
 
-	(this->*m_thunk_glTextureStorage1D)(state,texture,target,levels,internalFormat,width);
+		if (!m_fn_glTextureStorage1D && glfwExtensionSupported("GL_ARB_texture_storage") == GL_TRUE)
+		{
+			if (glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+			{
+				m_fn_glTextureStorage1D = glfwGetProcAddress("glTextureStorage1DEXT");
+				if (m_fn_glTextureStorage1D)
+					m_thunk_glTextureStorage1D = &StateFns::call_glTextureStorage1DEXT;
+			}
+
+			if (!m_fn_glTextureStorage1D)
+			{
+				m_fn_glTextureStorage1D = glfwGetProcAddress("glTexStorage1D");
+				if (m_fn_glTextureStorage1D)
+					m_thunk_glTextureStorage1D = &StateFns::call_glTexStorage1D;
+			}
+		}
+	}
+
+	return (m_fn_glTextureStorage1D != NULL);
 }
 
-void OOGL::StateFns::emulate_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::check_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
-
-	glTexParameteri(target,GL_TEXTURE_BASE_LEVEL,0);
-	glTexParameteri(target,GL_TEXTURE_MAX_LEVEL,levels-1);
-
-	// Keep in line with Texture::init
-	for (GLsizei i = 0; i < levels; ++i)
-	{
-		glTexImage1D(target,i,internalFormat,width,0,0,0,NULL);
-		width /= 2;
-		if (!width)
-			width = 1;
-	}
+	if (!check_glTextureStorage())
+		LOG_ERROR(("No glTexStorage1D function"));
+	else
+		(this->*m_thunk_glTextureStorage1D)(state,texture,target,levels,internalFormat,width);
 }
 
 void OOGL::StateFns::call_glTextureStorage1D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
@@ -513,44 +506,9 @@ void OOGL::StateFns::check_glTextureStorage2D(State& state, GLuint texture, GLen
 	}
 
 	if (!m_fn_glTextureStorage2D)
-		m_thunk_glTextureStorage2D = &StateFns::emulate_glTextureStorage2D;
-
-	(this->*m_thunk_glTextureStorage2D)(state,texture,target,levels,internalFormat,width,height);
-}
-
-void OOGL::StateFns::emulate_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
-{
-	state.bind_texture(state.m_active_texture_unit,target,texture);
-
-	glTexParameteri(target,GL_TEXTURE_BASE_LEVEL,0);
-	glTexParameteri(target,GL_TEXTURE_MAX_LEVEL,levels-1);
-
-	// Keep in line with Texture::init
-	for (GLsizei i = 0; i < levels; ++i)
-	{
-		if (target == GL_TEXTURE_CUBE_MAP)
-		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,i,internalFormat,width,height,0,0,0,NULL);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,i,internalFormat,width,height,0,0,0,NULL);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,i,internalFormat,width,height,0,0,0,NULL);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,i,internalFormat,width,height,0,0,0,NULL);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,i,internalFormat,width,height,0,0,0,NULL);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,i,internalFormat,width,height,0,0,0,NULL);
-		}
-		else
-			glTexImage2D(target,i,internalFormat,width,height,0,0,0,NULL);
-
-		width /= 2;
-		if (!width)
-			width = 1;
-
-		if (target != GL_TEXTURE_1D && target != GL_TEXTURE_1D_ARRAY)
-		{
-			height /= 2;
-			if (!height)
-				height = 1;
-		}
-	}
+		LOG_ERROR(("No glTexStorage2D function"));
+	else
+		(this->*m_thunk_glTextureStorage2D)(state,texture,target,levels,internalFormat,width,height);
 }
 
 void OOGL::StateFns::call_glTextureStorage2D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
@@ -602,38 +560,9 @@ void OOGL::StateFns::check_glTextureStorage3D(State& state, GLuint texture, GLen
 	}
 
 	if (!m_fn_glTextureStorage3D)
-		m_thunk_glTextureStorage3D = &StateFns::emulate_glTextureStorage3D;
-
-	(this->*m_thunk_glTextureStorage3D)(state,texture,target,levels,internalFormat,width,height,depth);
-}
-
-void OOGL::StateFns::emulate_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
-{
-	state.bind_texture(state.m_active_texture_unit,target,texture);
-
-	glTexParameteri(target,GL_TEXTURE_BASE_LEVEL,0);
-	glTexParameteri(target,GL_TEXTURE_MAX_LEVEL,levels-1);
-
-	// Keep in line with Texture::init
-	for (GLsizei i = 0; i < levels; ++i)
-	{
-		this->glTexImage3D(target,i,internalFormat,width,height,depth,0,0,0,NULL);
-
-		width /= 2;
-		if (!width)
-			width = 1;
-
-		height /= 2;
-		if (!height)
-			height = 1;
-
-		if (target != GL_TEXTURE_2D_ARRAY && target != GL_PROXY_TEXTURE_2D_ARRAY && target != GL_TEXTURE_CUBE_MAP_ARRAY && target != GL_PROXY_TEXTURE_CUBE_MAP_ARRAY)
-		{
-			depth /= 2;
-			if (!depth)
-				depth = 1;
-		}
-	}
+		LOG_ERROR(("No glTexStorage3D function"));
+	else
+		(this->*m_thunk_glTextureStorage3D)(state,texture,target,levels,internalFormat,width,height,depth);
 }
 
 void OOGL::StateFns::call_glTextureStorage3D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
@@ -680,12 +609,12 @@ void OOGL::StateFns::check_glTextureSubImage1D(State& state, GLuint texture, GLe
 	(this->*m_thunk_glTextureSubImage1D)(state,texture,target,level,xoffset,width,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage1D(State&, GLuint texture, GLenum, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE1DPROC)m_fn_glTextureSubImage1D))(texture,level,xoffset,width,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage1DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage1DEXT(State&, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE1DEXTPROC)m_fn_glTextureSubImage1D))(texture,target,level,xoffset,width,format,type,pixels);
 }
@@ -724,12 +653,12 @@ void OOGL::StateFns::check_glTextureSubImage2D(State& state, GLuint texture, GLe
 	(this->*m_thunk_glTextureSubImage2D)(state,texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage2D(State&, GLuint texture, GLenum, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE2DPROC)m_fn_glTextureSubImage2D))(texture,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage2DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage2DEXT(State&, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE2DEXTPROC)m_fn_glTextureSubImage2D))(texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
@@ -777,12 +706,12 @@ void OOGL::StateFns::check_glTextureSubImage3D(State& state, GLuint texture, GLe
 	(this->*m_thunk_glTextureSubImage3D)(state,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage3D(State&, GLuint texture, GLenum, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE3DPROC)m_fn_glTextureSubImage3D))(texture,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage3DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage3DEXT(State&, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE3DEXTPROC)m_fn_glTextureSubImage3D))(texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
@@ -821,12 +750,12 @@ void OOGL::StateFns::check_glTextureParameterf(State& state, GLuint texture, GLe
 	(this->*m_thunk_glTextureParameterf)(state,texture,target,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameterf(State& state, GLuint texture, GLenum, GLenum name, GLfloat val)
+void OOGL::StateFns::call_glTextureParameterf(State&, GLuint texture, GLenum, GLenum name, GLfloat val)
 {
 	(*((PFNGLTEXTUREPARAMETERFPROC)m_fn_glTextureParameterf))(texture,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameterfEXT(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
+void OOGL::StateFns::call_glTextureParameterfEXT(State&, GLuint texture, GLenum target, GLenum name, GLfloat val)
 {
 	(*((PFNGLTEXTUREPARAMETERFEXTPROC)m_fn_glTextureParameterf))(texture,target,name,val);
 }
@@ -865,12 +794,12 @@ void OOGL::StateFns::check_glTextureParameterfv(State& state, GLuint texture, GL
 	(this->*m_thunk_glTextureParameterfv)(state,texture,target,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+void OOGL::StateFns::call_glTextureParameterfv(State&, GLuint texture, GLenum, GLenum name, const GLfloat* val)
 {
 	(*((PFNGLTEXTUREPARAMETERFVPROC)m_fn_glTextureParameterfv))(texture,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameterfvEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
+void OOGL::StateFns::call_glTextureParameterfvEXT(State&, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
 {
 	(*((PFNGLTEXTUREPARAMETERFVEXTPROC)m_fn_glTextureParameterfv))(texture,target,name,val);
 }
@@ -909,12 +838,12 @@ void OOGL::StateFns::check_glTextureParameteri(State& state, GLuint texture, GLe
 	(this->*m_thunk_glTextureParameteri)(state,texture,target,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+void OOGL::StateFns::call_glTextureParameteri(State&, GLuint texture, GLenum, GLenum name, GLint val)
 {
 	(*((PFNGLTEXTUREPARAMETERIPROC)m_fn_glTextureParameteri))(texture,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameteriEXT(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
+void OOGL::StateFns::call_glTextureParameteriEXT(State&, GLuint texture, GLenum target, GLenum name, GLint val)
 {
 	(*((PFNGLTEXTUREPARAMETERIEXTPROC)m_fn_glTextureParameteri))(texture,target,name,val);
 }
@@ -953,12 +882,12 @@ void OOGL::StateFns::check_glTextureParameteriv(State& state, GLuint texture, GL
 	(this->*m_thunk_glTextureParameteriv)(state,texture,target,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+void OOGL::StateFns::call_glTextureParameteriv(State&, GLuint texture, GLenum, GLenum name, const GLint* val)
 {
 	(*((PFNGLTEXTUREPARAMETERIVPROC)m_fn_glTextureParameteriv))(texture,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameterivEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
+void OOGL::StateFns::call_glTextureParameterivEXT(State&, GLuint texture, GLenum target, GLenum name, const GLint* val)
 {
 	(*((PFNGLTEXTUREPARAMETERIVEXTPROC)m_fn_glTextureParameteriv))(texture,target,name,val);
 }
@@ -973,6 +902,72 @@ void OOGL::StateFns::call_glTexParameteriv(State& state, GLuint texture, GLenum 
 void OOGL::StateFns::glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
 {
 	(this->*m_thunk_glTextureParameteriv)(state,texture,target,name,val);
+}
+
+bool OOGL::StateFns::check_glGenerateMipmap()
+{
+	if (!m_fn_glGenerateTextureMipmap)
+	{
+		if (glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
+		{
+			m_fn_glGenerateTextureMipmap = glfwGetProcAddress("glGenerateTextureMipmap");
+			if (m_fn_glGenerateTextureMipmap)
+				m_thunk_glGenerateTextureMipmap = &StateFns::call_glGenerateTextureMipmap;
+		}
+
+		if (!m_fn_glGenerateTextureMipmap && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+		{
+			m_fn_glGenerateTextureMipmap = glfwGetProcAddress("glGenerateTextureMipmapEXT");
+			if (m_fn_glGenerateTextureMipmap)
+				m_thunk_glGenerateTextureMipmap = &StateFns::call_glGenerateTextureMipmapEXT;
+		}
+
+		if (!m_fn_glGenerateTextureMipmap && (isGLversion(3,0) || glfwExtensionSupported("GL_ARB_framebuffer_object") == GL_TRUE))
+		{
+			m_fn_glGenerateTextureMipmap = glfwGetProcAddress("glGenerateMipmap");
+			if (m_fn_glGenerateTextureMipmap)
+				m_thunk_glGenerateTextureMipmap = &StateFns::call_glGenerateMipmap;
+		}
+		
+		if (!m_fn_glGenerateTextureMipmap && glfwExtensionSupported("GL_EXT_framebuffer_object") == GL_TRUE)
+		{
+			m_fn_glGenerateTextureMipmap = glfwGetProcAddress("glGenerateMipmapEXT");
+			if (m_fn_glGenerateTextureMipmap)
+				m_thunk_glGenerateTextureMipmap = &StateFns::call_glGenerateMipmap;
+		}
+	}
+
+	return (m_fn_glGenerateTextureMipmap != NULL);
+}
+
+void OOGL::StateFns::check_glGenerateTextureMipmap(State& state, GLuint texture, GLenum target)
+{
+	if (!check_glGenerateMipmap())
+		LOG_ERROR(("No glGenerateMipmap function!"));
+	else
+		(this->*m_thunk_glGenerateTextureMipmap)(state,texture,target);
+}
+
+void OOGL::StateFns::call_glGenerateTextureMipmap(State&, GLuint texture, GLenum)
+{
+	(*((PFNGLGENERATETEXTUREMIPMAPPROC)m_fn_glGenerateTextureMipmap))(texture);
+}
+
+void OOGL::StateFns::call_glGenerateTextureMipmapEXT(State&, GLuint texture, GLenum target)
+{
+	(*((PFNGLGENERATETEXTUREMIPMAPEXTPROC)m_fn_glGenerateTextureMipmap))(texture,target);
+}
+
+void OOGL::StateFns::call_glGenerateMipmap(State& state, GLuint texture, GLenum target)
+{
+	state.bind_texture(state.m_active_texture_unit,target,texture);
+
+	(*((PFNGLGENERATEMIPMAPPROC)m_fn_glGenerateTextureMipmap))(target);
+}
+
+void OOGL::StateFns::glGenerateTextureMipmap(State& state, GLuint texture, GLenum target)
+{
+	(this->*m_thunk_glGenerateTextureMipmap)(state,texture,target);
 }
 
 void OOGL::StateFns::glGenBuffers(GLsizei n, GLuint* buffers)
