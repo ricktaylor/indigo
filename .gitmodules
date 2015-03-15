@@ -8,3 +8,6 @@
 	path = oobase
 	url = https://github.com/omegaonline/oobase.git
 
+[submodule "3rdparty/stb"]
+	path = 3rdparty/stb
+	url = https://github.com/nothings/stb.git
