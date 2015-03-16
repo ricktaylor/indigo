@@ -19,7 +19,7 @@ bin_PROGRAMS = indigo
 bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 	$(AM_V_CC)$(CC_FOR_BUILD) $(INCLUDES) $(AM_CFLAGS) -o $@ $(top_srcdir)/tools/bin2c.c
 	
-%.c: ../resources/%.tga bin2c
+%.c: ../resources/%.png bin2c
 	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
 	
 %.c: ../resources/%.fnt bin2c
@@ -40,9 +40,8 @@ indigo_SOURCES = \
 	LogicThread.cpp \
 	Main.cpp \
 	Splash.cpp \
-	DejaVu_Sans_0.c \
-	DejaVu_Sans_1.c \
-	DejaVu_Sans.c
+	Titillium-Regular_0.c \
+	Titillium-Regular.c
 		
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \

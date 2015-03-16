@@ -47,6 +47,12 @@ int main( int argc, char* argv[])
     }
 
     ident = argv[3];
+    char* c = ident;
+    for (; *c != '\0';++c)
+    {
+    	if (*c == '-')
+    		*c = '_';
+    }
 
     need_comma = 0;
 
