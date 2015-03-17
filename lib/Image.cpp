@@ -21,97 +21,76 @@
 
 #include "Image.h"
 
-static unsigned int read_uint16_le(const unsigned char* data)
+extern "C"
 {
-	unsigned int v = data[1];
-	v = (v << 8) | data[0];
-	return v;
+	static void* wrap_malloc(size_t sz);
+	static void* wrap_realloc(void* p, size_t sz);
+	static void wrap_free(void* p);
+
+	#define STBI_MALLOC(sz)    wrap_malloc(sz)
+	#define STBI_REALLOC(p,sz) wrap_realloc(p,sz)
+	#define STBI_FREE(p)       wrap_free(p)
+
+	#define STB_IMAGE_IMPLEMENTATION
+	#include "../3rdparty/stb/stb_image.h"
 }
 
-OOBase::SharedPtr<OOGL::Texture> OOGL::load_targa(const unsigned char* data, size_t len)
+static void* wrap_malloc(size_t sz)
 {
-	const unsigned char* start = data;
-	OOBase::SharedPtr<Texture> tex;
+	return OOBase::ThreadLocalAllocator::allocate(sz);
+}
 
-	if (len < 18)
-		LOG_ERROR_RETURN(("Bad length for TGA data"),tex);
+static void* wrap_realloc(void* p, size_t sz)
+{
+	return OOBase::ThreadLocalAllocator::reallocate(p,sz);
+}
 
-	if (data[1] != 0)
-		LOG_ERROR_RETURN(("Color-mapped TGA images unsupported"),tex);
+static void wrap_free(void* p)
+{
+	OOBase::ThreadLocalAllocator::free(p);
+}
 
-	if ((data[2] & 0x7) != 2)
-		LOG_ERROR_RETURN(("Only RGB TGA images supported"),tex);
+OOGL::Image::Image(int width, int height, int components, void* pixels) :
+		m_width(width),
+		m_height(height),
+		m_components(components),
+		m_pixels(pixels)
+{
+}
 
-	if (data[17] & 0x20)
-		LOG_ERROR_RETURN(("Inverted TGA images not supported"),tex);
+OOGL::Image::~Image()
+{
+	stbi_image_free(const_cast<void*>(m_pixels));
+}
 
-	bool rle = (data[2] & 0x8) != 0;
-
-	GLsizei width = read_uint16_le(data+12);
-	GLsizei height = read_uint16_le(data+14);
-	unsigned int bpp = data[16] / 8;
-
-	if (!rle && len < 18 + data[0] + (bpp * width * height))
-		LOG_ERROR_RETURN(("Incorrect length for TGA data"),tex);
-
-	if (data[0])
-		LOG_DEBUG(("Loading TGA file %.*s",(int)data[0],data));
-
-	// Skip image ID
-	data += 18 + data[0];
-
-	if (bpp == 2)
-		tex = OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,1,GL_RGB5_A1,width,height);
-	else if (bpp == 3)
-		tex = OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,1,GL_RGB8,width,height);
-	else if (bpp == 4)
-		tex = OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,1,GL_RGBA8,width,height);
+OOBase::SharedPtr<OOGL::Image> OOGL::Image::load(const char* filename, int components)
+{
+	OOBase::SharedPtr<Image> img;
+	int x,y,c = 0;
+	void* p = stbi_load(filename,&x,&y,&c,components);
+	if (p)
+		img = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>(x,y,c,p);
 	else
-		LOG_ERROR_RETURN(("Unexpected BPP for TGA data"),tex);
+		LOG_WARNING(("Failed to load image: %s\n",stbi_failure_reason()));
 
-	OOBase::SharedPtr<unsigned char> ptrBuf;
-	if (rle)
-	{
-		// Unpack RLE
-		unsigned char* wp = static_cast<unsigned char*>(OOBase::ThreadLocalAllocator::allocate(bpp * width * height,16));
-		if (wp)
-		{
-			ptrBuf = OOBase::make_shared<unsigned char,OOBase::ThreadLocalAllocator>(wp);
-			if (!ptrBuf)
-				OOBase::ThreadLocalAllocator::free(wp);
-		}
-		if (!ptrBuf)
-			LOG_ERROR_RETURN(("Out of memory"),OOBase::SharedPtr<Texture>());
+	return img;
+}
 
-		while (data < start + len)
-		{
-			unsigned char header = *data++;
-			unsigned char plen = (header & 0x7F) + 1;
+OOBase::SharedPtr<OOGL::Image> OOGL::Image::load(const unsigned char* buffer, int len, int components)
+{
+	OOBase::SharedPtr<Image> img;
+	int x,y,c = 0;
+	void* p = stbi_load_from_memory(buffer,len,&x,&y,&c,components);
+	if (p)
+		img = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>(x,y,c,p);
+	else
+		LOG_WARNING(("Failed to load image: %s\n",stbi_failure_reason()));
 
-			if (header & 0x80)
-			{
-				// RLE packet
-				while (plen--)
-				{
-					memcpy(wp,data,bpp);
-					wp += bpp;
-				}
+	return img;
+}
 
-				data += bpp;
-			}
-			else
-			{
-				// Raw packet
-				plen *= bpp;
-				memcpy(wp,data,plen);
-				wp += plen;
-				data += plen;
-			}
-		}
-
-		data = ptrBuf.get();
-	}
-
+/*OOBase::SharedPtr<OOGL::Texture> OOGL::load_targa(const unsigned char* data, size_t len)
+{
 	GLint old_align = 0;
 	glGetIntegerv(GL_UNPACK_ALIGNMENT,&old_align);
 
@@ -144,4 +123,4 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::load_targa(const unsigned char* data, siz
 	}
 
 	return tex;
-}
+}*/

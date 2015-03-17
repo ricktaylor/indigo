@@ -26,7 +26,24 @@
 
 namespace OOGL
 {
-	OOBase::SharedPtr<Texture> load_targa(const unsigned char* data, size_t len);
+	class Image : public OOBase::NonCopyable
+	{
+		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
+
+	public:
+		static OOBase::SharedPtr<Image> load(const char* filename, int components = 0);
+		static OOBase::SharedPtr<Image> load(const unsigned char* buffer, int len, int components = 0);
+
+		~Image();
+
+		const int   m_width;
+		const int   m_height;
+		const int   m_components;
+		const void* m_pixels;
+
+	private:
+		Image(int width, int height, int components, void* pixels);
+	};
 }
 
 #endif // INDIGO_IMAGE_H_INCLUDED
