@@ -65,7 +65,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\resources\Titillium-Regular.bin" />
+    <None Include="..\resources\Titillium-Regular.fnt" />
     <None Include="..\resources\Titillium-Regular_0.png" />
   </ItemGroup>
   <ItemGroup>

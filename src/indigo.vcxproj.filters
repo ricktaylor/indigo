@@ -106,10 +106,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\resources\Titillium-Regular.bin">
+    <None Include="..\resources\Titillium-Regular_0.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\resources\Titillium-Regular_0.png">
+    <None Include="..\resources\Titillium-Regular.fnt">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
