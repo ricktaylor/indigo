@@ -58,6 +58,7 @@ OOGL::StateFns::StateFns() :
 		m_fn_glDetachShader(NULL),
 		m_fn_glLinkProgram(NULL),
 		m_fn_glUseProgram(NULL),
+		m_fn_glGetUniformLocation(NULL),
 		m_fn_glActiveTexture(NULL),
 		m_thunk_glBindTextureUnit(&StateFns::check_glBindTextureUnit),
 		m_fn_glBindTextureUnit(NULL),
@@ -345,6 +346,17 @@ void OOGL::StateFns::glLinkProgram(GLuint program)
 		LOG_ERROR(("No glLinkProgram function"));
 	else
 		(*m_fn_glLinkProgram)(program);
+}
+
+GLint OOGL::StateFns::glGetUniformLocation(GLuint program, const char* name)
+{
+	if (!m_fn_glGetUniformLocation)
+		m_fn_glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)glfwGetProcAddress("glGetUniformLocation");
+
+	if (!m_fn_glGetUniformLocation)
+		LOG_ERROR_RETURN(("No glGetUniformLocation function"),-1);
+	else
+		return (*m_fn_glGetUniformLocation)(program,name);
 }
 
 void OOGL::StateFns::glActiveTexture(GLenum texture)

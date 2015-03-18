@@ -80,6 +80,22 @@ namespace OOGL
 
 		GLint uniform_location(const char* name) const;
 
+		template <typename T>
+		void uniform(const char* name, const T& v)
+		{
+			GLint l = uniform_location(name);
+			if (l != -1)
+				uniform(l,v);
+		}
+
+		template <typename T>
+		void uniform(const char* name, const T& v, bool transpose = false)
+		{
+			GLint l = uniform_location(name);
+			if (l != -1)
+				uniform(l,v,transpose);
+		}
+
 		void uniform(GLint location, GLfloat v);
 		void uniform(GLint location, GLint v);
 		void uniform(GLint location, GLuint v);
@@ -104,6 +120,8 @@ namespace OOGL
 
 	private:
 		GLuint m_id;
+		typedef OOBase::Table<OOBase::String,GLint,OOBase::Less<OOBase::String>,OOBase::ThreadLocalAllocator> uni_map_t;
+		mutable uni_map_t m_mapUniforms;
 
 		void use();
 	};

@@ -190,3 +190,19 @@ void OOGL::Program::use()
 {
 	StateFns::get_current()->glUseProgram(m_id);
 }
+
+GLint OOGL::Program::uniform_location(const char* name) const
+{
+	uni_map_t::iterator i = m_mapUniforms.find(name);
+	if (i != m_mapUniforms.end())
+		return i->second;
+
+	GLint l = StateFns::get_current()->glGetUniformLocation(m_id,name);
+	if (l != -1)
+	{
+		OOBase::String s;
+		if (s.assign(name))
+			m_mapUniforms.insert(s,l);
+	}
+	return l;
+}

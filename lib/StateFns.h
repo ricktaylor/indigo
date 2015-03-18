@@ -54,6 +54,7 @@ namespace OOGL
 		void glDetachShader(GLuint program, GLuint shader);
 		void glLinkProgram(GLuint program);
 		void glUseProgram(GLuint program);
+		GLint glGetUniformLocation(GLuint program, const char* name);
 
 		bool check_glTexImage3D();
 		void glActiveTexture(GLenum texture);
@@ -127,6 +128,7 @@ namespace OOGL
 		PFNGLDETACHSHADERPROC m_fn_glDetachShader;
 		PFNGLLINKPROGRAMPROC m_fn_glLinkProgram;
 		PFNGLUSEPROGRAMPROC m_fn_glUseProgram;
+		PFNGLGETUNIFORMLOCATIONPROC m_fn_glGetUniformLocation;
 		PFNGLACTIVETEXTUREPROC m_fn_glActiveTexture;
 
 		void (StateFns::*m_thunk_glBindTextureUnit)(State&,GLenum,GLenum,GLuint);
