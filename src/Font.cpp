@@ -34,8 +34,8 @@ namespace OOGL
 	{
 	public:
 		OOBase::SharedPtr<Program> m_program;
-		GLuint m_mvp;
-		GLuint m_colour;
+		GLint m_mvp;
+		GLint m_colour;
 	};
 }
 
