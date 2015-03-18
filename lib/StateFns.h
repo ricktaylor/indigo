@@ -55,6 +55,10 @@ namespace OOGL
 		void glLinkProgram(GLuint program);
 		void glUseProgram(GLuint program);
 		GLint glGetUniformLocation(GLuint program, const char* name);
+		void glUniform1f(GLint location, GLfloat v0);
+		void glUniform2f(GLint location, GLfloat v0, GLfloat v1);
+		void glUniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
+		void glUniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
 
 		bool check_glTexImage3D();
 		void glActiveTexture(GLenum texture);
@@ -129,6 +133,11 @@ namespace OOGL
 		PFNGLLINKPROGRAMPROC m_fn_glLinkProgram;
 		PFNGLUSEPROGRAMPROC m_fn_glUseProgram;
 		PFNGLGETUNIFORMLOCATIONPROC m_fn_glGetUniformLocation;
+		PFNGLUNIFORM1FPROC m_fn_glUniform1f;
+		PFNGLUNIFORM2FPROC m_fn_glUniform2f;
+		PFNGLUNIFORM3FPROC m_fn_glUniform3f;
+		PFNGLUNIFORM4FPROC m_fn_glUniform4f;
+
 		PFNGLACTIVETEXTUREPROC m_fn_glActiveTexture;
 
 		void (StateFns::*m_thunk_glBindTextureUnit)(State&,GLenum,GLenum,GLuint);

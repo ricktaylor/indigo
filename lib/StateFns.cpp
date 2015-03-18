@@ -39,6 +39,17 @@ namespace
 
 		return isGLversion(win,major,minor);
 	}
+
+	template <typename FN>
+	bool load_proc(FN& fn, const char* name)
+	{
+		if (!fn)
+			fn = (FN)glfwGetProcAddress(name);
+
+		if (!fn)
+			LOG_ERROR_RETURN(("No %s function",name),false);
+		return true;
+	}
 }
 
 OOGL::StateFns::StateFns() :
@@ -59,6 +70,10 @@ OOGL::StateFns::StateFns() :
 		m_fn_glLinkProgram(NULL),
 		m_fn_glUseProgram(NULL),
 		m_fn_glGetUniformLocation(NULL),
+		m_fn_glUniform1f(NULL),
+		m_fn_glUniform2f(NULL),
+		m_fn_glUniform3f(NULL),
+		m_fn_glUniform4f(NULL),
 		m_fn_glActiveTexture(NULL),
 		m_thunk_glBindTextureUnit(&StateFns::check_glBindTextureUnit),
 		m_fn_glBindTextureUnit(NULL),
@@ -217,156 +232,113 @@ GLenum OOGL::StateFns::glCheckFramebufferStatus(GLenum target)
 
 GLuint OOGL::StateFns::glCreateShader(GLenum shaderType)
 {
-	if (!m_fn_glCreateShader)
-	{
-		m_fn_glCreateShader = (PFNGLCREATESHADERPROC)glfwGetProcAddress("glCreateShader");
-		if (!m_fn_glCreateShader)
-			LOG_ERROR_RETURN(("No glCreateShader function"),0);
-	}
-
-	return (*m_fn_glCreateShader)(shaderType);
+	if (load_proc(m_fn_glCreateShader,"glCreateShader"))
+		return (*m_fn_glCreateShader)(shaderType);
+	else
+		return 0;
 }
 
 void OOGL::StateFns::glDeleteShader(GLuint shader)
 {
-	if (!m_fn_glDeleteShader)
-		m_fn_glDeleteShader = (PFNGLDELETESHADERPROC)glfwGetProcAddress("glDeleteShader");
-
-	if (!m_fn_glDeleteShader)
-		LOG_ERROR(("No glDeleteShader function"));
-	else
+	if (load_proc(m_fn_glDeleteShader,"glDeleteShader"))
 		(*m_fn_glDeleteShader)(shader);
 }
 
 void OOGL::StateFns::glShaderSource(GLuint shader, GLsizei count, const GLchar *const *string, const GLint *length)
 {
-	if (!m_fn_glShaderSource)
-		m_fn_glShaderSource = (PFNGLSHADERSOURCEPROC)glfwGetProcAddress("glShaderSource");
-
-	if (!m_fn_glShaderSource)
-		LOG_ERROR(("No glShaderSource function"));
-	else
+	if (load_proc(m_fn_glShaderSource,"glShaderSource"))
 		(*m_fn_glShaderSource)(shader,count,string,length);
 }
 
 void OOGL::StateFns::glCompileShader(GLuint shader)
 {
-	if (!m_fn_glCompileShader)
-		m_fn_glCompileShader = (PFNGLCOMPILESHADERPROC)glfwGetProcAddress("glCompileShader");
-
-	if (!m_fn_glCompileShader)
-		LOG_ERROR(("No glCompileShader function"));
-	else
+	if (load_proc(m_fn_glCompileShader,"glCompileShader"))
 		(*m_fn_glCompileShader)(shader);
 }
 
 void OOGL::StateFns::glGetShaderiv(GLuint shader, GLenum pname, GLint* params)
 {
-	if (!m_fn_glGetShaderiv)
-		m_fn_glGetShaderiv = (PFNGLGETSHADERIVPROC)glfwGetProcAddress("glGetShaderiv");
-
-	if (!m_fn_glGetShaderiv)
-		LOG_ERROR(("No glGetShaderiv function"));
-	else
+	if (load_proc(m_fn_glGetShaderiv,"glGetShaderiv"))
 		(*m_fn_glGetShaderiv)(shader,pname,params);
 }
 
 void OOGL::StateFns::glGetShaderInfoLog(GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog)
 {
-	if (!m_fn_glGetShaderInfoLog)
-		m_fn_glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)glfwGetProcAddress("glGetShaderInfoLog");
-
-	if (!m_fn_glGetShaderInfoLog)
-		LOG_ERROR(("No glGetShaderInfoLog function"));
-	else
+	if (load_proc(m_fn_glGetShaderInfoLog,"glGetShaderInfoLog"))
 		(*m_fn_glGetShaderInfoLog)(shader,maxLength,length,infoLog);
 }
 
 void OOGL::StateFns::glGetProgramiv(GLuint shader, GLenum pname, GLint* params)
 {
-	if (!m_fn_glGetProgramiv)
-		m_fn_glGetProgramiv = (PFNGLGETPROGRAMIVPROC)glfwGetProcAddress("glGetProgramiv");
-
-	if (!m_fn_glGetProgramiv)
-		LOG_ERROR(("No glGetProgramiv function"));
-	else
+	if (load_proc(m_fn_glGetProgramiv,"glGetProgramiv"))
 		(*m_fn_glGetProgramiv)(shader,pname,params);
 }
 
 void OOGL::StateFns::glGetProgramInfoLog(GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog)
 {
-	if (!m_fn_glGetProgramInfoLog)
-		m_fn_glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)glfwGetProcAddress("glGetProgramInfoLog");
-
-	if (!m_fn_glGetProgramInfoLog)
-		LOG_ERROR(("No glGetProgramInfoLog function"));
-	else
+	if (load_proc(m_fn_glGetProgramInfoLog,"glGetProgramInfoLog"))
 		(*m_fn_glGetProgramInfoLog)(program,maxLength,length,infoLog);
 }
 
 void OOGL::StateFns::glUseProgram(GLuint program)
 {
-	if (!m_fn_glUseProgram)
-		m_fn_glUseProgram = (PFNGLUSEPROGRAMPROC)glfwGetProcAddress("glUseProgram");
-
-	if (!m_fn_glUseProgram)
-		LOG_ERROR(("No glUseProgram function"));
-	else
+	if (load_proc(m_fn_glUseProgram,"glUseProgram"))
 		(*m_fn_glUseProgram)(program);
 }
 
 void OOGL::StateFns::glAttachShader(GLuint program, GLuint shader)
 {
-	if (!m_fn_glAttachShader)
-		m_fn_glAttachShader = (PFNGLATTACHSHADERPROC)glfwGetProcAddress("glAttachShader");
-
-	if (!m_fn_glAttachShader)
-		LOG_ERROR(("No glAttachShader function"));
-	else
+	if (load_proc(m_fn_glAttachShader,"glAttachShader"))
 		(*m_fn_glAttachShader)(program,shader);
 }
 
 void OOGL::StateFns::glDetachShader(GLuint program, GLuint shader)
 {
-	if (!m_fn_glDetachShader)
-		m_fn_glDetachShader = (PFNGLDETACHSHADERPROC)glfwGetProcAddress("glDetachShader");
-
-	if (!m_fn_glDetachShader)
-		LOG_ERROR(("No glDetachShader function"));
-	else
+	if (load_proc(m_fn_glDetachShader,"glDetachShader"))
 		(*m_fn_glDetachShader)(program,shader);
 }
 
 void OOGL::StateFns::glLinkProgram(GLuint program)
 {
-	if (!m_fn_glLinkProgram)
-		m_fn_glLinkProgram = (PFNGLLINKPROGRAMPROC)glfwGetProcAddress("glLinkProgram");
-
-	if (!m_fn_glLinkProgram)
-		LOG_ERROR(("No glLinkProgram function"));
-	else
+	if (load_proc(m_fn_glLinkProgram,"glLinkProgram"))
 		(*m_fn_glLinkProgram)(program);
 }
 
 GLint OOGL::StateFns::glGetUniformLocation(GLuint program, const char* name)
 {
-	if (!m_fn_glGetUniformLocation)
-		m_fn_glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)glfwGetProcAddress("glGetUniformLocation");
-
-	if (!m_fn_glGetUniformLocation)
-		LOG_ERROR_RETURN(("No glGetUniformLocation function"),-1);
-	else
+	if (load_proc(m_fn_glGetUniformLocation,"glGetUniformLocation"))
 		return (*m_fn_glGetUniformLocation)(program,name);
+	else
+		return -1;
+}
+
+void OOGL::StateFns::glUniform1f(GLint location, GLfloat v0)
+{
+	if (load_proc(m_fn_glUniform1f,"glUniform1f"))
+		(*m_fn_glUniform1f)(location,v0);
+}
+
+void OOGL::StateFns::glUniform2f(GLint location, GLfloat v0, GLfloat v1)
+{
+	if (load_proc(m_fn_glUniform2f,"glUniform2f"))
+		(*m_fn_glUniform2f)(location,v0,v1);
+}
+
+void OOGL::StateFns::glUniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
+{
+	if (load_proc(m_fn_glUniform3f,"glUniform3f"))
+		(*m_fn_glUniform3f)(location,v0,v1,v2);
+}
+
+void OOGL::StateFns::glUniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
+{
+	if (load_proc(m_fn_glUniform4f,"glUniform4f"))
+		(*m_fn_glUniform4f)(location,v0,v1,v2,v3);
 }
 
 void OOGL::StateFns::glActiveTexture(GLenum texture)
 {
-	if (!m_fn_glActiveTexture)
-		m_fn_glActiveTexture = (PFNGLACTIVETEXTUREPROC)glfwGetProcAddress("glActiveTexture");
-
-	if (!m_fn_glActiveTexture)
-		LOG_ERROR(("No glActiveTexture function"));
-	else
+	if (load_proc(m_fn_glActiveTexture,"glActiveTexture"))
 		(*m_fn_glActiveTexture)(texture);
 }
 
@@ -481,7 +453,7 @@ void OOGL::StateFns::call_glTextureStorage1DEXT(State&, GLuint texture, GLenum t
 
 void OOGL::StateFns::call_glTexStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
+	glBindTextureUnit(state,state.active_texture_unit(),target,texture);
 
 	(*((PFNGLTEXSTORAGE1DPROC)m_fn_glTextureStorage1D))(target,levels,internalFormat,width);
 }
@@ -535,7 +507,7 @@ void OOGL::StateFns::call_glTextureStorage2DEXT(State&, GLuint texture, GLenum t
 
 void OOGL::StateFns::call_glTexStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
+	glBindTextureUnit(state,state.active_texture_unit(),target,texture);
 
 	(*((PFNGLTEXSTORAGE2DPROC)m_fn_glTextureStorage2D))(target,levels,internalFormat,width,height);
 }
@@ -589,7 +561,7 @@ void OOGL::StateFns::call_glTextureStorage3DEXT(State&, GLuint texture, GLenum t
 
 void OOGL::StateFns::call_glTexStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
+	glBindTextureUnit(state,state.active_texture_unit(),target,texture);
 
 	(*((PFNGLTEXSTORAGE3DPROC)m_fn_glTextureStorage3D))(target,levels,internalFormat,width,height,depth);
 }
@@ -633,7 +605,7 @@ void OOGL::StateFns::call_glTextureSubImage1DEXT(State&, GLuint texture, GLenum 
 
 void OOGL::StateFns::call_glTexSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
+	glBindTextureUnit(state,state.active_texture_unit(),target,texture);
 
 	glTexSubImage1D(target,level,xoffset,width,format,type,pixels);
 }
@@ -677,7 +649,7 @@ void OOGL::StateFns::call_glTextureSubImage2DEXT(State&, GLuint texture, GLenum 
 
 void OOGL::StateFns::call_glTexSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
+	glBindTextureUnit(state,state.active_texture_unit(),target,texture);
 
 	glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
@@ -730,7 +702,7 @@ void OOGL::StateFns::call_glTextureSubImage3DEXT(State&, GLuint texture, GLenum 
 
 void OOGL::StateFns::call_glTexSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
+	glBindTextureUnit(state,state.active_texture_unit(),target,texture);
 
 	(*((PFNGLTEXSUBIMAGE3DPROC)m_fn_glTextureSubImage3D))(target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
@@ -774,7 +746,7 @@ void OOGL::StateFns::call_glTextureParameterfEXT(State&, GLuint texture, GLenum 
 
 void OOGL::StateFns::call_glTexParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
+	glBindTextureUnit(state,state.active_texture_unit(),target,texture);
 
 	glTexParameterf(target,name,val);
 }
@@ -818,7 +790,7 @@ void OOGL::StateFns::call_glTextureParameterfvEXT(State&, GLuint texture, GLenum
 
 void OOGL::StateFns::call_glTexParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* val)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
+	glBindTextureUnit(state,state.active_texture_unit(),target,texture);
 
 	glTexParameterfv(target,name,val);
 }
@@ -862,7 +834,7 @@ void OOGL::StateFns::call_glTextureParameteriEXT(State&, GLuint texture, GLenum 
 
 void OOGL::StateFns::call_glTexParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
+	glBindTextureUnit(state,state.active_texture_unit(),target,texture);
 
 	glTexParameteri(target,name,val);
 }
@@ -906,7 +878,7 @@ void OOGL::StateFns::call_glTextureParameterivEXT(State&, GLuint texture, GLenum
 
 void OOGL::StateFns::call_glTexParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
+	glBindTextureUnit(state,state.active_texture_unit(),target,texture);
 
 	glTexParameteriv(target,name,val);
 }
@@ -972,7 +944,7 @@ void OOGL::StateFns::call_glGenerateTextureMipmapEXT(State&, GLuint texture, GLe
 
 void OOGL::StateFns::call_glGenerateMipmap(State& state, GLuint texture, GLenum target)
 {
-	state.bind_texture(state.m_active_texture_unit,target,texture);
+	glBindTextureUnit(state,state.active_texture_unit(),target,texture);
 
 	(*((PFNGLGENERATEMIPMAPPROC)m_fn_glGenerateTextureMipmap))(target);
 }
@@ -984,34 +956,19 @@ void OOGL::StateFns::glGenerateTextureMipmap(State& state, GLuint texture, GLenu
 
 void OOGL::StateFns::glGenBuffers(GLsizei n, GLuint* buffers)
 {
-	if (!m_fn_glGenBuffers)
-		m_fn_glGenBuffers = (PFNGLGENBUFFERSPROC)glfwGetProcAddress("glGenBuffers");
-
-	if (!m_fn_glGenBuffers)
-		LOG_ERROR(("No glGenBuffers function"));
-	else
+	if (load_proc(m_fn_glGenBuffers,"glGenBuffers"))
 		(*m_fn_glGenBuffers)(n,buffers);
 }
 
 void OOGL::StateFns::glBindBuffer(GLenum target, GLuint buffer)
 {
-	if (!m_fn_glBindBuffer)
-		m_fn_glBindBuffer = (PFNGLBINDBUFFERPROC)glfwGetProcAddress("glBindBuffer");
-
-	if (!m_fn_glBindBuffer)
-		LOG_ERROR(("No glBindBuffer function"));
-	else
+	if (load_proc(m_fn_glBindBuffer,"glBindBuffer"))
 		(*m_fn_glBindBuffer)(target,buffer);
 }
 
 void OOGL::StateFns::glDeleteBuffers(GLsizei n, const GLuint* buffers)
 {
-	if (!m_fn_glDeleteBuffers)
-		m_fn_glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)glfwGetProcAddress("glDeleteBuffers");
-
-	if (!m_fn_glDeleteBuffers)
-		LOG_ERROR(("No glDeleteBuffers function"));
-	else
+	if (load_proc(m_fn_glDeleteBuffers,"glDeleteBuffers"))
 		(*m_fn_glDeleteBuffers)(n,buffers);
 }
 
