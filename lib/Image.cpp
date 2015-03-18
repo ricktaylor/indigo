@@ -153,39 +153,3 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::Image::make_texture(GLenum internalFormat
 	}
 	return tex;
 }
-
-/*OOBase::SharedPtr<OOGL::Texture> OOGL::load_targa(const unsigned char* data, size_t len)
-{
-	GLint old_align = 0;
-	glGetIntegerv(GL_UNPACK_ALIGNMENT,&old_align);
-
-	if ((width * bpp) % old_align == 0)
-		old_align = 0;
-
-	if (bpp == 2)
-	{
-		if (old_align)
-			glPixelStorei(GL_UNPACK_ALIGNMENT,2);
-		tex->sub_image(0,0,0,width,height,GL_BGRA,GL_UNSIGNED_SHORT_1_5_5_5_REV,data);
-		if (old_align)
-			glPixelStorei(GL_UNPACK_ALIGNMENT,old_align);
-	}
-	else if (bpp == 3)
-	{
-		if (old_align)
-			glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-		tex->sub_image(0,0,0,width,height,GL_BGR,GL_UNSIGNED_BYTE,data);
-		if (old_align)
-			glPixelStorei(GL_UNPACK_ALIGNMENT,old_align);
-	}
-	else
-	{
-		if (old_align)
-			glPixelStorei(GL_UNPACK_ALIGNMENT,4);
-		tex->sub_image(0,0,0,width,height,GL_BGRA,GL_UNSIGNED_BYTE,data);
-		if (old_align)
-			glPixelStorei(GL_UNPACK_ALIGNMENT,old_align);
-	}
-
-	return tex;
-}*/
