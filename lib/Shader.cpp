@@ -206,3 +206,23 @@ GLint OOGL::Program::uniform_location(const char* name) const
 	}
 	return l;
 }
+
+void OOGL::Program::uniform(GLint location, GLfloat v)
+{
+	StateFns::get_current()->glUniform1f(location,v);
+}
+
+void OOGL::Program::uniform(GLint location, const glm::vec2& v)
+{
+	StateFns::get_current()->glUniform2f(location,v.x,v.y);
+}
+
+void OOGL::Program::uniform(GLint location, const glm::vec3& v)
+{
+	StateFns::get_current()->glUniform3f(location,v.x,v.y,v.z);
+}
+
+void OOGL::Program::uniform(GLint location, const glm::vec4& v)
+{
+	StateFns::get_current()->glUniform4f(location,v.x,v.y,v.z,v.w);
+}

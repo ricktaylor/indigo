@@ -208,11 +208,6 @@ OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::State::bind(const OOBase::Share
 	return prev;
 }
 
-void OOGL::State::bind_texture(GLenum unit, GLenum target, GLuint texture)
-{
-	m_state_fns.glBindTextureUnit(*this,unit,target,texture);
-}
-
 OOBase::SharedPtr<OOGL::Program> OOGL::State::use(const OOBase::SharedPtr<Program>& program)
 {
 	OOBase::SharedPtr<Program> prev = m_current_program;
@@ -228,84 +223,4 @@ OOBase::SharedPtr<OOGL::Program> OOGL::State::use(const OOBase::SharedPtr<Progra
 	}
 
 	return prev;
-}
-
-void OOGL::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
-{
-	m_state_fns.glTextureStorage1D(*this,texture,target,levels,internalFormat,width);
-}
-
-void OOGL::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
-{
-	m_state_fns.glTextureStorage2D(*this,texture,target,levels,internalFormat,width,height);
-}
-
-void OOGL::State::texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
-{
-	m_state_fns.glTextureStorage3D(*this,texture,target,levels,internalFormat,width,height,depth);
-}
-
-void OOGL::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
-{
-	m_state_fns.glTextureSubImage1D(*this,texture,target,level,xoffset,width,format,type,pixels);
-}
-
-void OOGL::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
-{
-	m_state_fns.glTextureSubImage2D(*this,texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
-}
-
-void OOGL::State::texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
-{
-	m_state_fns.glTextureSubImage3D(*this,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
-}
-
-void OOGL::State::texture_parameter(GLuint texture, GLenum target, GLenum name, GLfloat val)
-{
-	m_state_fns.glTextureParameterf(*this,texture,target,name,val);
-}
-
-void OOGL::State::texture_parameter(GLuint texture, GLenum target, GLenum name, const GLfloat* pval)
-{
-	m_state_fns.glTextureParameterfv(*this,texture,target,name,pval);
-}
-
-void OOGL::State::texture_parameter(GLuint texture, GLenum target, GLenum name, GLint val)
-{
-	m_state_fns.glTextureParameteri(*this,texture,target,name,val);
-}
-
-void OOGL::State::texture_parameter(GLuint texture, GLenum target, GLenum name, const GLint* pval)
-{
-	m_state_fns.glTextureParameteriv(*this,texture,target,name,pval);
-}
-
-void OOGL::State::generate_mipmap(GLuint texture, GLenum target)
-{
-	m_state_fns.glGenerateTextureMipmap(*this,texture,target);
-}
-
-void OOGL::State::buffer_data(const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage)
-{
-	m_state_fns.glBufferData(*this,buffer,size,data,usage);
-}
-
-void* OOGL::State::map_buffer_range(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
-{
-	return m_state_fns.glMapBufferRange(*this,buffer,offset,length,orig_usage,orig_size,access);
-}
-
-bool OOGL::State::unmap_buffer(const OOBase::SharedPtr<BufferObject>& buffer)
-{
-	return m_state_fns.glUnmapBuffer(*this,buffer);
-}
-
-void OOGL::State::buffer_sub_data(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
-{
-	m_state_fns.glBufferSubData(*this,buffer,offset,size,data);
-}
-
-void OOGL::State::copy_buffer_data(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
-{
-	m_state_fns.glCopyBufferSubData(*this,write,writeoffset,read,readoffset,size);
 }

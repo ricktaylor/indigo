@@ -40,8 +40,9 @@ OOGL::BufferObject::BufferObject(GLenum target, GLenum usage, GLsizei size, cons
 		m_usage(usage),
 		m_size(size)
 {
-	StateFns::get_current()->glGenBuffers(1,&m_buffer);
-	State::get_current()->buffer_data(shared_from_this(),size,data,usage);
+	OOBase::SharedPtr<StateFns> fns = StateFns::get_current();
+	fns->glGenBuffers(1,&m_buffer);
+	fns->glBufferData(*State::get_current(),shared_from_this(),size,data,usage);
 }
 
 OOGL::BufferObject::BufferObject(GLenum target) : 
@@ -68,12 +69,12 @@ void OOGL::BufferObject::bind(GLenum target)
 
 void* OOGL::BufferObject::map(GLenum access, GLintptr offset, GLsizei length)
 {
-	return State::get_current()->map_buffer_range(shared_from_this(),offset,length,m_usage,m_size,access);
+	return StateFns::get_current()->glMapBufferRange(*State::get_current(),shared_from_this(),offset,length,m_usage,m_size,access);
 }
 
 bool OOGL::BufferObject::unmap()
 {
-	return State::get_current()->unmap_buffer(shared_from_this());
+	return StateFns::get_current()->glUnmapBuffer(*State::get_current(),shared_from_this());
 }
 
 OOBase::SharedPtr<char> OOGL::BufferObject::auto_map_i(GLenum access, GLintptr offset, GLsizei length)
@@ -81,7 +82,7 @@ OOBase::SharedPtr<char> OOGL::BufferObject::auto_map_i(GLenum access, GLintptr o
 	OOBase::SharedPtr<char> ret;
 	OOBase::SharedPtr<BufferObject> self(shared_from_this());
 
-	void* m = State::get_current()->map_buffer_range(self,offset,length,m_usage,m_size,access);
+	void* m = StateFns::get_current()->glMapBufferRange(*State::get_current(),self,offset,length,m_usage,m_size,access);
 	if (m)
 	{
 		detail::BufferMapping* bm = NULL;
@@ -90,7 +91,7 @@ OOBase::SharedPtr<char> OOGL::BufferObject::auto_map_i(GLenum access, GLintptr o
 			ret = OOBase::make_shared(reinterpret_cast<char*>(m),bm);
 
 		if (!ret)
-			State::get_current()->unmap_buffer(self);
+			StateFns::get_current()->glUnmapBuffer(*State::get_current(),self);
 	}
 
 	return ret;
@@ -98,10 +99,10 @@ OOBase::SharedPtr<char> OOGL::BufferObject::auto_map_i(GLenum access, GLintptr o
 
 void OOGL::BufferObject::write(GLintptr offset, GLsizei size, const void* data)
 {
-	State::get_current()->buffer_sub_data(shared_from_this(),offset,size,data);
+	StateFns::get_current()->glBufferSubData(*State::get_current(),shared_from_this(),offset,size,data);
 }
 
 void OOGL::BufferObject::copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
 {
-	State::get_current()->copy_buffer_data(shared_from_this(),writeoffset,read,readoffset,size);
+	StateFns::get_current()->glCopyBufferSubData(*State::get_current(),shared_from_this(),writeoffset,read,readoffset,size);
 }

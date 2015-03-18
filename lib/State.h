@@ -70,27 +70,9 @@ namespace OOGL
 
 		State(StateFns& fns);
 
-		void bind_texture(GLenum unit, GLenum target, GLuint texture);
 		GLenum activate_texture_unit(GLenum unit);
 
-		void texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
-		void texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height);
-		void texture_storage(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
-		void texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
-		void texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
-		void texture_subimage(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
-		void texture_parameter(GLuint texture, GLenum target, GLenum name, GLfloat val);
-		void texture_parameter(GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
-		void texture_parameter(GLuint texture, GLenum target, GLenum name, GLint val);
-		void texture_parameter(GLuint texture, GLenum target, GLenum name, const GLint* pval);
-		void generate_mipmap(GLuint texture, GLenum target);
-
 		OOBase::SharedPtr<BufferObject> bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
-		void buffer_data(const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage);
-		void* map_buffer_range(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access);
-		bool unmap_buffer(const OOBase::SharedPtr<BufferObject>& buffer);
-		void buffer_sub_data(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
-		void copy_buffer_data(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
 	};
 }
 
