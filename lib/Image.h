@@ -28,21 +28,42 @@ namespace OOGL
 {
 	class Image : public OOBase::NonCopyable
 	{
-		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
-
 	public:
-		static OOBase::SharedPtr<Image> load(const char* filename, int components = 0);
-		static OOBase::SharedPtr<Image> load(const unsigned char* buffer, int len, int components = 0);
-
+		Image();
 		~Image();
 
-		const int   m_width;
-		const int   m_height;
-		const int   m_components;
-		const void* m_pixels;
+		bool load(const char* filename, int components = 0);
+		bool load(const unsigned char* buffer, int len, int components = 0);
 
+		size_t width() const
+		{
+			return m_width;
+		}
+
+		size_t height() const
+		{
+			return m_height;
+		}
+
+		unsigned int components() const
+		{
+			return m_components;
+		}
+
+		const void* pixels() const
+		{
+			return m_pixels;
+		}
+
+		OOBase::SharedPtr<Texture> make_texture(GLenum internalFormat) const;
+		
 	private:
-		Image(int width, int height, int components, void* pixels);
+		int   m_width;
+		int   m_height;
+		int   m_components;
+		void* m_pixels;
+
+		
 	};
 }
 

@@ -37,56 +37,121 @@ extern "C"
 
 static void* wrap_malloc(size_t sz)
 {
-	return OOBase::ThreadLocalAllocator::allocate(sz);
+	return OOBase::CrtAllocator::allocate(sz);
 }
 
 static void* wrap_realloc(void* p, size_t sz)
 {
-	return OOBase::ThreadLocalAllocator::reallocate(p,sz);
+	return OOBase::CrtAllocator::reallocate(p,sz);
 }
 
 static void wrap_free(void* p)
 {
-	OOBase::ThreadLocalAllocator::free(p);
+	OOBase::CrtAllocator::free(p);
 }
 
-OOGL::Image::Image(int width, int height, int components, void* pixels) :
-		m_width(width),
-		m_height(height),
-		m_components(components),
-		m_pixels(pixels)
+OOGL::Image::Image() :
+		m_width(0),
+		m_height(0),
+		m_components(0),
+		m_pixels(NULL)
 {
 }
 
 OOGL::Image::~Image()
 {
-	stbi_image_free(const_cast<void*>(m_pixels));
+	if (m_pixels)
+		stbi_image_free(m_pixels);
 }
 
-OOBase::SharedPtr<OOGL::Image> OOGL::Image::load(const char* filename, int components)
+bool OOGL::Image::load(const char* filename, int components)
 {
-	OOBase::SharedPtr<Image> img;
+	if (m_pixels)
+	{
+		stbi_image_free(m_pixels);
+
+		m_width = 0;
+		m_height = 0;
+		m_components = 0;
+		m_pixels = 0;
+	}
+
 	int x,y,c = 0;
 	void* p = stbi_load(filename,&x,&y,&c,components);
-	if (p)
-		img = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>(x,y,c,p);
-	else
+	if (!p)
 		LOG_WARNING(("Failed to load image: %s\n",stbi_failure_reason()));
+	else
+	{
+		m_pixels = p;
+		m_width = x;
+		m_height = y;
+		m_components = c;
+	}
 
-	return img;
+	return (p != NULL);
 }
 
-OOBase::SharedPtr<OOGL::Image> OOGL::Image::load(const unsigned char* buffer, int len, int components)
+bool OOGL::Image::load(const unsigned char* buffer, int len, int components)
 {
-	OOBase::SharedPtr<Image> img;
+	if (m_pixels)
+	{
+		stbi_image_free(m_pixels);
+
+		m_width = 0;
+		m_height = 0;
+		m_components = 0;
+		m_pixels = 0;
+	}
+	
 	int x,y,c = 0;
 	void* p = stbi_load_from_memory(buffer,len,&x,&y,&c,components);
-	if (p)
-		img = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>(x,y,c,p);
-	else
+	if (!p)
 		LOG_WARNING(("Failed to load image: %s\n",stbi_failure_reason()));
+	else
+	{
+		m_pixels = p;
+		m_width = x;
+		m_height = y;
+		m_components = c;
+	}
 
-	return img;
+	return (p != NULL);
+}
+
+OOBase::SharedPtr<OOGL::Texture> OOGL::Image::make_texture(GLenum internalFormat) const
+{
+	OOBase::SharedPtr<Texture> tex;
+	if (!m_pixels)
+		LOG_WARNING(("Invalid image for make_texture\n"));
+	else
+	{
+		GLenum format = 0;
+		switch (m_components)
+		{
+		case 1:
+			format = GL_RED;
+			break;
+
+		case 2:
+			format = GL_RG;
+			break;
+
+		case 3:
+			format = GL_RGB;
+			break;
+
+		case 4:
+			format = GL_RGBA;
+			break;
+
+		default:
+			LOG_WARNING(("Invalid image for make_texture\n"));
+			return tex;
+		}
+
+		tex = OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,0,internalFormat,m_width,m_height,format,GL_UNSIGNED_BYTE,m_pixels);
+	}
+	return tex;
 }
 
 /*OOBase::SharedPtr<OOGL::Texture> OOGL::load_targa(const unsigned char* data, size_t len)
