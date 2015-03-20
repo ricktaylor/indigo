@@ -21,19 +21,73 @@
 
 #include "Render.h"
 
-static OOBase::SharedPtr<OOGL::Window> s_ptrSplash;
-static float ratio;
-
-static void on_window_draw(const OOGL::Window& win, OOGL::State& glState)
+namespace
 {
-	glState.bind(GL_FRAMEBUFFER,win.get_default_frame_buffer());
+	class Splash : public OOBase::EnableSharedFromThis<Splash>
+	{
+	public:
+		Splash();
+
+		bool init();
+
+	private:
+		// Render thread local members
+		OOBase::SharedPtr<OOGL::Window> m_wnd;
+		float m_ratio;
+
+		static bool create(void* p);
+
+		void on_draw(const OOGL::Window& win, OOGL::State& glState);
+		void on_close(const OOGL::Window& win);
+
+		OOBase::SharedPtr<Splash> self;
+	};
+}
+
+Splash::Splash() : m_ratio(0)
+{
+}
+
+bool Splash::init()
+{
+	return Indigo::render_call(&create,this);
+}
+
+bool Splash::create(void* p)
+{
+	Splash* pThis = static_cast<Splash*>(p);
+
+	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test");
+	if (!pThis->m_wnd || !pThis->m_wnd->is_valid())
+		return false;
+
+	if (!pThis->m_wnd->signal_close.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_close) ||
+			!pThis->m_wnd->signal_draw.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_draw))
+		LOG_ERROR_RETURN(("Failed to attach signal"),false);
+
+	glm::ivec2 sz = pThis->m_wnd->size();
+	pThis->m_ratio = sz.x / (float)sz.y;
+	glViewport(0, 0, sz.x, sz.y);
+
+	if (!Indigo::monitor_window(pThis->m_wnd))
+		LOG_ERROR_RETURN(("Failed to monitor window"),false);
+
+	pThis->m_wnd->visible(true);
+	pThis->self = pThis->shared_from_this();
+
+	return true;
+}
+
+void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
+{
+	glState.bind(GL_DRAW_FRAMEBUFFER,win.get_default_frame_buffer());
 
 	// Always clear everything
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+	glOrtho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glRotatef((float) glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
@@ -47,46 +101,16 @@ static void on_window_draw(const OOGL::Window& win, OOGL::State& glState)
 	glEnd();
 }
 
-static void on_window_close(const OOGL::Window& win)
+void Splash::on_close(const OOGL::Window& win)
 {
-	s_ptrSplash.reset();
-}
-
-static bool create_splash(void*)
-{
-	OOBase::SharedPtr<OOGL::Window> ptrSplash = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test");
-	if (!ptrSplash || !ptrSplash->is_valid())
-		return false;
-
-	if (!ptrSplash->signal_close.connect(&on_window_close) ||
-			!ptrSplash->signal_draw.connect(&on_window_draw))
-		LOG_ERROR_RETURN(("Failed to attach signal"),false);
-
-	glm::ivec2 sz = ptrSplash->size();
-	ratio = sz.x / (float)sz.y;
-	glViewport(0, 0, sz.x, sz.y);
-
-	if (!Indigo::monitor_window(ptrSplash))
-		LOG_ERROR_RETURN(("Failed to monitor window"),false);
-
-	ptrSplash->visible(true);
-	s_ptrSplash.swap(ptrSplash);
-
-	return true;
-}
-
-static bool close_splash(void*)
-{
-	s_ptrSplash.reset();
-	return true;
+	self.reset();
 }
 
 bool showSplash()
 {
-	return Indigo::render_call(&create_splash,NULL);
-}
+	OOBase::SharedPtr<Splash> ptrSplash = OOBase::allocate_shared<Splash,OOBase::CrtAllocator>();
+	if (!ptrSplash)
+		return false;
 
-bool hideSplash()
-{
-	return Indigo::render_call(&close_splash,NULL);
+	return ptrSplash->init();
 }
