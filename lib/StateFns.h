@@ -23,11 +23,13 @@
 #define INDIGO_STATE_FNS_H_INCLUDED
 
 #include "OOGL.h"
-#include "BufferObject.h"
 
 namespace OOGL
 {
 	class State;
+	class BufferObject;
+	class VertexArrayObject;
+	class Texture;
 
 	class StateFns : public OOBase::NonCopyable
 	{
@@ -71,17 +73,20 @@ namespace OOGL
 		void glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
 		void glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 		void glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
-		void glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val);
-		void glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
-		void glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val);
-		void glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* val);
+		void glTextureSubImage1D(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		void glTextureSubImage2D(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		void glTextureSubImage3D(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+		void glTextureParameterf(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val);
+		void glTextureParameterfv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* pval);
+		void glTextureParameteri(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val);
+		void glTextureParameteriv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val);
 		bool check_glGenerateMipmap();
-		void glGenerateTextureMipmap(State& state, GLuint texture, GLenum target);
+		void glGenerateTextureMipmap(GLuint texture, GLenum target);
 
 		void glGenBuffers(GLsizei n, GLuint* buffers);
 		void glBindBuffer(GLenum target, GLuint buffer);
 		void glDeleteBuffers(GLsizei n, const GLuint* buffers);
-		void glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void* data, GLenum usage);
+		void glBufferData(State& state, GLuint buffer, GLenum target, GLsizei size, const void* data, GLenum usage);
 		void* glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access);
 		bool glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
 		void glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
@@ -90,6 +95,8 @@ namespace OOGL
 		void glGenVertexArrays(GLsizei n, GLuint* arrays);
 		void glBindVertexArray(GLuint array);
 		void glDeleteVertexArrays(GLsizei n, const GLuint* arrays);
+		void glEnableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
+		void glDisableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
 
 		void glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount);
 		void glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
@@ -110,7 +117,6 @@ namespace OOGL
 		void glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLuint baseinstance);
 		bool check_glDrawElementsInstancedBaseVertexBaseInstance();
 		void glDrawElementsInstancedBaseVertexBaseInstance(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instancecount, GLint basevertex, GLuint baseinstance);
-		
 
 	private:
 		StateFns();
@@ -171,70 +177,88 @@ namespace OOGL
 		void call_glTexStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 
 		void (StateFns::*m_thunk_glTextureSubImage1D)(State&,GLuint,GLenum,GLint,GLint,GLsizei,GLenum,GLenum,const void*);
+		void (StateFns::*m_thunk_glTextureSubImage1D_2)(State&,const OOBase::SharedPtr<Texture>&,GLint,GLint,GLsizei,GLenum,GLenum,const void*);
 		GLFWglproc m_fn_glTextureSubImage1D;
+		void check_glTextureSubImage1D();
 		void check_glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		void check_glTextureSubImage1D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
 		void call_glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		void call_glTextureSubImage1D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
 		void call_glTextureSubImage1DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		void call_glTextureSubImage1DEXT_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
 		void call_glTexSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
+		void call_glTexSubImage1D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
 
 		void (StateFns::*m_thunk_glTextureSubImage2D)(State&,GLuint,GLenum,GLint,GLint,GLint,GLsizei,GLsizei,GLenum,GLenum,const void*);
+		void (StateFns::*m_thunk_glTextureSubImage2D_2)(State&,const OOBase::SharedPtr<Texture>&,GLint,GLint,GLint,GLsizei,GLsizei,GLenum,GLenum,const void*);
 		GLFWglproc m_fn_glTextureSubImage2D;
+		void check_glTextureSubImage2D();
 		void check_glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		void check_glTextureSubImage2D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 		void call_glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		void call_glTextureSubImage2D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 		void call_glTextureSubImage2DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		void call_glTextureSubImage2DEXT_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 		void call_glTexSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+		void call_glTexSubImage2D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 
 		void (StateFns::*m_thunk_glTextureSubImage3D)(State&,GLuint,GLenum,GLint,GLint,GLint,GLint,GLsizei,GLsizei,GLsizei,GLenum,GLenum,const void*);
+		void (StateFns::*m_thunk_glTextureSubImage3D_2)(State&,const OOBase::SharedPtr<Texture>&,GLint,GLint,GLint,GLint,GLsizei,GLsizei,GLsizei,GLenum,GLenum,const void*);
 		GLFWglproc m_fn_glTextureSubImage3D;
+		bool check_glTextureSubImage3D();
 		void check_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+		void check_glTextureSubImage3D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 		void call_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+		void call_glTextureSubImage3D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 		void call_glTextureSubImage3DEXT(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+		void call_glTextureSubImage3DEXT_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 		void call_glTexSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
+		void call_glTexSubImage3D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
 
-		void (StateFns::*m_thunk_glTextureParameterf)(State&,GLuint,GLenum,GLenum,GLfloat);
+		void (StateFns::*m_thunk_glTextureParameterf)(State&,const OOBase::SharedPtr<Texture>&,GLenum,GLfloat);
 		GLFWglproc m_fn_glTextureParameterf;
-		void check_glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val);
-		void call_glTextureParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val);
-		void call_glTextureParameterfEXT(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val);
-		void call_glTexParameterf(State& state, GLuint texture, GLenum target, GLenum name, GLfloat val);
+		void check_glTextureParameterf(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val);
+		void call_glTextureParameterf(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val);
+		void call_glTextureParameterfEXT(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val);
+		void call_glTexParameterf(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val);
 
-		void (StateFns::*m_thunk_glTextureParameterfv)(State&,GLuint,GLenum,GLenum,const GLfloat*);
+		void (StateFns::*m_thunk_glTextureParameterfv)(State&,const OOBase::SharedPtr<Texture>&,GLenum,const GLfloat*);
 		GLFWglproc m_fn_glTextureParameterfv;
-		void check_glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
-		void call_glTextureParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
-		void call_glTextureParameterfvEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
-		void call_glTexParameterfv(State& state, GLuint texture, GLenum target, GLenum name, const GLfloat* pval);
+		void check_glTextureParameterfv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* pval);
+		void call_glTextureParameterfv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* pval);
+		void call_glTextureParameterfvEXT(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* pval);
+		void call_glTexParameterfv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* pval);
 
-		void (StateFns::*m_thunk_glTextureParameteri)(State&,GLuint,GLenum,GLenum,GLint);
+		void (StateFns::*m_thunk_glTextureParameteri)(State&,const OOBase::SharedPtr<Texture>&,GLenum,GLint);
 		GLFWglproc m_fn_glTextureParameteri;
-		void check_glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val);
-		void call_glTextureParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val);
-		void call_glTextureParameteriEXT(State& state, GLuint texture, GLenum target, GLenum name, GLint val);
-		void call_glTexParameteri(State& state, GLuint texture, GLenum target, GLenum name, GLint val);
+		void check_glTextureParameteri(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val);
+		void call_glTextureParameteri(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val);
+		void call_glTextureParameteriEXT(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val);
+		void call_glTexParameteri(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val);
 
-		void (StateFns::*m_thunk_glTextureParameteriv)(State&,GLuint,GLenum,GLenum,const GLint*);
+		void (StateFns::*m_thunk_glTextureParameteriv)(State&,const OOBase::SharedPtr<Texture>&,GLenum,const GLint*);
 		GLFWglproc m_fn_glTextureParameteriv;
-		void check_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
-		void call_glTextureParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
-		void call_glTextureParameterivEXT(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
-		void call_glTexParameteriv(State& state, GLuint texture, GLenum target, GLenum name, const GLint* pval);
+		void check_glTextureParameteriv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* pval);
+		void call_glTextureParameteriv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* pval);
+		void call_glTextureParameterivEXT(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* pval);
+		void call_glTexParameteriv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* pval);
 
-		void (StateFns::*m_thunk_glGenerateTextureMipmap)(State&,GLuint,GLenum);
+		void (StateFns::*m_thunk_glGenerateTextureMipmap)(GLuint,GLenum);
 		GLFWglproc m_fn_glGenerateTextureMipmap;
-		void check_glGenerateTextureMipmap(State& state, GLuint texture, GLenum target);
-		void call_glGenerateTextureMipmap(State& state, GLuint texture, GLenum target);
-		void call_glGenerateTextureMipmapEXT(State& state, GLuint texture, GLenum target);
-		void call_glGenerateMipmap(State& state, GLuint texture, GLenum target);
+		void check_glGenerateTextureMipmap(GLuint texture, GLenum target);
+		void call_glGenerateTextureMipmap(GLuint texture, GLenum target);
+		void call_glGenerateTextureMipmapEXT(GLuint texture, GLenum target);
+		void call_glGenerateMipmap(GLuint texture, GLenum target);
 
 		PFNGLGENBUFFERSPROC m_fn_glGenBuffers;
 		PFNGLBINDBUFFERPROC m_fn_glBindBuffer;
 		PFNGLDELETEBUFFERSPROC m_fn_glDeleteBuffers;
 
-		void (StateFns::*m_thunk_glBufferData)(State&,const OOBase::SharedPtr<BufferObject>&,GLsizei,const void*,GLenum);
+		void (StateFns::*m_thunk_glBufferData)(State&,GLuint,GLenum,GLsizei,const void*,GLenum);
 		GLFWglproc m_fn_glBufferData;
-		void check_glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage);
-		void call_glNamedBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage);
-		void call_glBufferData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLsizei size, const void *data, GLenum usage);
+		void check_glBufferData(State& state, GLuint buffer, GLenum target, GLsizei size, const void *data, GLenum usage);
+		void call_glNamedBufferData(State& state, GLuint buffer, GLenum target, GLsizei size, const void *data, GLenum usage);
+		void call_glBufferData(State& state, GLuint buffer, GLenum target, GLsizei size, const void *data, GLenum usage);
 
 		void* (StateFns::*m_thunk_glMapBufferRange)(State&,const OOBase::SharedPtr<BufferObject>&,GLintptr,GLsizei,GLenum,GLsizei,GLbitfield);
 		GLFWglproc m_fn_glMapBufferRange;
@@ -265,6 +289,18 @@ namespace OOGL
 		PFNGLGENVERTEXARRAYSPROC m_fn_glGenVertexArrays;
 		PFNGLDELETEVERTEXARRAYSPROC m_fn_glDeleteVertexArrays;
 		PFNGLBINDVERTEXARRAYPROC m_fn_glBindVertexArray;
+
+		void (StateFns::*m_thunk_glEnableVertexArrayAttrib)(State&,const OOBase::SharedPtr<VertexArrayObject>&,GLuint);
+		GLFWglproc m_fn_glEnableVertexArrayAttrib;
+		void check_glEnableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
+		void call_glEnableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
+		void call_glEnableVertexAttribArray(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
+
+		void (StateFns::*m_thunk_glDisableVertexArrayAttrib)(State&,const OOBase::SharedPtr<VertexArrayObject>&,GLuint);
+		GLFWglproc m_fn_glDisableVertexArrayAttrib;
+		void check_glDisableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
+		void call_glDisableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
+		void call_glDisableVertexAttribArray(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
 
 		void (StateFns::*m_thunk_glMultiDrawArrays)(GLenum,const GLint*,const GLsizei*,GLsizei);
 		GLFWglproc m_fn_glMultiDrawArrays;

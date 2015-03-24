@@ -31,6 +31,18 @@ OOGL::State::State(StateFns& fns) :
 {
 }
 
+void OOGL::State::reset()
+{
+	// Make sure we unbind everything
+	m_read_fb.reset();
+
+	m_buffer_objects.clear();
+	m_vecTexUnits.clear();
+	m_current_vao.reset();
+	m_current_program.reset();
+	m_draw_fb.reset();
+}
+
 OOBase::SharedPtr<OOGL::State> OOGL::State::get_current()
 {
 	GLFWwindow* win = glfwGetCurrentContext();
@@ -157,9 +169,36 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLenum unit, const OOBase::Sh
 	return prev;
 }
 
+OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind_texture(GLuint texture, GLenum target)
+{
+	OOBase::SharedPtr<OOGL::Texture> prev;
+
+	tex_unit_t* tu = m_vecTexUnits.at(m_active_texture_unit - GL_TEXTURE0);
+	if (!tu)
+		glBindTexture(target,texture);
+	else
+	{
+		tex_unit_t::iterator i = tu->find(target);
+		if (i == tu->end())
+			glBindTexture(target,texture);
+		else
+		{
+			prev = i->second;
+			if (prev->m_tex != texture)
+			{
+				glBindTexture(target,texture);
+
+				tu->erase(i);
+			}
+		}
+	}
+
+	return prev;
+}
+
 OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object)
 {
-	return bind(buffer_object,buffer_object->m_target);
+	return bind(buffer_object,buffer_object ? buffer_object->m_target : 0);
 }
 
 OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
@@ -189,6 +228,26 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind(const OOBase::SharedPtr<
 			i->second = buffer_object;
 		}
 	}
+
+	return prev;
+}
+
+OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind_buffer(GLuint buffer, GLenum target)
+{
+	OOBase::SharedPtr<BufferObject> prev;
+	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
+	if (i != m_buffer_objects.end())
+	{
+		prev = i->second;
+		if (i->second->m_buffer != buffer)
+		{
+			m_state_fns.glBindBuffer(target,buffer);
+
+			m_buffer_objects.erase(i);
+		}
+	}
+
+	m_state_fns.glBindBuffer(target,buffer);
 
 	return prev;
 }

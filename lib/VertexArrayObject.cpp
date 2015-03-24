@@ -48,6 +48,14 @@ void OOGL::VertexArrayObject::bind()
 	StateFns::get_current()->glBindVertexArray(m_array);
 }
 
+void OOGL::VertexArrayObject::enable_attribute(GLuint index, bool enable)
+{
+	if (enable)
+		StateFns::get_current()->glEnableVertexArrayAttrib(*State::get_current(),shared_from_this(),index);
+	else
+		StateFns::get_current()->glDisableVertexArrayAttrib(*State::get_current(),shared_from_this(),index);
+}
+
 void OOGL::VertexArrayObject::draw(GLenum mode, GLint first, GLsizei count)
 {
 	State::get_current()->bind(shared_from_this());

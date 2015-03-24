@@ -64,6 +64,10 @@ OOGL::Window::Window(int width, int height, const char* title, unsigned int styl
 
 OOGL::Window::~Window()
 {
+	// Destroy all GL state before we kill the window
+	m_default_fb.reset();
+	m_state->reset();
+
 	if (m_glfw_window)
 		glfwDestroyWindow(m_glfw_window);
 }

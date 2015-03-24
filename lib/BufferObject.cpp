@@ -42,12 +42,14 @@ OOGL::BufferObject::BufferObject(GLenum target, GLenum usage, GLsizei size, cons
 {
 	OOBase::SharedPtr<StateFns> fns = StateFns::get_current();
 	fns->glGenBuffers(1,&m_buffer);
-	fns->glBufferData(*State::get_current(),shared_from_this(),size,data,usage);
+	fns->glBufferData(*State::get_current(),m_buffer,m_target,size,data,usage);
 }
 
 OOGL::BufferObject::BufferObject(GLenum target) : 
 		m_buffer(0), 
-		m_target(target)
+		m_target(target),
+		m_usage(0),
+		m_size(0)
 {
 }
 

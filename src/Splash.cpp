@@ -20,6 +20,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Render.h"
+#include "../lib/BufferObject.h"
+#include "../lib/VertexArrayObject.h"
 
 namespace
 {
@@ -37,6 +39,7 @@ namespace
 
 		static bool create(void* p);
 
+		void on_create();
 		void on_draw(const OOGL::Window& win, OOGL::State& glState);
 		void on_close(const OOGL::Window& win);
 
@@ -65,9 +68,7 @@ bool Splash::create(void* p)
 			!pThis->m_wnd->signal_draw.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_draw))
 		LOG_ERROR_RETURN(("Failed to attach signal"),false);
 
-	glm::ivec2 sz = pThis->m_wnd->size();
-	pThis->m_ratio = sz.x / (float)sz.y;
-	glViewport(0, 0, sz.x, sz.y);
+	pThis->on_create();
 
 	if (!Indigo::monitor_window(pThis->m_wnd))
 		LOG_ERROR_RETURN(("Failed to monitor window"),false);
@@ -76,6 +77,25 @@ bool Splash::create(void* p)
 	pThis->self = pThis->shared_from_this();
 
 	return true;
+}
+
+void Splash::on_create()
+{
+	glm::ivec2 sz = m_wnd->size();
+	m_ratio = sz.x / (float)sz.y;
+
+	glViewport(0, 0, sz.x, sz.y);
+
+	float points[] = {
+	   0.0f,  0.5f,  0.0f,
+	   0.5f, -0.5f,  0.0f,
+	  -0.5f, -0.5f,  0.0f
+	};
+	OOBase::SharedPtr<OOGL::BufferObject> ptrVB = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,9*sizeof(float),points);
+
+	OOBase::SharedPtr<OOGL::VertexArrayObject> ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
+	ptrVAO->enable_attribute(0);
+	//ptrVAO->attribute(0,ptrVB,3,GL_FLOAT,false);
 }
 
 void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)

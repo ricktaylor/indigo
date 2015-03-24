@@ -32,6 +32,7 @@ namespace OOGL
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		friend class State;
+		friend class StateFns;
 
 	public:
 		Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
@@ -49,7 +50,8 @@ namespace OOGL
 		void sub_image(GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels);
 		void sub_image(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 		void sub_image(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels);
-		void sub_image(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
+
+		void cubemap_sub_image(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels);
 
 		void parameter(GLenum name, GLfloat val);
 		void parameter(GLenum name, const GLfloat* pval);
@@ -57,8 +59,6 @@ namespace OOGL
 		void parameter(GLenum name, const GLint* pval);
 
 		GLenum target() const;
-
-		void bind(State& state, GLenum unit) const;
 
 		void invalidate(GLint level);
 		void invalidate(GLint level, GLint xoffset, GLsizei width);
@@ -84,6 +84,7 @@ namespace OOGL
 		Texture(GLuint tex, GLenum target);
 
 		void init();
+		void bind(State& state, GLenum unit) const;
 	};
 
 	class MutableTexture : public Texture
