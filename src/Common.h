@@ -29,6 +29,10 @@
 
 //////////////////////////////////////////////
 
+#include <OOBase/Condition.h>
+#include <OOBase/Queue.h>
+#include <OOBase/Thread.h>
+#include <OOBase/CDRStream.h>
 #include <OOBase/Environment.h>
 #include <OOBase/Posix.h>
 #include <OOBase/CmdArgs.h>

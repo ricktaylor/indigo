@@ -24,12 +24,11 @@
 
 //////////////////////////////////////////////
 
-#include <OOBase/CDRStream.h>
-#include <OOBase/Queue.h>
-#include <OOBase/Condition.h>
-#include <OOBase/Thread.h>
-#include <OOBase/Logger.h>
+#include <OOBase/SharedPtr.h>
 #include <OOBase/Table.h>
+#include <OOBase/Vector.h>
+#include <OOBase/String.h>
+#include <OOBase/Logger.h>
 #include <OOBase/SignalSlot.h>
 
 #if defined(_MSC_VER)

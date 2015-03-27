@@ -22,6 +22,8 @@
 #include "Shader.h"
 #include "StateFns.h"
 
+#include <OOBase/StackAllocator.h>
+
 static const GLchar* s_gstap =
 		"#ifndef GSTAP_H\n"
 		"#define GSTAP_H\n"
