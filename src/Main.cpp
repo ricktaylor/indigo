@@ -233,6 +233,7 @@ int main(int argc, const char* argv[])
 	if (!load_config(args,config_args))
 		return EXIT_FAILURE;
 
+#if 0
 	OOBase::BTree<char,bool,OOBase::Less<char>,5> bt;
 
 	char s[] = "thequickbrownfoxjumpsoverthelazydog";
@@ -261,6 +262,7 @@ int main(int argc, const char* argv[])
 		if (bt.remove(*c))
 			bt.dump();
 	}
+#endif
 
 	// Start our two main threads
 	return Indigo::start_render_thread(&logic_thread,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
