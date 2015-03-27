@@ -77,6 +77,8 @@ namespace OOGL
 
 		OOBase::SharedPtr<BufferObject> bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
 	};
+
+	void glCheckError(const char* fn, const char* file, unsigned int line);
 }
 
 #endif // INDIGO_STATE_H_INCLUDED

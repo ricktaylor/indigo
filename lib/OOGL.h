@@ -54,4 +54,10 @@ namespace OOGL
 	void glPrimitiveRestartIndex(GLuint index);
 }
 
+#if !defined(NDEBUG)
+#define OOGL_CHECK(fn) OOGL::glCheckError(fn,__FILE__,__LINE__)
+#else
+#define OOGL_CHECK(fn)
+#endif
+
 #endif // OOGL_H_INCLUDED

@@ -25,6 +25,13 @@
 #include "BufferObject.h"
 #include "VertexArrayObject.h"
 
+void OOGL::glCheckError(const char* fn, const char* file, unsigned int line)
+{
+	GLenum err = glGetError();
+	if(err != GL_NO_ERROR)
+		OOBase::Logger::filenum_t(OOBase::Logger::Error,file,line).log("glGetError() returned code %X after call to %s",err,fn);
+}
+
 OOGL::State::State(StateFns& fns) :
 		m_state_fns(fns),
 		m_active_texture_unit(GL_TEXTURE0)
