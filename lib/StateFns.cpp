@@ -1297,7 +1297,7 @@ void OOGL::StateFns::glDeleteBuffers(GLsizei n, const GLuint* buffers)
 	}
 }
 
-void OOGL::StateFns::check_glBufferData(State& state, GLuint buffer, GLenum target, GLsizei size, const void *data, GLenum usage)
+void OOGL::StateFns::check_glBufferData(State& state, GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1325,14 +1325,14 @@ void OOGL::StateFns::check_glBufferData(State& state, GLuint buffer, GLenum targ
 	(this->*m_thunk_glBufferData)(state,buffer,target,size,data,usage);
 }
 
-void OOGL::StateFns::call_glNamedBufferData(State&, GLuint buffer, GLenum, GLsizei size, const void *data, GLenum usage)
+void OOGL::StateFns::call_glNamedBufferData(State&, GLuint buffer, GLenum, GLsizeiptr size, const void *data, GLenum usage)
 {
 	(*((PFNGLNAMEDBUFFERDATAPROC)m_fn_glBufferData))(buffer,size,data,usage);
 
 	OOGL_CHECK("glNamedBufferData");
 }
 
-void OOGL::StateFns::call_glBufferData(State& state, GLuint buffer, GLenum target, GLsizei size, const void *data, GLenum usage)
+void OOGL::StateFns::call_glBufferData(State& state, GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage)
 {
 	state.bind_buffer(buffer,target);
 
@@ -1341,12 +1341,12 @@ void OOGL::StateFns::call_glBufferData(State& state, GLuint buffer, GLenum targe
 	OOGL_CHECK("glBufferData");
 }
 
-void OOGL::StateFns::glBufferData(State& state, GLuint buffer, GLenum target, GLsizei size, const void *data, GLenum usage)
+void OOGL::StateFns::glBufferData(State& state, GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage)
 {
 	(this->*m_thunk_glBufferData)(state,buffer,target,size,data,usage);
 }
 
-void* OOGL::StateFns::check_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
+void* OOGL::StateFns::check_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1381,7 +1381,7 @@ void* OOGL::StateFns::check_glMapBufferRange(State& state, const OOBase::SharedP
 	return (this->*m_thunk_glMapBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
 }
 
-void* OOGL::StateFns::call_glMapNamedBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
+void* OOGL::StateFns::call_glMapNamedBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	void* r = (*((PFNGLMAPNAMEDBUFFERRANGEPROC)m_fn_glMapBufferRange))(buffer->m_buffer,offset,length,access);
 
@@ -1390,7 +1390,7 @@ void* OOGL::StateFns::call_glMapNamedBufferRange(State& state, const OOBase::Sha
 	return r;
 }
 
-void* OOGL::StateFns::call_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
+void* OOGL::StateFns::call_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	state.bind(buffer);
 
@@ -1401,7 +1401,7 @@ void* OOGL::StateFns::call_glMapBufferRange(State& state, const OOBase::SharedPt
 	return r;
 }
 
-void* OOGL::StateFns::call_glMapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
+void* OOGL::StateFns::call_glMapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	if (access & GL_MAP_INVALIDATE_BUFFER_BIT)
 		glBufferData(state,buffer->m_buffer,buffer->m_target,orig_size,NULL,orig_usage);
@@ -1415,7 +1415,7 @@ void* OOGL::StateFns::call_glMapBuffer(State& state, const OOBase::SharedPtr<Buf
 	return ret;
 }
 
-void* OOGL::StateFns::glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access)
+void* OOGL::StateFns::glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	return (this->*m_thunk_glMapBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
 }
@@ -1473,7 +1473,7 @@ bool OOGL::StateFns::glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferO
 	return (this->*m_thunk_glUnmapBuffer)(state,buffer);
 }
 
-void OOGL::StateFns::check_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+void OOGL::StateFns::check_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1501,14 +1501,14 @@ void OOGL::StateFns::check_glBufferSubData(State& state, const OOBase::SharedPtr
 	(this->*m_thunk_glBufferSubData)(state,buffer,offset,size,data);
 }
 
-void OOGL::StateFns::call_glNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+void OOGL::StateFns::call_glNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
 {
 	(*((PFNGLNAMEDBUFFERSUBDATAPROC)m_fn_glBufferSubData))(buffer->m_buffer,offset,size,data);
 
 	OOGL_CHECK("glNamedBufferSubData");
 }
 
-void OOGL::StateFns::call_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+void OOGL::StateFns::call_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
 {
 	state.bind(buffer);
 
@@ -1517,12 +1517,12 @@ void OOGL::StateFns::call_glBufferSubData(State& state, const OOBase::SharedPtr<
 	OOGL_CHECK("glBufferSubData");
 }
 
-void OOGL::StateFns::glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data)
+void OOGL::StateFns::glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
 {
 	(this->*m_thunk_glBufferSubData)(state,buffer,offset,size,data);
 }
 
-void OOGL::StateFns::check_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::StateFns::check_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1554,14 +1554,14 @@ void OOGL::StateFns::check_glCopyBufferSubData(State& state, const OOBase::Share
 	(this->*m_thunk_glCopyBufferSubData)(state,write,writeoffset,read,readoffset,size);
 }
 
-void OOGL::StateFns::call_glCopyNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::StateFns::call_glCopyNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
 	(*((PFNGLCOPYNAMEDBUFFERSUBDATAPROC)m_fn_glCopyBufferSubData))(read->m_buffer,write->m_buffer,readoffset,writeoffset,size);
 
 	OOGL_CHECK("glCopyNamedBufferSubData");
 }
 
-void OOGL::StateFns::call_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::StateFns::call_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
 	state.bind(read,GL_COPY_READ_BUFFER);
 	state.bind(write,GL_COPY_WRITE_BUFFER);
@@ -1571,7 +1571,7 @@ void OOGL::StateFns::call_glCopyBufferSubData(State& state, const OOBase::Shared
 	OOGL_CHECK("glCopyBufferSubData");
 }
 
-void OOGL::StateFns::emulate_glCopyBufferSubData(State&, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::StateFns::emulate_glCopyBufferSubData(State&, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
 	OOBase::SharedPtr<OOBase::uint8_t> r = read->auto_map<OOBase::uint8_t>(GL_READ_ONLY,readoffset);
 	OOBase::SharedPtr<OOBase::uint8_t> w = write->auto_map<OOBase::uint8_t>(GL_WRITE_ONLY,writeoffset);
@@ -1579,7 +1579,7 @@ void OOGL::StateFns::emulate_glCopyBufferSubData(State&, const OOBase::SharedPtr
 	memcpy(w.get(),r.get(),size);
 }
 
-void OOGL::StateFns::glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size)
+void OOGL::StateFns::glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
 	(this->*m_thunk_glCopyBufferSubData)(state,write,writeoffset,read,readoffset,size);
 }

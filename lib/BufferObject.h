@@ -55,7 +55,7 @@ namespace OOGL
 		friend class StateFns;
 
 	public:
-		BufferObject(GLenum target, GLenum usage, GLsizei size, const void* data = NULL);
+		BufferObject(GLenum target, GLenum usage, GLsizeiptr size, const void* data = NULL);
 		~BufferObject();
 
 		static OOBase::SharedPtr<BufferObject> none(GLenum target);
@@ -66,11 +66,11 @@ namespace OOGL
 			if (offset >= m_size)
 				return OOBase::SharedPtr<T>();
 
-			return OOBase::reinterpret_pointer_cast<T,char>(auto_map_i(access,offset,static_cast<GLsizei>(m_size - offset)));
+			return OOBase::reinterpret_pointer_cast<T,char>(auto_map_i(access,offset,m_size - offset));
 		}
 
 		template <typename T>
-		OOBase::SharedPtr<T> auto_map(GLenum access, GLintptr offset, GLsizei length)
+		OOBase::SharedPtr<T> auto_map(GLenum access, GLintptr offset, GLsizeiptr length)
 		{
 			return OOBase::reinterpret_pointer_cast<T,char>(auto_map_i(access,offset,length));
 		}
@@ -80,10 +80,10 @@ namespace OOGL
 			if (offset >= m_size)
 				return NULL;
 
-			return map(access,offset,static_cast<GLsizei>(m_size - offset));
+			return map(access,offset,m_size - offset);
 		}
 
-		void* map(GLenum access, GLintptr offset, GLsizei length);
+		void* map(GLenum access, GLintptr offset, GLsizeiptr length);
 		bool unmap();
 
 		GLenum target() const
@@ -96,24 +96,24 @@ namespace OOGL
 			return m_usage;
 		}
 
-		GLsizei size() const
+		GLsizeiptr size() const
 		{
 			return m_size;
 		}
 
-		void write(GLintptr offset, GLsizei size, const void* data);
+		void write(GLintptr offset, GLsizeiptr size, const void* data);
 
-		void copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
+		void copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size);
 
 	private:
 		GLuint     m_buffer;
 		GLenum     m_target;
 		GLenum     m_usage;
-		GLsizei    m_size;
+		GLsizeiptr m_size;
 
 		BufferObject(GLenum target);
 
-		OOBase::SharedPtr<char> auto_map_i(GLenum access, GLintptr offset, GLsizei length);
+		OOBase::SharedPtr<char> auto_map_i(GLenum access, GLintptr offset, GLsizeiptr length);
 		void bind(GLenum target);
 	};
 }

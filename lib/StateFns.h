@@ -86,11 +86,11 @@ namespace OOGL
 		void glGenBuffers(GLsizei n, GLuint* buffers);
 		void glBindBuffer(GLenum target, GLuint buffer);
 		void glDeleteBuffers(GLsizei n, const GLuint* buffers);
-		void glBufferData(State& state, GLuint buffer, GLenum target, GLsizei size, const void* data, GLenum usage);
-		void* glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access);
+		void glBufferData(State& state, GLuint buffer, GLenum target, GLsizeiptr size, const void* data, GLenum usage);
+		void* glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
 		bool glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
-		void glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
-		void glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
+		void glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data);
+		void glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size);
 
 		void glGenVertexArrays(GLsizei n, GLuint* arrays);
 		void glBindVertexArray(GLuint array);
@@ -254,18 +254,18 @@ namespace OOGL
 		PFNGLBINDBUFFERPROC m_fn_glBindBuffer;
 		PFNGLDELETEBUFFERSPROC m_fn_glDeleteBuffers;
 
-		void (StateFns::*m_thunk_glBufferData)(State&,GLuint,GLenum,GLsizei,const void*,GLenum);
+		void (StateFns::*m_thunk_glBufferData)(State&,GLuint,GLenum,GLsizeiptr,const void*,GLenum);
 		GLFWglproc m_fn_glBufferData;
-		void check_glBufferData(State& state, GLuint buffer, GLenum target, GLsizei size, const void *data, GLenum usage);
-		void call_glNamedBufferData(State& state, GLuint buffer, GLenum target, GLsizei size, const void *data, GLenum usage);
-		void call_glBufferData(State& state, GLuint buffer, GLenum target, GLsizei size, const void *data, GLenum usage);
+		void check_glBufferData(State& state, GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage);
+		void call_glNamedBufferData(State& state, GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage);
+		void call_glBufferData(State& state, GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage);
 
-		void* (StateFns::*m_thunk_glMapBufferRange)(State&,const OOBase::SharedPtr<BufferObject>&,GLintptr,GLsizei,GLenum,GLsizei,GLbitfield);
+		void* (StateFns::*m_thunk_glMapBufferRange)(State&,const OOBase::SharedPtr<BufferObject>&,GLintptr,GLsizeiptr,GLenum,GLsizeiptr,GLbitfield);
 		GLFWglproc m_fn_glMapBufferRange;
-		void* check_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access);
-		void* call_glMapNamedBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access);
-		void* call_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access);
-		void* call_glMapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei length, GLenum orig_usage, GLsizei orig_size, GLbitfield access);
+		void* check_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void* call_glMapNamedBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void* call_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
+		void* call_glMapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access);
 
 		bool (StateFns::*m_thunk_glUnmapBuffer)(State&,const OOBase::SharedPtr<BufferObject>&);
 		GLFWglproc m_fn_glUnmapBuffer;
@@ -273,18 +273,18 @@ namespace OOGL
 		bool call_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
 		bool call_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer);
 
-		void (StateFns::*m_thunk_glBufferSubData)(State&,const OOBase::SharedPtr<BufferObject>&,GLintptr,GLsizei,const void*);
+		void (StateFns::*m_thunk_glBufferSubData)(State&,const OOBase::SharedPtr<BufferObject>&,GLintptr,GLsizeiptr,const void*);
 		GLFWglproc m_fn_glBufferSubData;
-		void check_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
-		void call_glNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
-		void call_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizei size, const void* data);
+		void check_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data);
+		void call_glNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data);
+		void call_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data);
 
-		void (StateFns::*m_thunk_glCopyBufferSubData)(State&,const OOBase::SharedPtr<BufferObject>&,GLintptr,const OOBase::SharedPtr<BufferObject>&,GLintptr,GLsizei);
+		void (StateFns::*m_thunk_glCopyBufferSubData)(State&,const OOBase::SharedPtr<BufferObject>&,GLintptr,const OOBase::SharedPtr<BufferObject>&,GLintptr,GLsizeiptr);
 		GLFWglproc m_fn_glCopyBufferSubData;
-		void check_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
-		void call_glCopyNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
-		void call_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
-		void emulate_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizei size);
+		void check_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size);
+		void call_glCopyNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size);
+		void call_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size);
+		void emulate_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size);
 
 		PFNGLGENVERTEXARRAYSPROC m_fn_glGenVertexArrays;
 		PFNGLDELETEVERTEXARRAYSPROC m_fn_glDeleteVertexArrays;
