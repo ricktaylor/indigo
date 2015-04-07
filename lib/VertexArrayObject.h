@@ -1,10 +1,12 @@
 #ifndef INDIGO_VERTEXARRAYOBJECT_H_INCLUDED
 #define INDIGO_VERTEXARRAYOBJECT_H_INCLUDED
 
-#include "BufferObject.h"
+#include "OOGL.h"
 
 namespace OOGL
 {
+	class BufferObject;
+
 	class VertexArrayObject : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<VertexArrayObject>
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;

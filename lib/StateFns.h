@@ -95,6 +95,9 @@ namespace OOGL
 		void glGenVertexArrays(GLsizei n, GLuint* arrays);
 		void glBindVertexArray(GLuint array);
 		void glDeleteVertexArrays(GLsizei n, const GLuint* arrays);
+		void glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
+		bool check_glVertexAttribIPointer();
+		void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const void* pointer);
 		void glEnableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
 		void glDisableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
 
@@ -289,6 +292,9 @@ namespace OOGL
 		PFNGLGENVERTEXARRAYSPROC m_fn_glGenVertexArrays;
 		PFNGLDELETEVERTEXARRAYSPROC m_fn_glDeleteVertexArrays;
 		PFNGLBINDVERTEXARRAYPROC m_fn_glBindVertexArray;
+
+		PFNGLVERTEXATTRIBPOINTERPROC m_fn_glVertexAttribPointer;
+		PFNGLVERTEXATTRIBIPOINTERPROC m_fn_glVertexAttribIPointer;
 
 		void (StateFns::*m_thunk_glEnableVertexArrayAttrib)(State&,const OOBase::SharedPtr<VertexArrayObject>&,GLuint);
 		GLFWglproc m_fn_glEnableVertexArrayAttrib;

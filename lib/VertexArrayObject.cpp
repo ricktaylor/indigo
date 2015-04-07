@@ -22,6 +22,7 @@
 #include "VertexArrayObject.h"
 #include "State.h"
 #include "StateFns.h"
+#include "BufferObject.h"
 
 OOGL::VertexArrayObject::VertexArrayObject() : m_array(0)
 {
@@ -48,6 +49,22 @@ void OOGL::VertexArrayObject::bind()
 	StateFns::get_current()->glBindVertexArray(m_array);
 }
 
+void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, GLsizei stride, GLsizeiptr offset)
+{
+	assert(buffer->target() == GL_ARRAY_BUFFER);
+	State::get_current()->bind(buffer);
+
+	StateFns::get_current()->glVertexAttribIPointer(index,components,type,stride,reinterpret_cast<const GLvoid*>(offset));
+}
+
+void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, bool normalized, GLsizei stride, GLsizeiptr offset)
+{
+	assert(buffer->target() == GL_ARRAY_BUFFER);
+	State::get_current()->bind(buffer);
+
+	StateFns::get_current()->glVertexAttribPointer(index,components,type,normalized ? GL_TRUE : GL_FALSE,stride,reinterpret_cast<const GLvoid*>(offset));
+}
+
 void OOGL::VertexArrayObject::enable_attribute(GLuint index, bool enable)
 {
 	if (enable)
@@ -60,6 +77,8 @@ void OOGL::VertexArrayObject::draw(GLenum mode, GLint first, GLsizei count)
 {
 	State::get_current()->bind(shared_from_this());
 	glDrawArrays(mode,first,count);
+
+	OOGL_CHECK("glDrawArrays");
 }
 
 void OOGL::VertexArrayObject::draw_instanced(GLenum mode, GLint first, GLsizei count, GLsizei instances)
@@ -87,6 +106,8 @@ void OOGL::VertexArrayObject::draw_elements(GLenum mode, GLsizei count, GLenum t
 {
 	State::get_current()->bind(shared_from_this());
 	glDrawElements(mode,count,type,(const void*)offset);
+
+	OOGL_CHECK("glDrawElements");
 }
 
 void OOGL::VertexArrayObject::draw_elements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex)
@@ -95,7 +116,10 @@ void OOGL::VertexArrayObject::draw_elements(GLenum mode, GLsizei count, GLenum t
 	if (basevertex)
 		StateFns::get_current()->glDrawElementsBaseVertex(mode,count,type,offset,basevertex);
 	else
+	{
 		glDrawElements(mode,count,type,(const void*)offset);
+		OOGL_CHECK("glDrawElements");
+	}
 }
 
 void OOGL::VertexArrayObject::draw_elements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset)

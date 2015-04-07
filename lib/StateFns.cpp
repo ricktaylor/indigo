@@ -123,6 +123,8 @@ OOGL::StateFns::StateFns() :
 		m_fn_glGenVertexArrays(NULL),
 		m_fn_glDeleteVertexArrays(NULL),
 		m_fn_glBindVertexArray(NULL),
+		m_fn_glVertexAttribPointer(NULL),
+		m_fn_glVertexAttribIPointer(NULL),
 		m_thunk_glEnableVertexArrayAttrib(&StateFns::check_glEnableVertexArrayAttrib),
 		m_fn_glEnableVertexArrayAttrib(NULL),
 		m_thunk_glDisableVertexArrayAttrib(&StateFns::check_glDisableVertexArrayAttrib),
@@ -1754,6 +1756,47 @@ void OOGL::StateFns::call_glDisableVertexAttribArray(State& state, const OOBase:
 void OOGL::StateFns::glDisableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
 {
 	(this->*m_thunk_glDisableVertexArrayAttrib)(state,vao,index);
+}
+
+void OOGL::StateFns::glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer)
+{
+	if (load_proc(m_fn_glVertexAttribPointer,"glVertexAttribPointer"))
+	{
+		(*m_fn_glVertexAttribPointer)(index,size,type,normalized,stride,pointer);
+
+		OOGL_CHECK("glVertexAttribPointer");
+	}
+}
+
+bool OOGL::StateFns::check_glVertexAttribIPointer()
+{
+	if (!m_fn_glVertexAttribIPointer)
+	{
+		if (isGLversion(3,0))
+			m_fn_glVertexAttribIPointer = (PFNGLVERTEXATTRIBIPOINTERPROC)glfwGetProcAddress("glVertexAttribIPointer");
+
+		if (!m_fn_glVertexAttribIPointer &&
+				glfwExtensionSupported("GL_ARB_vertex_array_object") == GL_TRUE &&
+				(glfwExtensionSupported("GL_EXT_gpu_shader4") == GL_TRUE || glfwExtensionSupported("NV_gpu_program4") == GL_TRUE))
+		{
+			m_fn_glVertexAttribIPointer = (PFNGLVERTEXATTRIBIPOINTERPROC)glfwGetProcAddress("glVertexAttribIPointerEXT");
+		}
+
+		if (!m_fn_glVertexAttribIPointer)
+			LOG_ERROR(("No glVertexAttribIPointer function"));
+	}
+
+	return m_fn_glVertexAttribIPointer != NULL;
+}
+
+void OOGL::StateFns::glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const void* pointer)
+{
+	if (check_glVertexAttribIPointer())
+	{
+		(*m_fn_glVertexAttribIPointer)(index,size,type,stride,pointer);
+
+		OOGL_CHECK("glVertexAttribIPointer");
+	}
 }
 
 void OOGL::StateFns::check_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
