@@ -22,6 +22,7 @@
 #include "Render.h"
 #include "../lib/BufferObject.h"
 #include "../lib/VertexArrayObject.h"
+#include "../lib/Shader.h"
 
 namespace
 {
@@ -44,6 +45,9 @@ namespace
 		void on_close(const OOGL::Window& win);
 
 		OOBase::SharedPtr<Splash> self;
+
+		OOBase::SharedPtr<OOGL::VertexArrayObject> ptrVAO;
+		OOBase::SharedPtr<OOGL::Program> ptrProgram;
 	};
 }
 
@@ -83,7 +87,6 @@ void Splash::on_create()
 {
 	glm::ivec2 sz = m_wnd->size();
 	m_ratio = sz.x / (float)sz.y;
-
 	glViewport(0, 0, sz.x, sz.y);
 
 	float points[] = {
@@ -91,11 +94,39 @@ void Splash::on_create()
 	   0.5f, -0.5f,  0.0f,
 	  -0.5f, -0.5f,  0.0f
 	};
-	OOBase::SharedPtr<OOGL::BufferObject> ptrVB = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,9*sizeof(float),points);
+	OOBase::SharedPtr<OOGL::BufferObject> ptrVB = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(points),points);
 
-	OOBase::SharedPtr<OOGL::VertexArrayObject> ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
+	OOBase::SharedPtr<OOGL::Shader> shaders[2];
+	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
+	shaders[0]->compile(
+			"#version 120\n"
+			"attribute vec3 in_Position;\n"
+			"void main() {\n"
+			"    gl_Position = vec4(in_Position,1.0);\n"
+			"}\n");
+	OOBase::String s = shaders[0]->info_log();
+	if (!s.empty())
+		LOG_DEBUG(("%s",s.c_str()));
+
+	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
+	shaders[1]->compile(
+			"#version 120\n"
+			"void main() {\n"
+			"    gl_FragColor = vec4(0.5,0.5,0,1);\n"
+			"}\n");
+	s = shaders[1]->info_log();
+	if (!s.empty())
+		LOG_DEBUG(("%s",s.c_str()));
+
+	ptrProgram = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
+	ptrProgram->link(shaders,2);
+	s = ptrProgram->info_log();
+	if (!s.empty())
+		LOG_DEBUG(("%s",s.c_str()));
+
+	ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
+	ptrVAO->attribute(ptrProgram->attribute_location("in_Position"),ptrVB,3,GL_FLOAT,false);
 	ptrVAO->enable_attribute(0);
-	//ptrVAO->attribute(0,ptrVB,3,GL_FLOAT,false);
 }
 
 void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
@@ -105,7 +136,7 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 	// Always clear everything
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	glMatrixMode(GL_PROJECTION);
+	/*glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
 	glMatrixMode(GL_MODELVIEW);
@@ -118,7 +149,10 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 	glVertex3f(0.6f, -0.4f, 0.f);
 	glColor3f(0.f, 0.f, 1.f);
 	glVertex3f(0.f, 0.6f, 0.f);
-	glEnd();
+	glEnd();*/
+
+	glState.use(ptrProgram);
+	ptrVAO->draw(GL_TRIANGLES,0,3);
 }
 
 void Splash::on_close(const OOGL::Window& win)

@@ -51,16 +51,24 @@ void OOGL::VertexArrayObject::bind()
 
 void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, GLsizei stride, GLsizeiptr offset)
 {
+	OOBase::SharedPtr<State> ptrState = State::get_current();
+
+	ptrState->bind(shared_from_this());
+
 	assert(buffer->target() == GL_ARRAY_BUFFER);
-	State::get_current()->bind(buffer);
+	ptrState->bind(buffer);
 
 	StateFns::get_current()->glVertexAttribIPointer(index,components,type,stride,reinterpret_cast<const GLvoid*>(offset));
 }
 
 void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, bool normalized, GLsizei stride, GLsizeiptr offset)
 {
+	OOBase::SharedPtr<State> ptrState = State::get_current();
+
+	ptrState->bind(shared_from_this());
+
 	assert(buffer->target() == GL_ARRAY_BUFFER);
-	State::get_current()->bind(buffer);
+	ptrState->bind(buffer);
 
 	StateFns::get_current()->glVertexAttribPointer(index,components,type,normalized ? GL_TRUE : GL_FALSE,stride,reinterpret_cast<const GLvoid*>(offset));
 }

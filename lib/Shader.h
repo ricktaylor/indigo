@@ -32,7 +32,7 @@ namespace OOGL
 
 	public:
 		Shader(GLenum shaderType);
-		virtual ~Shader();
+		~Shader();
 
 		void compile(const char* sz, GLint len = 0);
 		void compile(const char *const *strings, GLsizei count);
@@ -65,8 +65,16 @@ namespace OOGL
 
 	public:
 		Program();
+		~Program();
 
 		void link(const OOBase::SharedPtr<Shader>* shaders, size_t count);
+
+		template <size_t S>
+		void link(const OOBase::SharedPtr<Shader> shaders[S])
+		{
+			link(shaders,S);
+		}
+
 		bool link_status() const;
 		OOBase::String info_log() const;
 

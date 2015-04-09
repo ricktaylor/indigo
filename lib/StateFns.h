@@ -38,6 +38,8 @@ namespace OOGL
 	public:
 		static OOBase::SharedPtr<StateFns> get_current();
 
+		bool isGLversion(int major, int minor);
+
 		void glGenFramebuffers(GLsizei n, GLuint *framebuffers);
 		void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers);
 		void glBindFramebuffer(GLenum target, GLuint framebuffer);
@@ -50,12 +52,15 @@ namespace OOGL
 		void glGetShaderiv(GLuint shader, GLenum pname, GLint* params);
 		void glGetShaderInfoLog(GLuint shader, GLsizei maxLength, GLsizei* length, GLchar* infoLog);
 
+		GLuint glCreateProgram();
+		void glDeleteProgram(GLuint program);
 		void glGetProgramiv(GLuint program, GLenum pname, GLint* params);
 		void glGetProgramInfoLog(GLuint program, GLsizei maxLength, GLsizei* length, GLchar* infoLog);
 		void glAttachShader(GLuint program, GLuint shader);
 		void glDetachShader(GLuint program, GLuint shader);
 		void glLinkProgram(GLuint program);
 		void glUseProgram(GLuint program);
+		GLint glGetAttribLocation(GLuint program, const char* name);
 		GLint glGetUniformLocation(GLuint program, const char* name);
 		void glUniform1f(GLint location, GLfloat v0);
 		void glUniform2f(GLint location, GLfloat v0, GLfloat v1);
@@ -124,6 +129,9 @@ namespace OOGL
 	private:
 		StateFns();
 
+		int m_gl_major;
+		int m_gl_minor;
+
 		PFNGLGENFRAMEBUFFERSPROC m_fn_glGenFramebuffers;
 		PFNGLDELETEFRAMEBUFFERSPROC m_fn_glDeleteFramebuffers;
 		PFNGLBINDFRAMEBUFFERPROC m_fn_glBindFramebuffer;
@@ -135,12 +143,15 @@ namespace OOGL
 		PFNGLCOMPILESHADERPROC m_fn_glCompileShader;
 		PFNGLGETSHADERIVPROC m_fn_glGetShaderiv;
 		PFNGLGETSHADERINFOLOGPROC m_fn_glGetShaderInfoLog;
+		PFNGLCREATEPROGRAMPROC m_fn_glCreateProgram;
+		PFNGLDELETEPROGRAMPROC m_fn_glDeleteProgram;
 		PFNGLGETPROGRAMIVPROC m_fn_glGetProgramiv;
 		PFNGLGETPROGRAMINFOLOGPROC m_fn_glGetProgramInfoLog;
 		PFNGLATTACHSHADERPROC m_fn_glAttachShader;
 		PFNGLDETACHSHADERPROC m_fn_glDetachShader;
 		PFNGLLINKPROGRAMPROC m_fn_glLinkProgram;
 		PFNGLUSEPROGRAMPROC m_fn_glUseProgram;
+		PFNGLGETATTRIBLOCATIONPROC m_fn_glGetAttribLocation;
 		PFNGLGETUNIFORMLOCATIONPROC m_fn_glGetUniformLocation;
 		PFNGLUNIFORM1FPROC m_fn_glUniform1f;
 		PFNGLUNIFORM2FPROC m_fn_glUniform2f;

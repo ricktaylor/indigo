@@ -26,23 +26,6 @@
 
 namespace
 {
-	static bool isGLversion(GLFWwindow* win, int major, int minor)
-	{
-		int actual_major = glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR);
-		int actual_minor = glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MINOR);
-
-		return (actual_major > major || (actual_major == major && actual_minor >= minor));
-	}
-
-	static bool isGLversion(int major, int minor)
-	{
-		GLFWwindow* win = glfwGetCurrentContext();
-		if (!win)
-			LOG_ERROR_RETURN(("No current context!"),false);
-
-		return isGLversion(win,major,minor);
-	}
-
 	template <typename FN>
 	bool load_proc(FN& fn, const char* name)
 	{
@@ -54,9 +37,27 @@ namespace
 		}
 		return (fn != NULL);
 	}
+
+	void on_debug1(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* param)
+	{
+		if (length > 0)
+			OOBase::Logger::log(OOBase::Logger::Debug,"[OpenGL] %.*s",length,message);
+		else
+			OOBase::Logger::log(OOBase::Logger::Debug,"[OpenGL] %s",message);
+	}
+
+	void on_debug2(GLuint id, GLenum category, GLenum severity, GLsizei length, const GLchar *message, void *userParam)
+	{
+		if (length > 0)
+			OOBase::Logger::log(OOBase::Logger::Debug,"[OpenGL] %.*s",length,message);
+		else
+			OOBase::Logger::log(OOBase::Logger::Debug,"[OpenGL] %s",message);
+	}
 }
 
 OOGL::StateFns::StateFns() :
+		m_gl_major(1),
+		m_gl_minor(0),
 		m_fn_glGenFramebuffers(NULL),
 		m_fn_glDeleteFramebuffers(NULL),
 		m_fn_glBindFramebuffer(NULL),
@@ -67,12 +68,15 @@ OOGL::StateFns::StateFns() :
 		m_fn_glCompileShader(NULL),
 		m_fn_glGetShaderiv(NULL),
 		m_fn_glGetShaderInfoLog(NULL),
+		m_fn_glCreateProgram(NULL),
+		m_fn_glDeleteProgram(NULL),
 		m_fn_glGetProgramiv(NULL),
 		m_fn_glGetProgramInfoLog(NULL),
 		m_fn_glAttachShader(NULL),
 		m_fn_glDetachShader(NULL),
 		m_fn_glLinkProgram(NULL),
 		m_fn_glUseProgram(NULL),
+		m_fn_glGetAttribLocation(NULL),
 		m_fn_glGetUniformLocation(NULL),
 		m_fn_glUniform1f(NULL),
 		m_fn_glUniform2f(NULL),
@@ -154,6 +158,57 @@ OOGL::StateFns::StateFns() :
 		m_thunk_glDrawElementsInstancedBaseVertexBaseInstance(&StateFns::check_glDrawElementsInstancedBaseVertexBaseInstance),
 		m_fn_glDrawElementsInstancedBaseVertexBaseInstance(NULL)
 {
+	GLFWwindow* win = glfwGetCurrentContext();
+	if (!win)
+		LOG_ERROR(("No current context!"));
+	else
+	{
+		m_gl_major = glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MAJOR);
+		m_gl_minor = glfwGetWindowAttrib(win,GLFW_CONTEXT_VERSION_MINOR);
+	}
+
+	OOBase::Logger::log(OOBase::Logger::Information,"OpenGL version: %s",glGetString(GL_VERSION));
+	OOBase::Logger::log(OOBase::Logger::Information,"OpenGL renderer: %s",glGetString(GL_RENDERER));
+	OOBase::Logger::log(OOBase::Logger::Information,"OpenGL vendor: %s",glGetString(GL_VENDOR));
+
+	if (!isGLversion(2,0))
+	{
+		OOBase::Logger::log(OOBase::Logger::Information,"GLSL version: %s",glGetString(GL_SHADING_LANGUAGE_VERSION_ARB));
+		OOBase::Logger::log(OOBase::Logger::Warning,"OpenGL version: %d.%d is highly unlikely to work",m_gl_major,m_gl_minor);
+	}
+	else
+		OOBase::Logger::log(OOBase::Logger::Information,"GLSL version: %s",glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+#if !defined(NDEBUG)
+	if (isGLversion(4,5) || glfwExtensionSupported("GL_KHR_debug") == GL_TRUE)
+	{
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+		PFNGLDEBUGMESSAGECALLBACKPROC pfn = NULL;
+		if (load_proc(pfn,"glDebugMessageCallback"))
+			(*pfn)(&on_debug1,NULL);
+	}
+	else if (glfwExtensionSupported("GL_ARB_debug_output") == GL_TRUE)
+	{
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+
+		PFNGLDEBUGMESSAGECALLBACKARBPROC pfn = NULL;
+		if (load_proc(pfn,"glDebugMessageCallbackARB"))
+			(*pfn)(&on_debug1,NULL);
+	}
+	else if (glfwExtensionSupported("GL_AMD_debug_output") == GL_TRUE)
+	{
+		PFNGLDEBUGMESSAGECALLBACKAMDPROC pfn = NULL;
+		if (load_proc(pfn,"glDebugMessageCallbackAMD"))
+			(*pfn)(&on_debug2,NULL);
+	}
+
+#endif
+}
+
+bool OOGL::StateFns::isGLversion(int major, int minor)
+{
+	return (m_gl_major > major || (m_gl_major == major && m_gl_minor >= minor));
 }
 
 OOBase::SharedPtr<OOGL::StateFns> OOGL::StateFns::get_current()
@@ -324,6 +379,28 @@ void OOGL::StateFns::glGetShaderInfoLog(GLuint shader, GLsizei maxLength, GLsize
 	}
 }
 
+GLuint OOGL::StateFns::glCreateProgram()
+{
+	GLuint r = 0;
+	if (load_proc(m_fn_glCreateProgram,"glCreateProgram"))
+	{
+		r = (*m_fn_glCreateProgram)();
+
+		OOGL_CHECK("glCreateProgram");
+	}
+	return r;
+}
+
+void OOGL::StateFns::glDeleteProgram(GLuint program)
+{
+	if (load_proc(m_fn_glDeleteProgram,"glDeleteProgram"))
+	{
+		(*m_fn_glDeleteProgram)(program);
+
+		OOGL_CHECK("glDeleteProgram");
+	}
+}
+
 void OOGL::StateFns::glGetProgramiv(GLuint shader, GLenum pname, GLint* params)
 {
 	if (load_proc(m_fn_glGetProgramiv,"glGetProgramiv"))
@@ -382,6 +459,18 @@ void OOGL::StateFns::glLinkProgram(GLuint program)
 
 		OOGL_CHECK("glLinkProgram");
 	}
+}
+
+GLint OOGL::StateFns::glGetAttribLocation(GLuint program, const char* name)
+{
+	GLint r = -1;
+	if (load_proc(m_fn_glGetAttribLocation,"glGetAttribLocation"))
+	{
+		r = (*m_fn_glGetAttribLocation)(program,name);
+
+		OOGL_CHECK("glGetAttribLocation");
+	}
+	return r;
 }
 
 GLint OOGL::StateFns::glGetUniformLocation(GLuint program, const char* name)

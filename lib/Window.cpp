@@ -28,15 +28,16 @@ OOGL::Window::Window(int width, int height, const char* title, unsigned int styl
 	glfwWindowHint(GLFW_RESIZABLE,(style & eWSresizable) ? GL_TRUE : GL_FALSE);
 	glfwWindowHint(GLFW_DECORATED,(style & eWSdecorated) ? GL_TRUE : GL_FALSE);
 
+#if !defined(NDEBUG)
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT,GL_TRUE);
+#endif
+
 	// Now try to create the window
 	m_glfw_window = glfwCreateWindow(width,height,title,monitor,NULL);
 	if (!m_glfw_window)
 		LOG_ERROR(("Failed to create window"));
 	else
 	{
-		// Wait for window manager to do its thing
-		//glfwWaitEvents();
-
 		glfwMakeContextCurrent(m_glfw_window);
 
 		m_state_fns = OOBase::allocate_shared<StateFns,OOBase::ThreadLocalAllocator>();

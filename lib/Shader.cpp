@@ -131,8 +131,20 @@ OOBase::String OOGL::Shader::info_log() const
 	return ret;
 }
 
-OOGL::Program::Program() : m_id(0)
+OOGL::Program::Program() :
+		m_id(StateFns::get_current()->glCreateProgram())
 {
+}
+
+OOGL::Program::~Program()
+{
+	if (m_id)
+		StateFns::get_current()->glDeleteProgram(m_id);
+}
+
+GLint OOGL::Program::attribute_location(const char* name) const
+{
+	return StateFns::get_current()->glGetAttribLocation(m_id,name);
 }
 
 bool OOGL::Program::link_status() const
