@@ -116,7 +116,7 @@ void Splash::on_create()
 	shaders[1]->compile(
 			"#version 120\n"
 			"void main() {\n"
-			"    gl_FragColor = vec4(0.5,0.5,0,1);\n"
+			"    gl_FragColor = vec4(1,0,0,1);\n"
 			"}\n");
 	s = shaders[1]->info_log();
 	if (!s.empty())
@@ -157,7 +157,8 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 
 	glm::mat4 proj = glm::perspective(glm::radians(45.0f),m_ratio,0.1f,100.0f);
 	glm::mat4 view = glm::lookAt(glm::vec3(4,3,3),glm::vec3(0,0,0),glm::vec3(0,1,0));
-	glm::mat4 model = glm::mat4(1.0f);
+	glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians((float)glfwGetTime() * 50.f),glm::vec3(0,1,0));
+
 	glm::mat4 MVP = proj * view * model;
 
 	ptrProgram->uniform("MVP",MVP);
