@@ -24,6 +24,8 @@
 #include "../lib/VertexArrayObject.h"
 #include "../lib/Shader.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace
 {
 	class Splash : public OOBase::EnableSharedFromThis<Splash>
@@ -90,9 +92,9 @@ void Splash::on_create()
 	glViewport(0, 0, sz.x, sz.y);
 
 	float points[] = {
-	   0.0f,  0.5f,  0.0f,
-	   0.5f, -0.5f,  0.0f,
-	  -0.5f, -0.5f,  0.0f
+		-1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		0.0f,  1.0f, 0.0f
 	};
 	OOBase::SharedPtr<OOGL::BufferObject> ptrVB = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(points),points);
 
@@ -101,8 +103,10 @@ void Splash::on_create()
 	shaders[0]->compile(
 			"#version 120\n"
 			"attribute vec3 in_Position;\n"
+			"uniform mat4 MVP;\n"
 			"void main() {\n"
-			"    gl_Position = vec4(in_Position,1.0);\n"
+			"	vec4 v = vec4(in_Position,1.0);\n"
+			"	gl_Position = MVP * v;\n"
 			"}\n");
 	OOBase::String s = shaders[0]->info_log();
 	if (!s.empty())
@@ -150,6 +154,13 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 	glColor3f(0.f, 0.f, 1.f);
 	glVertex3f(0.f, 0.6f, 0.f);
 	glEnd();*/
+
+	glm::mat4 proj = glm::perspective(glm::radians(45.0f),m_ratio,0.1f,100.0f);
+	glm::mat4 view = glm::lookAt(glm::vec3(4,3,3),glm::vec3(0,0,0),glm::vec3(0,1,0));
+	glm::mat4 model = glm::mat4(1.0f);
+	glm::mat4 MVP = proj * view * model;
+
+	ptrProgram->uniform("MVP",MVP);
 
 	glState.use(ptrProgram);
 	ptrVAO->draw(GL_TRIANGLES,0,3);

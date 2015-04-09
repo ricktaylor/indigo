@@ -62,10 +62,11 @@ namespace OOGL
 		void glUseProgram(GLuint program);
 		GLint glGetAttribLocation(GLuint program, const char* name);
 		GLint glGetUniformLocation(GLuint program, const char* name);
-		void glUniform1f(GLint location, GLfloat v0);
-		void glUniform2f(GLint location, GLfloat v0, GLfloat v1);
-		void glUniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
-		void glUniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+		void glUniform1f(GLint location, GLfloat v);
+		void glUniform2fv(GLint location, GLsizei count, const GLfloat* v);
+		void glUniform3fv(GLint location, GLsizei count, const GLfloat* v);
+		void glUniform4fv(GLint location, GLsizei count, const GLfloat* v);
+		void glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* v);
 
 		bool check_glTexImage3D();
 		void glActiveTexture(GLenum texture);
@@ -154,9 +155,10 @@ namespace OOGL
 		PFNGLGETATTRIBLOCATIONPROC m_fn_glGetAttribLocation;
 		PFNGLGETUNIFORMLOCATIONPROC m_fn_glGetUniformLocation;
 		PFNGLUNIFORM1FPROC m_fn_glUniform1f;
-		PFNGLUNIFORM2FPROC m_fn_glUniform2f;
-		PFNGLUNIFORM3FPROC m_fn_glUniform3f;
-		PFNGLUNIFORM4FPROC m_fn_glUniform4f;
+		PFNGLUNIFORM2FVPROC m_fn_glUniform2fv;
+		PFNGLUNIFORM3FVPROC m_fn_glUniform3fv;
+		PFNGLUNIFORM4FVPROC m_fn_glUniform4fv;
+		PFNGLUNIFORMMATRIX4FVPROC m_fn_glUniformMatrix4fv;
 
 		PFNGLACTIVETEXTUREPROC m_fn_glActiveTexture;
 

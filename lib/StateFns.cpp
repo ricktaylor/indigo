@@ -79,9 +79,10 @@ OOGL::StateFns::StateFns() :
 		m_fn_glGetAttribLocation(NULL),
 		m_fn_glGetUniformLocation(NULL),
 		m_fn_glUniform1f(NULL),
-		m_fn_glUniform2f(NULL),
-		m_fn_glUniform3f(NULL),
-		m_fn_glUniform4f(NULL),
+		m_fn_glUniform2fv(NULL),
+		m_fn_glUniform3fv(NULL),
+		m_fn_glUniform4fv(NULL),
+		m_fn_glUniformMatrix4fv(NULL),
 		m_fn_glActiveTexture(NULL),
 		m_thunk_glBindTextureUnit(&StateFns::check_glBindTextureUnit),
 		m_fn_glBindTextureUnit(NULL),
@@ -495,33 +496,43 @@ void OOGL::StateFns::glUniform1f(GLint location, GLfloat v0)
 	}
 }
 
-void OOGL::StateFns::glUniform2f(GLint location, GLfloat v0, GLfloat v1)
+void OOGL::StateFns::glUniform2fv(GLint location, GLsizei count, const GLfloat* v)
 {
-	if (load_proc(m_fn_glUniform2f,"glUniform2f"))
+	if (load_proc(m_fn_glUniform2fv,"glUniform2fv"))
 	{
-		(*m_fn_glUniform2f)(location,v0,v1);
+		(*m_fn_glUniform2fv)(location,count,v);
 
-		OOGL_CHECK("glUniform2f");
+		OOGL_CHECK("glUniform2fv");
 	}
 }
 
-void OOGL::StateFns::glUniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
+void OOGL::StateFns::glUniform3fv(GLint location, GLsizei count, const GLfloat* v)
 {
-	if (load_proc(m_fn_glUniform3f,"glUniform3f"))
+	if (load_proc(m_fn_glUniform3fv,"glUniform3fv"))
 	{
-		(*m_fn_glUniform3f)(location,v0,v1,v2);
+		(*m_fn_glUniform3fv)(location,count,v);
 
-		OOGL_CHECK("glUniform3f");
+		OOGL_CHECK("glUniform3fv");
 	}
 }
 
-void OOGL::StateFns::glUniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
+void OOGL::StateFns::glUniform4fv(GLint location, GLsizei count, const GLfloat* v)
 {
-	if (load_proc(m_fn_glUniform4f,"glUniform4f"))
+	if (load_proc(m_fn_glUniform4fv,"glUniform4fv"))
 	{
-		(*m_fn_glUniform4f)(location,v0,v1,v2,v3);
+		(*m_fn_glUniform4fv)(location,count,v);
 
-		OOGL_CHECK("glUniform4f");
+		OOGL_CHECK("glUniform4fv");
+	}
+}
+
+void OOGL::StateFns::glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* v)
+{
+	if (load_proc(m_fn_glUniformMatrix4fv,"glUniformMatrix4fv"))
+	{
+		(*m_fn_glUniformMatrix4fv)(location,count,transpose,v);
+
+		OOGL_CHECK("glUniformMatrix4fv");
 	}
 }
 

@@ -97,7 +97,7 @@ namespace OOGL
 		}
 
 		template <typename T>
-		void uniform(const char* name, const T& v, bool transpose = false)
+		void uniform(const char* name, const T& v, bool transpose)
 		{
 			GLint l = uniform_location(name);
 			if (l != -1)

@@ -24,6 +24,8 @@
 
 #include <OOBase/StackAllocator.h>
 
+#include <glm/gtc/type_ptr.hpp>
+
 static const GLchar* s_gstap =
 		"#ifndef GSTAP_H\n"
 		"#define GSTAP_H\n"
@@ -228,15 +230,20 @@ void OOGL::Program::uniform(GLint location, GLfloat v)
 
 void OOGL::Program::uniform(GLint location, const glm::vec2& v)
 {
-	StateFns::get_current()->glUniform2f(location,v.x,v.y);
+	StateFns::get_current()->glUniform2fv(location,1,glm::value_ptr(v));
 }
 
 void OOGL::Program::uniform(GLint location, const glm::vec3& v)
 {
-	StateFns::get_current()->glUniform3f(location,v.x,v.y,v.z);
+	StateFns::get_current()->glUniform3fv(location,1,glm::value_ptr(v));
 }
 
 void OOGL::Program::uniform(GLint location, const glm::vec4& v)
 {
-	StateFns::get_current()->glUniform4f(location,v.x,v.y,v.z,v.w);
+	StateFns::get_current()->glUniform4fv(location,1,glm::value_ptr(v));
+}
+
+void OOGL::Program::uniform(GLint location, const glm::mat4& v, bool transpose)
+{
+	StateFns::get_current()->glUniformMatrix4fv(location,1,transpose ? GL_TRUE : GL_FALSE,glm::value_ptr(v));
 }
