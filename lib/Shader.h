@@ -59,9 +59,10 @@ namespace OOGL
 		GLuint m_id;
 	};
 
-	class Program : public OOBase::NonCopyable
+	class Program : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<Program>
 	{
 		friend class State;
+		friend class StateFns;
 
 	public:
 		Program();
@@ -128,8 +129,9 @@ namespace OOGL
 
 	private:
 		GLuint m_id;
-		typedef OOBase::Table<OOBase::String,GLint,OOBase::Less<OOBase::String>,OOBase::ThreadLocalAllocator> uni_map_t;
-		mutable uni_map_t m_mapUniforms;
+		typedef OOBase::Table<OOBase::String,GLint,OOBase::Less<OOBase::String>,OOBase::ThreadLocalAllocator> map_t;
+		mutable map_t m_mapUniforms;
+		mutable map_t m_mapAttributes;
 
 		void use();
 	};

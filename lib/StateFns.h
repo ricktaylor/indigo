@@ -62,11 +62,7 @@ namespace OOGL
 		void glUseProgram(GLuint program);
 		GLint glGetAttribLocation(GLuint program, const char* name);
 		GLint glGetUniformLocation(GLuint program, const char* name);
-		void glUniform1f(GLint location, GLfloat v);
-		void glUniform2fv(GLint location, GLsizei count, const GLfloat* v);
-		void glUniform3fv(GLint location, GLsizei count, const GLfloat* v);
-		void glUniform4fv(GLint location, GLsizei count, const GLfloat* v);
-		void glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* v);
+		void glUniformMatrix4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* v);
 
 		bool check_glTexImage3D();
 		void glActiveTexture(GLenum texture);
@@ -154,11 +150,12 @@ namespace OOGL
 		PFNGLUSEPROGRAMPROC m_fn_glUseProgram;
 		PFNGLGETATTRIBLOCATIONPROC m_fn_glGetAttribLocation;
 		PFNGLGETUNIFORMLOCATIONPROC m_fn_glGetUniformLocation;
-		PFNGLUNIFORM1FPROC m_fn_glUniform1f;
-		PFNGLUNIFORM2FVPROC m_fn_glUniform2fv;
-		PFNGLUNIFORM3FVPROC m_fn_glUniform3fv;
-		PFNGLUNIFORM4FVPROC m_fn_glUniform4fv;
-		PFNGLUNIFORMMATRIX4FVPROC m_fn_glUniformMatrix4fv;
+
+		void (StateFns::*m_thunk_glUniformMatrix4fv)(const OOBase::SharedPtr<Program>&,GLint,GLsizei,GLboolean,const GLfloat*);
+		GLFWglproc m_fn_glUniformMatrix4fv;
+		void check_glUniformMatrix4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* v);
+		void call_glProgramUniformMatrix4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* v);
+		void call_glUniformMatrix4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* v);
 
 		PFNGLACTIVETEXTUREPROC m_fn_glActiveTexture;
 

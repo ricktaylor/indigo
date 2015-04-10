@@ -23,6 +23,7 @@
 #include "BufferObject.h"
 #include "VertexArrayObject.h"
 #include "Texture.h"
+#include "Shader.h"
 
 namespace
 {
@@ -103,10 +104,7 @@ OOGL::StateFns::StateFns() :
 		m_fn_glUseProgram(NULL),
 		m_fn_glGetAttribLocation(NULL),
 		m_fn_glGetUniformLocation(NULL),
-		m_fn_glUniform1f(NULL),
-		m_fn_glUniform2fv(NULL),
-		m_fn_glUniform3fv(NULL),
-		m_fn_glUniform4fv(NULL),
+		m_thunk_glUniformMatrix4fv(&StateFns::check_glUniformMatrix4fv),
 		m_fn_glUniformMatrix4fv(NULL),
 		m_fn_glActiveTexture(NULL),
 		m_thunk_glBindTextureUnit(&StateFns::check_glBindTextureUnit),
@@ -511,54 +509,54 @@ GLint OOGL::StateFns::glGetUniformLocation(GLuint program, const char* name)
 	return r;
 }
 
-void OOGL::StateFns::glUniform1f(GLint location, GLfloat v0)
+void OOGL::StateFns::check_glUniformMatrix4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* v)
 {
-	if (load_proc(m_fn_glUniform1f,"glUniform1f"))
+	if (isGLversion(4,1) || glfwExtensionSupported("GL_ARB_separate_shader_objects") == GL_TRUE)
 	{
-		(*m_fn_glUniform1f)(location,v0);
-
-		OOGL_CHECK("glUniform1f");
+		m_fn_glUniformMatrix4fv = glfwGetProcAddress("glProgramUniformMatrix4fv");
+		if (m_fn_glUniformMatrix4fv)
+			m_thunk_glUniformMatrix4fv = &StateFns::call_glProgramUniformMatrix4fv;
 	}
+
+	if (!m_fn_glUniformMatrix4fv && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glUniformMatrix4fv = glfwGetProcAddress("glProgramUniformMatrix4fvEXT");
+		if (m_fn_glUniformMatrix4fv)
+			m_thunk_glUniformMatrix4fv = &StateFns::call_glProgramUniformMatrix4fv;
+	}
+
+	if (!m_fn_glUniformMatrix4fv)
+	{
+		m_fn_glUniformMatrix4fv = glfwGetProcAddress("glUniformMatrix4fv");
+		if (m_fn_glUniformMatrix4fv)
+			m_thunk_glUniformMatrix4fv = &StateFns::call_glUniformMatrix4fv;
+	}
+
+	if (!m_fn_glUniformMatrix4fv)
+		LOG_ERROR(("No glUniformMatrix4fv function"));
+	else
+		(this->*m_thunk_glUniformMatrix4fv)(program,location,count,transpose,v);
 }
 
-void OOGL::StateFns::glUniform2fv(GLint location, GLsizei count, const GLfloat* v)
+void OOGL::StateFns::call_glProgramUniformMatrix4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* v)
 {
-	if (load_proc(m_fn_glUniform2fv,"glUniform2fv"))
-	{
-		(*m_fn_glUniform2fv)(location,count,v);
+	(*((PFNGLPROGRAMUNIFORMMATRIX4FVPROC)m_fn_glUniformMatrix4fv))(program->m_id,location,count,transpose,v);
 
-		OOGL_CHECK("glUniform2fv");
-	}
+	OOGL_CHECK("glProgramUniformMatrix4fv");
 }
 
-void OOGL::StateFns::glUniform3fv(GLint location, GLsizei count, const GLfloat* v)
+void OOGL::StateFns::call_glUniformMatrix4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* v)
 {
-	if (load_proc(m_fn_glUniform3fv,"glUniform3fv"))
-	{
-		(*m_fn_glUniform3fv)(location,count,v);
+	State::get_current()->use(program);
 
-		OOGL_CHECK("glUniform3fv");
-	}
+	(*((PFNGLUNIFORMMATRIX4FVPROC)m_fn_glUniformMatrix4fv))(location,count,transpose,v);
+
+	OOGL_CHECK("glUniformMatrix4fv");
 }
 
-void OOGL::StateFns::glUniform4fv(GLint location, GLsizei count, const GLfloat* v)
+void OOGL::StateFns::glUniformMatrix4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* v)
 {
-	if (load_proc(m_fn_glUniform4fv,"glUniform4fv"))
-	{
-		(*m_fn_glUniform4fv)(location,count,v);
-
-		OOGL_CHECK("glUniform4fv");
-	}
-}
-
-void OOGL::StateFns::glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* v)
-{
-	if (load_proc(m_fn_glUniformMatrix4fv,"glUniformMatrix4fv"))
-	{
-		(*m_fn_glUniformMatrix4fv)(location,count,transpose,v);
-
-		OOGL_CHECK("glUniformMatrix4fv");
-	}
+	(this->*m_thunk_glUniformMatrix4fv)(program,location,count,transpose,v);
 }
 
 void OOGL::StateFns::glActiveTexture(GLenum texture)

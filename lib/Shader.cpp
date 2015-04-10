@@ -144,11 +144,6 @@ OOGL::Program::~Program()
 		StateFns::get_current()->glDeleteProgram(m_id);
 }
 
-GLint OOGL::Program::attribute_location(const char* name) const
-{
-	return StateFns::get_current()->glGetAttribLocation(m_id,name);
-}
-
 bool OOGL::Program::link_status() const
 {
 	GLint status;
@@ -209,7 +204,7 @@ void OOGL::Program::use()
 
 GLint OOGL::Program::uniform_location(const char* name) const
 {
-	uni_map_t::iterator i = m_mapUniforms.find(name);
+	map_t::iterator i = m_mapUniforms.find(name);
 	if (i != m_mapUniforms.end())
 		return i->second;
 
@@ -223,27 +218,23 @@ GLint OOGL::Program::uniform_location(const char* name) const
 	return l;
 }
 
-void OOGL::Program::uniform(GLint location, GLfloat v)
+GLint OOGL::Program::attribute_location(const char* name) const
 {
-	StateFns::get_current()->glUniform1f(location,v);
-}
+	map_t::iterator i = m_mapAttributes.find(name);
+	if (i != m_mapAttributes.end())
+		return i->second;
 
-void OOGL::Program::uniform(GLint location, const glm::vec2& v)
-{
-	StateFns::get_current()->glUniform2fv(location,1,glm::value_ptr(v));
-}
-
-void OOGL::Program::uniform(GLint location, const glm::vec3& v)
-{
-	StateFns::get_current()->glUniform3fv(location,1,glm::value_ptr(v));
-}
-
-void OOGL::Program::uniform(GLint location, const glm::vec4& v)
-{
-	StateFns::get_current()->glUniform4fv(location,1,glm::value_ptr(v));
+	GLint l = StateFns::get_current()->glGetAttribLocation(m_id,name);
+	if (l != -1)
+	{
+		OOBase::String s;
+		if (s.assign(name))
+			m_mapAttributes.insert(s,l);
+	}
+	return l;
 }
 
 void OOGL::Program::uniform(GLint location, const glm::mat4& v, bool transpose)
 {
-	StateFns::get_current()->glUniformMatrix4fv(location,1,transpose ? GL_TRUE : GL_FALSE,glm::value_ptr(v));
+	StateFns::get_current()->glUniformMatrix4fv(shared_from_this(),location,1,transpose ? GL_TRUE : GL_FALSE,glm::value_ptr(v));
 }
