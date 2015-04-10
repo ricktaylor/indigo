@@ -51,6 +51,10 @@ void OOGL::VertexArrayObject::bind()
 
 void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, GLsizei stride, GLsizeiptr offset)
 {
+	OOBase::Table<GLuint,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLuint>,OOBase::ThreadLocalAllocator>::iterator i = m_attributes.find(index);
+	if (i != m_attributes.end() && i->second == buffer)
+		return;
+
 	OOBase::SharedPtr<State> ptrState = State::get_current();
 
 	ptrState->bind(shared_from_this());
@@ -59,10 +63,19 @@ void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<Bu
 	ptrState->bind(buffer);
 
 	StateFns::get_current()->glVertexAttribIPointer(index,components,type,stride,reinterpret_cast<const GLvoid*>(offset));
+
+	if (i != m_attributes.end())
+		i->second = buffer;
+	else
+		m_attributes.insert(index,buffer);
 }
 
 void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, bool normalized, GLsizei stride, GLsizeiptr offset)
 {
+	OOBase::Table<GLuint,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLuint>,OOBase::ThreadLocalAllocator>::iterator i = m_attributes.find(index);
+	if (i != m_attributes.end() && i->second == buffer)
+		return;
+
 	OOBase::SharedPtr<State> ptrState = State::get_current();
 
 	ptrState->bind(shared_from_this());
@@ -71,6 +84,11 @@ void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<Bu
 	ptrState->bind(buffer);
 
 	StateFns::get_current()->glVertexAttribPointer(index,components,type,normalized ? GL_TRUE : GL_FALSE,stride,reinterpret_cast<const GLvoid*>(offset));
+
+	if (i != m_attributes.end())
+		i->second = buffer;
+	else
+		m_attributes.insert(index,buffer);
 }
 
 void OOGL::VertexArrayObject::enable_attribute(GLuint index, bool enable)

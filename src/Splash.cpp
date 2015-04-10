@@ -48,8 +48,6 @@ namespace
 
 		OOBase::SharedPtr<Splash> self;
 
-		OOBase::SharedPtr<OOGL::BufferObject> ptrVertices;
-		OOBase::SharedPtr<OOGL::BufferObject> ptrColours;
 		OOBase::SharedPtr<OOGL::VertexArrayObject> ptrVAO;
 		OOBase::SharedPtr<OOGL::Program> ptrProgram;
 	};
@@ -134,14 +132,14 @@ void Splash::on_create()
 			0.6f, -0.4f, 0.f,
 			0.f, 0.6f, 0.f
 	};
-	ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(points),points);
+	OOBase::SharedPtr<OOGL::BufferObject> ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(points),points);
 
 	float colours[] = {
 			1.f, 0.f, 0.f,
 			0.f, 1.f, 0.f,
 			0.f, 0.f, 1.f
 	};
-	ptrColours = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(colours),colours);
+	OOBase::SharedPtr<OOGL::BufferObject> ptrColours = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(colours),colours);
 
 	GLint a = ptrProgram->attribute_location("in_Position");
 	ptrVAO->attribute(a,ptrVertices,3,GL_FLOAT,false);
@@ -164,15 +162,17 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 	//glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 view = glm::lookAt(glm::vec3(3,0,0),glm::vec3(0,0,0),glm::vec3(0,1,0));
 	view = glm::rotate(view,-glm::radians((float)glfwGetTime() * 50.f),glm::vec3(0,1,0));
+	glm::mat4 model = glm::rotate(glm::mat4(1.0f),-glm::radians((float)glfwGetTime() * 150.f),glm::vec3(0,0,1));
 
-	glm::mat4 model = glm::rotate(glm::mat4(1.0f),-glm::radians((float)glfwGetTime() * 50.f),glm::vec3(0,0,1));
-
-	glm::mat4 MVP = proj * view * model;
-
-	glState.use(ptrProgram);
-	ptrProgram->uniform("MVP",MVP);
+	ptrProgram->uniform("MVP",proj * view * model);
 
 	ptrVAO->draw(GL_TRIANGLES,0,3);
+
+	proj = glm::ortho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
+	view = glm::mat4(1.0f);
+	model = glm::mat4(1.0f);
+
+
 }
 
 void Splash::on_close(const OOGL::Window& win)

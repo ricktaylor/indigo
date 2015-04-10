@@ -52,6 +52,8 @@ namespace OOGL
 	private:
 		GLuint m_array;
 
+		OOBase::Table<GLuint,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLuint>,OOBase::ThreadLocalAllocator> m_attributes;
+
 		VertexArrayObject(GLuint array);
 
 		void bind();
