@@ -48,6 +48,8 @@ namespace
 
 		OOBase::SharedPtr<Splash> self;
 
+		OOBase::SharedPtr<OOGL::BufferObject> ptrVertices;
+		OOBase::SharedPtr<OOGL::BufferObject> ptrColours;
 		OOBase::SharedPtr<OOGL::VertexArrayObject> ptrVAO;
 		OOBase::SharedPtr<OOGL::Program> ptrProgram;
 	};
@@ -91,20 +93,16 @@ void Splash::on_create()
 	m_ratio = sz.x / (float)sz.y;
 	glViewport(0, 0, sz.x, sz.y);
 
-	float points[] = {
-		-1.0f, -1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		0.0f,  1.0f, 0.0f
-	};
-	OOBase::SharedPtr<OOGL::BufferObject> ptrVB = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(points),points);
-
 	OOBase::SharedPtr<OOGL::Shader> shaders[2];
 	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
 	shaders[0]->compile(
 			"#version 120\n"
 			"attribute vec3 in_Position;\n"
+			"attribute vec3 in_Colour;\n"
 			"uniform mat4 MVP;\n"
+			"varying vec3 pass_Colour;\n"
 			"void main() {\n"
+			"	pass_Colour = in_Colour;\n"
 			"	vec4 v = vec4(in_Position,1.0);\n"
 			"	gl_Position = MVP * v;\n"
 			"}\n");
@@ -115,8 +113,9 @@ void Splash::on_create()
 	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
 	shaders[1]->compile(
 			"#version 120\n"
+			"varying vec3 pass_Colour;\n"
 			"void main() {\n"
-			"    gl_FragColor = vec4(1,0,0,1);\n"
+			"    gl_FragColor = vec4(pass_Colour,1.0);\n"
 			"}\n");
 	s = shaders[1]->info_log();
 	if (!s.empty())
@@ -129,8 +128,28 @@ void Splash::on_create()
 		LOG_DEBUG(("%s",s.c_str()));
 
 	ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
-	ptrVAO->attribute(ptrProgram->attribute_location("in_Position"),ptrVB,3,GL_FLOAT,false);
-	ptrVAO->enable_attribute(0);
+
+	float points[] = {
+			-0.6f, -0.4f, 0.f,
+			0.6f, -0.4f, 0.f,
+			0.f, 0.6f, 0.f
+	};
+	ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(points),points);
+
+	float colours[] = {
+			1.f, 0.f, 0.f,
+			0.f, 1.f, 0.f,
+			0.f, 0.f, 1.f
+	};
+	ptrColours = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(colours),colours);
+
+	GLint a = ptrProgram->attribute_location("in_Position");
+	ptrVAO->attribute(a,ptrVertices,3,GL_FLOAT,false);
+	ptrVAO->enable_attribute(a);
+
+	a = ptrProgram->attribute_location("in_Colour");
+	ptrVAO->attribute(a,ptrColours,3,GL_FLOAT,false);
+	ptrVAO->enable_attribute(a);
 }
 
 void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
@@ -138,32 +157,21 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 	glState.bind(GL_DRAW_FRAMEBUFFER,win.get_default_frame_buffer());
 
 	// Always clear everything
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/*glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glRotatef((float) glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
-	glBegin(GL_TRIANGLES);
-	glColor3f(1.f, 0.f, 0.f);
-	glVertex3f(-0.6f, -0.4f, 0.f);
-	glColor3f(0.f, 1.f, 0.f);
-	glVertex3f(0.6f, -0.4f, 0.f);
-	glColor3f(0.f, 0.f, 1.f);
-	glVertex3f(0.f, 0.6f, 0.f);
-	glEnd();*/
-
+	//glm::mat4 proj = glm::ortho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
 	glm::mat4 proj = glm::perspective(glm::radians(45.0f),m_ratio,0.1f,100.0f);
-	glm::mat4 view = glm::lookAt(glm::vec3(4,3,3),glm::vec3(0,0,0),glm::vec3(0,1,0));
-	glm::mat4 model = glm::rotate(glm::mat4(1.0f),glm::radians((float)glfwGetTime() * 50.f),glm::vec3(0,1,0));
+	//glm::mat4 view = glm::mat4(1.0f);
+	glm::mat4 view = glm::lookAt(glm::vec3(3,0,0),glm::vec3(0,0,0),glm::vec3(0,1,0));
+	view = glm::rotate(view,-glm::radians((float)glfwGetTime() * 50.f),glm::vec3(0,1,0));
+
+	glm::mat4 model = glm::rotate(glm::mat4(1.0f),-glm::radians((float)glfwGetTime() * 50.f),glm::vec3(0,0,1));
 
 	glm::mat4 MVP = proj * view * model;
 
+	glState.use(ptrProgram);
 	ptrProgram->uniform("MVP",MVP);
 
-	glState.use(ptrProgram);
 	ptrVAO->draw(GL_TRIANGLES,0,3);
 }
 
