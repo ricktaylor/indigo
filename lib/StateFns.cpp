@@ -47,8 +47,12 @@ namespace
 		else
 			str.printf("%s",message);
 
-		while (str[str.length()-1] == '\n' || str[str.length()-1] == '\r')
-			str[str.length()-1] = '\0';
+		size_t l = str.length();
+		if (l)
+		{
+			for (--l;l > 0 && (str[l] == '\n' || str[l] == '\r');str[l--] = '\0')
+				;
+		}
 
 		OOBase::Logger::Priority p = OOBase::Logger::Information;
 		switch (severity)
