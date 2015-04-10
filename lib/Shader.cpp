@@ -197,7 +197,7 @@ bool OOGL::Program::in_use() const
 	return (static_cast<GLuint>(id) == m_id);
 }
 
-void OOGL::Program::use()
+void OOGL::Program::internal_use() const
 {
 	StateFns::get_current()->glUseProgram(m_id);
 }

@@ -133,7 +133,7 @@ namespace OOGL
 		mutable map_t m_mapUniforms;
 		mutable map_t m_mapAttributes;
 
-		void use();
+		void internal_use() const;
 	};
 }
 

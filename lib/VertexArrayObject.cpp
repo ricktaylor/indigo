@@ -46,6 +46,11 @@ OOGL::VertexArrayObject::~VertexArrayObject()
 
 void OOGL::VertexArrayObject::bind()
 {
+	State::get_current()->bind(shared_from_this());
+}
+
+void OOGL::VertexArrayObject::internal_bind() const
+{
 	StateFns::get_current()->glBindVertexArray(m_array);
 }
 
@@ -88,9 +93,9 @@ void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<Bu
 void OOGL::VertexArrayObject::enable_attribute(GLuint index, bool enable)
 {
 	if (enable)
-		StateFns::get_current()->glEnableVertexArrayAttrib(*State::get_current(),shared_from_this(),index);
+		StateFns::get_current()->glEnableVertexArrayAttrib(shared_from_this(),index);
 	else
-		StateFns::get_current()->glDisableVertexArrayAttrib(*State::get_current(),shared_from_this(),index);
+		StateFns::get_current()->glDisableVertexArrayAttrib(shared_from_this(),index);
 }
 
 void OOGL::VertexArrayObject::draw(GLenum mode, GLint first, GLsizei count)

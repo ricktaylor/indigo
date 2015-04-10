@@ -672,43 +672,43 @@ bool OOGL::StateFns::check_glTextureStorage()
 	return (m_fn_glTextureStorage1D != NULL);
 }
 
-void OOGL::StateFns::check_glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::check_glTextureStorage1D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	if (!check_glTextureStorage())
 		LOG_ERROR(("No glTexStorage1D function"));
 	else
-		(this->*m_thunk_glTextureStorage1D)(state,texture,target,levels,internalFormat,width);
+		(this->*m_thunk_glTextureStorage1D)(texture,target,levels,internalFormat,width);
 }
 
-void OOGL::StateFns::call_glTextureStorage1D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::call_glTextureStorage1D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	(*((PFNGLTEXTURESTORAGE1DPROC)m_fn_glTextureStorage1D))(texture,levels,internalFormat,width);
 
 	OOGL_CHECK("glTextureStorage1D");
 }
 
-void OOGL::StateFns::call_glTextureStorage1DEXT(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::call_glTextureStorage1DEXT(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	(*((PFNGLTEXTURESTORAGE1DEXTPROC)m_fn_glTextureStorage1D))(texture,target,levels,internalFormat,width);
 
 	OOGL_CHECK("glTextureStorage1DEXT");
 }
 
-void OOGL::StateFns::call_glTexStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::call_glTexStorage1D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
-	state.bind_texture(texture,target);
+	State::get_current()->bind_texture(texture,target);
 
 	(*((PFNGLTEXSTORAGE1DPROC)m_fn_glTextureStorage1D))(target,levels,internalFormat,width);
 
 	OOGL_CHECK("glTexStorage1D");
 }
 
-void OOGL::StateFns::glTextureStorage1D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
+void OOGL::StateFns::glTextureStorage1D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
-	(this->*m_thunk_glTextureStorage1D)(state,texture,target,levels,internalFormat,width);
+	(this->*m_thunk_glTextureStorage1D)(texture,target,levels,internalFormat,width);
 }
 
-void OOGL::StateFns::check_glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::StateFns::check_glTextureStorage2D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -737,38 +737,38 @@ void OOGL::StateFns::check_glTextureStorage2D(State& state, GLuint texture, GLen
 	if (!m_fn_glTextureStorage2D)
 		LOG_ERROR(("No glTexStorage2D function"));
 	else
-		(this->*m_thunk_glTextureStorage2D)(state,texture,target,levels,internalFormat,width,height);
+		(this->*m_thunk_glTextureStorage2D)(texture,target,levels,internalFormat,width,height);
 }
 
-void OOGL::StateFns::call_glTextureStorage2D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::StateFns::call_glTextureStorage2D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	(*((PFNGLTEXTURESTORAGE2DPROC)m_fn_glTextureStorage2D))(texture,levels,internalFormat,width,height);
 
 	OOGL_CHECK("glTextureStorage2D");
 }
 
-void OOGL::StateFns::call_glTextureStorage2DEXT(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::StateFns::call_glTextureStorage2DEXT(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	(*((PFNGLTEXTURESTORAGE2DEXTPROC)m_fn_glTextureStorage2D))(texture,target,levels,internalFormat,width,height);
 
 	OOGL_CHECK("glTextureStorage2DEXT");
 }
 
-void OOGL::StateFns::call_glTexStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::StateFns::call_glTexStorage2D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
-	state.bind_texture(texture,target);
+	State::get_current()->bind_texture(texture,target);
 
 	(*((PFNGLTEXSTORAGE2DPROC)m_fn_glTextureStorage2D))(target,levels,internalFormat,width,height);
 
 	OOGL_CHECK("glTexStorage2D");
 }
 
-void OOGL::StateFns::glTextureStorage2D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
+void OOGL::StateFns::glTextureStorage2D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
-	(this->*m_thunk_glTextureStorage2D)(state,texture,target,levels,internalFormat,width,height);
+	(this->*m_thunk_glTextureStorage2D)(texture,target,levels,internalFormat,width,height);
 }
 
-void OOGL::StateFns::check_glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::StateFns::check_glTextureStorage3D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -797,35 +797,35 @@ void OOGL::StateFns::check_glTextureStorage3D(State& state, GLuint texture, GLen
 	if (!m_fn_glTextureStorage3D)
 		LOG_ERROR(("No glTexStorage3D function"));
 	else
-		(this->*m_thunk_glTextureStorage3D)(state,texture,target,levels,internalFormat,width,height,depth);
+		(this->*m_thunk_glTextureStorage3D)(texture,target,levels,internalFormat,width,height,depth);
 }
 
-void OOGL::StateFns::call_glTextureStorage3D(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::StateFns::call_glTextureStorage3D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	(*((PFNGLTEXTURESTORAGE3DPROC)m_fn_glTextureStorage3D))(texture,levels,internalFormat,width,height,depth);
 
 	OOGL_CHECK("glTextureStorage3D");
 }
 
-void OOGL::StateFns::call_glTextureStorage3DEXT(State&, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::StateFns::call_glTextureStorage3DEXT(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	(*((PFNGLTEXTURESTORAGE3DEXTPROC)m_fn_glTextureStorage3D))(texture,target,levels,internalFormat,width,height,depth);
 
 	OOGL_CHECK("glTextureStorage3DEXT");
 }
 
-void OOGL::StateFns::call_glTexStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::StateFns::call_glTexStorage3D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
-	state.bind_texture(texture,target);
+	State::get_current()->bind_texture(texture,target);
 
 	(*((PFNGLTEXSTORAGE3DPROC)m_fn_glTextureStorage3D))(target,levels,internalFormat,width,height,depth);
 
 	OOGL_CHECK("glTexStorage3D");
 }
 
-void OOGL::StateFns::glTextureStorage3D(State& state, GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
+void OOGL::StateFns::glTextureStorage3D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
-	(this->*m_thunk_glTextureStorage3D)(state,texture,target,levels,internalFormat,width,height,depth);
+	(this->*m_thunk_glTextureStorage3D)(texture,target,levels,internalFormat,width,height,depth);
 }
 
 void OOGL::StateFns::check_glTextureSubImage1D()
@@ -860,70 +860,70 @@ void OOGL::StateFns::check_glTextureSubImage1D()
 	}
 }
 
-void OOGL::StateFns::check_glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::check_glTextureSubImage1D(GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	check_glTextureSubImage1D();
 
-	(this->*m_thunk_glTextureSubImage1D)(state,texture,target,level,xoffset,width,format,type,pixels);
+	(this->*m_thunk_glTextureSubImage1D)(texture,target,level,xoffset,width,format,type,pixels);
 }
 
-void OOGL::StateFns::check_glTextureSubImage1D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::check_glTextureSubImage1D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	check_glTextureSubImage1D();
 
-	(this->*m_thunk_glTextureSubImage1D_2)(state,texture,level,xoffset,width,format,type,pixels);
+	(this->*m_thunk_glTextureSubImage1D_2)(texture,level,xoffset,width,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage1D(State&, GLuint texture, GLenum, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage1D(GLuint texture, GLenum, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE1DPROC)m_fn_glTextureSubImage1D))(texture,level,xoffset,width,format,type,pixels);
 
 	OOGL_CHECK("glTextureSubImage1D");
 }
 
-void OOGL::StateFns::call_glTextureSubImage1D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage1D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
-	call_glTextureSubImage1D(state,texture->m_tex,0,level,xoffset,width,format,type,pixels);
+	call_glTextureSubImage1D(texture->m_tex,0,level,xoffset,width,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage1DEXT(State&, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage1DEXT(GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE1DEXTPROC)m_fn_glTextureSubImage1D))(texture,target,level,xoffset,width,format,type,pixels);
 
 	OOGL_CHECK("glTextureSubImage1DEXT");
 }
 
-void OOGL::StateFns::call_glTextureSubImage1DEXT_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage1DEXT_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
-	call_glTextureSubImage1DEXT(state,texture->m_tex,texture->m_target,level,xoffset,width,format,type,pixels);
+	call_glTextureSubImage1DEXT(texture->m_tex,texture->m_target,level,xoffset,width,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTexSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTexSubImage1D(GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
-	state.bind_texture(texture,target);
+	State::get_current()->bind_texture(texture,target);
 
 	glTexSubImage1D(target,level,xoffset,width,format,type,pixels);
 
 	OOGL_CHECK("glTexSubImage1D");
 }
 
-void OOGL::StateFns::call_glTexSubImage1D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTexSubImage1D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
-	state.bind(state.active_texture_unit(),texture);
+	State::get_current()->internal_bind(texture);
 
 	glTexSubImage1D(texture->m_target,level,xoffset,width,format,type,pixels);
 
 	OOGL_CHECK("glTexSubImage1D");
 }
 
-void OOGL::StateFns::glTextureSubImage1D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::glTextureSubImage1D(GLuint texture, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
-	(this->*m_thunk_glTextureSubImage1D)(state,texture,target,level,xoffset,width,format,type,pixels);
+	(this->*m_thunk_glTextureSubImage1D)(texture,target,level,xoffset,width,format,type,pixels);
 }
 
-void OOGL::StateFns::glTextureSubImage1D(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::glTextureSubImage1D(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
-	(this->*m_thunk_glTextureSubImage1D_2)(state,texture,level,xoffset,width,format,type,pixels);
+	(this->*m_thunk_glTextureSubImage1D_2)(texture,level,xoffset,width,format,type,pixels);
 }
 
 void OOGL::StateFns::check_glTextureSubImage2D()
@@ -958,70 +958,70 @@ void OOGL::StateFns::check_glTextureSubImage2D()
 	}
 }
 
-void OOGL::StateFns::check_glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::check_glTextureSubImage2D(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	check_glTextureSubImage2D();
 
-	(this->*m_thunk_glTextureSubImage2D)(state,texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
+	(this->*m_thunk_glTextureSubImage2D)(texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void OOGL::StateFns::check_glTextureSubImage2D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::check_glTextureSubImage2D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	check_glTextureSubImage2D();
 
-	(this->*m_thunk_glTextureSubImage2D_2)(state,texture,level,xoffset,yoffset,width,height,format,type,pixels);
+	(this->*m_thunk_glTextureSubImage2D_2)(texture,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage2D(State&, GLuint texture, GLenum, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage2D(GLuint texture, GLenum, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE2DPROC)m_fn_glTextureSubImage2D))(texture,level,xoffset,yoffset,width,height,format,type,pixels);
 
 	OOGL_CHECK("glTextureSubImage2D");
 }
 
-void OOGL::StateFns::call_glTextureSubImage2D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage2D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
-	call_glTextureSubImage2D(state,texture->m_tex,0,level,xoffset,yoffset,width,height,format,type,pixels);
+	call_glTextureSubImage2D(texture->m_tex,0,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage2DEXT(State&, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage2DEXT(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE2DEXTPROC)m_fn_glTextureSubImage2D))(texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
 
 	OOGL_CHECK("glTextureSubImage2DEXT");
 }
 
-void OOGL::StateFns::call_glTextureSubImage2DEXT_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage2DEXT_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
-	call_glTextureSubImage2DEXT(state,texture->m_tex,texture->m_target,level,xoffset,yoffset,width,height,format,type,pixels);
+	call_glTextureSubImage2DEXT(texture->m_tex,texture->m_target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTexSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTexSubImage2D(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
-	state.bind_texture(texture,target);
+	State::get_current()->bind_texture(texture,target);
 
 	glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
 
 	OOGL_CHECK("glTexSubImage2D");
 }
 
-void OOGL::StateFns::call_glTexSubImage2D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTexSubImage2D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
-	state.bind(state.active_texture_unit(),texture);
+	State::get_current()->internal_bind(texture);
 
 	glTexSubImage2D(texture->m_target,level,xoffset,yoffset,width,height,format,type,pixels);
 
 	OOGL_CHECK("glTexSubImage2D");
 }
 
-void OOGL::StateFns::glTextureSubImage2D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::glTextureSubImage2D(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
-	(this->*m_thunk_glTextureSubImage2D)(state,texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
+	(this->*m_thunk_glTextureSubImage2D)(texture,target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
-void OOGL::StateFns::glTextureSubImage2D(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::glTextureSubImage2D(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
-	(this->*m_thunk_glTextureSubImage2D_2)(state,texture,level,xoffset,yoffset,width,height,format,type,pixels);
+	(this->*m_thunk_glTextureSubImage2D_2)(texture,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
 bool OOGL::StateFns::check_glTextureSubImage3D()
@@ -1062,71 +1062,71 @@ bool OOGL::StateFns::check_glTextureSubImage3D()
 	return true;
 }
 
-void OOGL::StateFns::check_glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::check_glTextureSubImage3D(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	if (check_glTextureSubImage3D())
-		(this->*m_thunk_glTextureSubImage3D)(state,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+		(this->*m_thunk_glTextureSubImage3D)(texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void OOGL::StateFns::check_glTextureSubImage3D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::check_glTextureSubImage3D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	if (check_glTextureSubImage3D())
-		(this->*m_thunk_glTextureSubImage3D_2)(state,texture,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+		(this->*m_thunk_glTextureSubImage3D_2)(texture,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage3D(State&, GLuint texture, GLenum, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage3D(GLuint texture, GLenum, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE3DPROC)m_fn_glTextureSubImage3D))(texture,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 
 	OOGL_CHECK("glTextureSubImage3D");
 }
 
-void OOGL::StateFns::call_glTextureSubImage3D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage3D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
-	call_glTextureSubImage3D(state,texture->m_tex,0,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+	call_glTextureSubImage3D(texture->m_tex,0,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTextureSubImage3DEXT(State&, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage3DEXT(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	(*((PFNGLTEXTURESUBIMAGE3DEXTPROC)m_fn_glTextureSubImage3D))(texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 
 	OOGL_CHECK("glTextureSubImage3DEXT");
 }
 
-void OOGL::StateFns::call_glTextureSubImage3DEXT_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTextureSubImage3DEXT_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
-	call_glTextureSubImage3DEXT(state,texture->m_tex,texture->m_target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+	call_glTextureSubImage3DEXT(texture->m_tex,texture->m_target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void OOGL::StateFns::call_glTexSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTexSubImage3D(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
-	state.bind_texture(texture,target);
+	State::get_current()->bind_texture(texture,target);
 
 	(*((PFNGLTEXSUBIMAGE3DPROC)m_fn_glTextureSubImage3D))(target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 
 	OOGL_CHECK("glTexSubImage3D");
 }
 
-void OOGL::StateFns::call_glTexSubImage3D_2(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::call_glTexSubImage3D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
-	state.bind(state.active_texture_unit(),texture);
+	State::get_current()->internal_bind(texture);
 
 	(*((PFNGLTEXSUBIMAGE3DPROC)m_fn_glTextureSubImage3D))(texture->m_target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 
 	OOGL_CHECK("glTexSubImage3D");
 }
 
-void OOGL::StateFns::glTextureSubImage3D(State& state, GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::glTextureSubImage3D(GLuint texture, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
-	(this->*m_thunk_glTextureSubImage3D)(state,texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+	(this->*m_thunk_glTextureSubImage3D)(texture,target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void OOGL::StateFns::glTextureSubImage3D(State& state, const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
+void OOGL::StateFns::glTextureSubImage3D(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
-	(this->*m_thunk_glTextureSubImage3D_2)(state,texture,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+	(this->*m_thunk_glTextureSubImage3D_2)(texture,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
-void OOGL::StateFns::check_glTextureParameterf(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val)
+void OOGL::StateFns::check_glTextureParameterf(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1145,38 +1145,38 @@ void OOGL::StateFns::check_glTextureParameterf(State& state, const OOBase::Share
 	if (!m_fn_glTextureParameterf)
 		m_thunk_glTextureParameterf = &StateFns::call_glTexParameterf;
 
-	(this->*m_thunk_glTextureParameterf)(state,texture,name,val);
+	(this->*m_thunk_glTextureParameterf)(texture,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameterf(State&, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val)
+void OOGL::StateFns::call_glTextureParameterf(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val)
 {
 	(*((PFNGLTEXTUREPARAMETERFPROC)m_fn_glTextureParameterf))(texture->m_tex,name,val);
 
 	OOGL_CHECK("glTextureParameterf");
 }
 
-void OOGL::StateFns::call_glTextureParameterfEXT(State&, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val)
+void OOGL::StateFns::call_glTextureParameterfEXT(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val)
 {
 	(*((PFNGLTEXTUREPARAMETERFEXTPROC)m_fn_glTextureParameterf))(texture->m_tex,texture->m_target,name,val);
 
 	OOGL_CHECK("glTextureParameterfEXT");
 }
 
-void OOGL::StateFns::call_glTexParameterf(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val)
+void OOGL::StateFns::call_glTexParameterf(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val)
 {
-	state.bind(state.active_texture_unit(),texture);
+	State::get_current()->internal_bind(texture);
 
 	glTexParameterf(texture->m_target,name,val);
 
 	OOGL_CHECK("glTexParameterf");
 }
 
-void OOGL::StateFns::glTextureParameterf(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val)
+void OOGL::StateFns::glTextureParameterf(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val)
 {
-	(this->*m_thunk_glTextureParameterf)(state,texture,name,val);
+	(this->*m_thunk_glTextureParameterf)(texture,name,val);
 }
 
-void OOGL::StateFns::check_glTextureParameterfv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* val)
+void OOGL::StateFns::check_glTextureParameterfv(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* val)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1195,38 +1195,38 @@ void OOGL::StateFns::check_glTextureParameterfv(State& state, const OOBase::Shar
 	if (!m_fn_glTextureParameterfv)
 		m_thunk_glTextureParameterfv = &StateFns::call_glTexParameterfv;
 
-	(this->*m_thunk_glTextureParameterfv)(state,texture,name,val);
+	(this->*m_thunk_glTextureParameterfv)(texture,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameterfv(State&, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* val)
+void OOGL::StateFns::call_glTextureParameterfv(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* val)
 {
 	(*((PFNGLTEXTUREPARAMETERFVPROC)m_fn_glTextureParameterfv))(texture->m_tex,name,val);
 
 	OOGL_CHECK("glTextureParameterfv");
 }
 
-void OOGL::StateFns::call_glTextureParameterfvEXT(State&, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* val)
+void OOGL::StateFns::call_glTextureParameterfvEXT(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* val)
 {
 	(*((PFNGLTEXTUREPARAMETERFVEXTPROC)m_fn_glTextureParameterfv))(texture->m_tex,texture->m_target,name,val);
 
 	OOGL_CHECK("glTextureParameterfvEXT");
 }
 
-void OOGL::StateFns::call_glTexParameterfv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* val)
+void OOGL::StateFns::call_glTexParameterfv(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* val)
 {
-	state.bind(state.active_texture_unit(),texture);
+	State::get_current()->internal_bind(texture);
 
 	glTexParameterfv(texture->m_target,name,val);
 
 	OOGL_CHECK("glTexParameterfv");
 }
 
-void OOGL::StateFns::glTextureParameterfv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* val)
+void OOGL::StateFns::glTextureParameterfv(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* val)
 {
-	(this->*m_thunk_glTextureParameterfv)(state,texture,name,val);
+	(this->*m_thunk_glTextureParameterfv)(texture,name,val);
 }
 
-void OOGL::StateFns::check_glTextureParameteri(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val)
+void OOGL::StateFns::check_glTextureParameteri(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1245,38 +1245,38 @@ void OOGL::StateFns::check_glTextureParameteri(State& state, const OOBase::Share
 	if (!m_fn_glTextureParameteri)
 		m_thunk_glTextureParameteri = &StateFns::call_glTexParameteri;
 
-	(this->*m_thunk_glTextureParameteri)(state,texture,name,val);
+	(this->*m_thunk_glTextureParameteri)(texture,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameteri(State&, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val)
+void OOGL::StateFns::call_glTextureParameteri(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val)
 {
 	(*((PFNGLTEXTUREPARAMETERIPROC)m_fn_glTextureParameteri))(texture->m_tex,name,val);
 
 	OOGL_CHECK("glTextureParameteri");
 }
 
-void OOGL::StateFns::call_glTextureParameteriEXT(State&, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val)
+void OOGL::StateFns::call_glTextureParameteriEXT(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val)
 {
 	(*((PFNGLTEXTUREPARAMETERIEXTPROC)m_fn_glTextureParameteri))(texture->m_tex,texture->m_target,name,val);
 
 	OOGL_CHECK("glTextureParameteriEXT");
 }
 
-void OOGL::StateFns::call_glTexParameteri(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val)
+void OOGL::StateFns::call_glTexParameteri(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val)
 {
-	state.bind(state.active_texture_unit(),texture);
+	State::get_current()->internal_bind(texture);
 
 	glTexParameteri(texture->m_target,name,val);
 
 	OOGL_CHECK("glTexParameteri");
 }
 
-void OOGL::StateFns::glTextureParameteri(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val)
+void OOGL::StateFns::glTextureParameteri(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val)
 {
-	(this->*m_thunk_glTextureParameteri)(state,texture,name,val);
+	(this->*m_thunk_glTextureParameteri)(texture,name,val);
 }
 
-void OOGL::StateFns::check_glTextureParameteriv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val)
+void OOGL::StateFns::check_glTextureParameteriv(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1295,35 +1295,35 @@ void OOGL::StateFns::check_glTextureParameteriv(State& state, const OOBase::Shar
 	if (!m_fn_glTextureParameteriv)
 		m_thunk_glTextureParameteriv = &StateFns::call_glTexParameteriv;
 
-	(this->*m_thunk_glTextureParameteriv)(state,texture,name,val);
+	(this->*m_thunk_glTextureParameteriv)(texture,name,val);
 }
 
-void OOGL::StateFns::call_glTextureParameteriv(State&, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val)
+void OOGL::StateFns::call_glTextureParameteriv(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val)
 {
 	(*((PFNGLTEXTUREPARAMETERIVPROC)m_fn_glTextureParameteriv))(texture->m_tex,name,val);
 
 	OOGL_CHECK("glTextureParameteriv");
 }
 
-void OOGL::StateFns::call_glTextureParameterivEXT(State&, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val)
+void OOGL::StateFns::call_glTextureParameterivEXT(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val)
 {
 	(*((PFNGLTEXTUREPARAMETERIVEXTPROC)m_fn_glTextureParameteriv))(texture->m_tex,texture->m_target,name,val);
 
 	OOGL_CHECK("glTextureParameterivEXT");
 }
 
-void OOGL::StateFns::call_glTexParameteriv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val)
+void OOGL::StateFns::call_glTexParameteriv(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val)
 {
-	state.bind(state.active_texture_unit(),texture);
+	State::get_current()->internal_bind(texture);
 
 	glTexParameteriv(texture->m_target,name,val);
 
 	OOGL_CHECK("glTexParameteriv");
 }
 
-void OOGL::StateFns::glTextureParameteriv(State& state, const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val)
+void OOGL::StateFns::glTextureParameteriv(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val)
 {
-	(this->*m_thunk_glTextureParameteriv)(state,texture,name,val);
+	(this->*m_thunk_glTextureParameteriv)(texture,name,val);
 }
 
 bool OOGL::StateFns::check_glGenerateMipmap()
@@ -1426,7 +1426,7 @@ void OOGL::StateFns::glDeleteBuffers(GLsizei n, const GLuint* buffers)
 	}
 }
 
-void OOGL::StateFns::check_glBufferData(State& state, GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage)
+void OOGL::StateFns::check_glBufferData(GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1451,31 +1451,31 @@ void OOGL::StateFns::check_glBufferData(State& state, GLuint buffer, GLenum targ
 			m_thunk_glBufferData = &StateFns::call_glBufferData;
 	}
 
-	(this->*m_thunk_glBufferData)(state,buffer,target,size,data,usage);
+	(this->*m_thunk_glBufferData)(buffer,target,size,data,usage);
 }
 
-void OOGL::StateFns::call_glNamedBufferData(State&, GLuint buffer, GLenum, GLsizeiptr size, const void *data, GLenum usage)
+void OOGL::StateFns::call_glNamedBufferData(GLuint buffer, GLenum, GLsizeiptr size, const void *data, GLenum usage)
 {
 	(*((PFNGLNAMEDBUFFERDATAPROC)m_fn_glBufferData))(buffer,size,data,usage);
 
 	OOGL_CHECK("glNamedBufferData");
 }
 
-void OOGL::StateFns::call_glBufferData(State& state, GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage)
+void OOGL::StateFns::call_glBufferData(GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage)
 {
-	state.bind_buffer(buffer,target);
+	State::get_current()->bind_buffer(buffer,target);
 
 	(*((PFNGLBUFFERDATAPROC)m_fn_glBufferData))(target,size,data,usage);
 
 	OOGL_CHECK("glBufferData");
 }
 
-void OOGL::StateFns::glBufferData(State& state, GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage)
+void OOGL::StateFns::glBufferData(GLuint buffer, GLenum target, GLsizeiptr size, const void *data, GLenum usage)
 {
-	(this->*m_thunk_glBufferData)(state,buffer,target,size,data,usage);
+	(this->*m_thunk_glBufferData)(buffer,target,size,data,usage);
 }
 
-void* OOGL::StateFns::check_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* OOGL::StateFns::check_glMapBufferRange(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1507,10 +1507,10 @@ void* OOGL::StateFns::check_glMapBufferRange(State& state, const OOBase::SharedP
 			m_thunk_glMapBufferRange = &StateFns::call_glMapBuffer;
 	}
 
-	return (this->*m_thunk_glMapBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
+	return (this->*m_thunk_glMapBufferRange)(buffer,offset,length,orig_usage,orig_size,access);
 }
 
-void* OOGL::StateFns::call_glMapNamedBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* OOGL::StateFns::call_glMapNamedBufferRange(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	void* r = (*((PFNGLMAPNAMEDBUFFERRANGEPROC)m_fn_glMapBufferRange))(buffer->m_buffer,offset,length,access);
 
@@ -1519,9 +1519,9 @@ void* OOGL::StateFns::call_glMapNamedBufferRange(State& state, const OOBase::Sha
 	return r;
 }
 
-void* OOGL::StateFns::call_glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* OOGL::StateFns::call_glMapBufferRange(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
-	state.bind(buffer);
+	buffer->bind();
 
 	void* r = (*((PFNGLMAPBUFFERRANGEPROC)m_fn_glMapBufferRange))(buffer->m_target,offset,length,access);
 
@@ -1530,12 +1530,12 @@ void* OOGL::StateFns::call_glMapBufferRange(State& state, const OOBase::SharedPt
 	return r;
 }
 
-void* OOGL::StateFns::call_glMapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* OOGL::StateFns::call_glMapBuffer(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
 	if (access & GL_MAP_INVALIDATE_BUFFER_BIT)
-		glBufferData(state,buffer->m_buffer,buffer->m_target,orig_size,NULL,orig_usage);
+		glBufferData(buffer->m_buffer,buffer->m_target,orig_size,NULL,orig_usage);
 	
-	state.bind(buffer);
+	buffer->bind();
 	
 	OOBase::uint8_t* ret = static_cast<OOBase::uint8_t*>((*((PFNGLMAPBUFFERPROC)m_fn_glMapBufferRange))(buffer->m_target,access));
 	if (ret)
@@ -1544,12 +1544,12 @@ void* OOGL::StateFns::call_glMapBuffer(State& state, const OOBase::SharedPtr<Buf
 	return ret;
 }
 
-void* OOGL::StateFns::glMapBufferRange(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
+void* OOGL::StateFns::glMapBufferRange(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
-	return (this->*m_thunk_glMapBufferRange)(state,buffer,offset,length,orig_usage,orig_size,access);
+	return (this->*m_thunk_glMapBufferRange)(buffer,offset,length,orig_usage,orig_size,access);
 }
 
-bool OOGL::StateFns::check_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool OOGL::StateFns::check_glUnmapBuffer(const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1574,10 +1574,10 @@ bool OOGL::StateFns::check_glUnmapBuffer(State& state, const OOBase::SharedPtr<B
 			m_thunk_glUnmapBuffer = &StateFns::call_glUnmapBuffer;
 	}
 
-	return (this->*m_thunk_glUnmapBuffer)(state,buffer);
+	return (this->*m_thunk_glUnmapBuffer)(buffer);
 }
 
-bool OOGL::StateFns::call_glUnmapNamedBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool OOGL::StateFns::call_glUnmapNamedBuffer(const OOBase::SharedPtr<BufferObject>& buffer)
 {
 	bool r = ((*((PFNGLUNMAPNAMEDBUFFERPROC)m_fn_glUnmapBuffer))(buffer->m_buffer) == GL_TRUE);
 
@@ -1586,9 +1586,9 @@ bool OOGL::StateFns::call_glUnmapNamedBuffer(State& state, const OOBase::SharedP
 	return r;
 }
 
-bool OOGL::StateFns::call_glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool OOGL::StateFns::call_glUnmapBuffer(const OOBase::SharedPtr<BufferObject>& buffer)
 {
-	state.bind(buffer);
+	buffer->bind();
 
 	bool r = ((*((PFNGLUNMAPBUFFERPROC)m_fn_glUnmapBuffer))(buffer->m_target) == GL_TRUE);
 
@@ -1597,12 +1597,12 @@ bool OOGL::StateFns::call_glUnmapBuffer(State& state, const OOBase::SharedPtr<Bu
 	return r;
 }
 
-bool OOGL::StateFns::glUnmapBuffer(State& state, const OOBase::SharedPtr<BufferObject>& buffer)
+bool OOGL::StateFns::glUnmapBuffer(const OOBase::SharedPtr<BufferObject>& buffer)
 {
-	return (this->*m_thunk_glUnmapBuffer)(state,buffer);
+	return (this->*m_thunk_glUnmapBuffer)(buffer);
 }
 
-void OOGL::StateFns::check_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
+void OOGL::StateFns::check_glBufferSubData(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1627,31 +1627,31 @@ void OOGL::StateFns::check_glBufferSubData(State& state, const OOBase::SharedPtr
 			m_thunk_glBufferSubData = &StateFns::call_glBufferSubData;
 	}
 
-	(this->*m_thunk_glBufferSubData)(state,buffer,offset,size,data);
+	(this->*m_thunk_glBufferSubData)(buffer,offset,size,data);
 }
 
-void OOGL::StateFns::call_glNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
+void OOGL::StateFns::call_glNamedBufferSubData(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
 {
 	(*((PFNGLNAMEDBUFFERSUBDATAPROC)m_fn_glBufferSubData))(buffer->m_buffer,offset,size,data);
 
 	OOGL_CHECK("glNamedBufferSubData");
 }
 
-void OOGL::StateFns::call_glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
+void OOGL::StateFns::call_glBufferSubData(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
 {
-	state.bind(buffer);
+	buffer->bind();
 
 	(*((PFNGLBUFFERSUBDATAPROC)m_fn_glBufferSubData))(buffer->m_target,offset,size,data);
 
 	OOGL_CHECK("glBufferSubData");
 }
 
-void OOGL::StateFns::glBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
+void OOGL::StateFns::glBufferSubData(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
 {
-	(this->*m_thunk_glBufferSubData)(state,buffer,offset,size,data);
+	(this->*m_thunk_glBufferSubData)(buffer,offset,size,data);
 }
 
-void OOGL::StateFns::check_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+void OOGL::StateFns::check_glCopyBufferSubData(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -1680,27 +1680,28 @@ void OOGL::StateFns::check_glCopyBufferSubData(State& state, const OOBase::Share
 		m_thunk_glCopyBufferSubData = &StateFns::emulate_glCopyBufferSubData;
 	}
 
-	(this->*m_thunk_glCopyBufferSubData)(state,write,writeoffset,read,readoffset,size);
+	(this->*m_thunk_glCopyBufferSubData)(write,writeoffset,read,readoffset,size);
 }
 
-void OOGL::StateFns::call_glCopyNamedBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+void OOGL::StateFns::call_glCopyNamedBufferSubData(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
 	(*((PFNGLCOPYNAMEDBUFFERSUBDATAPROC)m_fn_glCopyBufferSubData))(read->m_buffer,write->m_buffer,readoffset,writeoffset,size);
 
 	OOGL_CHECK("glCopyNamedBufferSubData");
 }
 
-void OOGL::StateFns::call_glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+void OOGL::StateFns::call_glCopyBufferSubData(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
-	state.bind(read,GL_COPY_READ_BUFFER);
-	state.bind(write,GL_COPY_WRITE_BUFFER);
+	OOBase::SharedPtr<State> ptrState = State::get_current();
+	ptrState->internal_bind(read,GL_COPY_READ_BUFFER);
+	ptrState->internal_bind(write,GL_COPY_WRITE_BUFFER);
 
 	(*((PFNGLCOPYBUFFERSUBDATAPROC)m_fn_glCopyBufferSubData))(GL_COPY_READ_BUFFER,GL_COPY_WRITE_BUFFER,readoffset,writeoffset,size);
 
 	OOGL_CHECK("glCopyBufferSubData");
 }
 
-void OOGL::StateFns::emulate_glCopyBufferSubData(State&, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+void OOGL::StateFns::emulate_glCopyBufferSubData(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
 	OOBase::SharedPtr<OOBase::uint8_t> r = read->auto_map<OOBase::uint8_t>(GL_READ_ONLY,readoffset);
 	OOBase::SharedPtr<OOBase::uint8_t> w = write->auto_map<OOBase::uint8_t>(GL_WRITE_ONLY,writeoffset);
@@ -1708,9 +1709,9 @@ void OOGL::StateFns::emulate_glCopyBufferSubData(State&, const OOBase::SharedPtr
 	memcpy(w.get(),r.get(),size);
 }
 
-void OOGL::StateFns::glCopyBufferSubData(State& state, const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+void OOGL::StateFns::glCopyBufferSubData(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
-	(this->*m_thunk_glCopyBufferSubData)(state,write,writeoffset,read,readoffset,size);
+	(this->*m_thunk_glCopyBufferSubData)(write,writeoffset,read,readoffset,size);
 }
 
 void OOGL::StateFns::glGenVertexArrays(GLsizei n, GLuint* arrays)
@@ -1767,7 +1768,7 @@ void OOGL::StateFns::glDeleteVertexArrays(GLsizei n, const GLuint* arrays)
 	}
 }
 
-void OOGL::StateFns::check_glEnableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
+void OOGL::StateFns::check_glEnableVertexArrayAttrib(const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
 {
 	if (!m_fn_glEnableVertexArrayAttrib)
 	{
@@ -1802,31 +1803,31 @@ void OOGL::StateFns::check_glEnableVertexArrayAttrib(State& state, const OOBase:
 	if (!m_fn_glEnableVertexArrayAttrib)
 		LOG_ERROR(("No glEnableVertexAttribArray function"));
 	else
-		(this->*m_thunk_glEnableVertexArrayAttrib)(state,vao,index);
+		(this->*m_thunk_glEnableVertexArrayAttrib)(vao,index);
 }
 
-void OOGL::StateFns::call_glEnableVertexArrayAttrib(State&, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
+void OOGL::StateFns::call_glEnableVertexArrayAttrib(const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
 {
 	(*((PFNGLENABLEVERTEXARRAYATTRIBPROC)m_fn_glEnableVertexArrayAttrib))(vao->m_array,index);
 
 	OOGL_CHECK("glEnableVertexArrayAttrib");
 }
 
-void OOGL::StateFns::call_glEnableVertexAttribArray(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
+void OOGL::StateFns::call_glEnableVertexAttribArray(const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
 {
-	state.bind(vao);
+	vao->bind();
 
 	(*((PFNGLENABLEVERTEXATTRIBARRAYPROC)m_fn_glEnableVertexArrayAttrib))(index);
 
 	OOGL_CHECK("glEnableVertexAttribArray");
 }
 
-void OOGL::StateFns::glEnableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
+void OOGL::StateFns::glEnableVertexArrayAttrib(const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
 {
-	(this->*m_thunk_glEnableVertexArrayAttrib)(state,vao,index);
+	(this->*m_thunk_glEnableVertexArrayAttrib)(vao,index);
 }
 
-void OOGL::StateFns::check_glDisableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
+void OOGL::StateFns::check_glDisableVertexArrayAttrib(const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
 {
 	if (!m_fn_glDisableVertexArrayAttrib)
 	{
@@ -1861,28 +1862,28 @@ void OOGL::StateFns::check_glDisableVertexArrayAttrib(State& state, const OOBase
 	if (!m_fn_glDisableVertexArrayAttrib)
 		LOG_ERROR(("No glDisableVertexAttribArray function"));
 	else
-		(this->*m_thunk_glDisableVertexArrayAttrib)(state,vao,index);
+		(this->*m_thunk_glDisableVertexArrayAttrib)(vao,index);
 }
 
-void OOGL::StateFns::call_glDisableVertexArrayAttrib(State&, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
+void OOGL::StateFns::call_glDisableVertexArrayAttrib(const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
 {
 	(*((PFNGLDISABLEVERTEXARRAYATTRIBPROC)m_fn_glDisableVertexArrayAttrib))(vao->m_array,index);
 
 	OOGL_CHECK("glDisableVertexArrayAttrib");
 }
 
-void OOGL::StateFns::call_glDisableVertexAttribArray(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
+void OOGL::StateFns::call_glDisableVertexAttribArray(const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
 {
-	state.bind(vao);
+	vao->bind();
 
 	(*((PFNGLDISABLEVERTEXATTRIBARRAYPROC)m_fn_glDisableVertexArrayAttrib))(index);
 
 	OOGL_CHECK("glDisableVertexAttribArray");
 }
 
-void OOGL::StateFns::glDisableVertexArrayAttrib(State& state, const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
+void OOGL::StateFns::glDisableVertexArrayAttrib(const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index)
 {
-	(this->*m_thunk_glDisableVertexArrayAttrib)(state,vao,index);
+	(this->*m_thunk_glDisableVertexArrayAttrib)(vao,index);
 }
 
 void OOGL::StateFns::glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer)

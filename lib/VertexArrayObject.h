@@ -19,6 +19,8 @@ namespace OOGL
 
 		static OOBase::SharedPtr<VertexArrayObject> none();
 
+		void bind();
+
 		void attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, GLsizei stride = 0, GLsizeiptr offset = 0);
 		void attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, bool normalized, GLsizei stride = 0, GLsizeiptr offset = 0);
 
@@ -36,11 +38,9 @@ namespace OOGL
 		void draw_instanced(GLenum mode, GLint first, GLsizei count, GLsizei instances);
 		void draw_instanced(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance);
 
-		void draw_elements(GLenum mode, GLsizei count, GLenum type);
-		void draw_elements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset);
+		void draw_elements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset = 0);
 		void draw_elements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
-		void draw_elements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type);
-		void draw_elements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset);
+		void draw_elements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset = 0);
 		void draw_elements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
 		void draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
 		void draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint* basevertices);
@@ -56,7 +56,7 @@ namespace OOGL
 
 		VertexArrayObject(GLuint array);
 
-		void bind();
+		void internal_bind() const;
 	};
 }
 

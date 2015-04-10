@@ -75,7 +75,8 @@ namespace OOGL
 
 		GLenum activate_texture_unit(GLenum unit);
 
-		OOBase::SharedPtr<BufferObject> bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
+		OOBase::SharedPtr<BufferObject> internal_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
+		OOBase::SharedPtr<Texture> internal_bind(const OOBase::SharedPtr<Texture>& texture);
 	};
 
 	void glCheckError(const char* fn, const char* file, unsigned int line);

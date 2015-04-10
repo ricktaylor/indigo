@@ -45,7 +45,7 @@ namespace OOGL
 		Framebuffer(GLuint id);
 		static OOBase::SharedPtr<Framebuffer> get_default();
 
-		void bind(GLenum target);
+		void internal_bind(GLenum target) const;
 	};
 }
 

@@ -70,7 +70,7 @@ OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLs
 	if (!fns->check_glTextureStorage())
 		init_mutable(levels,internalFormat,width,0,0,NULL);
 	else
-		fns->glTextureStorage1D(*State::get_current(),m_tex,m_target,levels,internalFormat,width);
+		fns->glTextureStorage1D(m_tex,m_target,levels,internalFormat,width);
 }
 
 OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height) :
@@ -86,7 +86,7 @@ OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLs
 	if (!fns->check_glTextureStorage())
 		init_mutable(levels,internalFormat,width,height,0,0,NULL);
 	else
-		fns->glTextureStorage2D(*State::get_current(),m_tex,m_target,levels,internalFormat,width,height);
+		fns->glTextureStorage2D(m_tex,m_target,levels,internalFormat,width,height);
 }
 
 OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth) :
@@ -102,7 +102,7 @@ OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLs
 	if (!fns->check_glTextureStorage())
 		init_mutable(levels,internalFormat,width,height,depth,0,0,NULL);
 	else
-		fns->glTextureStorage3D(*State::get_current(),m_tex,m_target,levels,internalFormat,width,height,depth);
+		fns->glTextureStorage3D(m_tex,m_target,levels,internalFormat,width,height,depth);
 }
 
 OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLenum format, GLenum type, const void* pixels) :
@@ -119,9 +119,8 @@ OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLs
 		init_mutable(levels,internalFormat,width,format,type,pixels);
 	else
 	{
-		OOBase::SharedPtr<State> state = State::get_current();
-		fns->glTextureStorage1D(*state,m_tex,m_target,levels,internalFormat,width);
-		fns->glTextureSubImage1D(*state,m_tex,m_target,0,0,width,format,type,pixels);
+		fns->glTextureStorage1D(m_tex,m_target,levels,internalFormat,width);
+		fns->glTextureSubImage1D(m_tex,m_target,0,0,width,format,type,pixels);
 
 		if (levels > 1)
 			fns->glGenerateTextureMipmap(m_tex,m_target);
@@ -147,9 +146,8 @@ OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLs
 		init_mutable(levels,internalFormat,width,height,format,type,pixels);
 	else
 	{
-		OOBase::SharedPtr<State> state = State::get_current();
-		fns->glTextureStorage2D(*state,m_tex,m_target,levels,internalFormat,width,height);
-		fns->glTextureSubImage2D(*state,m_tex,m_target,0,0,0,width,height,format,type,pixels);
+		fns->glTextureStorage2D(m_tex,m_target,levels,internalFormat,width,height);
+		fns->glTextureSubImage2D(m_tex,m_target,0,0,0,width,height,format,type,pixels);
 
 		if (levels > 1)
 			fns->glGenerateTextureMipmap(m_tex,m_target);
@@ -175,9 +173,8 @@ OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLs
 		init_mutable(levels,internalFormat,width,height,depth,format,type,pixels);
 	else
 	{
-		OOBase::SharedPtr<State> state = State::get_current();
-		fns->glTextureStorage3D(*state,m_tex,m_target,levels,internalFormat,width,height,depth);
-		fns->glTextureSubImage3D(*state,m_tex,m_target,0,0,0,0,width,height,depth,format,type,pixels);
+		fns->glTextureStorage3D(m_tex,m_target,levels,internalFormat,width,height,depth);
+		fns->glTextureSubImage3D(m_tex,m_target,0,0,0,0,width,height,depth,format,type,pixels);
 
 		if (levels > 1)
 			fns->glGenerateTextureMipmap(m_tex,m_target);
@@ -355,12 +352,12 @@ void OOGL::Texture::init_mutable(GLsizei levels, GLenum internalFormat, GLsizei 
 
 void OOGL::Texture::sub_image(GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
-	StateFns::get_current()->glTextureSubImage1D(*State::get_current(),shared_from_this(),level,xoffset,width,format,type,pixels);
+	StateFns::get_current()->glTextureSubImage1D(shared_from_this(),level,xoffset,width,format,type,pixels);
 }
 
 void OOGL::Texture::sub_image(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
-	StateFns::get_current()->glTextureSubImage2D(*State::get_current(),shared_from_this(),level,xoffset,yoffset,width,height,format,type,pixels);
+	StateFns::get_current()->glTextureSubImage2D(shared_from_this(),level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
 void OOGL::Texture::cubemap_sub_image(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
@@ -374,7 +371,7 @@ void OOGL::Texture::cubemap_sub_image(GLenum target, GLint level, GLint xoffset,
 
 void OOGL::Texture::sub_image(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
-	StateFns::get_current()->glTextureSubImage3D(*State::get_current(),shared_from_this(),level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
+	StateFns::get_current()->glTextureSubImage3D(shared_from_this(),level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 }
 
 GLenum OOGL::Texture::target() const
@@ -382,29 +379,29 @@ GLenum OOGL::Texture::target() const
 	return m_target;
 }
 
-void OOGL::Texture::bind(State& state, GLenum unit) const
+void OOGL::Texture::internal_bind(State& state, GLenum unit) const
 {
 	StateFns::get_current()->glBindTextureUnit(state,unit,m_target,m_tex);
 }
 
 void OOGL::Texture::parameter(GLenum name, GLfloat val)
 {
-	StateFns::get_current()->glTextureParameterf(*State::get_current(),shared_from_this(),name,val);
+	StateFns::get_current()->glTextureParameterf(shared_from_this(),name,val);
 }
 
 void OOGL::Texture::parameter(GLenum name, const GLfloat* pval)
 {
-	StateFns::get_current()->glTextureParameterfv(*State::get_current(),shared_from_this(),name,pval);
+	StateFns::get_current()->glTextureParameterfv(shared_from_this(),name,pval);
 }
 
 void OOGL::Texture::parameter(GLenum name, GLint val)
 {
-	StateFns::get_current()->glTextureParameteri(*State::get_current(),shared_from_this(),name,val);
+	StateFns::get_current()->glTextureParameteri(shared_from_this(),name,val);
 }
 
 void OOGL::Texture::parameter(GLenum name, const GLint* pval)
 {
-	StateFns::get_current()->glTextureParameteriv(*State::get_current(),shared_from_this(),name,pval);
+	StateFns::get_current()->glTextureParameteriv(shared_from_this(),name,pval);
 }
 
 OOGL::MutableTexture::MutableTexture(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width) : 

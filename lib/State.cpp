@@ -78,7 +78,7 @@ OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBa
 		if (m_draw_fb != fb || m_read_fb != fb)
 		{
 			if (fb)
-				fb->bind(GL_FRAMEBUFFER);
+				fb->internal_bind(GL_FRAMEBUFFER);
 
 			m_draw_fb = fb;
 			m_read_fb = fb;
@@ -90,7 +90,7 @@ OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBa
 		if (m_draw_fb != fb)
 		{
 			if (fb)
-				fb->bind(GL_DRAW_FRAMEBUFFER);
+				fb->internal_bind(GL_DRAW_FRAMEBUFFER);
 
 			m_draw_fb = fb;
 		}
@@ -101,7 +101,7 @@ OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBa
 		if (m_read_fb != fb)
 		{
 			if (fb)
-				fb->bind(GL_READ_FRAMEBUFFER);
+				fb->internal_bind(GL_READ_FRAMEBUFFER);
 
 			m_read_fb = fb;
 		}
@@ -130,6 +130,11 @@ GLenum OOGL::State::active_texture_unit() const
 	return m_active_texture_unit;
 }
 
+OOBase::SharedPtr<OOGL::Texture> OOGL::State::internal_bind(const OOBase::SharedPtr<Texture>& texture)
+{
+	return bind(m_active_texture_unit,texture);
+}
+
 OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture)
 {
 	OOBase::SharedPtr<OOGL::Texture> prev;
@@ -142,7 +147,7 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLenum unit, const OOBase::Sh
 			LOG_WARNING(("Failed to resize texture unit cache"));
 
 			if (texture)
-				texture->bind(*this,unit);
+				texture->internal_bind(*this,unit);
 
 			return prev;
 		}
@@ -155,7 +160,7 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLenum unit, const OOBase::Sh
 	{
 		if (texture)
 		{
-			texture->bind(*this,unit);
+			texture->internal_bind(*this,unit);
 
 			if (!tu->insert(texture->target(),texture))
 				LOG_WARNING(("Failed to add to texture unit cache"));
@@ -167,7 +172,7 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLenum unit, const OOBase::Sh
 		if (prev != texture)
 		{
 			if (texture)
-				texture->bind(*this,unit);
+				texture->internal_bind(*this,unit);
 
 			i->second = texture;
 		}
@@ -205,17 +210,17 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind_texture(GLuint texture, GLenu
 
 OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object)
 {
-	return bind(buffer_object,buffer_object ? buffer_object->m_target : 0);
+	return internal_bind(buffer_object,buffer_object ? buffer_object->m_target : 0);
 }
 
-OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
+OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::internal_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
 {
 	OOBase::SharedPtr<BufferObject> prev;
 	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
 	if (i == m_buffer_objects.end())
 	{
 		if (buffer_object)
-			buffer_object->bind(target);
+			buffer_object->internal_bind(target);
 		else
 			m_state_fns.glBindBuffer(target,0);
 
@@ -228,7 +233,7 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind(const OOBase::SharedPtr<
 		if (i->second != buffer_object)
 		{
 			if (buffer_object)
-				buffer_object->bind(target);
+				buffer_object->internal_bind(target);
 			else
 				m_state_fns.glBindBuffer(target,0);
 
@@ -266,7 +271,7 @@ OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::State::bind(const OOBase::Share
 	if (m_current_vao != vao)
 	{
 		if (vao)
-			vao->bind();
+			vao->internal_bind();
 		
 		m_current_vao = vao;
 	}
@@ -281,7 +286,7 @@ OOBase::SharedPtr<OOGL::Program> OOGL::State::use(const OOBase::SharedPtr<Progra
 	if (m_current_program != program)
 	{
 		if (program)
-			program->use();
+			program->internal_use();
 		else
 			m_state_fns.glUseProgram(0);
 
