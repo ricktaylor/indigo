@@ -38,29 +38,6 @@ namespace
 		OOBase::SharedPtr<OOGL::VertexArrayObject> ptrVAO;
 		OOBase::SharedPtr<OOGL::Program> ptrProgram;
 	};
-
-	class Splash : public OOBase::EnableSharedFromThis<Splash>
-	{
-	public:
-		Splash();
-
-		bool init();
-
-	private:
-		// Render thread local members
-		OOBase::SharedPtr<OOGL::Window> m_wnd;
-		float m_ratio;
-
-		static bool create(void* p);
-
-		void on_create();
-		void on_draw(const OOGL::Window& win, OOGL::State& glState);
-		void on_close(const OOGL::Window& win);
-
-		OOBase::SharedPtr<Splash> self;
-
-		Triangle m_tri;
-	};
 }
 
 void Triangle::setup()
@@ -124,12 +101,37 @@ void Triangle::setup()
 
 void Triangle::draw(OOGL::State& glState, const glm::mat4& VP)
 {
-	glState.use(ptrProgram);
-
 	glm::mat4 model = glm::rotate(glm::mat4(1.0f),-glm::radians((float)glfwGetTime() * 150.f),glm::vec3(0,0,1));
-
 	ptrProgram->uniform("MVP",VP * model);
+
+	glState.use(ptrProgram);
 	ptrVAO->draw(GL_TRIANGLES,0,3);
+}
+
+namespace
+{
+	class Splash : public OOBase::EnableSharedFromThis<Splash>
+	{
+	public:
+		Splash();
+
+		bool init();
+
+	private:
+		// Render thread local members
+		OOBase::SharedPtr<OOGL::Window> m_wnd;
+		float m_ratio;
+
+		static bool create(void* p);
+
+		void on_draw(const OOGL::Window& win, OOGL::State& glState);
+		void on_close(const OOGL::Window& win);
+		void on_size(const OOGL::Window& win, const glm::ivec2& sz);
+
+		OOBase::SharedPtr<Splash> self;
+
+		Triangle m_tri;
+	};
 }
 
 Splash::Splash() : m_ratio(0)
@@ -150,34 +152,32 @@ bool Splash::create(void* p)
 		return false;
 
 	if (!pThis->m_wnd->signal_close.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_close) ||
+			!pThis->m_wnd->signal_sized.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_size) ||
 			!pThis->m_wnd->signal_draw.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_draw))
 		LOG_ERROR_RETURN(("Failed to attach signal"),false);
 
-	pThis->on_create();
+	pThis->m_tri.setup();
 
 	if (!Indigo::monitor_window(pThis->m_wnd))
 		LOG_ERROR_RETURN(("Failed to monitor window"),false);
 
+	pThis->on_size(*pThis->m_wnd,pThis->m_wnd->size());
 	pThis->m_wnd->visible(true);
 	pThis->self = pThis->shared_from_this();
 
 	return true;
 }
 
-void Splash::on_create()
+void Splash::on_size(const OOGL::Window& win, const glm::ivec2& sz)
 {
-	glm::ivec2 sz = m_wnd->size();
 	m_ratio = sz.x / (float)sz.y;
 	glViewport(0, 0, sz.x, sz.y);
-
-	m_tri.setup();
 }
 
 void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
 	glState.bind(GL_DRAW_FRAMEBUFFER,win.get_default_frame_buffer());
 
-	// Always clear everything
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::mat4 proj = glm::perspective(glm::radians(45.0f),m_ratio,0.1f,100.0f);
