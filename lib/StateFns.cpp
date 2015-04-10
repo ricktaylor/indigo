@@ -40,18 +40,43 @@ namespace
 
 	void on_debug1(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* param)
 	{
+		OOBase::ScopedString str;
 		if (length > 0)
-			OOBase::Logger::log(OOBase::Logger::Debug,"[OpenGL] %.*s",length,message);
+			str.printf("%.*s",length,message);
 		else
-			OOBase::Logger::log(OOBase::Logger::Debug,"[OpenGL] %s",message);
+			str.printf("%s",message);
+
+		while (str[str.length()-1] == '\n' || str[str.length()-1] == '\r')
+			str[str.length()-1] = '\0';
+
+		OOBase::Logger::Priority p = OOBase::Logger::Information;
+		switch (severity)
+		{
+		case GL_DEBUG_SEVERITY_HIGH:
+			p = OOBase::Logger::Error;
+			break;
+
+		case GL_DEBUG_SEVERITY_MEDIUM:
+			p = OOBase::Logger::Warning;
+			break;
+
+		case GL_DEBUG_SEVERITY_LOW:
+			p = OOBase::Logger::Debug;
+			break;
+
+		default:
+			break;
+		}
+
+		if (type == GL_DEBUG_TYPE_ERROR)
+			p = OOBase::Logger::Error;
+
+		OOBase::Logger::log(p,"[OpenGL] %s",str.c_str());
 	}
 
 	void on_debug2(GLuint id, GLenum category, GLenum severity, GLsizei length, const GLchar *message, void *userParam)
 	{
-		if (length > 0)
-			OOBase::Logger::log(OOBase::Logger::Debug,"[OpenGL] %.*s",length,message);
-		else
-			OOBase::Logger::log(OOBase::Logger::Debug,"[OpenGL] %s",message);
+		on_debug1(category,GL_DEBUG_TYPE_OTHER,id,severity,length,message,userParam);
 	}
 }
 
