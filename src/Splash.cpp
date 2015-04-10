@@ -28,6 +28,17 @@
 
 namespace
 {
+	class Triangle
+	{
+	public:
+		void setup();
+		void draw(OOGL::State& glState, const glm::mat4& VP);
+
+	private:
+		OOBase::SharedPtr<OOGL::VertexArrayObject> ptrVAO;
+		OOBase::SharedPtr<OOGL::Program> ptrProgram;
+	};
+
 	class Splash : public OOBase::EnableSharedFromThis<Splash>
 	{
 	public:
@@ -48,49 +59,12 @@ namespace
 
 		OOBase::SharedPtr<Splash> self;
 
-		OOBase::SharedPtr<OOGL::VertexArrayObject> ptrVAO;
-		OOBase::SharedPtr<OOGL::Program> ptrProgram;
+		Triangle m_tri;
 	};
 }
 
-Splash::Splash() : m_ratio(0)
+void Triangle::setup()
 {
-}
-
-bool Splash::init()
-{
-	return Indigo::render_call(&create,this);
-}
-
-bool Splash::create(void* p)
-{
-	Splash* pThis = static_cast<Splash*>(p);
-
-	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test");
-	if (!pThis->m_wnd || !pThis->m_wnd->is_valid())
-		return false;
-
-	if (!pThis->m_wnd->signal_close.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_close) ||
-			!pThis->m_wnd->signal_draw.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_draw))
-		LOG_ERROR_RETURN(("Failed to attach signal"),false);
-
-	pThis->on_create();
-
-	if (!Indigo::monitor_window(pThis->m_wnd))
-		LOG_ERROR_RETURN(("Failed to monitor window"),false);
-
-	pThis->m_wnd->visible(true);
-	pThis->self = pThis->shared_from_this();
-
-	return true;
-}
-
-void Splash::on_create()
-{
-	glm::ivec2 sz = m_wnd->size();
-	m_ratio = sz.x / (float)sz.y;
-	glViewport(0, 0, sz.x, sz.y);
-
 	OOBase::SharedPtr<OOGL::Shader> shaders[2];
 	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
 	shaders[0]->compile(
@@ -132,22 +106,71 @@ void Splash::on_create()
 			0.6f, -0.4f, 0.f,
 			0.f, 0.6f, 0.f
 	};
-	OOBase::SharedPtr<OOGL::BufferObject> ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(points),points);
+	OOBase::SharedPtr<OOGL::BufferObject> ptrVBO = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(points),points);
+	GLint a = ptrProgram->attribute_location("in_Position");
+	ptrVAO->attribute(a,ptrVBO,3,GL_FLOAT,false);
+	ptrVAO->enable_attribute(a);
 
 	float colours[] = {
 			1.f, 0.f, 0.f,
 			0.f, 1.f, 0.f,
 			0.f, 0.f, 1.f
 	};
-	OOBase::SharedPtr<OOGL::BufferObject> ptrColours = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(colours),colours);
-
-	GLint a = ptrProgram->attribute_location("in_Position");
-	ptrVAO->attribute(a,ptrVertices,3,GL_FLOAT,false);
-	ptrVAO->enable_attribute(a);
-
+	ptrVBO = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(colours),colours);
 	a = ptrProgram->attribute_location("in_Colour");
-	ptrVAO->attribute(a,ptrColours,3,GL_FLOAT,false);
+	ptrVAO->attribute(a,ptrVBO,3,GL_FLOAT,false);
 	ptrVAO->enable_attribute(a);
+}
+
+void Triangle::draw(OOGL::State& glState, const glm::mat4& VP)
+{
+	glState.use(ptrProgram);
+
+	glm::mat4 model = glm::rotate(glm::mat4(1.0f),-glm::radians((float)glfwGetTime() * 150.f),glm::vec3(0,0,1));
+
+	ptrProgram->uniform("MVP",VP * model);
+	ptrVAO->draw(GL_TRIANGLES,0,3);
+}
+
+Splash::Splash() : m_ratio(0)
+{
+}
+
+bool Splash::init()
+{
+	return Indigo::render_call(&create,this);
+}
+
+bool Splash::create(void* p)
+{
+	Splash* pThis = static_cast<Splash*>(p);
+
+	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test");
+	if (!pThis->m_wnd || !pThis->m_wnd->is_valid())
+		return false;
+
+	if (!pThis->m_wnd->signal_close.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_close) ||
+			!pThis->m_wnd->signal_draw.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_draw))
+		LOG_ERROR_RETURN(("Failed to attach signal"),false);
+
+	pThis->on_create();
+
+	if (!Indigo::monitor_window(pThis->m_wnd))
+		LOG_ERROR_RETURN(("Failed to monitor window"),false);
+
+	pThis->m_wnd->visible(true);
+	pThis->self = pThis->shared_from_this();
+
+	return true;
+}
+
+void Splash::on_create()
+{
+	glm::ivec2 sz = m_wnd->size();
+	m_ratio = sz.x / (float)sz.y;
+	glViewport(0, 0, sz.x, sz.y);
+
+	m_tri.setup();
 }
 
 void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
@@ -157,20 +180,15 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 	// Always clear everything
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//glm::mat4 proj = glm::ortho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
 	glm::mat4 proj = glm::perspective(glm::radians(45.0f),m_ratio,0.1f,100.0f);
-	//glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 view = glm::lookAt(glm::vec3(3,0,0),glm::vec3(0,0,0),glm::vec3(0,1,0));
 	view = glm::rotate(view,-glm::radians((float)glfwGetTime() * 50.f),glm::vec3(0,1,0));
-	glm::mat4 model = glm::rotate(glm::mat4(1.0f),-glm::radians((float)glfwGetTime() * 150.f),glm::vec3(0,0,1));
 
-	ptrProgram->uniform("MVP",proj * view * model);
-
-	ptrVAO->draw(GL_TRIANGLES,0,3);
+	m_tri.draw(glState,proj * view);
 
 	proj = glm::ortho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
 	view = glm::mat4(1.0f);
-	model = glm::mat4(1.0f);
+
 
 
 }
