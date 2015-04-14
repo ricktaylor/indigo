@@ -620,7 +620,12 @@ void OOGL::StateFns::glBindTextureUnit(State& state, GLenum unit, GLenum target,
 	(this->*m_thunk_glBindTextureUnit)(state,unit,target,texture);
 }
 
-bool OOGL::StateFns::check_glTexImage3D()
+bool OOGL::StateFns::check_glTextureArray()
+{
+	return isGLversion(3,0) || glfwExtensionSupported("GL_EXT_texture_array") == GL_TRUE;
+}
+
+bool OOGL::StateFns::check_glTexture3D()
 {
 	if (!m_fn_glTexImage3D)
 		m_fn_glTexImage3D = (PFNGLTEXIMAGE3DPROC)glfwGetProcAddress("glTexImage3D");
@@ -630,7 +635,7 @@ bool OOGL::StateFns::check_glTexImage3D()
 
 void OOGL::StateFns::glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels)
 {
-	if (!check_glTexImage3D())
+	if (!check_glTexture3D())
 		LOG_ERROR(("No glTexImage3D function"));
 	else
 	{

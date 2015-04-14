@@ -64,7 +64,8 @@ namespace OOGL
 		GLint glGetUniformLocation(GLuint program, const char* name);
 		void glUniformMatrix4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* v);
 
-		bool check_glTexImage3D();
+		bool check_glTextureArray();
+		bool check_glTexture3D();
 		void glActiveTexture(GLenum texture);
 		void glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture);
 		void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels);
