@@ -24,6 +24,8 @@
 
 #include "../lib/State.h"
 
+#include <stdarg.h>
+
 namespace OOGL
 {
 	class Font : public OOBase::NonCopyable
@@ -31,10 +33,34 @@ namespace OOGL
 		friend class Text;
 
 	public:
-		Font(const char* fnt_data, ...);
+		Font();
 		~Font();
 
+		bool load(const unsigned char* data, size_t len, ...);
+
 	private:
+		unsigned int m_line_height;
+		unsigned int m_tex_width;
+		unsigned int m_tex_height;
+
+		struct char_info
+		{
+			OOBase::uint16_t x;
+			OOBase::uint16_t y;
+			OOBase::uint16_t width;
+			OOBase::uint16_t height;
+			OOBase::uint16_t xoffset;
+			OOBase::uint16_t yoffset;
+			OOBase::uint16_t xadvance;
+			OOBase::uint8_t page;
+			OOBase::uint8_t chnl;
+		};
+		typedef OOBase::Table<OOBase::uint32_t,struct char_info,OOBase::Less<OOBase::uint32_t>,OOBase::ThreadLocalAllocator> char_map_t;
+		char_map_t m_mapCharInfo;
+
+		typedef OOBase::Table<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>,OOBase::int16_t,OOBase::Less<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> >,OOBase::ThreadLocalAllocator> kern_map_t;
+		kern_map_t m_mapKerning;
+
 		void draw(State& state, const glm::mat4& mvp, const glm::vec4& colour);
 	};
 
