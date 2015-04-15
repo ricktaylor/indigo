@@ -31,7 +31,6 @@ int main( int argc, char* argv[])
     fseek(f_input, 0, SEEK_END);
     file_size = ftell(f_input);
     fseek(f_input, 0, SEEK_SET);
-    file_size++;
 
     buf = (unsigned char *)malloc(file_size);
     assert(buf);
