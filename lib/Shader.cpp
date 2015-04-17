@@ -234,6 +234,11 @@ GLint OOGL::Program::attribute_location(const char* name) const
 	return l;
 }
 
+void OOGL::Program::uniform(GLint location, const glm::vec4& v)
+{
+	StateFns::get_current()->glUniform4fv(shared_from_this(),location,1,glm::value_ptr(v));
+}
+
 void OOGL::Program::uniform(GLint location, const glm::mat4& v, bool transpose)
 {
 	StateFns::get_current()->glUniformMatrix4fv(shared_from_this(),location,1,transpose ? GL_TRUE : GL_FALSE,glm::value_ptr(v));
