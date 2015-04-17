@@ -53,7 +53,7 @@ namespace OOGL
 		static const char* get_gstap();
 
 		bool compile_status() const;
-		OOBase::String info_log() const;
+		OOBase::SharedString<OOBase::ThreadLocalAllocator> info_log() const;
 
 	private:
 		GLuint m_id;
@@ -77,7 +77,7 @@ namespace OOGL
 		}
 
 		bool link_status() const;
-		OOBase::String info_log() const;
+		OOBase::SharedString<OOBase::ThreadLocalAllocator> info_log() const;
 
 		bool in_use() const;
 
@@ -129,7 +129,7 @@ namespace OOGL
 
 	private:
 		GLuint m_id;
-		typedef OOBase::Table<OOBase::String,GLint,OOBase::Less<OOBase::String>,OOBase::ThreadLocalAllocator> map_t;
+		typedef OOBase::Table<OOBase::SharedString<OOBase::ThreadLocalAllocator>,GLint,OOBase::Less<OOBase::SharedString<OOBase::ThreadLocalAllocator> >,OOBase::ThreadLocalAllocator> map_t;
 		mutable map_t m_mapUniforms;
 		mutable map_t m_mapAttributes;
 

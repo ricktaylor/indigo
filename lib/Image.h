@@ -62,8 +62,6 @@ namespace OOGL
 		int   m_height;
 		int   m_components;
 		void* m_pixels;
-
-		
 	};
 }
 

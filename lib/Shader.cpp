@@ -107,11 +107,11 @@ bool OOGL::Shader::compile_status() const
 	return (status == GL_TRUE);
 }
 
-OOBase::String OOGL::Shader::info_log() const
+OOBase::SharedString<OOBase::ThreadLocalAllocator> OOGL::Shader::info_log() const
 {
 	OOBase::SharedPtr<OOGL::StateFns> fns = StateFns::get_current();
 
-	OOBase::String ret;
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> ret;
 	GLint len = 0;
 	fns->glGetShaderiv(m_id,GL_INFO_LOG_LENGTH,&len);
 	if (len)
@@ -151,11 +151,11 @@ bool OOGL::Program::link_status() const
 	return (status == GL_TRUE);
 }
 
-OOBase::String OOGL::Program::info_log() const
+OOBase::SharedString<OOBase::ThreadLocalAllocator> OOGL::Program::info_log() const
 {
 	OOBase::SharedPtr<OOGL::StateFns> fns = StateFns::get_current();
 
-	OOBase::String ret;
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> ret;
 	GLint len = 0;
 	fns->glGetProgramiv(m_id,GL_INFO_LOG_LENGTH,&len);
 	if (len)
@@ -211,7 +211,7 @@ GLint OOGL::Program::uniform_location(const char* name) const
 	GLint l = StateFns::get_current()->glGetUniformLocation(m_id,name);
 	if (l != -1)
 	{
-		OOBase::String s;
+		OOBase::SharedString<OOBase::ThreadLocalAllocator> s;
 		if (s.assign(name))
 			m_mapUniforms.insert(s,l);
 	}
@@ -227,7 +227,7 @@ GLint OOGL::Program::attribute_location(const char* name) const
 	GLint l = StateFns::get_current()->glGetAttribLocation(m_id,name);
 	if (l != -1)
 	{
-		OOBase::String s;
+		OOBase::SharedString<OOBase::ThreadLocalAllocator> s;
 		if (s.assign(name))
 			m_mapAttributes.insert(s,l);
 	}
