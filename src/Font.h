@@ -42,6 +42,7 @@ namespace OOGL
 		unsigned int m_line_height;
 		unsigned int m_tex_width;
 		unsigned int m_tex_height;
+		unsigned int m_pages;
 
 		struct char_info
 		{
@@ -61,25 +62,33 @@ namespace OOGL
 		typedef OOBase::Table<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>,OOBase::int16_t,OOBase::Less<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> >,OOBase::ThreadLocalAllocator> kern_map_t;
 		kern_map_t m_mapKerning;
 
+		OOBase::SharedPtr<OOGL::Texture> m_ptrTexture;
+		OOBase::SharedPtr<OOGL::Program> m_ptrProgram;
+		OOBase::SharedPtr<OOGL::VertexArrayObject> m_ptrVAO;
+		OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices;
+		OOBase::SharedPtr<OOGL::BufferObject> m_ptrTexCoords;
+		OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements;
+
+		bool load_8bit_shader();
+		bool prep_text(const char* sz, size_t len);
+
 		void draw(State& state, const glm::mat4& mvp, const glm::vec4& colour);
 	};
 
 	class Text : public OOBase::NonCopyable
 	{
 	public:
-		Text(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = size_t(-1));
+		Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s);
 		~Text();
 
-		void text(const char* sz, size_t len = -1);
-		const char* text() const;
+		void text(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s);
+		OOBase::SharedString<OOBase::ThreadLocalAllocator> text() const;
 
 		void draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start = 0, size_t end = size_t(-1));
 
 	private:
 		OOBase::SharedPtr<Font> m_font;
-
-		char*  m_sz;
-		size_t m_len;
+		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_str;
 	};
 }
 

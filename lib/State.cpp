@@ -30,6 +30,8 @@ void OOGL::glCheckError(const char* fn, const char* file, unsigned int line)
 	GLenum err = glGetError();
 	if(err != GL_NO_ERROR)
 		OOBase::Logger::filenum_t(OOBase::Logger::Error,file,line).log("glGetError() returned code %X after call to %s",err,fn);
+	/*else
+		OOBase::Logger::log(OOBase::Logger::Information,"%s",fn);*/
 }
 
 OOGL::State::State(StateFns& fns) :

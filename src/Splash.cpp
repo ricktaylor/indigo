@@ -24,6 +24,14 @@
 #include "../lib/VertexArrayObject.h"
 #include "../lib/Shader.h"
 
+
+extern const unsigned char* Titillium_Regular;
+extern size_t Titillium_Regular_length;
+extern const unsigned char* Titillium_Regular_0;
+extern size_t Titillium_Regular_0_length;
+
+#include "Font.h"
+
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace
@@ -55,7 +63,7 @@ void Triangle::setup()
 			"	vec4 v = vec4(in_Position,1.0);\n"
 			"	gl_Position = MVP * v;\n"
 			"}\n");
-	OOBase::String s = shaders[0]->info_log();
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> s = shaders[0]->info_log();
 	if (!s.empty())
 		LOG_DEBUG(("%s",s.c_str()));
 
@@ -110,99 +118,6 @@ void Triangle::draw(OOGL::State& glState, const glm::mat4& VP)
 
 namespace
 {
-	class Square
-	{
-	public:
-		void setup();
-		void draw(OOGL::State& glState, const glm::mat4& VP);
-
-	private:
-		OOBase::SharedPtr<OOGL::VertexArrayObject> ptrVAO;
-		OOBase::SharedPtr<OOGL::Program> ptrProgram;
-	};
-}
-
-void Square::setup()
-{
-	OOBase::SharedPtr<OOGL::Shader> shaders[2];
-	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
-	shaders[0]->compile(
-			"#version 120\n"
-			"attribute vec3 in_Position;\n"
-			"attribute vec3 in_Colour;\n"
-			"uniform mat4 MVP;\n"
-			"varying vec3 pass_Colour;\n"
-			"void main() {\n"
-			"	pass_Colour = in_Colour;\n"
-			"	vec4 v = vec4(in_Position,1.0);\n"
-			"	gl_Position = MVP * v;\n"
-			"}\n");
-	OOBase::String s = shaders[0]->info_log();
-	if (!s.empty())
-		LOG_DEBUG(("%s",s.c_str()));
-
-	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
-	shaders[1]->compile(
-			"#version 120\n"
-			"varying vec3 pass_Colour;\n"
-			"void main() {\n"
-			"    gl_FragColor = vec4(pass_Colour,1.0);\n"
-			"}\n");
-	s = shaders[1]->info_log();
-	if (!s.empty())
-		LOG_DEBUG(("%s",s.c_str()));
-
-	ptrProgram = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
-	ptrProgram->link(shaders,2);
-	s = ptrProgram->info_log();
-	if (!s.empty())
-		LOG_DEBUG(("%s",s.c_str()));
-
-	ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
-
-	float points[] = {
-			-1.f, 1.f, 0.f,
-			-1.f, -1.f, 0.f,
-			1.f, 1.f, 0.f,
-			1.f, -1.f, 0.f,
-	};
-	OOBase::SharedPtr<OOGL::BufferObject> ptrVBO = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(points),points);
-	GLint a = ptrProgram->attribute_location("in_Position");
-	ptrVAO->attribute(a,ptrVBO,3,GL_FLOAT,false);
-	ptrVAO->enable_attribute(a);
-
-	float colours[] = {
-			1.f, 0.f, 0.f,
-			0.f, 1.f, 0.f,
-			0.f, 0.f, 1.f,
-			1.f, 1.f, 0.f,
-	};
-	ptrVBO = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(colours),colours);
-	a = ptrProgram->attribute_location("in_Colour");
-	ptrVAO->attribute(a,ptrVBO,3,GL_FLOAT,false);
-	ptrVAO->enable_attribute(a);
-
-	GLuint indexes[] =
-	{
-		0,1,2,2,3,1
-	};
-	OOBase::SharedPtr<OOGL::BufferObject> ptrIndexes = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(indexes),indexes);
-	ptrIndexes->bind();
-}
-
-void Square::draw(OOGL::State& glState, const glm::mat4& VP)
-{
-	glm::mat4 model(1.f);
-	model = glm::scale(model,glm::vec3(.5f,.5f,.5f));
-	model = glm::translate(model,glm::vec3(-1.f,0.f,0.f));
-	ptrProgram->uniform("MVP",VP * model);
-
-	glState.use(ptrProgram);
-	ptrVAO->draw_elements(GL_TRIANGLES,6,GL_UNSIGNED_INT);
-}
-
-namespace
-{
 	class Splash : public OOBase::EnableSharedFromThis<Splash>
 	{
 	public:
@@ -224,7 +139,8 @@ namespace
 		OOBase::SharedPtr<Splash> self;
 
 		Triangle m_tri;
-		Square m_sq;
+
+		OOBase::SharedPtr<OOGL::Text> m_text;
 	};
 }
 
@@ -251,7 +167,17 @@ bool Splash::create(void* p)
 		LOG_ERROR_RETURN(("Failed to attach signal"),false);
 
 	pThis->m_tri.setup();
-	pThis->m_sq.setup();
+
+	OOBase::SharedPtr<OOGL::Font> fnt = OOBase::allocate_shared<OOGL::Font,OOBase::ThreadLocalAllocator>();
+	if (!fnt)
+		LOG_ERROR_RETURN(("Failed to load font"),false);
+
+	if (!fnt->load(Titillium_Regular,Titillium_Regular_length,Titillium_Regular_0,Titillium_Regular_0_length))
+		return false;
+
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> s;
+	s.assign("Testing");
+	pThis->m_text = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt,s);
 
 	if (!Indigo::monitor_window(pThis->m_wnd))
 		LOG_ERROR_RETURN(("Failed to monitor window"),false);
@@ -282,8 +208,11 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 	m_tri.draw(glState,proj * view);
 
 	proj = glm::ortho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
+	glm::mat4 model(1);
+	//model = glm::scale(model,glm::vec3(.5f,.5f,0.f));
+	model = glm::translate(model,glm::vec3(-1.f,-.5f,0.f));
 
-	m_sq.draw(glState,proj);
+	m_text->draw(glState,proj * model,glm::vec4(1,0,1,1));
 }
 
 void Splash::on_close(const OOGL::Window& win)

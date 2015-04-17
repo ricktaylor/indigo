@@ -22,6 +22,9 @@
 #include "Font.h"
 #include "../lib/Shader.h"
 #include "../lib/StateFns.h"
+#include "../lib/Image.h"
+#include "../lib/VertexArrayObject.h"
+#include "../lib/BufferObject.h"
 
 #include <OOBase/ByteSwap.h>
 
@@ -89,21 +92,56 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 			data += 2;
 			m_tex_width = read_uint16(data);
 			m_tex_height = read_uint16(data);
+			m_pages = read_uint16(data);
+			if (!m_pages)
 			{
-				unsigned int pages = read_uint16(data);
-				if (pages > 1 && !StateFns::get_current()->check_glTextureArray())
+				LOG_ERROR(("No textures in font!"));
+				ok = false;
+			}
+			else if (m_pages == 1)
+			{
+				const unsigned char* page_data = va_arg(textures,const unsigned char*);
+				size_t page_len = va_arg(textures,size_t);
+
+				OOGL::Image img;
+				if ((ok = img.load(page_data,page_len)))
+					ok = (m_ptrTexture = img.make_texture(GL_R8));
+			}
+			else
+			{
+				if (!StateFns::get_current()->check_glTextureArray())
 				{
 					LOG_ERROR(("Multiple textures in font, no texture array support"));
 					ok = false;
 				}
-				for (unsigned int p=0;ok && p<pages;++p)
+				for (unsigned int p=0;ok && p<m_pages;++p)
 				{
 					// Load page
 					const unsigned char* page_data = va_arg(textures,const unsigned char*);
 					size_t page_len = va_arg(textures,size_t);
+
+					OOGL::Image img;
+					if ((ok = img.load(page_data,page_len)))
+					{
+						// TODO: Load into array texture
+					}
 				}
 			}
-			data += 5;
+			if (*data++ == 1)
+			{
+				// TODO: Packed data
+				data += 4;
+			}
+			else
+			{
+				OOBase::uint32_t packing = read_uint32(data);
+				if (packing != 0x04040400)
+				{
+					// TODO: Funky packing
+				}
+				else
+					ok = load_8bit_shader();
+			}
 			break;
 
 		case 3:
@@ -124,8 +162,7 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 				ci.xadvance = read_uint16(data);
 				ci.page = *data++;
 				ci.chnl = *data++;
-				ok = m_mapCharInfo.insert(id,ci);
-				if (!ok)
+				if (!(ok = m_mapCharInfo.insert(id,ci)))
 					LOG_ERROR(("Failed to add character to table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
 			break;
@@ -137,8 +174,7 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 				ch.first = read_uint32(data);
 				ch.second = read_uint32(data);
 				OOBase::int16_t offset = read_uint16(data);
-				ok = m_mapKerning.insert(ch,offset);
-				if (!ok)
+				if (!(ok = m_mapKerning.insert(ch,offset)))
 					LOG_ERROR(("Failed to add character to kerning table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
 			break;
@@ -162,14 +198,167 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 	return true;
 }
 
-OOGL::Text::Text(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len) :
-		m_font(font)
+bool OOGL::Font::load_8bit_shader()
+{
+	OOBase::SharedPtr<OOGL::Shader> shaders[2];
+	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
+	shaders[0]->compile(
+			"#version 120\n"
+			"attribute vec3 in_Position;\n"
+			"attribute vec2 in_TexCoord;\n"
+			"uniform vec4 in_Colour;\n"
+			"uniform mat4 MVP;\n"
+			"varying vec4 pass_Colour;\n"
+			"varying vec2 pass_TexCoord;\n"
+			"void main() {\n"
+			"	pass_Colour = in_Colour;\n"
+			"	pass_TexCoord = in_TexCoord;\n"
+			"	vec4 v = vec4(in_Position,1.0);\n"
+			"	gl_Position = MVP * v;\n"
+			"}\n");
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> s = shaders[0]->info_log();
+	if (!s.empty())
+		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",s.c_str()),false);
+
+	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
+	shaders[1]->compile(
+			"#version 120\n"
+			"uniform sampler2D texture0;\n"
+			"varying vec4 pass_Colour;\n"
+			"varying vec2 pass_TexCoord;\n"
+			"void main() {\n"
+			"	gl_FragColor = texture2D(texture0,pass_TexCoord).rrrr * pass_Colour;\n"
+			"}\n");
+	s = shaders[1]->info_log();
+	if (!s.empty())
+		LOG_ERROR_RETURN(("Failed to compile fragment shader: %s",s.c_str()),false);
+
+	m_ptrProgram = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
+	m_ptrProgram->link(shaders,2);
+	s = m_ptrProgram->info_log();
+	if (!s.empty())
+		LOG_ERROR_RETURN(("Failed to link shaders: %s",s.c_str()),false);
+
+	return true;
+}
+
+bool OOGL::Font::prep_text(const char* sz, size_t len)
+{
+	if (len)
+	{
+		if (!m_ptrVAO)
+		{
+			m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
+			if (!m_ptrVAO)
+				LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+			m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,len * 4 * 3 * sizeof(float));
+			GLint a = m_ptrProgram->attribute_location("in_Position");
+			m_ptrVAO->attribute(a,m_ptrVertices,3,GL_FLOAT,false);
+			m_ptrVAO->enable_attribute(a);
+
+			m_ptrTexCoords = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,len * 4 * 2 * sizeof(float));
+			a = m_ptrProgram->attribute_location("in_TexCoord");
+			if (a != -1)
+			{
+				m_ptrVAO->attribute(a,m_ptrTexCoords,2,GL_FLOAT,false);
+				m_ptrVAO->enable_attribute(a);
+			}
+
+			m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,len * 6 * sizeof(GLuint));
+			m_ptrElements->bind();
+		}
+		else
+		{
+			// TODO:: Grow!!
+		}
+
+		OOBase::SharedPtr<float> vx = m_ptrVertices->auto_map<float>(GL_MAP_WRITE_BIT);
+		float* v = vx.get();
+		OOBase::SharedPtr<float> tx = m_ptrTexCoords->auto_map<float>(GL_MAP_WRITE_BIT);
+		float* t = tx.get();
+		OOBase::SharedPtr<GLuint> ei = m_ptrElements->auto_map<GLuint>(GL_MAP_WRITE_BIT);
+		GLuint* e = ei.get();
+		float advance = 0.f;
+		GLuint idx = 0;
+		for (size_t p=0;p<len;++p)
+		{
+			char_map_t::iterator i = m_mapCharInfo.find(sz[p]);
+
+			t[0] = i->second.x / (float)m_tex_width;
+			t[1] = i->second.y / (float)m_tex_height;
+			t[2] = t[0];
+			t[3] = t[1] + (i->second.height / (float)m_tex_height);
+			t[4] = t[0] + (i->second.width / (float)m_tex_width);
+			t[5] = t[1];
+			t[6] = t[4];
+			t[7] = t[3];
+			t += 8;
+
+			v[0] = advance + (i->second.xoffset / 64.f);
+			v[1] = 1.f - (i->second.yoffset / 64.f);
+			v[2] = 0.f;
+			v[3] = v[0];
+			v[4] = v[1] - (i->second.height / 64.f);
+			v[5] = 0.f;
+			v[6] = v[0] + (i->second.width / 64.f);
+			v[7] = v[1];
+			v[8] = 0.f;
+			v[9] = v[6];
+			v[10] = v[4];
+			v[11] = 0.f;
+			v += 12;
+
+			e[0] = idx + 0;
+			e[1] = idx + 1;
+			e[2] = idx + 2;
+			e[3] = idx + 2;
+			e[4] = idx + 1;
+			e[5] = idx + 3;
+			e += 6;
+			idx += 4;
+
+			advance += (i->second.xadvance / 64.f);
+		}
+	}
+
+	return true;
+}
+
+void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour)
+{
+	m_ptrProgram->uniform("in_Colour",colour);
+	m_ptrProgram->uniform("MVP",mvp);
+
+	state.use(m_ptrProgram);
+
+	state.bind(GL_TEXTURE0,m_ptrTexture);
+
+	m_ptrVAO->draw_elements(GL_TRIANGLES,6 * 4,GL_UNSIGNED_INT);
+}
+
+OOGL::Text::Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s) :
+		m_font(font), m_str(s)
+{
+	m_font->prep_text(s.c_str(),s.length());
+}
+
+OOGL::Text::~Text()
 {
 
 }
 
-void OOGL::Text::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start, size_t end)
+void OOGL::Text::text(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s)
 {
 
+}
 
+OOBase::SharedString<OOBase::ThreadLocalAllocator> OOGL::Text::text() const
+{
+	return m_str;
+}
+
+void OOGL::Text::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start, size_t end)
+{
+	m_font->draw(state,mvp,colour);
 }
