@@ -209,7 +209,7 @@ bool Splash::create(void* p)
 {
 	Splash* pThis = static_cast<Splash*>(p);
 
-	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test");
+	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test",OOGL::Window::eWSresizable | OOGL::Window::eWSdecorated);
 	if (!pThis->m_wnd || !pThis->m_wnd->is_valid())
 		return false;
 
@@ -231,6 +231,7 @@ bool Splash::create(void* p)
 	s.assign("This is some text!");
 	pThis->m_text = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt,s);
 
+	glClearColor(0.f,0.f,0.f,0.f);
 	glEnable(GL_BLEND);
 
 	if (!Indigo::monitor_window(pThis->m_wnd))
