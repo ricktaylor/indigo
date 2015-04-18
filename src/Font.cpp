@@ -192,6 +192,13 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 	if (!ok)
 		return false;
 
+	// Set up texture
+	if (m_ptrTexture)
+	{
+		m_ptrTexture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+		m_ptrTexture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	}
+
 	if (data != end)
 		LOG_WARNING(("Extra bytes at end of font data"));
 

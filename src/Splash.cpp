@@ -231,6 +231,8 @@ bool Splash::create(void* p)
 	s.assign("Testing");
 	pThis->m_text = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt,s);
 
+	glEnable(GL_BLEND);
+
 	if (!Indigo::monitor_window(pThis->m_wnd))
 		LOG_ERROR_RETURN(("Failed to monitor window"),false);
 
@@ -253,11 +255,15 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glBlendFunc(GL_SRC_ALPHA_SATURATE,GL_ONE);
+	
 	glm::mat4 proj = glm::perspective(glm::radians(45.0f),m_ratio,0.1f,100.0f);
 	glm::mat4 view = glm::lookAt(glm::vec3(3,0,0),glm::vec3(0,0,0),glm::vec3(0,1,0));
 	view = glm::rotate(view,-glm::radians((float)glfwGetTime() * 50.f),glm::vec3(0,1,0));
 
 	m_tri.draw(glState,proj * view);
+
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	proj = glm::ortho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
 	glm::mat4 model(1);
