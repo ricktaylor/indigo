@@ -66,13 +66,12 @@ namespace OOGL
 		OOBase::SharedPtr<OOGL::Program> m_ptrProgram;
 		OOBase::SharedPtr<OOGL::VertexArrayObject> m_ptrVAO;
 		OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices;
-		OOBase::SharedPtr<OOGL::BufferObject> m_ptrTexCoords;
 		OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements;
 
 		bool load_8bit_shader();
 		bool prep_text(const char* sz, size_t len);
 
-		void draw(State& state, const glm::mat4& mvp, const glm::vec4& colour);
+		void draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start, size_t len);
 	};
 
 	class Text : public OOBase::NonCopyable

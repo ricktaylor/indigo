@@ -251,97 +251,101 @@ bool OOGL::Font::load_8bit_shader()
 
 bool OOGL::Font::prep_text(const char* sz, size_t len)
 {
-	if (len)
+	if (!len)
+		return true;
+
+	struct attrib_data
 	{
+		float x;
+		float y;
+		GLushort u;
+		GLushort v;
+	};
+
+	if (!m_ptrVAO)
+	{
+		m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
 		if (!m_ptrVAO)
-		{
-			m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
-			if (!m_ptrVAO)
-				LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+			LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
-			m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,len * 4 * 3 * sizeof(float));
-			GLint a = m_ptrProgram->attribute_location("in_Position");
-			m_ptrVAO->attribute(a,m_ptrVertices,3,GL_FLOAT,false);
+		m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,len * 4 * sizeof(attrib_data));
+		GLint a = m_ptrProgram->attribute_location("in_Position");
+		m_ptrVAO->attribute(a,m_ptrVertices,2,GL_FLOAT,false,sizeof(attrib_data),offsetof(attrib_data,x));
+		m_ptrVAO->enable_attribute(a);
+
+		a = m_ptrProgram->attribute_location("in_TexCoord");
+		if (a != -1)
+		{
+			m_ptrVAO->attribute(a,m_ptrVertices,2,GL_UNSIGNED_SHORT,true,sizeof(attrib_data),offsetof(attrib_data,u));
 			m_ptrVAO->enable_attribute(a);
-
-			m_ptrTexCoords = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,len * 4 * 2 * sizeof(float));
-			a = m_ptrProgram->attribute_location("in_TexCoord");
-			if (a != -1)
-			{
-				m_ptrVAO->attribute(a,m_ptrTexCoords,2,GL_FLOAT,false);
-				m_ptrVAO->enable_attribute(a);
-			}
-
-			m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,len * 6 * sizeof(GLuint));
-			m_ptrElements->bind();
-		}
-		else
-		{
-			// TODO:: Grow!!
 		}
 
-		OOBase::SharedPtr<float> vx = m_ptrVertices->auto_map<float>(GL_MAP_WRITE_BIT);
-		float* v = vx.get();
-		OOBase::SharedPtr<float> tx = m_ptrTexCoords->auto_map<float>(GL_MAP_WRITE_BIT);
-		float* t = tx.get();
-		OOBase::SharedPtr<GLuint> ei = m_ptrElements->auto_map<GLuint>(GL_MAP_WRITE_BIT);
-		GLuint* e = ei.get();
-		float advance = 0.f;
-		GLuint idx = 0;
-		for (size_t p=0;p<len;++p)
-		{
-			char_map_t::iterator i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>(sz[p]));
-
-			t[0] = i->second.x / (float)m_tex_width;
-			t[1] = i->second.y / (float)m_tex_height;
-			t[2] = t[0];
-			t[3] = t[1] + (i->second.height / (float)m_tex_height);
-			t[4] = t[0] + (i->second.width / (float)m_tex_width);
-			t[5] = t[1];
-			t[6] = t[4];
-			t[7] = t[3];
-			t += 8;
-
-			v[0] = advance + (i->second.xoffset / 64.f);
-			v[1] = 1.f - (i->second.yoffset / 64.f);
-			v[2] = 0.f;
-			v[3] = v[0];
-			v[4] = v[1] - (i->second.height / 64.f);
-			v[5] = 0.f;
-			v[6] = v[0] + (i->second.width / 64.f);
-			v[7] = v[1];
-			v[8] = 0.f;
-			v[9] = v[6];
-			v[10] = v[4];
-			v[11] = 0.f;
-			v += 12;
-
-			e[0] = idx + 0;
-			e[1] = idx + 1;
-			e[2] = idx + 2;
-			e[3] = idx + 2;
-			e[4] = idx + 1;
-			e[5] = idx + 3;
-			e += 6;
-			idx += 4;
-
-			advance += (i->second.xadvance / 64.f);
-		}
+		m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,len * 6 * sizeof(GLuint));
+		m_ptrElements->bind();
+	}
+	else
+	{
+		// TODO:: Grow!!
 	}
 
+	OOBase::SharedPtr<attrib_data> attribs = m_ptrVertices->auto_map<attrib_data>(GL_MAP_WRITE_BIT);
+	attrib_data* a = attribs.get();
+	OOBase::SharedPtr<GLuint> ei = m_ptrElements->auto_map<GLuint>(GL_MAP_WRITE_BIT);
+	GLuint* e = ei.get();
+	float advance = 0.f;
+	GLuint idx = 0;
+	for (size_t p=0;p<len;++p)
+	{
+		char_map_t::iterator i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>(sz[p]));
+
+		a[0].x = advance + (i->second.xoffset / 64.f);
+		a[0].y = 1.f - (i->second.yoffset / 64.f);
+		a[1].x = a[0].x;
+		a[1].y = a[0].y - (i->second.height / 64.f);
+		a[2].x = a[0].x + (i->second.width / 64.f);
+		a[2].y = a[0].y;
+		a[3].x = a[2].x;
+		a[3].y = a[1].y;
+
+		a[0].u = i->second.x << 8;// / m_tex_width;
+		a[0].v = i->second.y << 8;// / (float)m_tex_height;
+		a[1].u = a[0].u;
+		a[1].v = a[0].v + (i->second.height << 8);// / (float)m_tex_height);
+		a[2].u = a[0].u + (i->second.width << 8);// / (float)m_tex_width);
+		a[2].v = a[0].v;
+		a[3].u = a[2].u;
+		a[3].v = a[1].v;
+
+		a += 4;
+				
+		e[0] = idx + 0;
+		e[1] = idx + 1;
+		e[2] = idx + 2;
+		e[3] = idx + 2;
+		e[4] = idx + 1;
+		e[5] = idx + 3;
+		e += 6;
+		idx += 4;
+
+		advance += (i->second.xadvance / 64.f);
+
+		kern_map_t::iterator k = m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(static_cast<OOBase::uint8_t>(sz[p]),static_cast<OOBase::uint8_t>(sz[p+1])));
+		if (k != m_mapKerning.end())
+			advance += (k->second / 64.f);
+	}
+	
 	return true;
 }
 
-void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour)
+void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start, size_t len)
 {
+	state.use(m_ptrProgram);
+	state.bind(0,m_ptrTexture);
+
 	m_ptrProgram->uniform("in_Colour",colour);
 	m_ptrProgram->uniform("MVP",mvp);
 
-	state.use(m_ptrProgram);
-
-	state.bind(0,m_ptrTexture);
-
-	m_ptrVAO->draw_elements(GL_TRIANGLES,6 * 4,GL_UNSIGNED_INT);
+	m_ptrVAO->draw_elements(GL_TRIANGLES,static_cast<GLsizei>(6 * len),GL_UNSIGNED_INT,static_cast<GLsizei>(start));
 }
 
 OOGL::Text::Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s) :
@@ -367,5 +371,5 @@ OOBase::SharedString<OOBase::ThreadLocalAllocator> OOGL::Text::text() const
 
 void OOGL::Text::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start, size_t end)
 {
-	m_font->draw(state,mvp,colour);
+	m_font->draw(state,mvp,colour,0,m_str.length());
 }

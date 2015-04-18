@@ -228,7 +228,7 @@ bool Splash::create(void* p)
 		return false;
 
 	OOBase::SharedString<OOBase::ThreadLocalAllocator> s;
-	s.assign("Testing");
+	s.assign("This is some text!");
 	pThis->m_text = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt,s);
 
 	glEnable(GL_BLEND);
@@ -267,10 +267,10 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 
 	proj = glm::ortho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
 	glm::mat4 model(1);
-	//model = glm::scale(model,glm::vec3(.5f,.5f,0.f));
-	model = glm::translate(model,glm::vec3(-1.f,-.5f,0.f));
+	model = glm::scale(model,glm::vec3(.5f,.5f,0.f));
+	model = glm::translate(model,glm::vec3(-2.5f,-.5f,0.f));
 
-	m_text->draw(glState,proj * model,glm::vec4(1,0,1,1));
+	m_text->draw(glState,proj * model,glm::vec4(fmod(glfwGetTime() / 2,1),fmod(glfwGetTime() / 3,1),fmod(glfwGetTime() / 7,1),fmod(glfwGetTime(),1)));
 }
 
 void Splash::on_close(const OOGL::Window& win)
