@@ -104,7 +104,7 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 				size_t page_len = va_arg(textures,size_t);
 
 				OOGL::Image img;
-				if ((ok = img.load(page_data,page_len)))
+				if ((ok = img.load(page_data,static_cast<int>(page_len))))
 					ok = (m_ptrTexture = img.make_texture(GL_R8));
 			}
 			else
@@ -121,7 +121,7 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 					size_t page_len = va_arg(textures,size_t);
 
 					OOGL::Image img;
-					if ((ok = img.load(page_data,page_len)))
+					if ((ok = img.load(page_data,static_cast<int>(page_len))))
 					{
 						// TODO: Load into array texture
 					}
@@ -283,7 +283,7 @@ bool OOGL::Font::prep_text(const char* sz, size_t len)
 		GLuint idx = 0;
 		for (size_t p=0;p<len;++p)
 		{
-			char_map_t::iterator i = m_mapCharInfo.find(sz[p]);
+			char_map_t::iterator i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>(sz[p]));
 
 			t[0] = i->second.x / (float)m_tex_width;
 			t[1] = i->second.y / (float)m_tex_height;

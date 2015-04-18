@@ -200,15 +200,15 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::Texture::none(GLenum target)
 void OOGL::Texture::init()
 {
 	glGenTextures(1,&m_tex);
+
+	// We always explicitly bind as this is when the create happens
+	State::get_current()->bind_texture(m_tex,m_target);
 }
 
 void OOGL::Texture::init_mutable(GLsizei levels, GLenum internalFormat, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
 	OOBase::SharedPtr<StateFns> fns = StateFns::get_current();
 	
-	// We always explicitly bind as there is no DSA glTexImage*D
-	State::get_current()->bind_texture(m_tex,m_target);
-
 	if (!pixels || levels == 1)
 	{
 		glTexParameteri(m_target,GL_TEXTURE_BASE_LEVEL,0);
@@ -243,9 +243,6 @@ void OOGL::Texture::init_mutable(GLsizei levels, GLenum internalFormat, GLsizei 
 void OOGL::Texture::init_mutable(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
 	OOBase::SharedPtr<StateFns> fns = StateFns::get_current();
-
-	// We always explicitly bind as there is no DSA glTexImage*D
-	State::get_current()->bind_texture(m_tex,m_target);
 
 	if (!pixels || levels == 1)
 	{
@@ -302,9 +299,6 @@ void OOGL::Texture::init_mutable(GLsizei levels, GLenum internalFormat, GLsizei 
 void OOGL::Texture::init_mutable(GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
 	OOBase::SharedPtr<StateFns> fns = StateFns::get_current();
-
-	// We always explicitly bind as there is no DSA glTexImage*D
-	State::get_current()->bind_texture(m_tex,m_target);
 
 	if (!pixels || levels == 1)
 	{

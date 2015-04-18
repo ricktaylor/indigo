@@ -668,7 +668,7 @@ void OOGL::StateFns::call_glMultiBindTexture(State& state, GLenum unit, GLenum t
 
 void OOGL::StateFns::glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture)
 {
-	(this->*m_thunk_glBindTextureUnit)(state,unit,target,texture);
+	(this->*m_thunk_glBindTextureUnit)(state,unit - GL_TEXTURE0,target,texture);
 }
 
 bool OOGL::StateFns::check_glTextureArray()
