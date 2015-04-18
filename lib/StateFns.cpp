@@ -614,17 +614,17 @@ void OOGL::StateFns::glUniformMatrix4fv(const OOBase::SharedPtr<Program>& progra
 	(this->*m_thunk_glUniformMatrix4fv)(program,location,count,transpose,v);
 }
 
-void OOGL::StateFns::glActiveTexture(GLenum texture)
+void OOGL::StateFns::glActiveTexture(GLuint unit)
 {
 	if (load_proc(m_fn_glActiveTexture,"glActiveTexture"))
 	{
-		(*m_fn_glActiveTexture)(texture);
+		(*m_fn_glActiveTexture)(GL_TEXTURE0 + unit);
 
 		OOGL_CHECK("glActiveTexture");
 	}
 }
 
-void OOGL::StateFns::check_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture)
+void OOGL::StateFns::check_glBindTextureUnit(State& state, GLuint unit, GLenum target, GLuint texture)
 {
 	if (isGLversion(4,5) || glfwExtensionSupported("GL_ARB_direct_state_access") == GL_TRUE)
 	{
@@ -646,29 +646,29 @@ void OOGL::StateFns::check_glBindTextureUnit(State& state, GLenum unit, GLenum t
 	(this->*m_thunk_glBindTextureUnit)(state,unit,target,texture);
 }
 
-void OOGL::StateFns::call_glBindTextureUnit(State&, GLenum unit, GLenum target, GLuint texture)
+void OOGL::StateFns::call_glBindTextureUnit(State&, GLuint unit, GLenum, GLuint texture)
 {
 	(*((PFNGLBINDTEXTUREUNITPROC)m_fn_glBindTextureUnit))(unit,texture);
 
 	OOGL_CHECK("glBindTextureUnit");
 }
 
-void OOGL::StateFns::emulate_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture)
+void OOGL::StateFns::emulate_glBindTextureUnit(State& state, GLuint unit, GLenum target, GLuint texture)
 {
 	state.activate_texture_unit(unit);
 	state.bind_texture(texture,target);
 }
 
-void OOGL::StateFns::call_glMultiBindTexture(State& state, GLenum unit, GLenum target, GLuint texture)
+void OOGL::StateFns::call_glMultiBindTexture(State& state, GLuint unit, GLenum target, GLuint texture)
 {
-	(*((PFNGLBINDMULTITEXTUREEXTPROC)m_fn_glBindTextureUnit))(unit,target,texture);
+	(*((PFNGLBINDMULTITEXTUREEXTPROC)m_fn_glBindTextureUnit))(GL_TEXTURE0 + unit,target,texture);
 
 	OOGL_CHECK("glBindMultiTextureEXT");
 }
 
-void OOGL::StateFns::glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture)
+void OOGL::StateFns::glBindTextureUnit(State& state, GLuint unit, GLenum target, GLuint texture)
 {
-	(this->*m_thunk_glBindTextureUnit)(state,unit - GL_TEXTURE0,target,texture);
+	(this->*m_thunk_glBindTextureUnit)(state,unit,target,texture);
 }
 
 bool OOGL::StateFns::check_glTextureArray()

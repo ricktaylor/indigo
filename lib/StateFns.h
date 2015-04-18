@@ -67,8 +67,8 @@ namespace OOGL
 
 		bool check_glTextureArray();
 		bool check_glTexture3D();
-		void glActiveTexture(GLenum texture);
-		void glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture);
+		void glActiveTexture(GLuint unit);
+		void glBindTextureUnit(State& state, GLuint unit, GLenum target, GLuint texture);
 		void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels);
 		bool check_glTextureStorage();
 		void glTextureStorage1D(GLuint texture, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width);
@@ -167,12 +167,12 @@ namespace OOGL
 
 		PFNGLACTIVETEXTUREPROC m_fn_glActiveTexture;
 
-		void (StateFns::*m_thunk_glBindTextureUnit)(State&,GLenum,GLenum,GLuint);
+		void (StateFns::*m_thunk_glBindTextureUnit)(State&,GLuint,GLenum,GLuint);
 		GLFWglproc m_fn_glBindTextureUnit;
-		void check_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture);
-		void emulate_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture);
-		void call_glMultiBindTexture(State& state, GLenum unit, GLenum target, GLuint texture);
-		void call_glBindTextureUnit(State& state, GLenum unit, GLenum target, GLuint texture);
+		void check_glBindTextureUnit(State& state, GLuint unit, GLenum target, GLuint texture);
+		void emulate_glBindTextureUnit(State& state, GLuint unit, GLenum target, GLuint texture);
+		void call_glMultiBindTexture(State& state, GLuint unit, GLenum target, GLuint texture);
+		void call_glBindTextureUnit(State& state, GLuint unit, GLenum target, GLuint texture);
 
 		PFNGLTEXIMAGE3DPROC m_fn_glTexImage3D;
 

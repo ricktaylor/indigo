@@ -53,18 +53,18 @@ namespace OOGL
 
 		OOBase::SharedPtr<Program> use(const OOBase::SharedPtr<Program>& program);
 
-		GLenum active_texture_unit() const;
+		GLuint active_texture_unit() const;
 
 	private:
 		StateFns&                            m_state_fns;
 		OOBase::SharedPtr<Framebuffer>       m_draw_fb;
 		OOBase::SharedPtr<Framebuffer>       m_read_fb;
-		GLenum                               m_active_texture_unit;
+		GLuint                               m_active_texture_unit;
 		OOBase::SharedPtr<Program>           m_current_program;
 		OOBase::SharedPtr<VertexArrayObject> m_current_vao;
 		
 		OOBase::SharedPtr<Texture> bind_texture(GLuint texture, GLenum target);
-		typedef OOBase::Table<GLenum,OOBase::SharedPtr<Texture>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator> tex_unit_t;
+		typedef OOBase::Table<GLuint,OOBase::SharedPtr<Texture>,OOBase::Less<GLuint>,OOBase::ThreadLocalAllocator> tex_unit_t;
 		OOBase::Vector<tex_unit_t,OOBase::ThreadLocalAllocator> m_vecTexUnits;
 
 		OOBase::SharedPtr<BufferObject> bind_buffer(GLuint buffer, GLenum target);
@@ -73,7 +73,7 @@ namespace OOGL
 		State(StateFns& fns);
 		void reset();
 
-		GLenum activate_texture_unit(GLenum unit);
+		GLuint activate_texture_unit(GLuint unit);
 
 		OOBase::SharedPtr<BufferObject> internal_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
 		OOBase::SharedPtr<Texture> internal_bind(const OOBase::SharedPtr<Texture>& texture);

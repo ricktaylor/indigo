@@ -332,7 +332,7 @@ void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colou
 
 	state.use(m_ptrProgram);
 
-	state.bind(GL_TEXTURE0,m_ptrTexture);
+	state.bind(0,m_ptrTexture);
 
 	m_ptrVAO->draw_elements(GL_TRIANGLES,6 * 4,GL_UNSIGNED_INT);
 }

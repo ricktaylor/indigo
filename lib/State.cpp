@@ -36,7 +36,7 @@ void OOGL::glCheckError(const char* fn, const char* file, unsigned int line)
 
 OOGL::State::State(StateFns& fns) :
 		m_state_fns(fns),
-		m_active_texture_unit(GL_TEXTURE0)
+		m_active_texture_unit(0)
 {
 }
 
@@ -112,22 +112,22 @@ OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBa
 	return prev;
 }
 
-GLenum OOGL::State::activate_texture_unit(GLenum unit)
+GLuint OOGL::State::activate_texture_unit(GLuint unit)
 {
-	GLenum prev = m_active_texture_unit;
+	GLuint prev = m_active_texture_unit;
 	if (unit != m_active_texture_unit)
 	{
 		m_state_fns.glActiveTexture(unit);
 		m_active_texture_unit = unit;
 	}
 
-	if (prev == GLenum(-1))
+	if (prev == GLuint(-1))
 		prev = unit;
 
 	return prev;
 }
 
-GLenum OOGL::State::active_texture_unit() const
+GLuint OOGL::State::active_texture_unit() const
 {
 	return m_active_texture_unit;
 }
@@ -137,14 +137,14 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::internal_bind(const OOBase::Shared
 	return bind(m_active_texture_unit,texture);
 }
 
-OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLenum unit, const OOBase::SharedPtr<Texture>& texture)
+OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::SharedPtr<Texture>& texture)
 {
 	OOBase::SharedPtr<OOGL::Texture> prev;
 
-	tex_unit_t* tu = m_vecTexUnits.at(unit - GL_TEXTURE0);
+	tex_unit_t* tu = m_vecTexUnits.at(unit);
 	if (!tu)
 	{
-		if (!m_vecTexUnits.resize(unit - GL_TEXTURE0 + 1))
+		if (!m_vecTexUnits.resize(unit + 1))
 		{
 			LOG_WARNING(("Failed to resize texture unit cache"));
 
@@ -154,7 +154,7 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLenum unit, const OOBase::Sh
 			return prev;
 		}
 
-		tu = m_vecTexUnits.at(unit - GL_TEXTURE0);
+		tu = m_vecTexUnits.at(unit);
 	}
 
 	tex_unit_t::iterator i = tu->find(texture->target());
@@ -187,7 +187,7 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind_texture(GLuint texture, GLenu
 {
 	OOBase::SharedPtr<OOGL::Texture> prev;
 
-	tex_unit_t* tu = m_vecTexUnits.at(m_active_texture_unit - GL_TEXTURE0);
+	tex_unit_t* tu = m_vecTexUnits.at(m_active_texture_unit);
 	if (!tu)
 		glBindTexture(target,texture);
 	else

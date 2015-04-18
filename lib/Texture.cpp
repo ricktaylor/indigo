@@ -373,7 +373,7 @@ GLenum OOGL::Texture::target() const
 	return m_target;
 }
 
-void OOGL::Texture::internal_bind(State& state, GLenum unit) const
+void OOGL::Texture::internal_bind(State& state, GLuint unit) const
 {
 	StateFns::get_current()->glBindTextureUnit(state,unit,m_target,m_tex);
 }
