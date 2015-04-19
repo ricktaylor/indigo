@@ -39,10 +39,11 @@ namespace OOGL
 		bool load(const unsigned char* data, size_t len, ...);
 
 	private:
-		unsigned int m_line_height;
-		unsigned int m_tex_width;
-		unsigned int m_tex_height;
-		unsigned int m_pages;
+		OOBase::uint16_t m_size;
+		OOBase::uint16_t m_line_height;
+		OOBase::uint16_t m_tex_width;
+		OOBase::uint16_t m_tex_height;
+		OOBase::uint16_t m_pages;
 
 		struct char_info
 		{

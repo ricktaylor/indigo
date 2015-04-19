@@ -82,8 +82,9 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 		switch (type)
 		{
 		case 1:
-			OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %u",data + 14,((unsigned int)data[1] << 8) | data[0]);
-			data += len;
+			m_size = read_uint16(data);
+			OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %u",data + 12,m_size);
+			data += len - 2;
 			break;
 
 		case 2:
@@ -294,29 +295,38 @@ bool OOGL::Font::prep_text(const char* sz, size_t len)
 	GLuint* e = ei.get();
 	float advance = 0.f;
 	GLuint idx = 0;
+	unsigned int ushort_max = 0x10000;
+	float fsize = static_cast<float>(m_size);
 	for (size_t p=0;p<len;++p)
 	{
-		char_map_t::iterator i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>(sz[p]));
+		if (p > 0)
+		{
+			kern_map_t::iterator k = m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(static_cast<OOBase::uint8_t>(sz[p-1]),static_cast<OOBase::uint8_t>(sz[p])));
+			if (k != m_mapKerning.end())
+				advance += (k->second / fsize);
+		}
 
-		a[0].x = advance + (i->second.xoffset / 64.f);
-		a[0].y = 1.f - (i->second.yoffset / 64.f);
+		char_map_t::iterator i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>(sz[p]));
+		if (i == m_mapCharInfo.end())
+			i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>('?'));
+
+		a[0].x = advance + (i->second.xoffset / fsize);
+		a[0].y = 1.f - (i->second.yoffset / fsize);
 		a[1].x = a[0].x;
-		a[1].y = a[0].y - (i->second.height / 64.f);
-		a[2].x = a[0].x + (i->second.width / 64.f);
+		a[1].y = a[0].y - (i->second.height / fsize);
+		a[2].x = a[0].x + (i->second.width / fsize);
 		a[2].y = a[0].y;
 		a[3].x = a[2].x;
 		a[3].y = a[1].y;
 
-		a[0].u = i->second.x << 8;// / m_tex_width;
-		a[0].v = i->second.y << 8;// / (float)m_tex_height;
+		a[0].u = i->second.x * (ushort_max / m_tex_width);
+		a[0].v = i->second.y * (ushort_max / m_tex_height);
 		a[1].u = a[0].u;
-		a[1].v = a[0].v + (i->second.height << 8);// / (float)m_tex_height);
-		a[2].u = a[0].u + (i->second.width << 8);// / (float)m_tex_width);
+		a[1].v = a[0].v + (i->second.height  * (ushort_max / m_tex_height));
+		a[2].u = a[0].u + (i->second.width * (ushort_max / m_tex_width));
 		a[2].v = a[0].v;
 		a[3].u = a[2].u;
 		a[3].v = a[1].v;
-
-		a += 4;
 				
 		e[0] = idx + 0;
 		e[1] = idx + 1;
@@ -324,14 +334,12 @@ bool OOGL::Font::prep_text(const char* sz, size_t len)
 		e[3] = idx + 2;
 		e[4] = idx + 1;
 		e[5] = idx + 3;
+
+		a += 4;
 		e += 6;
 		idx += 4;
 
-		advance += (i->second.xadvance / 64.f);
-
-		kern_map_t::iterator k = m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(static_cast<OOBase::uint8_t>(sz[p]),static_cast<OOBase::uint8_t>(sz[p+1])));
-		if (k != m_mapKerning.end())
-			advance += (k->second / 64.f);
+		advance += (i->second.xadvance / fsize);
 	}
 	
 	return true;
@@ -355,11 +363,6 @@ OOGL::Text::Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString
 }
 
 OOGL::Text::~Text()
-{
-
-}
-
-void OOGL::Text::text(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s)
 {
 
 }
