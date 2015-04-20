@@ -28,6 +28,8 @@
 
 namespace OOGL
 {
+	class Text;
+
 	class Font : public OOBase::NonCopyable
 	{
 		friend class Text;
@@ -40,28 +42,31 @@ namespace OOGL
 
 	private:
 		OOBase::uint16_t m_size;
-		OOBase::uint16_t m_line_height;
-		OOBase::uint16_t m_tex_width;
-		OOBase::uint16_t m_tex_height;
-		OOBase::uint16_t m_pages;
+		float m_line_height;
+		OOBase::uint32_t m_packing;
 
 		struct char_info
 		{
-			OOBase::uint16_t x;
-			OOBase::uint16_t y;
-			OOBase::uint16_t width;
-			OOBase::uint16_t height;
-			OOBase::uint16_t xoffset;
-			OOBase::uint16_t yoffset;
-			OOBase::uint16_t xadvance;
+			OOBase::uint16_t u0;
+			OOBase::uint16_t v0;
+			OOBase::uint16_t u1;
+			OOBase::uint16_t v1;
+			float left;
+			float top;
+			float right;
+			float bottom;
+			float xadvance;
 			OOBase::uint8_t page;
-			OOBase::uint8_t chnl;
+			OOBase::uint8_t channel;
 		};
 		typedef OOBase::Table<OOBase::uint32_t,struct char_info,OOBase::Less<OOBase::uint32_t>,OOBase::ThreadLocalAllocator> char_map_t;
 		char_map_t m_mapCharInfo;
 
-		typedef OOBase::Table<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>,OOBase::int16_t,OOBase::Less<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> >,OOBase::ThreadLocalAllocator> kern_map_t;
+		typedef OOBase::Table<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>,float,OOBase::Less<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> >,OOBase::ThreadLocalAllocator> kern_map_t;
 		kern_map_t m_mapKerning;
+
+		typedef OOBase::List<OOBase::Pair<GLsizei,GLsizei>,OOBase::ThreadLocalAllocator> free_list_t;
+		free_list_t m_listFree;
 
 		OOBase::SharedPtr<OOGL::Texture> m_ptrTexture;
 		OOBase::SharedPtr<OOGL::Program> m_ptrProgram;
@@ -70,25 +75,33 @@ namespace OOGL
 		OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements;
 
 		bool load_8bit_shader();
-		bool prep_text(const char* sz, size_t len);
+		bool alloc_text(Text& text, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s);
+		void free_text(Text& text);
 
-		void draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start, size_t len);
+		void draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei len);
 	};
 
 	class Text : public OOBase::NonCopyable
 	{
+		friend class Font;
+
 	public:
 		Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s);
 		~Text();
 
-		void text(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s);
+		bool text(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s);
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> text() const;
 
-		void draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start = 0, size_t end = size_t(-1));
+		float length() const;
+
+		void draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start = 0, GLsizei length = GLsizei(-1));
 
 	private:
 		OOBase::SharedPtr<Font> m_font;
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_str;
+		GLsizei m_glyph_start;
+		GLsizei m_glyph_len;
+		float m_length;
 	};
 }
 

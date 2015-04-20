@@ -54,6 +54,144 @@ namespace
 		return r;
 	}
 
+	const char utf8_data[256] =
+	{
+		// Key:
+		//  0 = Invalid first byte
+		//  1 = Single byte
+		//  2 = 2 byte sequence
+		//  3 = 3 byte sequence
+		//  4 = 4 byte sequence
+
+		// -1 = Continuation byte
+		// -2 = Overlong 2 byte sequence
+		// -3 = 3 byte overlong check (0x80..0x9F) as next byte fail
+		// -4 = 3 byte reserved check (0xA0..0xBF) as next byte fail
+		// -5 = 4 byte overlong check (0x80..0x8F) as next byte fail
+		// -6 = 4 byte reserved check (0x90..0xBF) as next byte fail
+
+		 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 0x00..0x0F
+		 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 0x10..0x1F
+		 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 0x20..0x2F
+		 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 0x30..0x3F
+		 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 0x40..0x4F
+		 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 0x50..0x5F
+		 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 0x60..0x6F
+		 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  // 0x70..0x7F
+		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,  // 0x80..0x8F
+		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,  // 0x90..0x9F
+		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,  // 0xA0..0xAF
+		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,  // 0xB0..0xBF
+		-2,-2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,  // 0xC0..0xCF
+		 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,  // 0xD0..0xDF
+		-3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,-4, 3, 3,  // 0xE0..0xEF
+		-5, 4, 4, 4,-6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0   // 0xF0..0xFF
+	};
+
+	const OOBase::uint32_t utf_subst_val = 0xFFFD;
+
+	bool utf8_to_glyphs(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s, OOBase::Vector<OOBase::uint32_t,OOBase::ThreadLocalAllocator>& glyphs)
+	{
+		const unsigned char* sz = reinterpret_cast<const unsigned char*>(s.c_str());
+		const unsigned char* end = sz + s.length();
+
+		while (sz < end)
+		{
+			// Default to substitution value
+			OOBase::uint32_t wide_val = utf_subst_val;
+			int l = 0;
+
+			unsigned char c = *sz++;
+			switch (utf8_data[c])
+			{
+				case 1:
+					wide_val = c;
+					break;
+
+				case 2:
+					wide_val = (c & 0x1F);
+					l = 1;
+					break;
+
+				case -2:
+					++sz;
+					break;
+
+				case 3:
+					wide_val = (c & 0x0F);
+					l = 2;
+					break;
+
+				case -3:
+					if (*sz >= 0x80 && *sz <= 0x9F)
+						sz += 2;
+					else
+					{
+						wide_val = (c & 0x0F);
+						l = 2;
+					}
+					break;
+
+				case 4:
+					wide_val = (c & 0x07);
+					l = 3;
+					break;
+
+				case -4:
+					if (*sz >= 0xA0 && *sz <= 0xBF)
+						sz += 2;
+					else
+					{
+						wide_val = (c & 0x0F);
+						l = 2;
+					}
+					break;
+
+				case -5:
+					if (*sz >= 0x80 && *sz <= 0x8F)
+						sz += 3;
+					else
+					{
+						wide_val = (c & 0x07);
+						l = 3;
+					}
+					break;
+
+				case -6:
+					if (*sz >= 0x90 && *sz <= 0xBF)
+						sz += 3;
+					else
+					{
+						wide_val = (c & 0x07);
+						l = 3;
+					}
+					break;
+
+				default:
+					break;
+			}
+
+			while (l-- > 0)
+			{
+				c = *sz++;
+				if (utf8_data[c] != -1)
+				{
+					wide_val = utf_subst_val;
+					sz += l;
+					break;
+				}
+
+				wide_val <<= 6;
+				wide_val |= (c & 0x3F);
+			}
+
+			if (!glyphs.push_back(wide_val))
+				return false;
+		}
+
+		return true;
+	}
+
 	struct attrib_data
 	{
 		float x;
@@ -81,6 +219,8 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 	va_list textures;
 	va_start(textures,len);
 
+	unsigned int tex_width, tex_height, pages;
+
 	bool ok = true;
 	for (data += 4;ok && data < end;)
 	{
@@ -97,17 +237,17 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 
 		case 2:
 			assert(len == 15);
-			m_line_height = read_uint16(data);
+			m_line_height = read_uint16(data) / static_cast<float>(m_size);
 			data += 2;
-			m_tex_width = read_uint16(data);
-			m_tex_height = read_uint16(data);
-			m_pages = read_uint16(data);
-			if (!m_pages)
+			tex_width = read_uint16(data);
+			tex_height = read_uint16(data);
+			pages = read_uint16(data);
+			if (!pages)
 			{
 				LOG_ERROR(("No textures in font!"));
 				ok = false;
 			}
-			else if (m_pages == 1)
+			else if (pages == 1)
 			{
 				const unsigned char* page_data = va_arg(textures,const unsigned char*);
 				size_t page_len = va_arg(textures,size_t);
@@ -123,7 +263,7 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 					LOG_ERROR(("Multiple textures in font, no texture array support"));
 					ok = false;
 				}
-				for (unsigned int p=0;ok && p<m_pages;++p)
+				for (unsigned int p=0;ok && p<pages;++p)
 				{
 					// Load page
 					const unsigned char* page_data = va_arg(textures,const unsigned char*);
@@ -143,13 +283,13 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 			}
 			else
 			{
-				OOBase::uint32_t packing = read_uint32(data);
-				if (packing != 0x04040400)
+				m_packing = read_uint32(data);
+				if (m_packing == 0x04040400)
+					ok = load_8bit_shader();
+				else
 				{
 					// TODO: Funky packing
 				}
-				else
-					ok = load_8bit_shader();
 			}
 			break;
 
@@ -160,17 +300,24 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 		case 4:
 			for (size_t c = 0;ok && c < len / 20; ++c)
 			{
+				unsigned int ushort_max = 0x10000;
 				struct char_info ci;
 				OOBase::uint32_t id = read_uint32(data);
-				ci.x = read_uint16(data);
-				ci.y = read_uint16(data);
-				ci.width = read_uint16(data);
-				ci.height = read_uint16(data);
-				ci.xoffset = read_uint16(data);
-				ci.yoffset = read_uint16(data);
-				ci.xadvance = read_uint16(data);
+				ci.u0 = read_uint16(data) * (ushort_max / tex_width);
+				ci.v0 = read_uint16(data) * (ushort_max / tex_height);
+				OOBase::uint16_t width = read_uint16(data);
+				OOBase::uint16_t height = read_uint16(data);
+				ci.u1 = ci.u0 + (width  * (ushort_max / tex_width));
+				ci.v1 = ci.v0 + (height  * (ushort_max / tex_height));
+				ci.left = read_uint16(data) / static_cast<float>(m_size);
+				ci.top = 1.0f - (read_uint16(data) / static_cast<float>(m_size));
+				ci.right = ci.left + (width / static_cast<float>(m_size));
+				ci.bottom = ci.top - (height / static_cast<float>(m_size));
+
+				ci.xadvance = read_uint16(data) / static_cast<float>(m_size);
 				ci.page = *data++;
-				ci.chnl = *data++;
+				ci.channel = *data++;
+
 				if (!(ok = m_mapCharInfo.insert(id,ci)))
 					LOG_ERROR(("Failed to add character to table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
@@ -182,7 +329,7 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 				OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> ch;
 				ch.first = read_uint32(data);
 				ch.second = read_uint32(data);
-				OOBase::int16_t offset = read_uint16(data);
+				float offset = read_uint16(data) / static_cast<float>(m_size);
 				if (!(ok = m_mapKerning.insert(ch,offset)))
 					LOG_ERROR(("Failed to add character to kerning table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
@@ -258,10 +405,18 @@ bool OOGL::Font::load_8bit_shader()
 	return true;
 }
 
-bool OOGL::Font::prep_text(const char* sz, size_t len)
+bool OOGL::Font::alloc_text(Text& text, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s)
 {
-	if (!len)
+	text.m_glyph_len = 0;
+
+	if (s.empty())
 		return true;
+
+	OOBase::Vector<OOBase::uint32_t,OOBase::ThreadLocalAllocator> glyphs;
+	if (!utf8_to_glyphs(s,glyphs))
+		LOG_ERROR_RETURN(("Failed to parse UTF-8 text: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+	size_t len = glyphs.size();
 
 	if (!m_ptrVAO)
 	{
@@ -283,6 +438,8 @@ bool OOGL::Font::prep_text(const char* sz, size_t len)
 
 		m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,len * 6 * sizeof(GLuint));
 		m_ptrElements->bind();
+
+		text.m_glyph_start = 0;
 	}
 	else
 	{
@@ -293,37 +450,42 @@ bool OOGL::Font::prep_text(const char* sz, size_t len)
 	attrib_data* a = attribs.get();
 	OOBase::SharedPtr<GLuint> ei = m_ptrElements->auto_map<GLuint>(GL_MAP_WRITE_BIT);
 	GLuint* e = ei.get();
-	float advance = 0.f;
 	GLuint idx = 0;
-	unsigned int ushort_max = 0x10000;
-	float fsize = static_cast<float>(m_size);
-	for (size_t p=0;p<len;++p)
-	{
-		if (p > 0)
-		{
-			kern_map_t::iterator k = m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(static_cast<OOBase::uint8_t>(sz[p-1]),static_cast<OOBase::uint8_t>(sz[p])));
-			if (k != m_mapKerning.end())
-				advance += (k->second / fsize);
-		}
+	OOBase::uint32_t prev_glyph = OOBase::uint32_t(-1);
+	const OOBase::uint32_t* start = glyphs.data();
+	const OOBase::uint32_t* end = start + len;
 
-		char_map_t::iterator i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>(sz[p]));
+	text.m_length = 0.0f;
+
+	while (start < end)
+	{
+		OOBase::uint32_t glyph = *start++;
+		if (prev_glyph != OOBase::uint32_t(-1))
+		{
+			kern_map_t::iterator k = m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(prev_glyph,glyph));
+			if (k != m_mapKerning.end())
+				text.m_length += k->second;
+		}
+		prev_glyph = glyph;
+
+		char_map_t::iterator i = m_mapCharInfo.find(glyph);
 		if (i == m_mapCharInfo.end())
 			i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>('?'));
 
-		a[0].x = advance + (i->second.xoffset / fsize);
-		a[0].y = 1.f - (i->second.yoffset / fsize);
+		a[0].x = text.m_length + i->second.left;
+		a[0].y = i->second.top;
 		a[1].x = a[0].x;
-		a[1].y = a[0].y - (i->second.height / fsize);
-		a[2].x = a[0].x + (i->second.width / fsize);
+		a[1].y = i->second.bottom;
+		a[2].x = text.m_length + i->second.right;
 		a[2].y = a[0].y;
 		a[3].x = a[2].x;
 		a[3].y = a[1].y;
 
-		a[0].u = i->second.x * (ushort_max / m_tex_width);
-		a[0].v = i->second.y * (ushort_max / m_tex_height);
+		a[0].u = i->second.u0;
+		a[0].v = i->second.v0;
 		a[1].u = a[0].u;
-		a[1].v = a[0].v + (i->second.height  * (ushort_max / m_tex_height));
-		a[2].u = a[0].u + (i->second.width * (ushort_max / m_tex_width));
+		a[1].v = i->second.v1;
+		a[2].u = i->second.u1;
 		a[2].v = a[0].v;
 		a[3].u = a[2].u;
 		a[3].v = a[1].v;
@@ -339,13 +501,20 @@ bool OOGL::Font::prep_text(const char* sz, size_t len)
 		e += 6;
 		idx += 4;
 
-		advance += (i->second.xadvance / fsize);
+		text.m_length += i->second.xadvance;
+
+		++text.m_glyph_len;
 	}
 	
 	return true;
 }
 
-void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start, size_t len)
+void OOGL::Font::free_text(Text& text)
+{
+
+}
+
+void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei len)
 {
 	state.use(m_ptrProgram);
 	state.bind(0,m_ptrTexture);
@@ -353,18 +522,18 @@ void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colou
 	m_ptrProgram->uniform("in_Colour",colour);
 	m_ptrProgram->uniform("MVP",mvp);
 
-	m_ptrVAO->draw_elements(GL_TRIANGLES,static_cast<GLsizei>(6 * len),GL_UNSIGNED_INT,static_cast<GLsizei>(start));
+	m_ptrVAO->draw_elements(GL_TRIANGLES,6 * len,GL_UNSIGNED_INT,start);
 }
 
 OOGL::Text::Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s) :
-		m_font(font), m_str(s)
+		m_font(font), m_str(s), m_glyph_start(0), m_glyph_len(0), m_length(0.0f)
 {
-	m_font->prep_text(s.c_str(),s.length());
+	m_font->alloc_text(*this,s);
 }
 
 OOGL::Text::~Text()
 {
-
+	m_font->free_text(*this);
 }
 
 OOBase::SharedString<OOBase::ThreadLocalAllocator> OOGL::Text::text() const
@@ -372,7 +541,33 @@ OOBase::SharedString<OOBase::ThreadLocalAllocator> OOGL::Text::text() const
 	return m_str;
 }
 
-void OOGL::Text::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, size_t start, size_t end)
+bool OOGL::Text::text(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s)
 {
-	m_font->draw(state,mvp,colour,0,m_str.length());
+	bool ret = true;
+	if (m_str != s)
+	{
+		m_font->free_text(*this);
+		if ((ret = m_font->alloc_text(*this,s)))
+			m_str = s;
+	}
+	return ret;
+}
+
+float OOGL::Text::length() const
+{
+	return m_length;
+}
+
+void OOGL::Text::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei length)
+{
+	if (start > m_glyph_len)
+		start = m_glyph_len;
+
+	if (length == GLsizei(-1))
+		length = m_glyph_len - start;
+
+	if (start + length > m_glyph_len)
+		length = m_glyph_len - start;
+
+	m_font->draw(state,mvp,colour,m_glyph_start + start,length);
 }
