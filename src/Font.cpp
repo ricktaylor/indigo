@@ -53,6 +53,14 @@ namespace
 #endif
 		return r;
 	}
+
+	struct attrib_data
+	{
+		float x;
+		float y;
+		GLushort u;
+		GLushort v;
+	};
 }
 
 OOGL::Font::Font()
@@ -254,14 +262,6 @@ bool OOGL::Font::prep_text(const char* sz, size_t len)
 {
 	if (!len)
 		return true;
-
-	struct attrib_data
-	{
-		float x;
-		float y;
-		GLushort u;
-		GLushort v;
-	};
 
 	if (!m_ptrVAO)
 	{
