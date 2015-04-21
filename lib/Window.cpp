@@ -160,6 +160,61 @@ glm::ivec2 OOGL::Window::size() const
 	return glm::ivec2(width,height);
 }
 
+GLFWmonitor* OOGL::Window::monitor() const
+{
+	GLFWmonitor* m = glfwGetWindowMonitor(m_glfw_window);
+	if (!m)
+	{
+		// Try to find by position
+
+		int width, height;
+		glfwGetWindowSize(m_glfw_window,&width,&height);
+
+		int left,top,right,bottom;
+		glfwGetWindowFrameSize(m_glfw_window,&left,&top,&right,&bottom);
+		width += left + right;
+		height += top + bottom;
+
+		int xpos, ypos;
+		glfwGetWindowPos(m_glfw_window,&xpos,&ypos);
+
+		glm::ivec2 centre(xpos - left + width/2,ypos - top + height/2);
+
+		int count;
+		GLFWmonitor** monitors = glfwGetMonitors(&count);
+		for (int i = 0;i < count;++i)
+		{
+			glfwGetMonitorPos(monitors[i], &xpos, &ypos);
+			if (centre.x >= xpos && centre.y >= ypos)
+			{
+				const GLFWvidmode* mode = glfwGetVideoMode(monitors[i]);
+				if (centre.x < xpos + mode->width && centre.y < ypos + mode->height)
+				{
+					m = monitors[0];
+					break;
+				}
+			}
+		}
+	}
+	return m;
+}
+
+glm::vec2 OOGL::Window::dots_per_mm() const
+{
+	glm::vec2 res(0,0);
+	GLFWmonitor* m = monitor();
+	if (m)
+	{
+		int width, height;
+		glfwGetMonitorPhysicalSize(m, &width, &height);
+
+		const GLFWvidmode* mode = glfwGetVideoMode(m);
+		res.x = static_cast<float>(mode->width) / width;
+		res.y = static_cast<float>(mode->height) / height;
+	}
+	return res;
+}
+
 bool OOGL::Window::draw()
 {
 	if (!m_glfw_window || !is_visible() || is_iconified())

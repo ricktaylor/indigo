@@ -54,6 +54,7 @@ namespace OOGL
 		void iconify(bool minimize);
 
 		glm::ivec2 size() const;
+		glm::vec2 dots_per_mm() const;
 
 		const OOBase::SharedPtr<Framebuffer>& get_default_frame_buffer() const;
 
@@ -72,6 +73,8 @@ namespace OOGL
 		OOBase::SharedPtr<Framebuffer> m_default_fb;
 		OOBase::SharedPtr<State>       m_state;
 		OOBase::SharedPtr<StateFns>    m_state_fns;
+
+		GLFWmonitor* monitor() const;
 
 		static void on_size(GLFWwindow* window, int width, int height);
 		static void on_close(GLFWwindow* window);

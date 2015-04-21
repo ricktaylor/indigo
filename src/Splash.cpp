@@ -190,6 +190,7 @@ namespace
 
 		OOBase::SharedPtr<Splash> self;
 
+		glm::vec2 m_dpmm;
 		Triangle m_tri;
 
 		OOBase::SharedPtr<OOGL::Text> m_text;
@@ -246,7 +247,8 @@ bool Splash::create(void* p)
 
 void Splash::on_size(const OOGL::Window& win, const glm::ivec2& sz)
 {
-	m_ratio = sz.x / (float)sz.y;
+	m_dpmm = win.dots_per_mm();
+	m_ratio = (sz.x * m_dpmm.x) / (sz.y * m_dpmm.y);
 	glViewport(0, 0, sz.x, sz.y);
 }
 
