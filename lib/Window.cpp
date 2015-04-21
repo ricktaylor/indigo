@@ -54,6 +54,7 @@ OOGL::Window::Window(int width, int height, const char* title, unsigned int styl
 
 				glfwSetWindowUserPointer(m_glfw_window,this);
 				glfwSetFramebufferSizeCallback(m_glfw_window,&on_size);
+				glfwSetWindowPosCallback(m_glfw_window,&on_move);
 				glfwSetWindowCloseCallback(m_glfw_window,&on_close);
 				glfwSetWindowFocusCallback(m_glfw_window,&on_focus);
 				glfwSetWindowIconifyCallback(m_glfw_window,&on_iconify);
@@ -109,6 +110,13 @@ void OOGL::Window::iconify(bool minimize)
 		else
 			glfwRestoreWindow(m_glfw_window);
 	}
+}
+
+void OOGL::Window::on_move(GLFWwindow* window, int left, int top)
+{
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (pThis)
+		pThis->signal_moved.fire(*pThis,glm::ivec2(left,top));
 }
 
 void OOGL::Window::on_size(GLFWwindow* window, int width, int height)

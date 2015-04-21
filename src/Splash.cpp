@@ -186,6 +186,7 @@ namespace
 
 		void on_draw(const OOGL::Window& win, OOGL::State& glState);
 		void on_close(const OOGL::Window& win);
+		void on_move(const OOGL::Window& win, const glm::ivec2& pos);
 		void on_size(const OOGL::Window& win, const glm::ivec2& sz);
 
 		OOBase::SharedPtr<Splash> self;
@@ -215,6 +216,7 @@ bool Splash::create(void* p)
 		return false;
 
 	if (!pThis->m_wnd->signal_close.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_close) ||
+			!pThis->m_wnd->signal_moved.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_move) ||
 			!pThis->m_wnd->signal_sized.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_size) ||
 			!pThis->m_wnd->signal_draw.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_draw))
 		LOG_ERROR_RETURN(("Failed to attach signal"),false);
@@ -243,6 +245,14 @@ bool Splash::create(void* p)
 	pThis->self = pThis->shared_from_this();
 
 	return true;
+}
+
+void Splash::on_move(const OOGL::Window& win, const glm::ivec2& pos)
+{
+	glm::ivec2 sz = win.size();
+	m_dpmm = win.dots_per_mm();
+	m_ratio = (sz.x * m_dpmm.x) / (sz.y * m_dpmm.y);
+	glViewport(0, 0, sz.x, sz.y);
 }
 
 void Splash::on_size(const OOGL::Window& win, const glm::ivec2& sz)

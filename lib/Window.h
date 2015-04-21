@@ -66,6 +66,7 @@ namespace OOGL
 		OOBase::Signal1<const Window&,OOBase::ThreadLocalAllocator> signal_close;
 		OOBase::Signal2<const Window&,State&,OOBase::ThreadLocalAllocator> signal_draw;
 		OOBase::Signal2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> signal_sized;
+		OOBase::Signal2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> signal_moved;
 
 	private:
 		GLFWwindow* m_glfw_window;
@@ -76,6 +77,7 @@ namespace OOGL
 
 		GLFWmonitor* monitor() const;
 
+		static void on_move(GLFWwindow* window, int left, int top);
 		static void on_size(GLFWwindow* window, int width, int height);
 		static void on_close(GLFWwindow* window);
 		static void on_focus(GLFWwindow* window, int focused);
