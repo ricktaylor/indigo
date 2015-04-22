@@ -20,13 +20,14 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Font.h"
-#include "../lib/Shader.h"
-#include "../lib/StateFns.h"
-#include "../lib/Image.h"
-#include "../lib/VertexArrayObject.h"
-#include "../lib/BufferObject.h"
+#include "Shader.h"
+#include "StateFns.h"
+#include "Image.h"
+#include "VertexArrayObject.h"
+#include "BufferObject.h"
 
 #include <OOBase/ByteSwap.h>
+#include <OOBase/Logger.h>
 
 namespace
 {

@@ -35,8 +35,8 @@ indigo_SOURCES = \
 	../lib/BufferObject.cpp \
 	../lib/VertexArrayObject.cpp \
 	../lib/Image.cpp \
+	../lib/Font.cpp \
 	Render.cpp \
-	Font.cpp \
 	LogicThread.cpp \
 	Main.cpp \
 	Splash.cpp \

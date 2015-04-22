@@ -25,6 +25,8 @@
 #include "BufferObject.h"
 #include "VertexArrayObject.h"
 
+#include <OOBase/Logger.h>
+
 void OOGL::glCheckError(const char* fn, const char* file, unsigned int line)
 {
 	GLenum err = glGetError();

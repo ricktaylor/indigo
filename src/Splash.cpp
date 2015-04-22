@@ -23,8 +23,7 @@
 #include "../lib/BufferObject.h"
 #include "../lib/VertexArrayObject.h"
 #include "../lib/Shader.h"
-
-#include "Font.h"
+#include "../lib/Font.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -266,7 +265,7 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
 	glState.bind(GL_DRAW_FRAMEBUFFER,win.get_default_frame_buffer());
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	glBlendFunc(GL_SRC_ALPHA_SATURATE,GL_ONE);
 	
@@ -281,7 +280,7 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 	proj = glm::ortho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
 	glm::mat4 model(1);
 	model = glm::scale(model,glm::vec3(.5f,.5f,0.f));
-	model = glm::translate(model,glm::vec3(-m_text->length() / 2.f,-.5f,0.f));
+	model = glm::translate(model,glm::vec3(-m_text->length()/2,-.5f,0.f));
 
 	m_text->draw(glState,proj * model,glm::vec4(fmod(glfwGetTime() / 2,1),fmod(glfwGetTime() / 3,1),fmod(glfwGetTime() / 7,1),fmod(glfwGetTime(),1)));
 }

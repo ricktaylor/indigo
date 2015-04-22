@@ -22,7 +22,10 @@
 #ifndef INDIGO_FONT_H_INCLUDED
 #define INDIGO_FONT_H_INCLUDED
 
-#include "../lib/State.h"
+#include "State.h"
+
+#include <OOBase/String.h>
+#include <OOBase/List.h>
 
 #include <stdarg.h>
 

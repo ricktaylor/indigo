@@ -26,13 +26,14 @@
 #include "State.h"
 #include "StateFns.h"
 
+#include <OOBase/SignalSlot.h>
+
 namespace OOGL
 {
 	class Window : public OOBase::NonCopyable
 	{
 		friend class State;
 		friend class StateFns;
-		friend bool start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
 	public:
 		enum Style

@@ -24,6 +24,8 @@
 
 #include "OOGL.h"
 
+#include <OOBase/SharedPtr.h>
+
 namespace OOGL
 {
 	class State;

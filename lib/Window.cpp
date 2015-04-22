@@ -21,6 +21,8 @@
 
 #include "Window.h"
 
+#include <OOBase/Logger.h>
+
 OOGL::Window::Window(int width, int height, const char* title, unsigned int style, GLFWmonitor* monitor) :
 		m_glfw_window(NULL)
 {

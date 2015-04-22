@@ -25,6 +25,8 @@
 #include "Texture.h"
 #include "Shader.h"
 
+#include <OOBase/Logger.h>
+
 namespace
 {
 	template <typename FN>

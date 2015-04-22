@@ -23,47 +23,9 @@
 #include "StateFns.h"
 
 #include <OOBase/StackAllocator.h>
+#include <OOBase/Logger.h>
 
 #include <glm/gtc/type_ptr.hpp>
-
-static const GLchar* s_gstap =
-		"#ifndef GSTAP_H\n"
-		"#define GSTAP_H\n"
-		"\n"
-		"// gstap.h -- useful for glsl migration\n"
-		"// from:\n"
-		"//		Mike Bailey and Steve Cunningham\n"
-		"//		\"Graphics Shaders: Theory and Practice\",\n"
-		"//		Second Edition, AK Peters, 2011.\n"
-		"\n"
-		"// we are assuming that the compatibility #version line\n"
-		"// is given in the source file, for example:\n"
-		"// #version 400 compatibility\n"
-		"\n"
-		"// uniform variables:\n"
-		"\n"
-		"#define uModelViewMatrix           gl_ModelViewMatrix\n"
-		"#define uProjectionMatrix          gl_ProjectionMatrix\n"
-		"#define uModelViewProjectionMatrix gl_ModelViewProjectionMatrix\n"
-		"#define uNormalMatrix              gl_NormalMatrix\n"
-		"#define uModelViewMatrixInverse    gl_ModelViewMatrixInverse\n"
-		"\n"
-		"// attribute variables:\n"
-		"\n"
-		"#define aColor   gl_Color\n"
-		"#define aNormal  gl_Normal\n"
-		"#define aVertex  gl_Vertex\n"
-		"\n"
-		"#define aTexCoord0   gl_MultiTexCoord0\n"
-		"#define aTexCoord1   gl_MultiTexCoord1\n"
-		"#define aTexCoord2   gl_MultiTexCoord2\n"
-		"#define aTexCoord3   gl_MultiTexCoord3\n"
-		"#define aTexCoord4   gl_MultiTexCoord4\n"
-		"#define aTexCoord5   gl_MultiTexCoord5\n"
-		"#define aTexCoord6   gl_MultiTexCoord6\n"
-		"#define aTexCoord7   gl_MultiTexCoord7\n"
-		"\n"
-		"#endif	// #ifndef GSTAP_H\n";
 
 OOGL::Shader::Shader(GLenum shaderType) : m_id(StateFns::get_current()->glCreateShader(shaderType))
 {
@@ -72,11 +34,6 @@ OOGL::Shader::Shader(GLenum shaderType) : m_id(StateFns::get_current()->glCreate
 OOGL::Shader::~Shader()
 {
 	StateFns::get_current()->glDeleteShader(m_id);
-}
-
-const GLchar* OOGL::Shader::get_gstap()
-{
-	return s_gstap;
 }
 
 void OOGL::Shader::compile(const GLchar* sz, GLint len)

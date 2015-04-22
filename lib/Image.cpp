@@ -21,6 +21,8 @@
 
 #include "Image.h"
 
+#include <OOBase/Logger.h>
+
 extern "C"
 {
 	static void* wrap_malloc(size_t sz);

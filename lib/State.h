@@ -24,6 +24,9 @@
 
 #include "OOGL.h"
 
+#include <OOBase/SharedPtr.h>
+#include <OOBase/Table.h>
+
 namespace OOGL
 {
 	class StateFns;

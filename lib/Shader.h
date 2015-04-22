@@ -24,6 +24,9 @@
 
 #include "OOGL.h"
 
+#include <OOBase/String.h>
+#include <OOBase/Table.h>
+
 namespace OOGL
 {
 	class Shader : public OOBase::NonCopyable
@@ -49,8 +52,6 @@ namespace OOGL
 		{
 			compile(strings,S);
 		}
-
-		static const char* get_gstap();
 
 		bool compile_status() const;
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> info_log() const;
