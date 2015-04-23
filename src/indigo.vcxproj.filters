@@ -51,13 +51,13 @@
     <ClInclude Include="..\lib\BufferObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Font.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\lib\VertexArrayObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\Font.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -95,13 +95,16 @@
     <ClCompile Include="..\lib\BufferObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Font.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\lib\VertexArrayObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StaticResources.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\Font.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lib\BufferObject.h" />
+    <ClInclude Include="..\lib\Font.h" />
     <ClInclude Include="..\lib\Framebuffer.h" />
     <ClInclude Include="..\lib\glext.h" />
     <ClInclude Include="..\lib\Image.h" />
@@ -32,11 +33,11 @@
     <ClInclude Include="..\lib\Window.h" />
     <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="Common.h" />
-    <ClInclude Include="Font.h" />
     <ClInclude Include="Render.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\lib\BufferObject.cpp" />
+    <ClCompile Include="..\lib\Font.cpp" />
     <ClCompile Include="..\lib\Framebuffer.cpp" />
     <ClCompile Include="..\lib\Image.cpp" />
     <ClCompile Include="..\lib\Shader.cpp" />
@@ -45,11 +46,11 @@
     <ClCompile Include="..\lib\Texture.cpp" />
     <ClCompile Include="..\lib\VertexArrayObject.cpp" />
     <ClCompile Include="..\lib\Window.cpp" />
-    <ClCompile Include="Font.cpp" />
     <ClCompile Include="LogicThread.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Splash.cpp" />
+    <ClCompile Include="StaticResources.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\3rdparty\glfw\x64\src\glfw.vcxproj">

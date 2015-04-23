@@ -45,16 +45,16 @@ namespace
 	struct RES
 	{
 		const char* name;
-		LPCTSTR res_name;
-		LPCTSTR type;
-		HRSRC res
+		DWORD id;
+		LPTSTR type;
+		HRSRC res;
 		const unsigned char* data;
 		size_t length;
 	};
 	RES s_resources[] =
 	{
-		{ "Titillium-Regular.fnt", MAKEINTRESOURCE(IDR_TITILLIUM), MAKEINTRESOURCE(10), NULL, NULL, 0 },
-		{ "Titillium-Regular_0.png", MAKEINTRESOURCE(IDR_TITILLIUM_0), MAKEINTRESOURCE(10), NULL, NULL, 0 },
+		{ "Titillium-Regular.fnt", IDR_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
+		{ "Titillium-Regular.bin_0.png", IDR_TITILLIUM_0, RT_RCDATA, NULL, NULL, 0 },
 	};
 
 	const RES* find_resource(const char* name)
@@ -63,13 +63,10 @@ namespace
 		{
 			if (strcmp(name,s_resources[i].name) == 0)
 			{
-				if (!s_resources[i].data)
+				if (!s_resources[i].res && (s_resources[i].res = FindResource(NULL,MAKEINTRESOURCE(s_resources[i].id),s_resources[i].type)))
 				{
-					if ((s_resources[i].res = FindResource(NULL,s_resources[i].name,s_resources[i].type))
-					{
-						s_resources[i].data = static_cast<const unsigned char*>(LockResource(LoadResource(NULL,s_resources[i].res)));
-						s_resources[i].length = SizeofResource(NULL,s_resources[i].res);
-					}
+					s_resources[i].data = static_cast<const unsigned char*>(LockResource(LoadResource(NULL,s_resources[i].res)));
+					s_resources[i].length = SizeofResource(NULL,s_resources[i].res);
 				}
 				return &s_resources[i];
 			}
