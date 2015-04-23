@@ -24,66 +24,14 @@
 #include "../lib/VertexArrayObject.h"
 #include "../lib/Shader.h"
 #include "../lib/Font.h"
+#include "../lib/Resource.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#if defined(_WIN32)
-
-#include "../resources/resource.h"
-
-namespace
+namespace Indigo
 {
-	void load_resource(const unsigned char*& p, size_t& len, LPCTSTR name, LPCTSTR type = MAKEINTRESOURCE(10))
-	{
-		if (!p)
-		{
-			HRSRC res = FindResource(NULL,name,type);
-			if (res)
-			{
-				p = static_cast<const unsigned char*>(LockResource(LoadResource(NULL,res)));
-				len = SizeofResource(NULL,res);
-			}
-		}
-	}
-
-	const unsigned char* s_Titillium_Regular = NULL;
-	size_t s_Titillium_Regular_length = 0;
-	const unsigned char* get_Titillium_Regular()
-	{
-		load_resource(s_Titillium_Regular,s_Titillium_Regular_length,MAKEINTRESOURCE(IDR_TITILLIUM));
-		return s_Titillium_Regular;
-	}
-	size_t get_Titillium_Regular_length()
-	{
-		load_resource(s_Titillium_Regular,s_Titillium_Regular_length,MAKEINTRESOURCE(IDR_TITILLIUM));
-		return s_Titillium_Regular_length;
-	}
-
-	const unsigned char* s_Titillium_Regular_0 = NULL;
-	size_t s_Titillium_Regular_0_length = 0;
-	const unsigned char* get_Titillium_Regular_0()
-	{
-		load_resource(s_Titillium_Regular_0,s_Titillium_Regular_0_length,MAKEINTRESOURCE(IDR_TITILLIUM_0));
-		return s_Titillium_Regular_0;
-	}
-	size_t get_Titillium_Regular_0_length()
-	{
-		load_resource(s_Titillium_Regular_0,s_Titillium_Regular_0_length,MAKEINTRESOURCE(IDR_TITILLIUM_0));
-		return s_Titillium_Regular_0_length;
-	}
+	OOGL::ResourceBundle& static_resources();
 }
-
-#define Titillium_Regular (get_Titillium_Regular())
-#define Titillium_Regular_length (get_Titillium_Regular_length())
-#define Titillium_Regular_0 (get_Titillium_Regular_0())
-#define Titillium_Regular_0_length (get_Titillium_Regular_0_length())
-
-#else
-extern const unsigned char* Titillium_Regular;
-extern size_t Titillium_Regular_length;
-extern const unsigned char* Titillium_Regular_0;
-extern size_t Titillium_Regular_0_length;
-#endif
 
 namespace
 {
@@ -226,7 +174,7 @@ bool Splash::create(void* p)
 	if (!fnt)
 		LOG_ERROR_RETURN(("Failed to load font"),false);
 
-	if (!fnt->load(Titillium_Regular,Titillium_Regular_length,Titillium_Regular_0,Titillium_Regular_0_length))
+	if (!fnt->load(Indigo::static_resources(),"Titillium-Regular.fnt"))
 		return false;
 
 	OOBase::SharedString<OOBase::ThreadLocalAllocator> s;

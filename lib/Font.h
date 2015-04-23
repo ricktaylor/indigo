@@ -23,11 +23,10 @@
 #define INDIGO_FONT_H_INCLUDED
 
 #include "State.h"
+#include "Resource.h"
 
 #include <OOBase/String.h>
 #include <OOBase/List.h>
-
-#include <stdarg.h>
 
 namespace OOGL
 {
@@ -41,7 +40,7 @@ namespace OOGL
 		Font();
 		~Font();
 
-		bool load(const unsigned char* data, size_t len, ...);
+		bool load(ResourceBundle& resource, const char* name);
 
 	private:
 		OOBase::uint16_t m_size;

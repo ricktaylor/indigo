@@ -210,17 +210,21 @@ OOGL::Font::~Font()
 {
 }
 
-bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
+bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 {
+	if (!resource.exists(name))
+		LOG_ERROR_RETURN(("Failed to find resource %s",name),false);
+
+	const unsigned char* data = resource.load(name);
+	size_t len = resource.size(name);
+
 	// BMF\0x3
 	if (data[0] != 66 || data[1] != 77 || data[2] != 70 || data[3] != 3)
 		LOG_ERROR_RETURN(("Failed to load font data: Format not recognised"),false);
 
 	const unsigned char* end = data + len;
-	va_list textures;
-	va_start(textures,len);
-
 	unsigned int tex_width, tex_height, pages;
+	OOBase::Vector<const char*,OOBase::ThreadLocalAllocator> vecPages;
 
 	bool ok = true;
 	for (data += 4;ok && data < end;)
@@ -243,40 +247,6 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 			tex_width = read_uint16(data);
 			tex_height = read_uint16(data);
 			pages = read_uint16(data);
-			if (!pages)
-			{
-				LOG_ERROR(("No textures in font!"));
-				ok = false;
-			}
-			else if (pages == 1)
-			{
-				const unsigned char* page_data = va_arg(textures,const unsigned char*);
-				size_t page_len = va_arg(textures,size_t);
-
-				OOGL::Image img;
-				if ((ok = img.load(page_data,static_cast<int>(page_len))))
-					ok = (m_ptrTexture = img.make_texture(GL_R8));
-			}
-			else
-			{
-				if (!StateFns::get_current()->check_glTextureArray())
-				{
-					LOG_ERROR(("Multiple textures in font, no texture array support"));
-					ok = false;
-				}
-				for (unsigned int p=0;ok && p<pages;++p)
-				{
-					// Load page
-					const unsigned char* page_data = va_arg(textures,const unsigned char*);
-					size_t page_len = va_arg(textures,size_t);
-
-					OOGL::Image img;
-					if ((ok = img.load(page_data,static_cast<int>(page_len))))
-					{
-						// TODO: Load into array texture
-					}
-				}
-			}
 			if (*data++ == 1)
 			{
 				// TODO: Packed data
@@ -292,10 +262,56 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 					// TODO: Funky packing
 				}
 			}
+			if (!pages)
+			{
+				LOG_ERROR(("No textures in font!"));
+				ok = false;
+			}
 			break;
 
 		case 3:
-			data += len;
+			if (pages == 1)
+			{
+				if (!(ok = resource.exists(reinterpret_cast<const char*>(data))))
+					LOG_ERROR(("Missing font resource %s",reinterpret_cast<const char*>(data)));
+				else
+				{
+					const unsigned char* page_data = resource.load(reinterpret_cast<const char*>(data));
+					size_t page_len = resource.size(reinterpret_cast<const char*>(data));
+
+					OOGL::Image img;
+					if ((ok = img.load(page_data,static_cast<int>(page_len))))
+						ok = (m_ptrTexture = img.make_texture(GL_R8));
+
+					data += len;
+				}
+			}
+			else
+			{
+				if (!StateFns::get_current()->check_glTextureArray())
+				{
+					LOG_ERROR(("Multiple textures in font, no texture array support"));
+					ok = false;
+				}
+				for (unsigned int p=0;ok && p<pages;++p)
+				{
+					if (!(ok = resource.exists(reinterpret_cast<const char*>(data))))
+						LOG_ERROR(("Missing font resource %s",reinterpret_cast<const char*>(data)));
+					else
+					{
+						const unsigned char* page_data = resource.load(reinterpret_cast<const char*>(data));
+						size_t page_len = resource.size(reinterpret_cast<const char*>(data));
+
+						OOGL::Image img;
+						if ((ok = img.load(page_data,static_cast<int>(page_len))))
+						{
+							// TODO: Load into array texture
+						}
+
+						data += len/pages;
+					}
+				}
+			}
 			break;
 
 		case 4:
@@ -343,8 +359,6 @@ bool OOGL::Font::load(const unsigned char* data, size_t len, ...)
 			break;
 		}
 	}
-
-	va_end(textures);
 
 	if (!ok)
 		return false;

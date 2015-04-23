@@ -36,12 +36,11 @@ indigo_SOURCES = \
 	../lib/VertexArrayObject.cpp \
 	../lib/Image.cpp \
 	../lib/Font.cpp \
+	StaticResources.cpp \
 	Render.cpp \
 	LogicThread.cpp \
 	Main.cpp \
-	Splash.cpp \
-	Titillium-Regular_0.c \
-	Titillium-Regular.c
+	Splash.cpp
 		
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \
