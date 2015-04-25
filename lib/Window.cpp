@@ -29,10 +29,7 @@ OOGL::Window::Window(int width, int height, const char* title, unsigned int styl
 	glfwWindowHint(GLFW_VISIBLE,(style & eWSvisible) ? GL_TRUE : GL_FALSE);
 	glfwWindowHint(GLFW_RESIZABLE,(style & eWSresizable) ? GL_TRUE : GL_FALSE);
 	glfwWindowHint(GLFW_DECORATED,(style & eWSdecorated) ? GL_TRUE : GL_FALSE);
-
-#if !defined(NDEBUG)
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT,GL_TRUE);
-#endif
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT,(style & eWSdebug_context) ? GL_TRUE : GL_FALSE);
 
 	// Now try to create the window
 	m_glfw_window = glfwCreateWindow(width,height,title,monitor,NULL);

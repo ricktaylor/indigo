@@ -40,7 +40,8 @@ namespace OOGL
 		{
 			eWSvisible = 1,
 			eWSresizable = 2,
-			eWSdecorated = 4
+			eWSdecorated = 4,
+			eWSdebug_context = 8
 		};
 
 		Window(int width, int height, const char* title, unsigned int style = eWSdecorated, GLFWmonitor* monitor = NULL);

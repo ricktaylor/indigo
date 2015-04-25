@@ -158,7 +158,11 @@ bool Splash::create(void* p)
 {
 	Splash* pThis = static_cast<Splash*>(p);
 
-	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test",OOGL::Window::eWSresizable | OOGL::Window::eWSdecorated);
+	unsigned int style = OOGL::Window::eWSresizable | OOGL::Window::eWSdecorated;
+	if (Indigo::is_debug())
+		style |= OOGL::Window::eWSdebug_context;
+
+	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test",style);
 	if (!pThis->m_wnd || !pThis->m_wnd->is_valid())
 		return false;
 
