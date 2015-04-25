@@ -69,6 +69,16 @@ namespace OOGL
 		OOBase::Signal2<const Window&,State&,OOBase::ThreadLocalAllocator> signal_draw;
 		OOBase::Signal2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> signal_sized;
 		OOBase::Signal2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> signal_moved;
+		OOBase::Signal3<const Window&,unsigned int,int,OOBase::ThreadLocalAllocator> signal_character;
+
+		struct key_stroke_t
+		{
+			int key;
+			int scancode;
+			int action;
+			int mods;
+		};
+		OOBase::Signal2<const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator> signal_keystroke;
 
 	private:
 		GLFWwindow* m_glfw_window;
@@ -85,6 +95,8 @@ namespace OOGL
 		static void on_focus(GLFWwindow* window, int focused);
 		static void on_iconify(GLFWwindow* window, int iconified);
 		static void on_refresh(GLFWwindow* window);
+		static void on_character(GLFWwindow* window, unsigned int codepoint, int mods);
+		static void on_key(GLFWwindow* window, int key, int scancode, int action, int mods);
 	};
 }
 

@@ -58,6 +58,8 @@ OOGL::Window::Window(int width, int height, const char* title, unsigned int styl
 				glfwSetWindowFocusCallback(m_glfw_window,&on_focus);
 				glfwSetWindowIconifyCallback(m_glfw_window,&on_iconify);
 				glfwSetWindowRefreshCallback(m_glfw_window,&on_refresh);
+				glfwSetCharModsCallback(m_glfw_window,&on_character);
+				glfwSetKeyCallback(m_glfw_window,&on_key);
 			}
 		}
 	}
@@ -147,6 +149,23 @@ void OOGL::Window::on_refresh(GLFWwindow* window)
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->draw())
 		pThis->swap();
+}
+
+void OOGL::Window::on_character(GLFWwindow* window, unsigned int codepoint, int mods)
+{
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (pThis)
+		pThis->signal_character.fire(*pThis,codepoint,mods);
+}
+
+void OOGL::Window::on_key(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (pThis)
+	{
+		key_stroke_t keystroke = {key, scancode, action, mods};
+		pThis->signal_keystroke.fire(*pThis,keystroke);
+	}
 }
 
 bool OOGL::Window::is_valid() const
