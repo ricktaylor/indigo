@@ -150,9 +150,13 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 			LOG_ERROR_RETURN(("Failed read configuration file %s: Syntax error at line %lu, column %lu",rpath,(unsigned long)error.line,(unsigned long)error.col),false);
 		else if (err != ENOENT)
 			LOG_ERROR_RETURN(("Failed load configuration file %s: %s",rpath,OOBase::system_error_text(err)),false);
-	}
 
-	OOBase::Logger::log(OOBase::Logger::Information,"Configuration loaded successfully");
+		OOBase::Logger::log(OOBase::Logger::Information,"Configuration loaded successfully");
+	}
+	else
+	{
+		OOBase::Logger::log(OOBase::Logger::Information,"No configuration file in use");
+	}
 
 	return true;
 }
