@@ -273,8 +273,13 @@ void Splash::on_character(const OOGL::Window& win, unsigned int codepoint, int m
 {
 	OOBase::SharedString<OOBase::ThreadLocalAllocator> s = m_text->text();
 	char c = static_cast<char>(codepoint);
-	if (s.append(&c,1))
-		m_text->text(s);
+	if (s.empty())
+		s.assign(&c,1);
+	else
+		s.append(&c,1);
+	
+	m_text->text(s);
+	LOG_DEBUG(("TEXT = %s",s.c_str()));
 }
 
 void Splash::on_keystroke(const OOGL::Window& win, const OOGL::Window::key_stroke_t& keystroke)
@@ -284,8 +289,10 @@ void Splash::on_keystroke(const OOGL::Window& win, const OOGL::Window::key_strok
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> s,t = m_text->text();
 		if (!t.empty())
 		{
-			s.assign(t.c_str(),t.length()-1);
+			if (t.length() > 1)
+				s.assign(t.c_str(),t.length()-1);
 			m_text->text(s);
+			LOG_DEBUG(("TEXT = %s",s.c_str()));
 		}
 	}
 }
