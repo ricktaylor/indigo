@@ -44,14 +44,17 @@ OOGL::VertexArrayObject::~VertexArrayObject()
 		StateFns::get_current()->glDeleteVertexArrays(1,&m_array);
 }
 
-void OOGL::VertexArrayObject::bind()
+OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::VertexArrayObject::bind()
 {
-	State::get_current()->bind(shared_from_this());
+	return State::get_current()->bind(shared_from_this());
 }
 
 void OOGL::VertexArrayObject::internal_bind() const
 {
 	StateFns::get_current()->glBindVertexArray(m_array);
+
+	// VAO bind sets the GL_ELEMENT_ARRAY_BUFFER binding
+	State::get_current()->update_bind(m_element_array,GL_ELEMENT_ARRAY_BUFFER);
 }
 
 void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, GLsizei stride, GLsizeiptr offset)
@@ -96,6 +99,26 @@ void OOGL::VertexArrayObject::enable_attribute(GLuint index, bool enable)
 		StateFns::get_current()->glEnableVertexArrayAttrib(shared_from_this(),index);
 	else
 		StateFns::get_current()->glDisableVertexArrayAttrib(shared_from_this(),index);
+}
+
+OOBase::SharedPtr<OOGL::BufferObject> OOGL::VertexArrayObject::element_array(const OOBase::SharedPtr<BufferObject>& buffer)
+{
+	OOBase::SharedPtr<OOGL::BufferObject> prev = m_element_array;
+	if (buffer != m_element_array)
+	{
+		bind();
+
+		prev = m_element_array;
+		m_element_array = buffer;
+
+		State::get_current()->bind(buffer);
+	}
+	return prev;
+}
+
+const OOBase::SharedPtr<OOGL::BufferObject>& OOGL::VertexArrayObject::element_array() const
+{
+	return m_element_array;
 }
 
 void OOGL::VertexArrayObject::draw(GLenum mode, GLint first, GLsizei count)

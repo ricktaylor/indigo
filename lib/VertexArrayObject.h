@@ -22,7 +22,7 @@ namespace OOGL
 
 		static OOBase::SharedPtr<VertexArrayObject> none();
 
-		void bind();
+		OOBase::SharedPtr<OOGL::VertexArrayObject> bind();
 
 		void attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, GLsizei stride = 0, GLsizeiptr offset = 0);
 		void attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, bool normalized, GLsizei stride = 0, GLsizeiptr offset = 0);
@@ -34,6 +34,9 @@ namespace OOGL
 		{
 			return enable_attribute(index,false);
 		}
+
+		OOBase::SharedPtr<BufferObject> element_array(const OOBase::SharedPtr<BufferObject>& buffer);
+		const OOBase::SharedPtr<BufferObject>& element_array() const;
 
 		void draw(GLenum mode, GLint first, GLsizei count);
 		void draw(GLenum mode, const GLint* firsts, const GLsizei* counts, GLsizei primcount);
@@ -56,6 +59,7 @@ namespace OOGL
 		GLuint m_array;
 
 		OOBase::Table<GLuint,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLuint>,OOBase::ThreadLocalAllocator> m_attributes;
+		OOBase::SharedPtr<BufferObject> m_element_array;
 
 		VertexArrayObject(GLuint array);
 

@@ -65,9 +65,12 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::BufferObject::none(GLenum target)
 	return OOBase::allocate_shared<BufferObject,OOBase::ThreadLocalAllocator>(target);
 }
 
-void OOGL::BufferObject::bind()
+OOBase::SharedPtr<OOGL::BufferObject> OOGL::BufferObject::bind()
 {
-	State::get_current()->bind(shared_from_this());
+	// Use VAO element_array() instead
+	assert(m_target != GL_ELEMENT_ARRAY_BUFFER);
+
+	return State::get_current()->bind(shared_from_this());
 }
 
 void OOGL::BufferObject::internal_bind(GLenum target) const

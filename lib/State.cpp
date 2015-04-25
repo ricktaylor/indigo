@@ -255,7 +255,7 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind_buffer(GLuint buffer, GL
 	if (i != m_buffer_objects.end())
 	{
 		prev = i->second;
-		if (i->second->m_buffer != buffer)
+		if (!i->second || i->second->m_buffer != buffer)
 		{
 			m_state_fns.glBindBuffer(target,buffer);
 
@@ -266,6 +266,18 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind_buffer(GLuint buffer, GL
 	m_state_fns.glBindBuffer(target,buffer);
 
 	return prev;
+}
+
+void OOGL::State::update_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
+{
+	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
+	if (i == m_buffer_objects.end())
+	{
+		if (!m_buffer_objects.insert(target,buffer_object))
+			LOG_WARNING(("Failed to add to buffer object cache"));
+	}
+	else if (i->second != buffer_object)
+		i->second = buffer_object;
 }
 
 OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::State::bind(const OOBase::SharedPtr<VertexArrayObject>& vao)

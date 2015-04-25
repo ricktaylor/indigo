@@ -62,7 +62,7 @@ namespace OOGL
 
 		static OOBase::SharedPtr<BufferObject> none(GLenum target);
 		
-		void bind();
+		OOBase::SharedPtr<OOGL::BufferObject> bind();
 
 		template <typename T>
 		OOBase::SharedPtr<T> auto_map(GLenum access, GLintptr offset = 0)

@@ -467,13 +467,19 @@ bool OOGL::Font::alloc_text(Text& text, const OOBase::SharedString<OOBase::Threa
 
 	if (!m_ptrVAO)
 	{
-		OOBase::SharedPtr<Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance()->program(m_packing);
-		
 		m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
 		if (!m_ptrVAO)
 			LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+	}
 
+	if (!m_ptrVertices)
+	{
 		m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,len * 4 * sizeof(attrib_data));
+		m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,len * 6 * sizeof(GLuint));
+		if (!m_ptrVertices || !m_ptrElements)
+			LOG_ERROR_RETURN(("Failed to allocate VBO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+		
+		OOBase::SharedPtr<Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance()->program(m_packing);
 		GLint a = ptrProgram->attribute_location("in_Position");
 		m_ptrVAO->attribute(a,m_ptrVertices,2,GL_FLOAT,false,sizeof(attrib_data),offsetof(attrib_data,x));
 		m_ptrVAO->enable_attribute(a);
@@ -485,8 +491,7 @@ bool OOGL::Font::alloc_text(Text& text, const OOBase::SharedString<OOBase::Threa
 			m_ptrVAO->enable_attribute(a);
 		}
 
-		m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,len * 6 * sizeof(GLuint));
-		m_ptrElements->bind();
+		m_ptrVAO->element_array(m_ptrElements);
 
 		text.m_glyph_start = 0;
 	}

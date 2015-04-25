@@ -78,6 +78,7 @@ namespace OOGL
 
 		GLuint activate_texture_unit(GLuint unit);
 
+		void update_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
 		OOBase::SharedPtr<BufferObject> internal_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
 		OOBase::SharedPtr<Texture> internal_bind(const OOBase::SharedPtr<Texture>& texture);
 	};
