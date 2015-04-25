@@ -178,6 +178,9 @@ int main(int argc, const char* argv[])
 	cmd_args.add_option("help",'h');
 	cmd_args.add_option("config-file",'f',true);
 	cmd_args.add_option("debug");
+#if defined(_WIN32)
+	cmd_args.add_option("console");
+#endif
 
 	// Parse command line
 	OOBase::CmdArgs::results_t args;
@@ -206,7 +209,15 @@ int main(int argc, const char* argv[])
 	// Start the logger
 	OOBase::Logger::set_source_file(__FILE__);
 #if defined(_WIN32)
-	OOBase::Logger::connect_debug_log();
+	if (s_is_debug)
+	{
+		OOBase::Logger::connect_debug_log();
+		if (args.exists("console") && AllocConsole())
+		{
+			OOBase::Logger::connect_stderr_log();
+			OOBase::Logger::connect_stdout_log();
+		}
+	}
 #else
 	OOBase::Logger::connect_stderr_log();
 	OOBase::Logger::connect_stdout_log();
@@ -232,37 +243,6 @@ int main(int argc, const char* argv[])
 	OOBase::Table<OOBase::String,OOBase::String> config_args;
 	if (!load_config(args,config_args))
 		return EXIT_FAILURE;
-
-#if 0
-	OOBase::BTree<char,bool,OOBase::Less<char>,5> bt;
-
-	char s[] = "thequickbrownfoxjumpsoverthelazydog";
-	char r[] = "godyzalehtrevospmujxofnworbkciuqeht";
-	for (char* c = s;*c != 0; ++c)
-		bt.insert(*c,true);
-
-	for (char c = 'A';c <= 'Z'; ++c)
-		bt.insert(c,true);
-
-	bt.dump();
-
-	for (char c = 'a';c <= 'z'; ++c)
-	{
-		assert(bt.find(c));
-	}
-
-	for (char c = 'A';c <= 'Z'; ++c)
-	{
-		if (bt.remove(c))
-			bt.dump();
-	}
-
-	for (char* c = s;*c != 0; ++c)
-	{
-		if (bt.remove(*c))
-			bt.dump();
-	}
-#endif
 
 	// Start our two main threads
 	return Indigo::start_render_thread(&logic_thread,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
