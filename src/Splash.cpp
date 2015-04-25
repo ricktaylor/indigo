@@ -162,6 +162,9 @@ bool Splash::create(void* p)
 	if (!pThis->m_wnd || !pThis->m_wnd->is_valid())
 		return false;
 
+	if (Indigo::is_debug())
+		OOGL::StateFns::get_current()->enable_logging();
+
 	if (!pThis->m_wnd->signal_close.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_close) ||
 			!pThis->m_wnd->signal_moved.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_move) ||
 			!pThis->m_wnd->signal_sized.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_size) ||

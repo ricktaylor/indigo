@@ -90,6 +90,7 @@ namespace
 OOGL::StateFns::StateFns() :
 		m_gl_major(1),
 		m_gl_minor(0),
+		m_logging(false),
 		m_fn_glGenFramebuffers(NULL),
 		m_fn_glDeleteFramebuffers(NULL),
 		m_fn_glBindFramebuffer(NULL),
@@ -209,32 +210,37 @@ OOGL::StateFns::StateFns() :
 	}
 	else
 		OOBase::Logger::log(OOBase::Logger::Information,"GLSL version: %s",glGetString(GL_SHADING_LANGUAGE_VERSION));
+}
 
-#if !defined(NDEBUG)
-	if (isGLversion(4,5) || glfwExtensionSupported("GL_KHR_debug") == GL_TRUE)
+void OOGL::StateFns::enable_logging()
+{
+	if (!m_logging)
 	{
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		if (isGLversion(4,5) || glfwExtensionSupported("GL_KHR_debug") == GL_TRUE)
+		{
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
-		PFNGLDEBUGMESSAGECALLBACKPROC pfn = NULL;
-		if (load_proc(pfn,"glDebugMessageCallback"))
-			(*pfn)(&on_debug1,NULL);
-	}
-	else if (glfwExtensionSupported("GL_ARB_debug_output") == GL_TRUE)
-	{
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+			PFNGLDEBUGMESSAGECALLBACKPROC pfn = NULL;
+			if (load_proc(pfn,"glDebugMessageCallback"))
+				(*pfn)(&on_debug1,NULL);
+		}
+		else if (glfwExtensionSupported("GL_ARB_debug_output") == GL_TRUE)
+		{
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
 
-		PFNGLDEBUGMESSAGECALLBACKARBPROC pfn = NULL;
-		if (load_proc(pfn,"glDebugMessageCallbackARB"))
-			(*pfn)(&on_debug1,NULL);
-	}
-	else if (glfwExtensionSupported("GL_AMD_debug_output") == GL_TRUE)
-	{
-		PFNGLDEBUGMESSAGECALLBACKAMDPROC pfn = NULL;
-		if (load_proc(pfn,"glDebugMessageCallbackAMD"))
-			(*pfn)(&on_debug2,NULL);
-	}
+			PFNGLDEBUGMESSAGECALLBACKARBPROC pfn = NULL;
+			if (load_proc(pfn,"glDebugMessageCallbackARB"))
+				(*pfn)(&on_debug1,NULL);
+		}
+		else if (glfwExtensionSupported("GL_AMD_debug_output") == GL_TRUE)
+		{
+			PFNGLDEBUGMESSAGECALLBACKAMDPROC pfn = NULL;
+			if (load_proc(pfn,"glDebugMessageCallbackAMD"))
+				(*pfn)(&on_debug2,NULL);
+		}
 
-#endif
+		m_logging = true;
+	}
 }
 
 bool OOGL::StateFns::isGLversion(int major, int minor)

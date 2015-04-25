@@ -42,6 +42,8 @@ namespace OOGL
 
 		bool isGLversion(int major, int minor);
 
+		void enable_logging();
+
 		void glGenFramebuffers(GLsizei n, GLuint *framebuffers);
 		void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers);
 		void glBindFramebuffer(GLenum target, GLuint framebuffer);
@@ -132,6 +134,7 @@ namespace OOGL
 
 		int m_gl_major;
 		int m_gl_minor;
+		bool m_logging;
 
 		PFNGLGENFRAMEBUFFERSPROC m_fn_glGenFramebuffers;
 		PFNGLDELETEFRAMEBUFFERSPROC m_fn_glDeleteFramebuffers;
