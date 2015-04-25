@@ -71,12 +71,10 @@ namespace OOGL
 		free_list_t m_listFree;
 
 		OOBase::SharedPtr<OOGL::Texture> m_ptrTexture;
-		OOBase::SharedPtr<OOGL::Program> m_ptrProgram;
 		OOBase::SharedPtr<OOGL::VertexArrayObject> m_ptrVAO;
 		OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices;
 		OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements;
 
-		bool load_8bit_shader();
 		bool alloc_text(Text& text, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s);
 		void free_text(Text& text);
 

@@ -28,6 +28,7 @@
 
 #include <OOBase/ByteSwap.h>
 #include <OOBase/Logger.h>
+#include <OOBase/TLSSingleton.h>
 
 namespace
 {
@@ -193,6 +194,20 @@ namespace
 		return true;
 	}
 
+	class FontProgram
+	{
+	public:
+		FontProgram()
+		{}
+
+		const OOBase::SharedPtr<OOGL::Program>& program(OOBase::uint32_t packing); 
+
+	private:
+		OOBase::SharedPtr<OOGL::Program> m_ptr_ch1_8_Program;
+
+		bool load_8bit_shader();
+	};
+
 	struct attrib_data
 	{
 		float x;
@@ -200,6 +215,67 @@ namespace
 		GLushort u;
 		GLushort v;
 	};
+}
+
+const OOBase::SharedPtr<OOGL::Program>& FontProgram::program(OOBase::uint32_t packing)
+{
+	const OOBase::SharedPtr<OOGL::Program>& program = m_ptr_ch1_8_Program;
+	//switch (packing)
+	{
+	//default:
+		if (!m_ptr_ch1_8_Program)
+			load_8bit_shader();
+	//	break;
+	}
+	return program;
+}
+
+bool FontProgram::load_8bit_shader()
+{
+	OOBase::SharedPtr<OOGL::Shader> shaders[2];
+	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
+	shaders[0]->compile(
+			"#version 120\n"
+			"attribute vec3 in_Position;\n"
+			"attribute vec2 in_TexCoord;\n"
+			"uniform vec4 in_Colour;\n"
+			"uniform mat4 MVP;\n"
+			"varying vec4 pass_Colour;\n"
+			"varying vec2 pass_TexCoord;\n"
+			"void main() {\n"
+			"	pass_Colour = in_Colour;\n"
+			"	pass_TexCoord = in_TexCoord;\n"
+			"	vec4 v = vec4(in_Position,1.0);\n"
+			"	gl_Position = MVP * v;\n"
+			"}\n");
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> s = shaders[0]->info_log();
+	if (!s.empty())
+		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",s.c_str()),false);
+
+	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
+	shaders[1]->compile(
+			"#version 120\n"
+			"uniform sampler2D texture0;\n"
+			"varying vec4 pass_Colour;\n"
+			"varying vec2 pass_TexCoord;\n"
+			"void main() {\n"
+			"	gl_FragColor = texture2D(texture0,pass_TexCoord).rrrr * pass_Colour;\n"
+			"}\n");
+	s = shaders[1]->info_log();
+	if (!s.empty())
+		LOG_ERROR_RETURN(("Failed to compile fragment shader: %s",s.c_str()),false);
+
+	OOBase::SharedPtr<OOGL::Program> program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
+	if (!program)
+		LOG_ERROR_RETURN(("Faield to allocate shader program: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+	program->link(shaders,2);
+	s = program->info_log();
+	if (!s.empty())
+		LOG_ERROR_RETURN(("Failed to link shaders: %s",s.c_str()),false);
+
+	m_ptr_ch1_8_Program = program;
+	return true;
 }
 
 OOGL::Font::Font()
@@ -256,7 +332,7 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 			{
 				m_packing = read_uint32(data);
 				if (m_packing == 0x04040400)
-					ok = load_8bit_shader();
+					ok = (!!OOBase::TLSSingleton<FontProgram>::instance()->program(m_packing));
 				else
 				{
 					// TODO: Funky packing
@@ -376,50 +452,6 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 	return true;
 }
 
-bool OOGL::Font::load_8bit_shader()
-{
-	OOBase::SharedPtr<OOGL::Shader> shaders[2];
-	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
-	shaders[0]->compile(
-			"#version 120\n"
-			"attribute vec3 in_Position;\n"
-			"attribute vec2 in_TexCoord;\n"
-			"uniform vec4 in_Colour;\n"
-			"uniform mat4 MVP;\n"
-			"varying vec4 pass_Colour;\n"
-			"varying vec2 pass_TexCoord;\n"
-			"void main() {\n"
-			"	pass_Colour = in_Colour;\n"
-			"	pass_TexCoord = in_TexCoord;\n"
-			"	vec4 v = vec4(in_Position,1.0);\n"
-			"	gl_Position = MVP * v;\n"
-			"}\n");
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> s = shaders[0]->info_log();
-	if (!s.empty())
-		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",s.c_str()),false);
-
-	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
-	shaders[1]->compile(
-			"#version 120\n"
-			"uniform sampler2D texture0;\n"
-			"varying vec4 pass_Colour;\n"
-			"varying vec2 pass_TexCoord;\n"
-			"void main() {\n"
-			"	gl_FragColor = texture2D(texture0,pass_TexCoord).rrrr * pass_Colour;\n"
-			"}\n");
-	s = shaders[1]->info_log();
-	if (!s.empty())
-		LOG_ERROR_RETURN(("Failed to compile fragment shader: %s",s.c_str()),false);
-
-	m_ptrProgram = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
-	m_ptrProgram->link(shaders,2);
-	s = m_ptrProgram->info_log();
-	if (!s.empty())
-		LOG_ERROR_RETURN(("Failed to link shaders: %s",s.c_str()),false);
-
-	return true;
-}
-
 bool OOGL::Font::alloc_text(Text& text, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s)
 {
 	text.m_glyph_len = 0;
@@ -435,16 +467,18 @@ bool OOGL::Font::alloc_text(Text& text, const OOBase::SharedString<OOBase::Threa
 
 	if (!m_ptrVAO)
 	{
+		OOBase::SharedPtr<Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance()->program(m_packing);
+		
 		m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
 		if (!m_ptrVAO)
 			LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 		m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,len * 4 * sizeof(attrib_data));
-		GLint a = m_ptrProgram->attribute_location("in_Position");
+		GLint a = ptrProgram->attribute_location("in_Position");
 		m_ptrVAO->attribute(a,m_ptrVertices,2,GL_FLOAT,false,sizeof(attrib_data),offsetof(attrib_data,x));
 		m_ptrVAO->enable_attribute(a);
 
-		a = m_ptrProgram->attribute_location("in_TexCoord");
+		a = ptrProgram->attribute_location("in_TexCoord");
 		if (a != -1)
 		{
 			m_ptrVAO->attribute(a,m_ptrVertices,2,GL_UNSIGNED_SHORT,true,sizeof(attrib_data),offsetof(attrib_data,u));
@@ -531,11 +565,13 @@ void OOGL::Font::free_text(Text& text)
 
 void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei len)
 {
-	state.use(m_ptrProgram);
+	OOBase::SharedPtr<Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance()->program(m_packing);
+	
+	state.use(ptrProgram);
 	state.bind(0,m_ptrTexture);
 
-	m_ptrProgram->uniform("in_Colour",colour);
-	m_ptrProgram->uniform("MVP",mvp);
+	ptrProgram->uniform("in_Colour",colour);
+	ptrProgram->uniform("MVP",mvp);
 
 	m_ptrVAO->draw_elements(GL_TRIANGLES,6 * len,GL_UNSIGNED_INT,start);
 }
