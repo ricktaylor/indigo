@@ -135,17 +135,22 @@ namespace
 		void on_close(const OOGL::Window& win);
 		void on_move(const OOGL::Window& win, const glm::ivec2& pos);
 		void on_size(const OOGL::Window& win, const glm::ivec2& sz);
+		void on_character(const OOGL::Window& win, unsigned int codepoint, int mods);
+		void on_keystroke(const OOGL::Window& win, const OOGL::Window::key_stroke_t& keystroke);
 
 		OOBase::SharedPtr<Splash> self;
 
 		glm::vec2 m_dpmm;
 		Triangle m_tri;
 
+		double m_start;
+
 		OOBase::SharedPtr<OOGL::Text> m_text;
+		OOBase::SharedPtr<OOGL::Text> m_fps;
 	};
 }
 
-Splash::Splash() : m_ratio(0)
+Splash::Splash() : m_ratio(0), m_start(0.0)
 {
 }
 
@@ -162,7 +167,7 @@ bool Splash::create(void* p)
 	if (Indigo::is_debug())
 		style |= OOGL::Window::eWSdebug_context;
 
-	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test",style);
+	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(800,600,"Test",style);
 	if (!pThis->m_wnd || !pThis->m_wnd->is_valid())
 		return false;
 
@@ -172,7 +177,9 @@ bool Splash::create(void* p)
 	if (!pThis->m_wnd->signal_close.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_close) ||
 			!pThis->m_wnd->signal_moved.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_move) ||
 			!pThis->m_wnd->signal_sized.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_size) ||
-			!pThis->m_wnd->signal_draw.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_draw))
+			!pThis->m_wnd->signal_draw.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_draw) ||
+			!pThis->m_wnd->signal_character.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_character) ||
+			!pThis->m_wnd->signal_keystroke.connect(OOBase::WeakPtr<Splash>(pThis->shared_from_this()),&Splash::on_keystroke))
 		LOG_ERROR_RETURN(("Failed to attach signal"),false);
 
 	pThis->m_tri.setup();
@@ -185,8 +192,10 @@ bool Splash::create(void* p)
 		return false;
 
 	OOBase::SharedString<OOBase::ThreadLocalAllocator> s;
-	s.assign("This is some text!");
+	s.assign("Now try typing!");
 	pThis->m_text = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt,s);
+
+	pThis->m_fps = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt);
 
 	glClearColor(0.f,0.f,0.f,0.f);
 	glEnable(GL_BLEND);
@@ -218,26 +227,67 @@ void Splash::on_size(const OOGL::Window& win, const glm::ivec2& sz)
 
 void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
+	double now = glfwGetTime();
 	glState.bind(GL_DRAW_FRAMEBUFFER,win.get_default_frame_buffer());
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	glBlendFunc(GL_SRC_ALPHA_SATURATE,GL_ONE);
 	
+	glm::mat4 model(1);
 	glm::mat4 proj = glm::perspective(glm::radians(45.0f),m_ratio,0.1f,100.0f);
 	glm::mat4 view = glm::lookAt(glm::vec3(3,0,0),glm::vec3(0,0,0),glm::vec3(0,1,0));
-	view = glm::rotate(view,-glm::radians((float)glfwGetTime() * 50.f),glm::vec3(0,1,0));
+	view = glm::rotate(view,-glm::radians((float)now * 50.f),glm::vec3(0,1,0));
 
 	m_tri.draw(glState,proj * view);
 
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	if (m_start != 0.0)
+	{
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	proj = glm::ortho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
-	glm::mat4 model(1);
-	model = glm::scale(model,glm::vec3(.5f,.5f,0.f));
-	model = glm::translate(model,glm::vec3(-m_text->length()/2,-.5f,0.f));
+		OOBase::SharedString<OOBase::ThreadLocalAllocator> fps;
+		fps.printf("%.4f ms = %.4f fps",(now - m_start) * 1000.0,1.0/(now - m_start));
+		m_fps->text(fps);
 
-	m_text->draw(glState,proj * model,glm::vec4(fmod(glfwGetTime() / 2,1),fmod(glfwGetTime() / 3,1),fmod(glfwGetTime() / 7,1),fmod(glfwGetTime(),1)));
+		glm::ivec2 sz = win.size();
+		proj = glm::ortho(0.f, (float)sz.x, 0.f, (float)sz.y, 1.f, -1.f);
+		model = glm::scale(model,glm::vec3(32.f,32,0.f));
+
+		m_fps->draw(glState,proj * model,glm::vec4(1.f));
+	}
+
+	m_start = now;
+
+	if (m_text->length())
+	{
+		proj = glm::ortho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
+		model = glm::mat4(1);
+		model = glm::scale(model,glm::vec3(.25f,.25f,0.f));
+		model = glm::translate(model,glm::vec3(-m_text->length()/2,-.5f,0.f));
+
+		m_text->draw(glState,proj * model,glm::vec4(fmod(now / 2,1),fmod(now / 3,1),fmod(now / 7,1),fmod(now,1)));
+	}
+}
+
+void Splash::on_character(const OOGL::Window& win, unsigned int codepoint, int mods)
+{
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> s = m_text->text();
+	char c = static_cast<char>(codepoint);
+	if (s.append(&c,1))
+		m_text->text(s);
+}
+
+void Splash::on_keystroke(const OOGL::Window& win, const OOGL::Window::key_stroke_t& keystroke)
+{
+	if (keystroke.key == GLFW_KEY_BACKSPACE && keystroke.action == GLFW_PRESS)
+	{
+		OOBase::SharedString<OOBase::ThreadLocalAllocator> s,t = m_text->text();
+		if (!t.empty())
+		{
+			s.assign(t.c_str(),t.length()-1);
+			m_text->text(s);
+		}
+	}
 }
 
 void Splash::on_close(const OOGL::Window& win)

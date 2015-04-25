@@ -69,6 +69,7 @@ namespace OOGL
 
 		typedef OOBase::List<OOBase::Pair<GLsizei,GLsizei>,OOBase::ThreadLocalAllocator> free_list_t;
 		free_list_t m_listFree;
+		GLsizei m_allocated;
 
 		OOBase::SharedPtr<OOGL::Texture> m_ptrTexture;
 		OOBase::SharedPtr<OOGL::VertexArrayObject> m_ptrVAO;
@@ -86,7 +87,7 @@ namespace OOGL
 		friend class Font;
 
 	public:
-		Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s);
+		Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s = OOBase::SharedString<OOBase::ThreadLocalAllocator>());
 		~Text();
 
 		bool text(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s);

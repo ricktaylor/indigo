@@ -113,7 +113,7 @@ void OOGL::BufferObject::write(GLintptr offset, GLsizeiptr size, const void* dat
 	StateFns::get_current()->glBufferSubData(shared_from_this(),offset,size,data);
 }
 
-void OOGL::BufferObject::copy(GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
+void OOGL::BufferObject::copy(GLintptr dst_offset, const OOBase::SharedPtr<BufferObject>& src, GLintptr src_offset, GLsizeiptr length)
 {
-	StateFns::get_current()->glCopyBufferSubData(shared_from_this(),writeoffset,read,readoffset,size);
+	StateFns::get_current()->glCopyBufferSubData(shared_from_this(),dst_offset,src,src_offset,length);
 }
