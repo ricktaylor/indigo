@@ -465,7 +465,6 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		return true;
 
 	bool found = false;	
-	free_list_t::iterator last = m_listFree.end();
 	for (free_list_t::iterator i=m_listFree.begin(); i!=m_listFree.end(); ++i)
 	{
 		if (i->second == len)
@@ -483,9 +482,6 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 			found = true;
 			break;
 		}
-
-		if (i->first + i->second == m_allocated)
-			last = i;
 	}
 	
 	if (!found)
@@ -508,10 +504,12 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		m_ptrVertices.swap(ptrNewVertices);
 		m_ptrElements.swap(ptrNewElements);
 
+		free_list_t::iterator last = m_listFree.back();
 		if (last != m_listFree.end())
 			last->second += new_size - m_allocated;
 		else
 			last = m_listFree.insert(m_allocated,new_size - m_allocated);
+		
 		m_allocated = new_size;
 
 		text.m_glyph_start = last->first;
