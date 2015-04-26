@@ -56,6 +56,11 @@ namespace
 		return r;
 	}
 
+	static OOBase::int16_t read_int16(const unsigned char*& data)
+	{
+		return static_cast<OOBase::int16_t>(read_uint16(data));
+	}
+
 	const char utf8_data[256] =
 	{
 		// Key:
@@ -404,12 +409,12 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 				OOBase::uint16_t height = read_uint16(data);
 				ci.u1 = ci.u0 + (width  * (ushort_max / tex_width));
 				ci.v1 = ci.v0 + (height  * (ushort_max / tex_height));
-				ci.left = read_uint16(data) / static_cast<float>(m_size);
-				ci.top = 1.0f - (read_uint16(data) / static_cast<float>(m_size));
+				ci.left = read_int16(data) / static_cast<float>(m_size);
+				ci.top = 1.0f - (read_int16(data) / static_cast<float>(m_size));
 				ci.right = ci.left + (width / static_cast<float>(m_size));
 				ci.bottom = ci.top - (height / static_cast<float>(m_size));
 
-				ci.xadvance = read_uint16(data) / static_cast<float>(m_size);
+				ci.xadvance = read_int16(data) / static_cast<float>(m_size);
 				ci.page = *data++;
 				ci.channel = *data++;
 
@@ -424,7 +429,7 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 				OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> ch;
 				ch.first = read_uint32(data);
 				ch.second = read_uint32(data);
-				float offset = static_cast<OOBase::int16_t>(read_uint16(data)) / static_cast<float>(m_size);
+				float offset = read_int16(data) / static_cast<float>(m_size);
 				if (!(ok = (m_mapKerning.insert(ch,offset) != m_mapKerning.end())))
 					LOG_ERROR(("Failed to add character to kerning table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
@@ -509,9 +514,8 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 			last->second += new_size - m_allocated;
 		else
 			last = m_listFree.insert(m_allocated,new_size - m_allocated);
-		
 		m_allocated = new_size;
-
+		
 		text.m_glyph_start = last->first;
 		last->first += len;
 		last->second -= len;
