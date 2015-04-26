@@ -36,29 +36,26 @@ OOGL::Shader::~Shader()
 	StateFns::get_current()->glDeleteShader(m_id);
 }
 
-void OOGL::Shader::compile(const GLchar* sz, GLint len)
+bool OOGL::Shader::compile(const GLchar* sz, GLint len)
 {
 	if (len)
-		compile(&sz,&len,1);
+		return compile(&sz,&len,1);
 	else
-		compile(&sz,NULL,1);
+		return compile(&sz,NULL,1);
 }
 
-void OOGL::Shader::compile(const GLchar *const *strings, GLsizei count)
+bool OOGL::Shader::compile(const GLchar *const *strings, GLsizei count)
 {
-	compile(strings,NULL,count);
+	return compile(strings,NULL,count);
 }
 
-void OOGL::Shader::compile(const GLchar *const *strings, const GLint* lengths, GLsizei count)
+bool OOGL::Shader::compile(const GLchar *const *strings, const GLint* lengths, GLsizei count)
 {
 	OOBase::SharedPtr<OOGL::StateFns> fns = StateFns::get_current();
 
 	fns->glShaderSource(m_id,count,strings,lengths);
 	fns->glCompileShader(m_id);
-}
 
-bool OOGL::Shader::compile_status() const
-{
 	GLint status = GL_FALSE;
 	StateFns::get_current()->glGetShaderiv(m_id,GL_COMPILE_STATUS,&status);
 	return (status == GL_TRUE);
@@ -101,8 +98,18 @@ OOGL::Program::~Program()
 		StateFns::get_current()->glDeleteProgram(m_id);
 }
 
-bool OOGL::Program::link_status() const
+bool OOGL::Program::link(const OOBase::SharedPtr<Shader>* shaders, size_t count)
 {
+	OOBase::SharedPtr<OOGL::StateFns> fns = StateFns::get_current();
+
+	for (size_t i=0;i<count;++i)
+		fns->glAttachShader(m_id,shaders[i]->m_id);
+
+	fns->glLinkProgram(m_id);
+
+	for (size_t i=0;i<count;++i)
+		fns->glDetachShader(m_id,shaders[i]->m_id);
+
 	GLint status;
 	StateFns::get_current()->glGetProgramiv(m_id,GL_LINK_STATUS,&status);
 	return (status == GL_TRUE);
@@ -132,26 +139,6 @@ OOBase::SharedString<OOBase::ThreadLocalAllocator> OOGL::Program::info_log() con
 	}
 
 	return ret;
-}
-
-void OOGL::Program::link(const OOBase::SharedPtr<Shader>* shaders, size_t count)
-{
-	OOBase::SharedPtr<OOGL::StateFns> fns = StateFns::get_current();
-
-	for (size_t i=0;i<count;++i)
-		fns->glAttachShader(m_id,shaders[i]->m_id);
-
-	fns->glLinkProgram(m_id);
-
-	for (size_t i=0;i<count;++i)
-		fns->glDetachShader(m_id,shaders[i]->m_id);
-}
-
-bool OOGL::Program::in_use() const
-{
-	GLint id = 0;
-	glGetIntegerv(GL_CURRENT_PROGRAM,&id);
-	return (static_cast<GLuint>(id) == m_id);
 }
 
 void OOGL::Program::internal_use() const

@@ -238,7 +238,7 @@ bool FontProgram::load_8bit_shader()
 {
 	OOBase::SharedPtr<OOGL::Shader> shaders[2];
 	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
-	shaders[0]->compile(
+	if (!shaders[0]->compile(
 			"#version 120\n"
 			"attribute vec3 in_Position;\n"
 			"attribute vec2 in_TexCoord;\n"
@@ -251,33 +251,31 @@ bool FontProgram::load_8bit_shader()
 			"	pass_TexCoord = in_TexCoord;\n"
 			"	vec4 v = vec4(in_Position,1.0);\n"
 			"	gl_Position = MVP * v;\n"
-			"}\n");
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> s = shaders[0]->info_log();
-	if (!s.empty())
-		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",s.c_str()),false);
+			"}\n"))
+	{
+		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
+	}
 
 	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
-	shaders[1]->compile(
+	if (!shaders[1]->compile(
 			"#version 120\n"
 			"uniform sampler2D texture0;\n"
 			"varying vec4 pass_Colour;\n"
 			"varying vec2 pass_TexCoord;\n"
 			"void main() {\n"
 			"	gl_FragColor = texture2D(texture0,pass_TexCoord).rrrr * pass_Colour;\n"
-			"}\n");
-	s = shaders[1]->info_log();
-	if (!s.empty())
-		LOG_ERROR_RETURN(("Failed to compile fragment shader: %s",s.c_str()),false);
+			"}\n"))
+	{
+		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()),false);
+	}
 
 	OOBase::SharedPtr<OOGL::Program> program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
 	if (!program)
-		LOG_ERROR_RETURN(("Faield to allocate shader program: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+		LOG_ERROR_RETURN(("Failed to allocate shader program: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
-	program->link(shaders,2);
-	s = program->info_log();
-	if (!s.empty())
-		LOG_ERROR_RETURN(("Failed to link shaders: %s",s.c_str()),false);
-
+	if (!program->link(shaders,2))
+		LOG_ERROR_RETURN(("Failed to link shaders: %s",program->info_log().c_str()),false);
+	
 	m_ptr_ch1_8_Program = program;
 	return true;
 }

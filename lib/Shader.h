@@ -37,23 +37,22 @@ namespace OOGL
 		Shader(GLenum shaderType);
 		~Shader();
 
-		void compile(const char* sz, GLint len = 0);
-		void compile(const char *const *strings, GLsizei count);
-		void compile(const char *const *strings, const GLint* lengths, GLsizei count);
+		bool compile(const char* sz, GLint len = 0);
+		bool compile(const char *const *strings, GLsizei count);
+		bool compile(const char *const *strings, const GLint* lengths, GLsizei count);
 
 		template <GLsizei S>
-		void compile(const char *const strings[S], const GLint lengths[S])
+		bool compile(const char *const strings[S], const GLint lengths[S])
 		{
-			compile(strings,lengths,S);
+			return compile(strings,lengths,S);
 		}
 
 		template <GLsizei S>
-		void compile(const char *const strings[S])
+		bool compile(const char *const strings[S])
 		{
-			compile(strings,S);
+			return compile(strings,S);
 		}
 
-		bool compile_status() const;
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> info_log() const;
 
 	private:
@@ -69,18 +68,15 @@ namespace OOGL
 		Program();
 		~Program();
 
-		void link(const OOBase::SharedPtr<Shader>* shaders, size_t count);
+		bool link(const OOBase::SharedPtr<Shader>* shaders, size_t count);
 
 		template <size_t S>
-		void link(const OOBase::SharedPtr<Shader> shaders[S])
+		bool link(const OOBase::SharedPtr<Shader> shaders[S])
 		{
-			link(shaders,S);
+			return link(shaders,S);
 		}
 
-		bool link_status() const;
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> info_log() const;
-
-		bool in_use() const;
 
 		void attribute_location(const char* name, GLuint index);
 		GLint attribute_location(const char* name) const;

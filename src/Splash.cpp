@@ -51,7 +51,7 @@ void Triangle::setup()
 {
 	OOBase::SharedPtr<OOGL::Shader> shaders[2];
 	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
-	shaders[0]->compile(
+	if (!shaders[0]->compile(
 			"#version 120\n"
 			"attribute vec3 in_Position;\n"
 			"attribute vec3 in_Colour;\n"
@@ -61,27 +61,21 @@ void Triangle::setup()
 			"	pass_Colour = in_Colour;\n"
 			"	vec4 v = vec4(in_Position,1.0);\n"
 			"	gl_Position = MVP * v;\n"
-			"}\n");
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> s = shaders[0]->info_log();
-	if (!s.empty())
-		LOG_DEBUG(("%s",s.c_str()));
+			"}\n"))
+		LOG_ERROR(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()));
 
 	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
-	shaders[1]->compile(
+	if (!shaders[1]->compile(
 			"#version 120\n"
 			"varying vec3 pass_Colour;\n"
 			"void main() {\n"
 			"    gl_FragColor = vec4(pass_Colour,1.0);\n"
-			"}\n");
-	s = shaders[1]->info_log();
-	if (!s.empty())
-		LOG_DEBUG(("%s",s.c_str()));
-
+			"}\n"))
+		LOG_ERROR(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()));
+	
 	ptrProgram = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
-	ptrProgram->link(shaders,2);
-	s = ptrProgram->info_log();
-	if (!s.empty())
-		LOG_DEBUG(("%s",s.c_str()));
+	if (!ptrProgram->link(shaders,2))
+		LOG_ERROR(("Failed to link shaders: %s",ptrProgram->info_log().c_str()));
 
 	ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
 
