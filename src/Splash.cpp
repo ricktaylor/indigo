@@ -185,8 +185,7 @@ bool Splash::create(void* p)
 	if (!fnt->load(Indigo::static_resources(),"Titillium-Regular.fnt"))
 		return false;
 
-	pThis->m_str.assign("Now try typing!");
-	pThis->m_text = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt,pThis->m_str.c_str());
+	pThis->m_text = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt,"Now try typing!");
 	pThis->m_fps = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt);
 
 	glClearColor(0.f,0.f,0.f,0.f);
