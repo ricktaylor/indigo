@@ -188,7 +188,7 @@ namespace
 				wide_val |= (c & 0x3F);
 			}
 
-			if (!glyphs.push_back(wide_val))
+			if (glyphs.push_back(wide_val) == glyphs.end())
 				break;
 
 			if (wide_val > 31 && wide_val != 127 && (wide_val < 128 || wide_val > 159))
@@ -415,7 +415,7 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 				ci.page = *data++;
 				ci.channel = *data++;
 
-				if (!(ok = m_mapCharInfo.insert(id,ci)))
+				if (!(ok = (m_mapCharInfo.insert(id,ci) != m_mapCharInfo.end())))
 					LOG_ERROR(("Failed to add character to table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
 			break;
@@ -427,7 +427,7 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 				ch.first = read_uint32(data);
 				ch.second = read_uint32(data);
 				float offset = read_uint16(data) / static_cast<float>(m_size);
-				if (!(ok = m_mapKerning.insert(ch,offset)))
+				if (!(ok = (m_mapKerning.insert(ch,offset) != m_mapKerning.end())))
 					LOG_ERROR(("Failed to add character to kerning table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
 			break;

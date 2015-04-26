@@ -388,5 +388,5 @@ bool Indigo::handle_events()
 
 bool Indigo::monitor_window(const OOBase::WeakPtr<OOGL::Window>& win)
 {
-	return s_vecWindows->push_back(win);
+	return s_vecWindows->push_back(win) != s_vecWindows->end();
 }

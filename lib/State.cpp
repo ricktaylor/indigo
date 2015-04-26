@@ -166,7 +166,7 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::Sh
 		{
 			texture->internal_bind(*this,unit);
 
-			if (!tu->insert(texture->target(),texture))
+			if (tu->insert(texture->target(),texture) == tu->end())
 				LOG_WARNING(("Failed to add to texture unit cache"));
 		}
 	}
@@ -228,7 +228,7 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::internal_bind(const OOBase::S
 		else
 			m_state_fns.glBindBuffer(target,0);
 
-		if (!m_buffer_objects.insert(target,buffer_object))
+		if (m_buffer_objects.insert(target,buffer_object) == m_buffer_objects.end())
 			LOG_WARNING(("Failed to add to buffer object cache"));
 	}
 	else 
@@ -273,7 +273,7 @@ void OOGL::State::update_bind(const OOBase::SharedPtr<BufferObject>& buffer_obje
 	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
 	if (i == m_buffer_objects.end())
 	{
-		if (!m_buffer_objects.insert(target,buffer_object))
+		if (m_buffer_objects.insert(target,buffer_object) == m_buffer_objects.end())
 			LOG_WARNING(("Failed to add to buffer object cache"));
 	}
 	else if (i->second != buffer_object)
