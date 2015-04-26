@@ -138,7 +138,7 @@ namespace
 		Triangle m_tri;
 
 		double m_start;
-
+		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_str;
 		OOBase::SharedPtr<OOGL::Text> m_text;
 		OOBase::SharedPtr<OOGL::Text> m_fps;
 	};
@@ -185,10 +185,8 @@ bool Splash::create(void* p)
 	if (!fnt->load(Indigo::static_resources(),"Titillium-Regular.fnt"))
 		return false;
 
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> s;
-	s.assign("Now try typing!");
-	pThis->m_text = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt,s);
-
+	pThis->m_str.assign("Now try typing!");
+	pThis->m_text = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt,pThis->m_str.c_str());
 	pThis->m_fps = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt);
 
 	glClearColor(0.f,0.f,0.f,0.f);
@@ -239,9 +237,9 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 	{
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-		OOBase::SharedString<OOBase::ThreadLocalAllocator> fps;
+		OOBase::ScopedString fps;
 		fps.printf("%.4f ms = %.4f fps",(now - m_start) * 1000.0,1.0/(now - m_start));
-		m_fps->text(fps);
+		m_fps->text(fps.c_str());
 
 		glm::ivec2 sz = win.size();
 		proj = glm::ortho(0.f, (float)sz.x, 0.f, (float)sz.y, 1.f, -1.f);
@@ -265,28 +263,25 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 
 void Splash::on_character(const OOGL::Window& win, unsigned int codepoint, int mods)
 {
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> s = m_text->text();
-	char c = static_cast<char>(codepoint);
-	if (s.empty())
-		s.assign(&c,1);
-	else
-		s.append(&c,1);
+	m_str.append(static_cast<char>(codepoint));
 	
-	m_text->text(s);
-	LOG_DEBUG(("TEXT = %s",s.c_str()));
+	m_text->text(m_str.c_str());
+	LOG_DEBUG(("TEXT = %s",m_str.c_str()));
 }
 
 void Splash::on_keystroke(const OOGL::Window& win, const OOGL::Window::key_stroke_t& keystroke)
 {
 	if (keystroke.key == GLFW_KEY_BACKSPACE && keystroke.action == GLFW_PRESS)
 	{
-		OOBase::SharedString<OOBase::ThreadLocalAllocator> s,t = m_text->text();
-		if (!t.empty())
+		if (!m_str.empty())
 		{
-			if (t.length() > 1)
-				s.assign(t.c_str(),t.length()-1);
-			m_text->text(s);
-			LOG_DEBUG(("TEXT = %s",s.c_str()));
+			if (m_str.length() > 1)
+				m_str.assign(m_str.c_str(),m_str.length()-1);
+			else
+				m_str.clear();
+
+			m_text->text(m_str.c_str());
+			LOG_DEBUG(("TEXT = %s",m_str.c_str()));
 		}
 	}
 }

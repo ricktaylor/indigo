@@ -67,7 +67,7 @@ namespace OOGL
 		typedef OOBase::Table<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>,float,OOBase::Less<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> >,OOBase::ThreadLocalAllocator> kern_map_t;
 		kern_map_t m_mapKerning;
 
-		typedef OOBase::List<OOBase::Pair<GLsizei,GLsizei>,OOBase::ThreadLocalAllocator> free_list_t;
+		typedef OOBase::Table<GLsizei,GLsizei,OOBase::Less<GLsizei>,OOBase::ThreadLocalAllocator> free_list_t;
 		free_list_t m_listFree;
 		GLsizei m_allocated;
 
@@ -76,7 +76,7 @@ namespace OOGL
 		OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices;
 		OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements;
 
-		bool alloc_text(Text& text, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s);
+		bool alloc_text(Text& text, const char* sz, size_t len);
 		void free_text(Text& text);
 
 		void draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei len);
@@ -87,19 +87,18 @@ namespace OOGL
 		friend class Font;
 
 	public:
-		Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s = OOBase::SharedString<OOBase::ThreadLocalAllocator>());
+		Text(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = size_t(-1));
 		~Text();
 
-		bool text(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s);
-		OOBase::SharedString<OOBase::ThreadLocalAllocator> text() const;
-
+		const OOBase::SharedPtr<Font>& font() const;
+		bool text(const char* sz, size_t len = size_t(-1));
+		
 		float length() const;
 
 		void draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start = 0, GLsizei length = GLsizei(-1));
 
 	private:
 		OOBase::SharedPtr<Font> m_font;
-		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_str;
 		GLsizei m_glyph_start;
 		GLsizei m_glyph_len;
 		float m_length;

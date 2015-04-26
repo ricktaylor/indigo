@@ -92,11 +92,11 @@ namespace
 
 	const OOBase::uint32_t utf_subst_val = 0xFFFD;
 
-	GLsizei utf8_to_glyphs(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s, OOBase::Vector<OOBase::uint32_t,OOBase::ThreadLocalAllocator>& glyphs)
+	GLsizei utf8_to_glyphs(const char* s, size_t s_len, OOBase::Vector<OOBase::uint32_t,OOBase::ThreadLocalAllocator>& glyphs)
 	{
 		GLsizei drawable = 0;
-		const unsigned char* sz = reinterpret_cast<const unsigned char*>(s.c_str());
-		const unsigned char* end = sz + s.length();
+		const unsigned char* sz = reinterpret_cast<const unsigned char*>(s);
+		const unsigned char* end = sz + s_len;
 
 		while (sz < end)
 		{
@@ -424,7 +424,7 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 				OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> ch;
 				ch.first = read_uint32(data);
 				ch.second = read_uint32(data);
-				float offset = read_uint16(data) / static_cast<float>(m_size);
+				float offset = static_cast<OOBase::int16_t>(read_uint16(data)) / static_cast<float>(m_size);
 				if (!(ok = (m_mapKerning.insert(ch,offset) != m_mapKerning.end())))
 					LOG_ERROR(("Failed to add character to kerning table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
@@ -454,13 +454,13 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 	return true;
 }
 
-bool OOGL::Font::alloc_text(Text& text, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s)
+bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 {
 	text.m_glyph_len = 0;
 	text.m_glyph_start = 0;
 	
 	OOBase::Vector<OOBase::uint32_t,OOBase::ThreadLocalAllocator> glyphs;
-	GLsizei len = utf8_to_glyphs(s,glyphs);
+	GLsizei len = utf8_to_glyphs(sz,s_len,glyphs);
 	if (!len)
 		return true;
 
@@ -471,7 +471,7 @@ bool OOGL::Font::alloc_text(Text& text, const OOBase::SharedString<OOBase::Threa
 		if (i->second == len)
 		{
 			text.m_glyph_start = i->first;
-			m_listFree.remove_at(i);
+			m_listFree.erase(i);
 			found = true;
 			break;
 		}
@@ -511,7 +511,7 @@ bool OOGL::Font::alloc_text(Text& text, const OOBase::SharedString<OOBase::Threa
 		if (last != m_listFree.end())
 			last->second += new_size - m_allocated;
 		else
-			last = m_listFree.push_back(OOBase::make_pair(m_allocated,new_size - m_allocated));
+			last = m_listFree.insert(m_allocated,new_size - m_allocated);
 		m_allocated = new_size;
 
 		text.m_glyph_start = last->first;
@@ -612,7 +612,24 @@ bool OOGL::Font::alloc_text(Text& text, const OOBase::SharedString<OOBase::Threa
 
 void OOGL::Font::free_text(Text& text)
 {
-	m_listFree.push_front(OOBase::make_pair(text.m_glyph_start,text.m_glyph_len));
+	free_list_t::iterator i = m_listFree.insert(text.m_glyph_start,text.m_glyph_len);
+	if (i != m_listFree.end())
+	{
+		while (i != m_listFree.begin())
+		{
+			free_list_t::iterator j = i+1;
+			if (j != m_listFree.end() && j->first == i->first + i->second)
+			{
+				// Merge i with j
+				i->second += j->second;
+				m_listFree.erase(j);
+			}
+			else
+			{
+				--i;
+			}
+		}
+	}
 }
 
 void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei len)
@@ -631,33 +648,34 @@ void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colou
 	}
 }
 
-OOGL::Text::Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s) :
-		m_font(font), m_str(s), m_glyph_start(0), m_glyph_len(0), m_length(0.0f)
+OOGL::Text::Text(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len) :
+		m_font(font), m_glyph_start(0), m_glyph_len(0), m_length(0.0f)
 {
-	m_font->alloc_text(*this,s);
+	if (len == size_t(-1))
+		len = (sz ? strlen(sz) : 0);
+
+	m_font->alloc_text(*this,sz,len);
 }
 
 OOGL::Text::~Text()
 {
 	m_font->free_text(*this);
+}
+
+bool OOGL::Text::text(const char* sz, size_t len)
+{
+	if (len == size_t(-1))
+		len = (sz ? strlen(sz) : 0);
+
+	bool ret = true;
+	m_font->free_text(*this);
+	
 	m_glyph_start = 0;
 	m_glyph_len = 0;
-}
 
-OOBase::SharedString<OOBase::ThreadLocalAllocator> OOGL::Text::text() const
-{
-	return m_str;
-}
-
-bool OOGL::Text::text(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& s)
-{
-	bool ret = true;
-	if (m_str != s)
-	{
-		m_font->free_text(*this);
-		if ((ret = m_font->alloc_text(*this,s)))
-			m_str = s;
-	}
+	if (len)
+		ret = m_font->alloc_text(*this,sz,len);
+			
 	return ret;
 }
 
