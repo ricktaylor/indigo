@@ -1585,7 +1585,7 @@ void* OOGL::StateFns::call_glMapNamedBufferRange(const OOBase::SharedPtr<BufferO
 
 void* OOGL::StateFns::call_glMapBufferRange(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr length, GLenum orig_usage, GLsizeiptr orig_size, GLbitfield access)
 {
-	buffer->bind();
+	State::get_current()->bind(buffer);
 
 	void* r = (*((PFNGLMAPBUFFERRANGEPROC)m_fn_glMapBufferRange))(buffer->m_target,offset,length,access);
 
@@ -1599,7 +1599,7 @@ void* OOGL::StateFns::call_glMapBuffer(const OOBase::SharedPtr<BufferObject>& bu
 	if (access & GL_MAP_INVALIDATE_BUFFER_BIT)
 		glBufferData(buffer->m_buffer,buffer->m_target,orig_size,NULL,orig_usage);
 	
-	buffer->bind();
+	State::get_current()->bind(buffer);
 	
 	OOBase::uint8_t* ret = static_cast<OOBase::uint8_t*>((*((PFNGLMAPBUFFERPROC)m_fn_glMapBufferRange))(buffer->m_target,access));
 	if (ret)
@@ -1652,7 +1652,7 @@ bool OOGL::StateFns::call_glUnmapNamedBuffer(const OOBase::SharedPtr<BufferObjec
 
 bool OOGL::StateFns::call_glUnmapBuffer(const OOBase::SharedPtr<BufferObject>& buffer)
 {
-	buffer->bind();
+	State::get_current()->bind(buffer);
 
 	bool r = ((*((PFNGLUNMAPBUFFERPROC)m_fn_glUnmapBuffer))(buffer->m_target) == GL_TRUE);
 
@@ -1703,7 +1703,7 @@ void OOGL::StateFns::call_glNamedBufferSubData(const OOBase::SharedPtr<BufferObj
 
 void OOGL::StateFns::call_glBufferSubData(const OOBase::SharedPtr<BufferObject>& buffer, GLintptr offset, GLsizeiptr size, const void* data)
 {
-	buffer->bind();
+	State::get_current()->bind(buffer);
 
 	(*((PFNGLBUFFERSUBDATAPROC)m_fn_glBufferSubData))(buffer->m_target,offset,size,data);
 
