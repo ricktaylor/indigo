@@ -268,7 +268,7 @@ bool FontProgram::load_8bit_shader()
 			"varying vec4 pass_Colour;\n"
 			"varying vec2 pass_TexCoord;\n"
 			"void main() {\n"
-			"	gl_FragColor = texture2D(texture0,pass_TexCoord).rrrr * pass_Colour;\n"
+			"	gl_FragColor = vec4(pass_Colour.rgb,texture2D(texture0,pass_TexCoord).r * pass_Colour.a);\n"
 			"}\n"))
 	{
 		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()),false);
