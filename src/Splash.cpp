@@ -191,6 +191,9 @@ bool Splash::create(void* p)
 	glClearColor(0.f,0.f,0.f,0.f);
 	glEnable(GL_BLEND);
 
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
 	if (!Indigo::monitor_window(pThis->m_wnd))
 		LOG_ERROR_RETURN(("Failed to monitor window"),false);
 
