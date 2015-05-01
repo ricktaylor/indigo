@@ -254,8 +254,7 @@ bool FontProgram::load_8bit_shader()
 			"void main() {\n"
 			"	pass_Colour = in_Colour;\n"
 			"	pass_TexCoord = in_TexCoord;\n"
-			"	vec4 v = vec4(in_Position,1.0);\n"
-			"	gl_Position = MVP * v;\n"
+			"	gl_Position = MVP * vec4(in_Position,1.0);\n"
 			"}\n"))
 	{
 		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
