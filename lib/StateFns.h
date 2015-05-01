@@ -66,6 +66,7 @@ namespace OOGL
 		void glUseProgram(GLuint program);
 		GLint glGetAttribLocation(GLuint program, const char* name);
 		GLint glGetUniformLocation(GLuint program, const char* name);
+		void glUniform3fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, const GLfloat* v);
 		void glUniform4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, const GLfloat* v);
 		void glUniformMatrix4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, GLboolean transpose, const GLfloat* v);
 
@@ -157,6 +158,12 @@ namespace OOGL
 		PFNGLUSEPROGRAMPROC m_fn_glUseProgram;
 		PFNGLGETATTRIBLOCATIONPROC m_fn_glGetAttribLocation;
 		PFNGLGETUNIFORMLOCATIONPROC m_fn_glGetUniformLocation;
+
+		void (StateFns::*m_thunk_glUniform3fv)(const OOBase::SharedPtr<Program>&,GLint,GLsizei,const GLfloat*);
+		GLFWglproc m_fn_glUniform3fv;
+		void check_glUniform3fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, const GLfloat* v);
+		void call_glProgramUniform3fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, const GLfloat* v);
+		void call_glUniform3fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, const GLfloat* v);
 
 		void (StateFns::*m_thunk_glUniform4fv)(const OOBase::SharedPtr<Program>&,GLint,GLsizei,const GLfloat*);
 		GLFWglproc m_fn_glUniform4fv;

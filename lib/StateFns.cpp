@@ -112,6 +112,7 @@ OOGL::StateFns::StateFns() :
 		m_fn_glUseProgram(NULL),
 		m_fn_glGetAttribLocation(NULL),
 		m_fn_glGetUniformLocation(NULL),
+		m_thunk_glUniform3fv(&StateFns::check_glUniform3fv),
 		m_thunk_glUniform4fv(&StateFns::check_glUniform4fv),
 		m_thunk_glUniformMatrix4fv(&StateFns::check_glUniformMatrix4fv),
 		m_fn_glUniformMatrix4fv(NULL),
@@ -521,6 +522,56 @@ GLint OOGL::StateFns::glGetUniformLocation(GLuint program, const char* name)
 		OOGL_CHECK("glGetUniformLocation");
 	}
 	return r;
+}
+
+void OOGL::StateFns::check_glUniform3fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, const GLfloat* v)
+{
+	if (isGLversion(4,1) || glfwExtensionSupported("GL_ARB_separate_shader_objects") == GL_TRUE)
+	{
+		m_fn_glUniform3fv = glfwGetProcAddress("glProgramUniform3fv");
+		if (m_fn_glUniform3fv)
+			m_thunk_glUniform3fv = &StateFns::call_glProgramUniform3fv;
+	}
+
+	if (!m_fn_glUniform3fv && glfwExtensionSupported("GL_EXT_direct_state_access") == GL_TRUE)
+	{
+		m_fn_glUniform3fv = glfwGetProcAddress("glProgramUniform3fvEXT");
+		if (m_fn_glUniform3fv)
+			m_thunk_glUniform3fv = &StateFns::call_glProgramUniform3fv;
+	}
+
+	if (!m_fn_glUniform3fv)
+	{
+		m_fn_glUniform3fv = glfwGetProcAddress("glUniform3fv");
+		if (m_fn_glUniform3fv)
+			m_thunk_glUniform3fv = &StateFns::call_glUniform3fv;
+	}
+
+	if (!m_fn_glUniform3fv)
+		LOG_ERROR(("No glUniform3fv function"));
+	else
+		(this->*m_thunk_glUniform3fv)(program,location,count,v);
+}
+
+void OOGL::StateFns::call_glProgramUniform3fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, const GLfloat* v)
+{
+	(*((PFNGLPROGRAMUNIFORM3FVPROC)m_fn_glUniform3fv))(program->m_id,location,count,v);
+
+	OOGL_CHECK("glProgramUniform3fv");
+}
+
+void OOGL::StateFns::call_glUniform3fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, const GLfloat* v)
+{
+	State::get_current()->use(program);
+
+	(*((PFNGLUNIFORM3FVPROC)m_fn_glUniform3fv))(location,count,v);
+
+	OOGL_CHECK("glUniform3fv");
+}
+
+void OOGL::StateFns::glUniform3fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, const GLfloat* v)
+{
+	(this->*m_thunk_glUniform3fv)(program,location,count,v);
 }
 
 void OOGL::StateFns::check_glUniform4fv(const OOBase::SharedPtr<Program>& program, GLint location, GLsizei count, const GLfloat* v)
