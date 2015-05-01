@@ -39,7 +39,7 @@ namespace
 	{
 	public:
 		void setup();
-		void draw(OOGL::State& glState, const glm::mat4& VP);
+		void draw(OOGL::State& glState, const glm::mat4& V, const glm::mat4& P);
 
 	private:
 		OOBase::SharedPtr<OOGL::VertexArrayObject> m_ptrVAO;
@@ -66,14 +66,22 @@ void Triangle::setup()
 	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
 	if (!shaders[0]->compile(
 			"#version 120\n"
+			"uniform mat4 MV;\n"
+			"uniform mat4 P;\n"
+			"uniform mat4 N;\n"
+			"uniform vec3 light;\n"
 			"attribute vec3 in_Position;\n"
 			"attribute vec3 in_Normal;\n"
 			"attribute vec3 in_Colour;\n"
-			"uniform mat4 MVP;\n"
 			"varying vec3 pass_Colour;\n"
+			"varying vec3 pass_Normal;\n"
+			"varying vec3 pass_Pos;\n"
 			"void main() {\n"
 			"	pass_Colour = in_Colour;\n"
-			"	gl_Position = MVP * vec4(in_Position,1.0);\n"
+			"	gl_Position = P * MV * vec4(in_Position,1.0);\n"
+			"	vec4 pos = MV * vec4(in_Position,1.0);\n"
+			"	pass_Pos = vec3(pos) / pos.w;\n"
+			"	pass_Normal = normalize(vec3(N * vec4(in_Normal,0.0)));\n"
 			"}\n"))
 		LOG_ERROR(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()));
 
@@ -81,8 +89,12 @@ void Triangle::setup()
 	if (!shaders[1]->compile(
 			"#version 120\n"
 			"varying vec3 pass_Colour;\n"
+			"varying vec3 pass_Normal;\n"
+			"varying vec3 pass_Pos;\n"
 			"void main() {\n"
-			"    gl_FragColor = vec4(pass_Colour,1.0);\n"
+			"	vec3 light_dir = normalize(vec3(100.0,50.0,100.0) - pass_Pos);\n"
+			"	float lambert = max(dot(light_dir,pass_Normal),0.0);\n"
+			"   gl_FragColor = vec4(lambert*pass_Colour,1.0);\n"
 			"}\n"))
 		LOG_ERROR(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()));
 	
@@ -95,40 +107,40 @@ void Triangle::setup()
 	vbo_data data[] =
 	{
 			// Front
-			{ {-1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
-			{ {-1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
-			{ { 1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
-			{ { 1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
+			{ {-1.0f, 1.0f, 1.0f}, {0.0f,0.0f,1.0f}, {1.0f,0.0f,0.0f} },
+			{ {-1.0f,-1.0f, 1.0f}, {0.0f,0.0f,1.0f}, {0.0f,1.0f,0.0f} },
+			{ { 1.0f, 1.0f, 1.0f}, {0.0f,0.0f,1.0f}, {0.0f,0.0f,1.0f} },
+			{ { 1.0f,-1.0f, 1.0f}, {0.0f,0.0f,1.0f}, {1.0f,1.0f,0.0f} },
 
 			// Right
-			{ { 1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
-			{ { 1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
-			{ { 1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
-			{ { 1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
+			{ { 1.0f, 1.0f, 1.0f}, {1.0f,0.0f,0.0f}, {0.0f,0.0f,1.0f} },
+			{ { 1.0f,-1.0f, 1.0f}, {1.0f,0.0f,0.0f}, {1.0f,1.0f,0.0f} },
+			{ { 1.0f, 1.0f,-1.0f}, {1.0f,0.0f,0.0f}, {0.0f,1.0f,0.0f} },
+			{ { 1.0f,-1.0f,-1.0f}, {1.0f,0.0f,0.0f}, {1.0f,0.0f,0.0f} },
 
 			// Top
-			{ {-1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
-			{ {-1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
-			{ { 1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
-			{ { 1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
+			{ {-1.0f, 1.0f,-1.0f}, {0.0f,1.0f,0.0f}, {1.0f,1.0f,0.0f} },
+			{ {-1.0f, 1.0f, 1.0f}, {0.0f,1.0f,0.0f}, {1.0f,0.0f,0.0f} },
+			{ { 1.0f, 1.0f,-1.0f}, {0.0f,1.0f,0.0f}, {0.0f,1.0f,0.0f} },
+			{ { 1.0f, 1.0f, 1.0f}, {0.0f,1.0f,0.0f}, {0.0f,0.0f,1.0f} },
 
 			// Back
-			{ { 1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
-			{ { 1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
-			{ {-1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
-			{ {-1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
+			{ { 1.0f, 1.0f,-1.0f}, {0.0f,0.0f,-1.0f}, {0.0f,1.0f,0.0f} },
+			{ { 1.0f,-1.0f,-1.0f}, {0.0f,0.0f,-1.0f}, {1.0f,0.0f,0.0f} },
+			{ {-1.0f, 1.0f,-1.0f}, {0.0f,0.0f,-1.0f}, {1.0f,1.0f,0.0f} },
+			{ {-1.0f,-1.0f,-1.0f}, {0.0f,0.0f,-1.0f}, {0.0f,0.0f,1.0f} },
 
 			// Left
-			{ {-1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
-			{ {-1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
-			{ {-1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
-			{ {-1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
+			{ {-1.0f, 1.0f,-1.0f}, {-1.0f,0.0f,0.0f}, {1.0f,1.0f,0.0f} },
+			{ {-1.0f,-1.0f,-1.0f}, {-1.0f,0.0f,0.0f}, {0.0f,0.0f,1.0f} },
+			{ {-1.0f, 1.0f, 1.0f}, {-1.0f,0.0f,0.0f}, {1.0f,0.0f,0.0f} },
+			{ {-1.0f,-1.0f, 1.0f}, {-1.0f,0.0f,0.0f}, {0.0f,1.0f,0.0f} },
 
 			// Bottom
-			{ { 1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
-			{ { 1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
-			{ {-1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
-			{ {-1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
+			{ { 1.0f,-1.0f,-1.0f}, {0.0f,-1.0f,0.0f}, {1.0f,0.0f,0.0f} },
+			{ { 1.0f,-1.0f, 1.0f}, {0.0f,-1.0f,0.0f}, {1.0f,1.0f,0.0f} },
+			{ {-1.0f,-1.0f,-1.0f}, {0.0f,-1.0f,0.0f}, {0.0f,0.0f,1.0f} },
+			{ {-1.0f,-1.0f, 1.0f}, {0.0f,-1.0f,0.0f}, {0.0f,1.0f,0.0f} },
 	};
 
 	OOBase::SharedPtr<OOGL::BufferObject> ptrVBO = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(data),data);
@@ -165,10 +177,13 @@ void Triangle::setup()
 
 }
 
-void Triangle::draw(OOGL::State& glState, const glm::mat4& VP)
+void Triangle::draw(OOGL::State& glState, const glm::mat4& V, const glm::mat4& P)
 {
 	glm::mat4 model = glm::rotate(glm::mat4(1.0f),-glm::radians((float)glfwGetTime() * 150.f),glm::vec3(0,1,0));
-	m_ptrProgram->uniform("MVP",VP * model);
+	model = glm::rotate(model,glm::radians((float)glfwGetTime() * 50.f),glm::vec3(1,0,0));
+	m_ptrProgram->uniform("MV",V * model);
+	m_ptrProgram->uniform("P",P);
+	m_ptrProgram->uniform("N",glm::transpose(glm::inverse(model)));
 
 	glState.use(m_ptrProgram);
 	m_ptrVAO->draw_elements(GL_TRIANGLES,36,GL_UNSIGNED_INT);
@@ -293,13 +308,11 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 
 	glBlendFunc(GL_SRC_ALPHA_SATURATE,GL_ONE);
 	
-	glm::mat4 model(1);
-	model = glm::scale(model,glm::vec3(.5f,.5f,.5f));
 	glm::mat4 proj = glm::perspective(glm::radians(45.0f),m_ratio,0.1f,100.0f);
 	glm::mat4 view = glm::lookAt(glm::vec3(2,3,4),glm::vec3(0,0,0),glm::vec3(0,1,0));
-	view = glm::rotate(view,-glm::radians((float)now * 50.f),glm::vec3(1,0,0));
+	//view = glm::rotate(view,-glm::radians((float)now * 50.f),glm::vec3(1,0,0));
 
-	m_tri.draw(glState,proj * view);
+	m_tri.draw(glState,view,proj);
 
 	if (m_start != 0.0)
 	{
@@ -311,7 +324,7 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 
 		glm::ivec2 sz = win.size();
 		proj = glm::ortho(0.f, (float)sz.x, 0.f, (float)sz.y, 1.f, -1.f);
-		model = glm::scale(model,glm::vec3(48.f,48.f,0.f));
+		glm::mat4 model = glm::scale(glm::mat4(1),glm::vec3(32.f,32.f,0.f));
 
 		m_fps->draw(glState,proj * model,glm::vec4(1.f));
 	}
@@ -321,8 +334,7 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 	if (m_text->length())
 	{
 		proj = glm::ortho(-m_ratio, m_ratio, -1.f, 1.f, 1.f, -1.f);
-		model = glm::mat4(1);
-		model = glm::scale(model,glm::vec3(.25f,.25f,0.f));
+		glm::mat4 model = glm::scale(glm::mat4(1),glm::vec3(.25f,.25f,0.f));
 		model = glm::translate(model,glm::vec3(-m_text->length()/2,-.5f,0.f));
 
 		m_text->draw(glState,proj * model,glm::vec4(fmod(now / 2,1),fmod(now / 3,1),fmod(now / 7,1),fmod(now,1)));
