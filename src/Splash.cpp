@@ -81,7 +81,7 @@ void Triangle::setup()
 			"	gl_Position = P * MV * vec4(in_Position,1.0);\n"
 			"	vec4 pos = MV * vec4(in_Position,1.0);\n"
 			"	pass_Pos = vec3(pos) / pos.w;\n"
-			"	pass_Normal = normalize(vec3(N * vec4(in_Normal,0.0)));\n"
+			"	pass_Normal = vec3(N * vec4(in_Normal,0.0));\n"
 			"}\n"))
 		LOG_ERROR(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()));
 
@@ -92,9 +92,17 @@ void Triangle::setup()
 			"varying vec3 pass_Normal;\n"
 			"varying vec3 pass_Pos;\n"
 			"void main() {\n"
-			"	vec3 light_dir = normalize(vec3(100.0,50.0,100.0) - pass_Pos);\n"
+			"	vec3 normal = normalize(pass_Normal);\n"
+			"	vec3 light_dir = normalize(vec3(10.0,70.0,100.0) - pass_Pos);\n"
 			"	float lambert = max(dot(light_dir,pass_Normal),0.0);\n"
-			"   gl_FragColor = vec4(lambert*pass_Colour,1.0);\n"
+			"	float specular = 0.0;\n"
+			"	if (lambert > 0.0) {\n"
+			"		vec3 view_dir = normalize(-pass_Pos);\n"
+			"		vec3 half_dir = normalize(light_dir + view_dir);\n"
+			"		float specAngle = max(dot(half_dir,normal),0.0);\n"
+			"		specular = pow(specAngle,16.0);\n"
+			"	}\n"
+			"   gl_FragColor = vec4(lambert*pass_Colour + vec3(1.0,1.0,1.0)*specular,1.0);\n"
 			"}\n"))
 		LOG_ERROR(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()));
 	
