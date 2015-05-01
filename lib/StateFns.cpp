@@ -52,8 +52,9 @@ namespace
 		size_t l = str.length();
 		if (l)
 		{
-			for (--l;l > 0 && (str[l] == '\n' || str[l] == '\r');str[l--] = '\0')
-				;
+			for (;l > 0 && (str[l-1] == '\n' || str[l-1] == '\r' || str[l-1] == '\0');)
+				--l;
+			str.assign(str.c_str(),l);
 		}
 
 		OOBase::Logger::Priority p = OOBase::Logger::Information;
