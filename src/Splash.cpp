@@ -42,8 +42,21 @@ namespace
 		void draw(OOGL::State& glState, const glm::mat4& VP);
 
 	private:
-		OOBase::SharedPtr<OOGL::VertexArrayObject> ptrVAO;
-		OOBase::SharedPtr<OOGL::Program> ptrProgram;
+		OOBase::SharedPtr<OOGL::VertexArrayObject> m_ptrVAO;
+		OOBase::SharedPtr<OOGL::Program> m_ptrProgram;
+
+		struct vbo_vec3
+		{
+			float x;
+			float y;
+			float z;
+		};
+		struct vbo_data
+		{
+			vbo_vec3 vertex;
+			vbo_vec3 normal;
+			vbo_vec3 colour;
+		};
 	};
 }
 
@@ -54,13 +67,13 @@ void Triangle::setup()
 	if (!shaders[0]->compile(
 			"#version 120\n"
 			"attribute vec3 in_Position;\n"
+			"attribute vec3 in_Normal;\n"
 			"attribute vec3 in_Colour;\n"
 			"uniform mat4 MVP;\n"
 			"varying vec3 pass_Colour;\n"
 			"void main() {\n"
 			"	pass_Colour = in_Colour;\n"
-			"	vec4 v = vec4(in_Position,1.0);\n"
-			"	gl_Position = MVP * v;\n"
+			"	gl_Position = MVP * vec4(in_Position,1.0);\n"
 			"}\n"))
 		LOG_ERROR(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()));
 
@@ -73,40 +86,92 @@ void Triangle::setup()
 			"}\n"))
 		LOG_ERROR(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()));
 	
-	ptrProgram = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
-	if (!ptrProgram->link(shaders,2))
-		LOG_ERROR(("Failed to link shaders: %s",ptrProgram->info_log().c_str()));
+	m_ptrProgram = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
+	if (!m_ptrProgram->link(shaders,2))
+		LOG_ERROR(("Failed to link shaders: %s",m_ptrProgram->info_log().c_str()));
 
-	ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
+	m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
 
-	float points[] = {
-			-0.6f, -0.4f, 0.f,
-			0.6f, -0.4f, 0.f,
-			0.f, 0.6f, 0.f
+	vbo_data data[] =
+	{
+			// Front
+			{ {-1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
+			{ {-1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
+			{ { 1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
+			{ { 1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
+
+			// Right
+			{ { 1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
+			{ { 1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
+			{ { 1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
+			{ { 1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
+
+			// Top
+			{ {-1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
+			{ {-1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
+			{ { 1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
+			{ { 1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
+
+			// Back
+			{ { 1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
+			{ { 1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
+			{ {-1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
+			{ {-1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
+
+			// Left
+			{ {-1.0f, 1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
+			{ {-1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
+			{ {-1.0f, 1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
+			{ {-1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
+
+			// Bottom
+			{ { 1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,0.0f,0.0f} },
+			{ { 1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {1.0f,1.0f,0.0f} },
+			{ {-1.0f,-1.0f,-1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,0.0f,1.0f} },
+			{ {-1.0f,-1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}, {0.0f,1.0f,0.0f} },
 	};
-	OOBase::SharedPtr<OOGL::BufferObject> ptrVBO = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(points),points);
-	GLint a = ptrProgram->attribute_location("in_Position");
-	ptrVAO->attribute(a,ptrVBO,3,GL_FLOAT,false);
-	ptrVAO->enable_attribute(a);
 
-	float colours[] = {
-			1.f, 0.f, 0.f,
-			0.f, 1.f, 0.f,
-			0.f, 0.f, 1.f
+	OOBase::SharedPtr<OOGL::BufferObject> ptrVBO = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(data),data);
+	GLint a = m_ptrProgram->attribute_location("in_Position");
+	m_ptrVAO->attribute(a,ptrVBO,3,GL_FLOAT,false,sizeof(vbo_data),offsetof(vbo_data,vertex));
+	m_ptrVAO->enable_attribute(a);
+
+	a = m_ptrProgram->attribute_location("in_Normal");
+	if (a != -1)
+	{
+		m_ptrVAO->attribute(a,ptrVBO,3,GL_FLOAT,false,sizeof(vbo_data),offsetof(vbo_data,normal));
+		m_ptrVAO->enable_attribute(a);
+	}
+
+	a = m_ptrProgram->attribute_location("in_Colour");
+	if (a != -1)
+	{
+		m_ptrVAO->attribute(a,ptrVBO,3,GL_FLOAT,false,sizeof(vbo_data),offsetof(vbo_data,colour));
+		m_ptrVAO->enable_attribute(a);
+	}
+
+	GLuint indexes[] =
+	{
+		 0, 1, 2, 2, 1, 3,
+		 4, 5, 6, 6, 5, 7,
+		 8, 9,10,10, 9,11,
+		12,13,14,14,13,15,
+		16,17,18,18,17,19,
+		20,21,22,22,21,23,
 	};
-	ptrVBO = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(colours),colours);
-	a = ptrProgram->attribute_location("in_Colour");
-	ptrVAO->attribute(a,ptrVBO,3,GL_FLOAT,false);
-	ptrVAO->enable_attribute(a);
+
+	ptrVBO = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(indexes),indexes);
+	m_ptrVAO->element_array(ptrVBO);
+
 }
 
 void Triangle::draw(OOGL::State& glState, const glm::mat4& VP)
 {
-	glm::mat4 model = glm::rotate(glm::mat4(1.0f),-glm::radians((float)glfwGetTime() * 150.f),glm::vec3(0,0,1));
-	ptrProgram->uniform("MVP",VP * model);
+	glm::mat4 model = glm::rotate(glm::mat4(1.0f),-glm::radians((float)glfwGetTime() * 150.f),glm::vec3(0,1,0));
+	m_ptrProgram->uniform("MVP",VP * model);
 
-	glState.use(ptrProgram);
-	ptrVAO->draw(GL_TRIANGLES,0,3);
+	glState.use(m_ptrProgram);
+	m_ptrVAO->draw_elements(GL_TRIANGLES,36,GL_UNSIGNED_INT);
 }
 
 namespace
@@ -229,9 +294,10 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 	glBlendFunc(GL_SRC_ALPHA_SATURATE,GL_ONE);
 	
 	glm::mat4 model(1);
+	model = glm::scale(model,glm::vec3(.5f,.5f,.5f));
 	glm::mat4 proj = glm::perspective(glm::radians(45.0f),m_ratio,0.1f,100.0f);
-	glm::mat4 view = glm::lookAt(glm::vec3(3,0,0),glm::vec3(0,0,0),glm::vec3(0,1,0));
-	view = glm::rotate(view,-glm::radians((float)now * 50.f),glm::vec3(0,1,0));
+	glm::mat4 view = glm::lookAt(glm::vec3(2,3,4),glm::vec3(0,0,0),glm::vec3(0,1,0));
+	view = glm::rotate(view,-glm::radians((float)now * 50.f),glm::vec3(1,0,0));
 
 	m_tri.draw(glState,proj * view);
 
@@ -245,7 +311,7 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 
 		glm::ivec2 sz = win.size();
 		proj = glm::ortho(0.f, (float)sz.x, 0.f, (float)sz.y, 1.f, -1.f);
-		model = glm::scale(model,glm::vec3(32.f,32,0.f));
+		model = glm::scale(model,glm::vec3(48.f,48.f,0.f));
 
 		m_fps->draw(glState,proj * model,glm::vec4(1.f));
 	}
@@ -266,9 +332,7 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 void Splash::on_character(const OOGL::Window& win, unsigned int codepoint, int mods)
 {
 	m_str.append(static_cast<char>(codepoint));
-	
 	m_text->text(m_str.c_str());
-	LOG_DEBUG(("TEXT = %s",m_str.c_str()));
 }
 
 void Splash::on_keystroke(const OOGL::Window& win, const OOGL::Window::key_stroke_t& keystroke)
@@ -277,13 +341,8 @@ void Splash::on_keystroke(const OOGL::Window& win, const OOGL::Window::key_strok
 	{
 		if (!m_str.empty())
 		{
-			if (m_str.length() > 1)
-				m_str.assign(m_str.c_str(),m_str.length()-1);
-			else
-				m_str.clear();
-
+			m_str.assign(m_str.c_str(),m_str.length()-1);
 			m_text->text(m_str.c_str());
-			LOG_DEBUG(("TEXT = %s",m_str.c_str()));
 		}
 	}
 }
