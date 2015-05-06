@@ -249,7 +249,7 @@ bool Splash::create(void* p)
 	if (Indigo::is_debug())
 		style |= OOGL::Window::eWSdebug_context;
 
-	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(800,600,"Test",style);
+	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test",style);
 	if (!pThis->m_wnd || !pThis->m_wnd->is_valid())
 		return false;
 

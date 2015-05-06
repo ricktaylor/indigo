@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2013 Rick Taylor
+// Copyright (C) 2014 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,33 +19,32 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Render.h"
-#include "MainWindow.h"
+#ifndef INDIGO_MAINWINDOW_H_INCLUDED
+#define INDIGO_MAINWINDOW_H_INCLUDED
 
-bool showSplash();
+#include "Common.h"
 
-static void on_close(Indigo::MainWindow& win)
+#include <OOBase/SignalSlot.h>
+
+namespace Indigo
 {
-	win.destroy();
-}
-
-bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
-{
-	bool ret = false;
-
-	//if (!showSplash())
-	//	return false;
-
-	Indigo::MainWindow wnd;
-
-	wnd.signal_close.connect(&on_close);
-
-	if (wnd.create())
+	class MainWindow : public OOBase::NonCopyable
 	{
-		ret = Indigo::handle_events();
+	public:
+		MainWindow();
+		~MainWindow();
 
-		OOBase::Logger::log(OOBase::Logger::Information,"Quit");
-	}
+		bool create();
+		void destroy();
 
-	return ret;
+	public:
+		OOBase::Signal1<MainWindow&,OOBase::CrtAllocator> signal_close;
+
+	private:
+		bool m_live;
+
+		static void on_close(MainWindow* pThis);
+	};
 }
+
+#endif // INDIGO_MAINWINDOW_H_INCLUDED

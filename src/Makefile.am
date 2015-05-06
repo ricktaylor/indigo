@@ -40,6 +40,7 @@ indigo_SOURCES = \
 	Render.cpp \
 	LogicThread.cpp \
 	Main.cpp \
+	MainWindow.cpp \
 	Splash.cpp
 		
 indigo_LDADD = \
