@@ -338,7 +338,7 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 			{
 				m_packing = read_uint32(data);
 				if (m_packing == 0x04040400)
-					ok = (!!OOBase::TLSSingleton<FontProgram>::instance()->program(m_packing));
+					ok = (!!OOBase::TLSSingleton<FontProgram>::instance().program(m_packing));
 				else
 				{
 					// TODO: Funky packing
@@ -526,7 +526,7 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 				LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 
-		OOBase::SharedPtr<Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance()->program(m_packing);
+		OOBase::SharedPtr<Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance().program(m_packing);
 		GLint a = ptrProgram->attribute_location("in_Position");
 		m_ptrVAO->attribute(a,m_ptrVertices,2,GL_FLOAT,false,sizeof(attrib_data),offsetof(attrib_data,x));
 		m_ptrVAO->enable_attribute(a);
@@ -637,7 +637,7 @@ void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colou
 {
 	if (len)
 	{
-		OOBase::SharedPtr<Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance()->program(m_packing);
+		OOBase::SharedPtr<Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance().program(m_packing);
 	
 		state.use(ptrProgram);
 		state.bind(0,m_ptrTexture);
