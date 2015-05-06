@@ -62,7 +62,6 @@ static int help()
 
 static bool critical_failure(const char* msg)
 {
-	OOBase::stderr_write("Critical error in Indigo:");
 	OOBase::stderr_write(msg);
 	OOBase::stderr_write("\n");
 	return true;
