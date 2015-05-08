@@ -68,7 +68,11 @@ namespace Indigo
 			}
 		};
 
-		OOBase::CDRStream stream;
+		OOBase::RefPtr<OOBase::Buffer> buffer = OOBase::Buffer::create<OOBase::ThreadLocalAllocator>();
+		if (!buffer)
+			LOG_ERROR_RETURN(("Failed to allocate buffer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+		OOBase::CDRStream stream(buffer);
 		if (!stream.write(delegate))
 			LOG_ERROR_RETURN(("Failed to marshal event parameters: %s",OOBase::system_error_text(stream.last_error())),false);
 
@@ -91,7 +95,11 @@ namespace Indigo
 			}
 		};
 
-		OOBase::CDRStream stream;
+		OOBase::RefPtr<OOBase::Buffer> buffer = OOBase::Buffer::create<OOBase::ThreadLocalAllocator>();
+		if (!buffer)
+			LOG_ERROR_RETURN(("Failed to allocate buffer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+		OOBase::CDRStream stream(buffer);
 		if (!stream.write(delegate) || !stream.write(p1))
 			LOG_ERROR_RETURN(("Failed to marshal event parameters: %s",OOBase::system_error_text(stream.last_error())),false);
 
@@ -114,7 +122,11 @@ namespace Indigo
 			}
 		};
 
-		OOBase::CDRStream stream;
+		OOBase::RefPtr<OOBase::Buffer> buffer = OOBase::Buffer::create<OOBase::ThreadLocalAllocator>();
+		if (!buffer)
+			LOG_ERROR_RETURN(("Failed to allocate buffer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+		OOBase::CDRStream stream(buffer);
 		if (!stream.write(delegate) || !stream.write(p1) || !stream.write(p2))
 			LOG_ERROR_RETURN(("Failed to marshal event parameters: %s",OOBase::system_error_text(stream.last_error())),false);
 

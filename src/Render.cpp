@@ -356,6 +356,7 @@ static bool raise_event_i(void* param)
 {
 	struct raise_event_thunk* ret = static_cast<struct raise_event_thunk*>(param);
 
+	ret->m_buffer->addref();
 	OOBase::CDRStream stream(ret->m_buffer);
 	(*ret->m_fn)(stream);
 
