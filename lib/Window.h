@@ -94,14 +94,14 @@ namespace OOGL
 
 		GLFWmonitor* monitor() const;
 
-		static void on_move(GLFWwindow* window, int left, int top);
-		static void on_size(GLFWwindow* window, int width, int height);
-		static void on_close(GLFWwindow* window);
-		static void on_focus(GLFWwindow* window, int focused);
-		static void on_iconify(GLFWwindow* window, int iconified);
-		static void on_refresh(GLFWwindow* window);
-		static void on_character(GLFWwindow* window, unsigned int codepoint, int mods);
-		static void on_key(GLFWwindow* window, int key, int scancode, int action, int mods);
+		static void cb_on_move(GLFWwindow* window, int left, int top);
+		static void cb_on_size(GLFWwindow* window, int width, int height);
+		static void cb_on_close(GLFWwindow* window);
+		static void cb_on_focus(GLFWwindow* window, int focused);
+		static void cb_on_iconify(GLFWwindow* window, int iconified);
+		static void cb_on_refresh(GLFWwindow* window);
+		static void cb_on_character(GLFWwindow* window, unsigned int codepoint, int mods);
+		static void cb_on_key(GLFWwindow* window, int key, int scancode, int action, int mods);
 	};
 }
 

@@ -52,14 +52,14 @@ OOGL::Window::Window(int width, int height, const char* title, unsigned int styl
 				m_default_fb = Framebuffer::get_default();
 
 				glfwSetWindowUserPointer(m_glfw_window,this);
-				glfwSetFramebufferSizeCallback(m_glfw_window,&on_size);
-				glfwSetWindowPosCallback(m_glfw_window,&on_move);
-				glfwSetWindowCloseCallback(m_glfw_window,&on_close);
-				glfwSetWindowFocusCallback(m_glfw_window,&on_focus);
-				glfwSetWindowIconifyCallback(m_glfw_window,&on_iconify);
-				glfwSetWindowRefreshCallback(m_glfw_window,&on_refresh);
-				glfwSetCharModsCallback(m_glfw_window,&on_character);
-				glfwSetKeyCallback(m_glfw_window,&on_key);
+				glfwSetFramebufferSizeCallback(m_glfw_window,&cb_on_size);
+				glfwSetWindowPosCallback(m_glfw_window,&cb_on_move);
+				glfwSetWindowCloseCallback(m_glfw_window,&cb_on_close);
+				glfwSetWindowFocusCallback(m_glfw_window,&cb_on_focus);
+				glfwSetWindowIconifyCallback(m_glfw_window,&cb_on_iconify);
+				glfwSetWindowRefreshCallback(m_glfw_window,&cb_on_refresh);
+				glfwSetCharModsCallback(m_glfw_window,&cb_on_character);
+				glfwSetKeyCallback(m_glfw_window,&cb_on_key);
 			}
 		}
 	}
@@ -113,52 +113,52 @@ void OOGL::Window::iconify(bool minimize)
 	}
 }
 
-void OOGL::Window::on_move(GLFWwindow* window, int left, int top)
+void OOGL::Window::cb_on_move(GLFWwindow* window, int left, int top)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
 		pThis->m_on_moved.invoke(*pThis,glm::ivec2(left,top));
 }
 
-void OOGL::Window::on_size(GLFWwindow* window, int width, int height)
+void OOGL::Window::cb_on_size(GLFWwindow* window, int width, int height)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
 		pThis->m_on_sized.invoke(*pThis,glm::ivec2(width,height));
 }
 
-void OOGL::Window::on_close(GLFWwindow* window)
+void OOGL::Window::cb_on_close(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
 		pThis->m_on_close.invoke(*pThis);
 }
 
-void OOGL::Window::on_focus(GLFWwindow* window, int focused)
+void OOGL::Window::cb_on_focus(GLFWwindow* window, int focused)
 {
 	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
 }
 
-void OOGL::Window::on_iconify(GLFWwindow* window, int iconified)
+void OOGL::Window::cb_on_iconify(GLFWwindow* window, int iconified)
 {
 	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
 }
 
-void OOGL::Window::on_refresh(GLFWwindow* window)
+void OOGL::Window::cb_on_refresh(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->draw())
 		pThis->swap();
 }
 
-void OOGL::Window::on_character(GLFWwindow* window, unsigned int codepoint, int mods)
+void OOGL::Window::cb_on_character(GLFWwindow* window, unsigned int codepoint, int mods)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
 		pThis->m_on_character.invoke(*pThis,codepoint,mods);
 }
 
-void OOGL::Window::on_key(GLFWwindow* window, int key, int scancode, int action, int mods)
+void OOGL::Window::cb_on_key(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis)
