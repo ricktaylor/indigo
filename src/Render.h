@@ -31,118 +31,91 @@ namespace Indigo
 
 	bool render_call(bool (*fn)(void*), void* param);
 
-	bool raise_event(void (*fn)(OOBase::CDRStream&), OOBase::CDRStream& stream);
-
 	template <typename T>
-	bool raise_event(T* pThis, void (T::*member_fn)())
+	bool render_call(bool (T::*fn)(), T* p)
 	{
 		struct thunk
 		{
-			static void member_event(OOBase::CDRStream& stream)
+			bool (T::*m_fn)();
+			T* m_this;
+
+			static bool call(void* p)
 			{
-				T* pThis;
-				void (T::*fn)();
-				if (!stream.read(pThis) || !stream.read(fn))
-					LOG_ERROR(("Failed to unmarshal event parameters: %s",OOBase::system_error_text(stream.last_error())));
-				else
-					(pThis->*fn)();
+				thunk* t = static_cast<thunk*>(p);
+				return (t->m_this->*t->m_fn)();
 			}
 		};
 
-		OOBase::CDRStream stream;
-		if (!stream.write(pThis) || !stream.write(member_fn))
-			LOG_ERROR_RETURN(("Failed to marshal event parameters: %s",OOBase::system_error_text(stream.last_error())),false);
-
-		return raise_event(&thunk::member_event,stream);
+		thunk t;
+		t.m_fn = fn;
+		t.m_this = p;
+		return render_call(&thunk::call,&t);
 	}
 
-	inline bool raise_event(void (*fn)())
+	bool raise_event(void (*fn)(OOBase::CDRStream&), OOBase::CDRStream& stream);
+
+	inline bool raise_event(const OOBase::Delegate0<OOBase::CrtAllocator>& delegate)
 	{
 		struct thunk
 		{
 			static void event(OOBase::CDRStream& stream)
 			{
-				void (*fn)();
-				if (!stream.read(fn))
+				OOBase::Delegate0<OOBase::CrtAllocator> delegate;
+				if (!stream.read(delegate))
 					LOG_ERROR(("Failed to unmarshal event parameters: %s",OOBase::system_error_text(stream.last_error())));
 				else
-					(*fn)();
+					delegate.invoke();
 			}
 		};
 
 		OOBase::CDRStream stream;
-		if (!stream.write(fn))
+		if (!stream.write(delegate))
 			LOG_ERROR_RETURN(("Failed to marshal event parameters: %s",OOBase::system_error_text(stream.last_error())),false);
 
 		return raise_event(&thunk::event,stream);
-	}
-
-	template <typename T, typename P1>
-	bool raise_event(T* pThis, void (T::*member_fn)(P1), P1 p1)
-	{
-		struct thunk
-		{
-			static void member_event(OOBase::CDRStream& stream)
-			{
-				T* pThis;
-				void (T::*fn)(P1 p1);
-				P1 p1;
-				if (!stream.read(pThis) || !stream.read(fn) || !stream.read(p1))
-					LOG_ERROR(("Failed to unmarshal event parameters: %s",OOBase::system_error_text(stream.last_error())));
-				else
-					(pThis->*fn)(p1);
-			}
-		};
-
-		OOBase::CDRStream stream;
-		if (!stream.write(pThis) || !stream.write(member_fn) || !stream.write(p1))
-			LOG_ERROR_RETURN(("Failed to marshal event parameters: %s",OOBase::system_error_text(stream.last_error())),false);
-
-		return raise_event(&thunk::member_event,stream);
 	}
 
 	template <typename P1>
-	bool raise_event(void (*fn)(P1), P1 p1)
-	{
-		struct thunk
-		{
-			static void event(OOBase::CDRStream& stream)
-			{
-				void (*fn)(P1);
-				P1 p1;
-				if (!stream.read(fn) | !stream.read(p1))
-					LOG_ERROR(("Failed to unmarshal event parameters: %s",OOBase::system_error_text(stream.last_error())));
-				else
-					(*fn)(p1);
-			}
-		};
-
-		OOBase::CDRStream stream;
-		if (!stream.write(fn) || !stream.write(p1))
-			LOG_ERROR_RETURN(("Failed to marshal event parameters: %s",OOBase::system_error_text(stream.last_error())),false);
-
-		return raise_event(&thunk::event,stream);
-	}
-
-	template <typename T, typename P1, typename P2>
-	bool raise_event(T* pThis, void (T::*member_fn)(P1,P2), P1 p1, P2 p2)
+	bool raise_event(const OOBase::Delegate1<P1>& delegate, P1 p1)
 	{
 		struct thunk
 		{
 			static void member_event(OOBase::CDRStream& stream)
 			{
-				T* pThis;
-				void (T::*fn)(P1 p1, P2 p2);
-				P1 p1; P2 p2;
-				if (!stream.read(pThis) || !stream.read(fn) || !stream.read(p1) || !stream.read(p2))
+				OOBase::Delegate1<P1> delegate;
+				P1 p1;
+				if (!stream.read(delegate) || !stream.read(p1))
 					LOG_ERROR(("Failed to unmarshal event parameters: %s",OOBase::system_error_text(stream.last_error())));
 				else
-					(pThis->*fn)(p1,p2);
+					delegate.invoke(p1);
 			}
 		};
 
 		OOBase::CDRStream stream;
-		if (!stream.write(pThis) || !stream.write(member_fn) || !stream.write(p1) || !stream.write(p2))
+		if (!stream.write(delegate) || !stream.write(p1))
+			LOG_ERROR_RETURN(("Failed to marshal event parameters: %s",OOBase::system_error_text(stream.last_error())),false);
+
+		return raise_event(&thunk::member_event,stream);
+	}
+
+	template <typename P1, typename P2>
+	bool raise_event(const OOBase::Delegate2<P1,P2>& delegate, P1 p1, P2 p2)
+	{
+		struct thunk
+		{
+			static void member_event(OOBase::CDRStream& stream)
+			{
+				OOBase::Delegate2<P1,P2> delegate;
+				P1 p1; P2 p2;
+				if (!stream.read(delegate) || !stream.read(p1) || !stream.read(p2))
+					LOG_ERROR(("Failed to unmarshal event parameters: %s",OOBase::system_error_text(stream.last_error())));
+				else
+					delegate.invoke(p1,p2);
+			}
+		};
+
+		OOBase::CDRStream stream;
+		if (!stream.write(delegate) || !stream.write(p1) || !stream.write(p2))
 			LOG_ERROR_RETURN(("Failed to marshal event parameters: %s",OOBase::system_error_text(stream.last_error())),false);
 
 		return raise_event(&thunk::member_event,stream);

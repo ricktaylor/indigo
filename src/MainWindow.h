@@ -28,8 +28,15 @@
 
 namespace Indigo
 {
-	class MainWindow : public OOBase::NonCopyable
+	namespace detail
 	{
+		class MainWindowImpl;
+	}
+
+	class MainWindow : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<MainWindow>
+	{
+		friend class detail::MainWindowImpl;
+
 	public:
 		MainWindow();
 		~MainWindow();
@@ -37,13 +44,12 @@ namespace Indigo
 		bool create();
 		void destroy();
 
-	public:
-		OOBase::Signal1<MainWindow&,OOBase::CrtAllocator> signal_close;
-
 	private:
-		bool m_live;
+		OOBase::SharedPtr<detail::MainWindowImpl> m_wnd;
 
-		static void on_close(MainWindow* pThis);
+		bool do_create();
+		bool do_destroy();
+		void on_close();
 	};
 }
 

@@ -24,11 +24,6 @@
 
 bool showSplash();
 
-static void on_close(Indigo::MainWindow& win)
-{
-	win.destroy();
-}
-
 bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
 	bool ret = false;
@@ -36,11 +31,8 @@ bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_arg
 	//if (!showSplash())
 	//	return false;
 
-	Indigo::MainWindow wnd;
-
-	wnd.signal_close.connect(&on_close);
-
-	if (wnd.create())
+	OOBase::SharedPtr<Indigo::MainWindow> wnd = OOBase::allocate_shared<Indigo::MainWindow,OOBase::CrtAllocator>();
+	if (wnd->create())
 	{
 		ret = Indigo::handle_events();
 
