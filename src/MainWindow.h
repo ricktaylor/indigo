@@ -33,7 +33,7 @@ namespace Indigo
 		class MainWindowImpl;
 	}
 
-	class MainWindow : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<MainWindow>
+	class MainWindow : public OOBase::NonCopyable
 	{
 		friend class detail::MainWindowImpl;
 
@@ -44,8 +44,12 @@ namespace Indigo
 		bool create();
 		void destroy();
 
+		OOBase::Delegate1<const MainWindow&,OOBase::ThreadLocalAllocator> on_close(const OOBase::Delegate1<const MainWindow&,OOBase::ThreadLocalAllocator>& delegate);
+
 	private:
 		OOBase::SharedPtr<detail::MainWindowImpl> m_wnd;
+
+		OOBase::Delegate1<const MainWindow&,OOBase::ThreadLocalAllocator> m_on_close;
 
 		bool do_create();
 		bool do_destroy();

@@ -35,15 +35,15 @@ namespace Indigo
 {
 	namespace detail
 	{
-		class MainWindowImpl : public OOBase::EnableSharedFromThis<MainWindowImpl>
+		class MainWindowImpl
 		{
 		public:
-			MainWindowImpl(OOBase::WeakPtr<Indigo::MainWindow> parent);
+			MainWindowImpl(Indigo::MainWindow* parent);
 
 			bool create();
 
 		private:
-			OOBase::WeakPtr<Indigo::MainWindow> m_parent;
+			Indigo::MainWindow* m_parent;
 
 			OOBase::SharedPtr<OOGL::Window> m_wnd;
 
@@ -58,7 +58,7 @@ namespace Indigo
 	}
 }
 
-Indigo::detail::MainWindowImpl::MainWindowImpl(OOBase::WeakPtr<Indigo::MainWindow> parent) : m_parent(parent), m_ratio(0)
+Indigo::detail::MainWindowImpl::MainWindowImpl(Indigo::MainWindow* parent) : m_parent(parent), m_ratio(0)
 {
 }
 
@@ -72,12 +72,10 @@ bool Indigo::detail::MainWindowImpl::create()
 	if (!m_wnd || !m_wnd->is_valid())
 		return false;
 
-	OOBase::WeakPtr<MainWindowImpl> wthis(shared_from_this());
-
-	m_wnd->on_close(OOBase::Delegate1<const OOGL::Window&,OOBase::ThreadLocalAllocator>(wthis,&MainWindowImpl::on_close));
-	m_wnd->on_moved(OOBase::Delegate2<const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>(wthis,&MainWindowImpl::on_move));
-	m_wnd->on_sized(OOBase::Delegate2<const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>(wthis,&MainWindowImpl::on_size));
-	m_wnd->on_draw(OOBase::Delegate2<const OOGL::Window&,OOGL::State&,OOBase::ThreadLocalAllocator>(wthis,&MainWindowImpl::on_draw));
+	m_wnd->on_close(OOBase::Delegate1<const OOGL::Window&,OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_close));
+	m_wnd->on_moved(OOBase::Delegate2<const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_move));
+	m_wnd->on_sized(OOBase::Delegate2<const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_size));
+	m_wnd->on_draw(OOBase::Delegate2<const OOGL::Window&,OOGL::State&,OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_draw));
 
 	if (Indigo::is_debug())
 		OOGL::StateFns::get_current()->enable_logging();
@@ -145,7 +143,7 @@ void Indigo::MainWindow::destroy()
 
 bool Indigo::MainWindow::do_create()
 {
-	OOBase::SharedPtr<detail::MainWindowImpl> wnd = OOBase::allocate_shared<detail::MainWindowImpl,OOBase::ThreadLocalAllocator>(OOBase::WeakPtr<MainWindow>(shared_from_this()));
+	OOBase::SharedPtr<detail::MainWindowImpl> wnd = OOBase::allocate_shared<detail::MainWindowImpl,OOBase::ThreadLocalAllocator>(this);
 	if (!wnd)
 		LOG_ERROR_RETURN(("Failed to allocate MainWindow: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
@@ -162,7 +160,14 @@ bool Indigo::MainWindow::do_destroy()
 	return true;
 }
 
+OOBase::Delegate1<const Indigo::MainWindow&,OOBase::ThreadLocalAllocator> Indigo::MainWindow::on_close(const OOBase::Delegate1<const MainWindow&,OOBase::ThreadLocalAllocator>& delegate)
+{
+	OOBase::Delegate1<const MainWindow&,OOBase::ThreadLocalAllocator> prev = m_on_close;
+	m_on_close = delegate;
+	return prev;
+}
+
 void Indigo::MainWindow::on_close()
 {
-	LOG_DEBUG(("Indigo::MainWindow::on_close()"));
+	m_on_close.invoke(*this);
 }
