@@ -38,7 +38,7 @@ indigo_SOURCES = \
 	../lib/Font.cpp \
 	StaticResources.cpp \
 	Render.cpp \
-	LogicThread.cpp \
+	App.cpp \
 	Main.cpp \
 	MainWindow.cpp \
 	Splash.cpp

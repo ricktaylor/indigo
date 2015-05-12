@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2013 Rick Taylor
+// Copyright (C) 2014 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,32 +19,27 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Render.h"
+#ifndef INDIGO_APP_H_INCLUDED
+#define INDIGO_APP_H_INCLUDED
+
 #include "MainWindow.h"
 
-bool showSplash();
-
-static void fire_close(const Indigo::MainWindow& wnd)
+namespace Indigo
 {
-	LOG_DEBUG(("Quit"));
-}
-
-bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
-{
-	bool ret = false;
-
-	//if (!showSplash())
-	//	return false;
-
-	Indigo::MainWindow wnd;
-	if (wnd.create())
+	class Application
 	{
-		wnd.on_close(OOBase::Delegate1<const Indigo::MainWindow&,OOBase::ThreadLocalAllocator>(&fire_close));
+	public:
+		static bool run(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
-		ret = Indigo::handle_events();
+		void on_main_wnd_close();
 
-		OOBase::Logger::log(OOBase::Logger::Information,"Quit");
-	}
+	private:
+		MainWindow m_main_wnd;
 
-	return ret;
+		Application();
+
+		bool start(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
+	};
 }
+
+#endif // INDIGO_APP_H_INCLUDED

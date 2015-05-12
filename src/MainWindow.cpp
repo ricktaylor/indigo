@@ -20,6 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "MainWindow.h"
+#include "App.h"
 #include "Render.h"
 #include "../lib/BufferObject.h"
 #include "../lib/VertexArrayObject.h"
@@ -115,7 +116,7 @@ void Indigo::detail::MainWindowImpl::on_draw(const OOGL::Window& win, OOGL::Stat
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-Indigo::MainWindow::MainWindow()
+Indigo::MainWindow::MainWindow(Application* app) : m_app(app)
 {
 }
 
@@ -160,14 +161,7 @@ bool Indigo::MainWindow::do_destroy()
 	return true;
 }
 
-OOBase::Delegate1<const Indigo::MainWindow&,OOBase::ThreadLocalAllocator> Indigo::MainWindow::on_close(const OOBase::Delegate1<const MainWindow&,OOBase::ThreadLocalAllocator>& delegate)
-{
-	OOBase::Delegate1<const MainWindow&,OOBase::ThreadLocalAllocator> prev = m_on_close;
-	m_on_close = delegate;
-	return prev;
-}
-
 void Indigo::MainWindow::on_close()
 {
-	m_on_close.invoke(*this);
+	m_app->on_main_wnd_close();
 }

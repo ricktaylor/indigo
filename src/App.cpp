@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2014 Rick Taylor
+// Copyright (C) 2013 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,40 +19,37 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_MAINWINDOW_H_INCLUDED
-#define INDIGO_MAINWINDOW_H_INCLUDED
+#include "App.h"
+#include "Render.h"
 
-#include "Common.h"
+bool showSplash();
 
-namespace Indigo
+Indigo::Application::Application() : m_main_wnd(this)
 {
-	namespace detail
-	{
-		class MainWindowImpl;
-	}
-
-	class Application;
-
-	class MainWindow : public OOBase::NonCopyable
-	{
-		friend class detail::MainWindowImpl;
-
-	public:
-		MainWindow(Application* app);
-		~MainWindow();
-
-		bool create();
-		void destroy();
-
-
-	private:
-		Application* m_app;
-		OOBase::SharedPtr<detail::MainWindowImpl> m_wnd;
-
-		bool do_create();
-		bool do_destroy();
-		void on_close();
-	};
 }
 
-#endif // INDIGO_MAINWINDOW_H_INCLUDED
+bool Indigo::Application::start(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
+{
+	//if (!showSplash())
+	//	return false;
+
+	return m_main_wnd.create();
+}
+
+bool Indigo::Application::run(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
+{
+	Application app;
+	if (!app.start(config_args))
+		return false;
+
+	if (!Indigo::handle_events())
+		return false;
+
+	OOBase::Logger::log(OOBase::Logger::Information,"Quit");
+	return true;
+}
+
+void Indigo::Application::on_main_wnd_close()
+{
+	m_main_wnd.destroy();
+}

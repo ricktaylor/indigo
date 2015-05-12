@@ -19,7 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
+#include "App.h"
 #include "Render.h"
 
 #include <stdlib.h>
@@ -37,9 +37,6 @@
 #include <OOBase/Morton.h>
 
 static bool s_is_debug = false;
-
-// Forward declare the thread functions
-bool logic_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
 
 bool Indigo::is_debug()
 {
@@ -248,5 +245,5 @@ int main(int argc, const char* argv[])
 		return EXIT_FAILURE;
 
 	// Start our two main threads
-	return Indigo::start_render_thread(&logic_thread,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return Indigo::start_render_thread(&Indigo::Application::run,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

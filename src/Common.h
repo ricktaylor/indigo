@@ -38,6 +38,7 @@
 #include <OOBase/CmdArgs.h>
 #include <OOBase/ConfigFile.h>
 #include <OOBase/Logger.h>
+#include <OOBase/Delegate.h>
 
 #if defined(_MSC_VER)
 	//#include "Config_msvc.h"
