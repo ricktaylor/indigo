@@ -116,21 +116,21 @@ void OOGL::Window::iconify(bool minimize)
 void OOGL::Window::cb_on_move(GLFWwindow* window, int left, int top)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
-	if (pThis)
+	if (pThis && pThis->m_on_moved)
 		pThis->m_on_moved.invoke(*pThis,glm::ivec2(left,top));
 }
 
 void OOGL::Window::cb_on_size(GLFWwindow* window, int width, int height)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
-	if (pThis)
+	if (pThis && pThis->m_on_sized)
 		pThis->m_on_sized.invoke(*pThis,glm::ivec2(width,height));
 }
 
 void OOGL::Window::cb_on_close(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
-	if (pThis)
+	if (pThis && pThis->m_on_close)
 		pThis->m_on_close.invoke(*pThis);
 }
 
@@ -154,14 +154,14 @@ void OOGL::Window::cb_on_refresh(GLFWwindow* window)
 void OOGL::Window::cb_on_character(GLFWwindow* window, unsigned int codepoint, int mods)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
-	if (pThis)
+	if (pThis && pThis->m_on_character)
 		pThis->m_on_character.invoke(*pThis,codepoint,mods);
 }
 
 void OOGL::Window::cb_on_key(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
-	if (pThis)
+	if (pThis && pThis->m_on_keystroke)
 	{
 		key_stroke_t keystroke = {key, scancode, action, mods};
 		pThis->m_on_keystroke.invoke(*pThis,keystroke);
@@ -243,7 +243,7 @@ glm::vec2 OOGL::Window::dots_per_mm() const
 
 bool OOGL::Window::draw()
 {
-	if (!m_glfw_window || !is_visible() || is_iconified())
+	if (!m_glfw_window || !is_visible() || is_iconified() || !m_on_draw)
 		return false;
 
 	// Make this context current

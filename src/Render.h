@@ -63,7 +63,7 @@ namespace Indigo
 				OOBase::Delegate0<void,OOBase::CrtAllocator> delegate;
 				if (!stream.read(delegate))
 					LOG_ERROR(("Failed to unmarshal event parameters: %s",OOBase::system_error_text(stream.last_error())));
-				else
+				else if (delegate)
 					delegate.invoke();
 			}
 		};
