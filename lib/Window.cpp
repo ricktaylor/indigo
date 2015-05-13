@@ -260,44 +260,44 @@ void OOGL::Window::swap()
 		glfwSwapBuffers(m_glfw_window);
 }
 
-OOBase::Delegate1<const OOGL::Window&,OOBase::ThreadLocalAllocator> OOGL::Window::on_close(const OOBase::Delegate1<const Window&,OOBase::ThreadLocalAllocator>& delegate)
+OOBase::Delegate1<void,const OOGL::Window&,OOBase::ThreadLocalAllocator> OOGL::Window::on_close(const OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator>& delegate)
 {
-	OOBase::Delegate1<const Window&,OOBase::ThreadLocalAllocator> prev = m_on_close;
+	OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> prev = m_on_close;
 	m_on_close = delegate;
 	return prev;
 }
 
-OOBase::Delegate2<const OOGL::Window&,OOGL::State&,OOBase::ThreadLocalAllocator> OOGL::Window::on_draw(const OOBase::Delegate2<const Window&,State&,OOBase::ThreadLocalAllocator>& delegate)
+OOBase::Delegate2<void,const OOGL::Window&,OOGL::State&,OOBase::ThreadLocalAllocator> OOGL::Window::on_draw(const OOBase::Delegate2<void,const Window&,State&,OOBase::ThreadLocalAllocator>& delegate)
 {
-	const OOBase::Delegate2<const Window&,State&,OOBase::ThreadLocalAllocator> prev = m_on_draw;
+	const OOBase::Delegate2<void,const Window&,State&,OOBase::ThreadLocalAllocator> prev = m_on_draw;
 	m_on_draw = delegate;
 	return prev;
 }
 
-OOBase::Delegate2<const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_sized(const OOBase::Delegate2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>& delegate)
+OOBase::Delegate2<void,const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_sized(const OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>& delegate)
 {
-	OOBase::Delegate2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> prev = m_on_sized;
+	OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> prev = m_on_sized;
 	m_on_sized = delegate;
 	return prev;
 }
 
-OOBase::Delegate2<const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_moved(const OOBase::Delegate2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>& delegate)
+OOBase::Delegate2<void,const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_moved(const OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>& delegate)
 {
-	OOBase::Delegate2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> prev = m_on_moved;
+	OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> prev = m_on_moved;
 	m_on_moved = delegate;
 	return prev;
 }
 
-OOBase::Delegate3<const OOGL::Window&,unsigned int,int,OOBase::ThreadLocalAllocator> OOGL::Window::on_character(const OOBase::Delegate3<const Window&,unsigned int,int,OOBase::ThreadLocalAllocator>& delegate)
+OOBase::Delegate3<void,const OOGL::Window&,unsigned int,int,OOBase::ThreadLocalAllocator> OOGL::Window::on_character(const OOBase::Delegate3<void,const Window&,unsigned int,int,OOBase::ThreadLocalAllocator>& delegate)
 {
-	OOBase::Delegate3<const Window&,unsigned int,int,OOBase::ThreadLocalAllocator> prev = m_on_character;
+	OOBase::Delegate3<void,const Window&,unsigned int,int,OOBase::ThreadLocalAllocator> prev = m_on_character;
 	m_on_character = delegate;
 	return prev;
 }
 
-OOBase::Delegate2<const OOGL::Window&,const OOGL::Window::key_stroke_t&,OOBase::ThreadLocalAllocator> OOGL::Window::on_keystroke(const OOBase::Delegate2<const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator>& delegate)
+OOBase::Delegate2<void,const OOGL::Window&,const OOGL::Window::key_stroke_t&,OOBase::ThreadLocalAllocator> OOGL::Window::on_keystroke(const OOBase::Delegate2<void,const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator>& delegate)
 {
-	OOBase::Delegate2<const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator> prev = m_on_keystroke;
+	OOBase::Delegate2<void,const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator> prev = m_on_keystroke;
 	m_on_keystroke = delegate;
 	return prev;
 }

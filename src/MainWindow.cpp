@@ -73,10 +73,10 @@ bool Indigo::detail::MainWindowImpl::create()
 	if (!m_wnd || !m_wnd->is_valid())
 		return false;
 
-	m_wnd->on_close(OOBase::Delegate1<const OOGL::Window&,OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_close));
-	m_wnd->on_moved(OOBase::Delegate2<const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_move));
-	m_wnd->on_sized(OOBase::Delegate2<const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_size));
-	m_wnd->on_draw(OOBase::Delegate2<const OOGL::Window&,OOGL::State&,OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_draw));
+	m_wnd->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_close));
+	m_wnd->on_moved(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_move));
+	m_wnd->on_sized(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_size));
+	m_wnd->on_draw(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_draw));
 
 	if (Indigo::is_debug())
 		OOGL::StateFns::get_current()->enable_logging();
@@ -94,7 +94,7 @@ bool Indigo::detail::MainWindowImpl::create()
 
 void Indigo::detail::MainWindowImpl::on_close(const OOGL::Window& win)
 {
-	raise_event(OOBase::Delegate0<OOBase::CrtAllocator>(m_parent,&MainWindow::on_close));
+	raise_event(OOBase::make_delegate(m_parent,&MainWindow::on_close));
 }
 
 void Indigo::detail::MainWindowImpl::on_move(const OOGL::Window& win, const glm::ivec2& pos)

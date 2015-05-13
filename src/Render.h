@@ -54,13 +54,13 @@ namespace Indigo
 
 	bool raise_event(void (*fn)(OOBase::CDRStream&), OOBase::CDRStream& stream);
 
-	inline bool raise_event(const OOBase::Delegate0<OOBase::CrtAllocator>& delegate)
+	inline bool raise_event(const OOBase::Delegate0<void,OOBase::CrtAllocator>& delegate)
 	{
 		struct thunk
 		{
 			static void event(OOBase::CDRStream& stream)
 			{
-				OOBase::Delegate0<OOBase::CrtAllocator> delegate;
+				OOBase::Delegate0<void,OOBase::CrtAllocator> delegate;
 				if (!stream.read(delegate))
 					LOG_ERROR(("Failed to unmarshal event parameters: %s",OOBase::system_error_text(stream.last_error())));
 				else
@@ -80,13 +80,13 @@ namespace Indigo
 	}
 
 	template <typename P1>
-	bool raise_event(const OOBase::Delegate1<P1>& delegate, P1 p1)
+	bool raise_event(const OOBase::Delegate1<void,P1,OOBase::CrtAllocator>& delegate, P1 p1)
 	{
 		struct thunk
 		{
 			static void member_event(OOBase::CDRStream& stream)
 			{
-				OOBase::Delegate1<P1> delegate;
+				OOBase::Delegate1<void,P1,OOBase::CrtAllocator> delegate;
 				P1 p1;
 				if (!stream.read(delegate) || !stream.read(p1))
 					LOG_ERROR(("Failed to unmarshal event parameters: %s",OOBase::system_error_text(stream.last_error())));
@@ -107,13 +107,13 @@ namespace Indigo
 	}
 
 	template <typename P1, typename P2>
-	bool raise_event(const OOBase::Delegate2<P1,P2>& delegate, P1 p1, P2 p2)
+	bool raise_event(const OOBase::Delegate2<void,P1,P2,OOBase::CrtAllocator>& delegate, P1 p1, P2 p2)
 	{
 		struct thunk
 		{
 			static void member_event(OOBase::CDRStream& stream)
 			{
-				OOBase::Delegate2<P1,P2> delegate;
+				OOBase::Delegate2<void,P1,P2,OOBase::CrtAllocator> delegate;
 				P1 p1; P2 p2;
 				if (!stream.read(delegate) || !stream.read(p1) || !stream.read(p2))
 					LOG_ERROR(("Failed to unmarshal event parameters: %s",OOBase::system_error_text(stream.last_error())));

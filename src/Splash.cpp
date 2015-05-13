@@ -256,12 +256,12 @@ bool Splash::create(void* p)
 	if (Indigo::is_debug())
 		OOGL::StateFns::get_current()->enable_logging();
 
-	pThis->m_wnd->on_close(OOBase::Delegate1<const OOGL::Window&,OOBase::ThreadLocalAllocator>(pThis,&Splash::on_close));
-	pThis->m_wnd->on_moved(OOBase::Delegate2<const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>(pThis,&Splash::on_move));
-	pThis->m_wnd->on_sized(OOBase::Delegate2<const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>(pThis,&Splash::on_size));
-	pThis->m_wnd->on_draw(OOBase::Delegate2<const OOGL::Window&,OOGL::State&,OOBase::ThreadLocalAllocator>(pThis,&Splash::on_draw));
-	pThis->m_wnd->on_character(OOBase::Delegate3<const OOGL::Window&,unsigned int,int,OOBase::ThreadLocalAllocator>(pThis,&Splash::on_character));
-	pThis->m_wnd->on_keystroke(OOBase::Delegate2<const OOGL::Window&,const OOGL::Window::key_stroke_t&,OOBase::ThreadLocalAllocator>(pThis,&Splash::on_keystroke));
+	pThis->m_wnd->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(pThis,&Splash::on_close));
+	pThis->m_wnd->on_moved(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(pThis,&Splash::on_move));
+	pThis->m_wnd->on_sized(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(pThis,&Splash::on_size));
+	pThis->m_wnd->on_draw(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(pThis,&Splash::on_draw));
+	pThis->m_wnd->on_character(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(pThis,&Splash::on_character));
+	pThis->m_wnd->on_keystroke(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(pThis,&Splash::on_keystroke));
 
 	pThis->m_tri.setup();
 
@@ -373,7 +373,7 @@ void Splash::on_close(const OOGL::Window& win)
 
 bool showSplash()
 {
-	OOBase::SharedPtr<Splash> ptrSplash = OOBase::allocate_shared<Splash,OOBase::CrtAllocator>();
+	OOBase::SharedPtr<Splash> ptrSplash = OOBase::allocate_shared<Splash>();
 	if (!ptrSplash)
 		return false;
 

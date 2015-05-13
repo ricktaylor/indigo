@@ -63,11 +63,11 @@ namespace OOGL
 		bool draw();
 		void swap();
 
-		OOBase::Delegate1<const Window&,OOBase::ThreadLocalAllocator> on_close(const OOBase::Delegate1<const Window&,OOBase::ThreadLocalAllocator>& delegate);
-		OOBase::Delegate2<const Window&,State&,OOBase::ThreadLocalAllocator> on_draw(const OOBase::Delegate2<const Window&,State&,OOBase::ThreadLocalAllocator>& delegate);
-		OOBase::Delegate2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> on_sized(const OOBase::Delegate2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>& delegate);
-		OOBase::Delegate2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> on_moved(const OOBase::Delegate2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>& delegate);
-		OOBase::Delegate3<const Window&,unsigned int,int,OOBase::ThreadLocalAllocator> on_character(const OOBase::Delegate3<const Window&,unsigned int,int,OOBase::ThreadLocalAllocator>& delegate);
+		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> on_close(const OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator>& delegate);
+		OOBase::Delegate2<void,const Window&,State&,OOBase::ThreadLocalAllocator> on_draw(const OOBase::Delegate2<void,const Window&,State&,OOBase::ThreadLocalAllocator>& delegate);
+		OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> on_sized(const OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>& delegate);
+		OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> on_moved(const OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>& delegate);
+		OOBase::Delegate3<void,const Window&,unsigned int,int,OOBase::ThreadLocalAllocator> on_character(const OOBase::Delegate3<void,const Window&,unsigned int,int,OOBase::ThreadLocalAllocator>& delegate);
 
 		struct key_stroke_t
 		{
@@ -76,7 +76,7 @@ namespace OOGL
 			int action;
 			int mods;
 		};
-		OOBase::Delegate2<const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator> on_keystroke(const OOBase::Delegate2<const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator>& delegate);
+		OOBase::Delegate2<void,const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator> on_keystroke(const OOBase::Delegate2<void,const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator>& delegate);
 
 	private:
 		GLFWwindow* m_glfw_window;
@@ -85,12 +85,12 @@ namespace OOGL
 		OOBase::SharedPtr<State>       m_state;
 		OOBase::SharedPtr<StateFns>    m_state_fns;
 
-		OOBase::Delegate1<const Window&,OOBase::ThreadLocalAllocator> m_on_close;
-		OOBase::Delegate2<const Window&,State&,OOBase::ThreadLocalAllocator> m_on_draw;
-		OOBase::Delegate2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> m_on_sized;
-		OOBase::Delegate2<const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> m_on_moved;
-		OOBase::Delegate3<const Window&,unsigned int,int,OOBase::ThreadLocalAllocator> m_on_character;
-		OOBase::Delegate2<const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator> m_on_keystroke;
+		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> m_on_close;
+		OOBase::Delegate2<void,const Window&,State&,OOBase::ThreadLocalAllocator> m_on_draw;
+		OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> m_on_sized;
+		OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> m_on_moved;
+		OOBase::Delegate3<void,const Window&,unsigned int,int,OOBase::ThreadLocalAllocator> m_on_character;
+		OOBase::Delegate2<void,const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator> m_on_keystroke;
 
 		GLFWmonitor* monitor() const;
 
