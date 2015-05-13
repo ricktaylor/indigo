@@ -297,7 +297,7 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 	if (!resource.exists(name))
 		LOG_ERROR_RETURN(("Failed to find resource %s",name),false);
 
-	const unsigned char* data = resource.load(name);
+	const unsigned char* data = static_cast<const unsigned char*>(resource.load(name));
 	size_t len = resource.size(name);
 
 	// BMF\0x3
@@ -358,7 +358,7 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 					LOG_ERROR(("Missing font resource %s",reinterpret_cast<const char*>(data)));
 				else
 				{
-					const unsigned char* page_data = resource.load(reinterpret_cast<const char*>(data));
+					const unsigned char* page_data = static_cast<const unsigned char*>(resource.load(reinterpret_cast<const char*>(data)));
 					size_t page_len = resource.size(reinterpret_cast<const char*>(data));
 
 					OOGL::Image img;
@@ -381,7 +381,7 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 						LOG_ERROR(("Missing font resource %s",reinterpret_cast<const char*>(data)));
 					else
 					{
-						const unsigned char* page_data = resource.load(reinterpret_cast<const char*>(data));
+						const unsigned char* page_data = static_cast<const unsigned char*>(resource.load(reinterpret_cast<const char*>(data)));
 						size_t page_len = resource.size(reinterpret_cast<const char*>(data));
 
 						OOGL::Image img;

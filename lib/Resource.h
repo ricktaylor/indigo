@@ -32,13 +32,13 @@ namespace OOGL
 		virtual ~ResourceBundle()
 		{}
 
-		const unsigned char* load(const char* name, size_t length = size_t(-1))
+		const void* load(const char* name, size_t length = size_t(-1))
 		{
 			return load(name,0,length);
 		}
 
-		virtual const unsigned char* load(const char* name, size_t start, size_t length = size_t(-1)) = 0;
-		virtual size_t size(const char* name) = 0;
+		virtual const void* load(const char* name, size_t start, size_t length = size_t(-1)) = 0;
+		virtual OOBase::uint64_t size(const char* name) = 0;
 		virtual bool exists(const char* name) = 0;
 	};
 }
