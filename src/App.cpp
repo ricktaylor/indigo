@@ -21,6 +21,7 @@
 
 #include "App.h"
 #include "Render.h"
+#include "ZipResource.h"
 
 bool showSplash();
 
@@ -33,7 +34,19 @@ bool Indigo::Application::start(const OOBase::Table<OOBase::String,OOBase::Strin
 	//if (!showSplash())
 	//	return false;
 
-	return m_main_wnd.create();
+	if (!m_main_wnd.create())
+		return false;
+
+	OOBase::String strZip;
+	if (!config_args.find("$1",strZip))
+		LOG_ERROR_RETURN(("No zip file"),false);
+
+	ZipResource zip;
+	int err = zip.open(strZip.c_str());
+	if (err)
+		LOG_ERROR_RETURN(("Failed to open %s: %s",strZip.c_str(),OOBase::system_error_text(err)),false);
+
+	return true;
 }
 
 bool Indigo::Application::run(const OOBase::Table<OOBase::String,OOBase::String>& config_args)

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2013 Rick Taylor
+// Copyright (C) 2015 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,40 +19,41 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_COMMON_H_INCLUDED
-#define INDIGO_COMMON_H_INCLUDED
+#include "Common.h"
 
-// Mingw can include pid_t etc, which we don't want
-#if defined(__MINGW32__)
-#define _NO_OLDNAMES
-#endif
+#include "../lib/Resource.h"
 
-//////////////////////////////////////////////
-
-#include <OOBase/CDRStream.h>
-#include <OOBase/Condition.h>
-#include <OOBase/Queue.h>
-#include <OOBase/Thread.h>
-#include <OOBase/Environment.h>
-#include <OOBase/Posix.h>
-#include <OOBase/CmdArgs.h>
-#include <OOBase/ConfigFile.h>
-#include <OOBase/Logger.h>
-#include <OOBase/Delegate.h>
-#include <OOBase/File.h>
-
-#if defined(_MSC_VER)
-	//#include "Config_msvc.h"
-#elif defined(HAVE_CONFIG_H)
-	// Autoconf
-	#include <Config.h>
-#else
-#error Need some kind of configure scipt!
-#endif
+#ifndef INDIGO_ZIPRESOURCE_H_INCLUDED
+#define INDIGO_ZIPRESOURCE_H_INCLUDED
 
 namespace Indigo
 {
-	bool is_debug();
+	namespace detail
+	{
+		class ZipFile;
+	}
+
+	class ZipResource : public OOGL::ResourceBundle
+	{
+	public:
+		ZipResource();
+
+		int open(const char* filename);
+		bool is_open() const;
+
+		ZipResource sub_dir(const char* prefix);
+
+		const void* load(const char* name, size_t start, size_t length = size_t(-1));
+		OOBase::uint64_t size(const char* name);
+		bool exists(const char* name);
+
+	private:
+		OOBase::SharedPtr<detail::ZipFile> m_zip;
+		OOBase::String m_prefix;
+
+		ZipResource(const OOBase::SharedPtr<detail::ZipFile>& zip, const OOBase::String& prefix);
+	};
 }
 
-#endif // INDIGO_COMMON_H_INCLUDED
+
+#endif // INDIGO_ZIPRESOURCE_H_INCLUDED

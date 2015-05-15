@@ -37,6 +37,7 @@ indigo_SOURCES = \
 	../lib/Image.cpp \
 	../lib/Font.cpp \
 	StaticResources.cpp \
+	ZipResource.cpp \
 	Render.cpp \
 	App.cpp \
 	Main.cpp \
