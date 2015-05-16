@@ -32,7 +32,7 @@
 
 namespace
 {
-	static OOBase::uint32_t read_uint32(const unsigned char*& data)
+	OOBase::uint32_t read_uint32(const unsigned char*& data)
 	{
 		OOBase::uint32_t r = 0;
 		memcpy(&r,data,4);
@@ -44,7 +44,7 @@ namespace
 		return r;
 	}
 
-	static OOBase::uint16_t read_uint16(const unsigned char*& data)
+	OOBase::uint16_t read_uint16(const unsigned char*& data)
 	{
 		OOBase::uint16_t r = 0;
 		memcpy(&r,data,2);
@@ -56,7 +56,7 @@ namespace
 		return r;
 	}
 
-	static OOBase::int16_t read_int16(const unsigned char*& data)
+	OOBase::int16_t read_int16(const unsigned char*& data)
 	{
 		return static_cast<OOBase::int16_t>(read_uint16(data));
 	}

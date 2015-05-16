@@ -21,6 +21,33 @@
 
 #include "ZipResource.h"
 
+namespace
+{
+	template <typename T>
+	OOBase::uint32_t read_uint32(const T& buf, ptrdiff_t offset)
+	{
+		OOBase::uint32_t r = 0;
+		memcpy(&r,&buf[offset],4);
+		
+#if (OOBASE_BYTE_ORDER == OOBASE_BIG_ENDIAN)
+		OOBase::byte_swap(r);
+#endif
+		return r;
+	}
+
+	template <typename T>
+	OOBase::uint16_t read_uint16(const T& buf, ptrdiff_t offset)
+	{
+		OOBase::uint16_t r = 0;
+		memcpy(&r,&buf[offset],2);
+		
+#if (OOBASE_BYTE_ORDER == OOBASE_BIG_ENDIAN)
+		OOBase::byte_swap(r);
+#endif
+		return r;
+	}
+}
+
 namespace Indigo
 {
 	namespace detail
@@ -35,12 +62,16 @@ namespace Indigo
 
 		private:
 			OOBase::File m_file;
+			OOBase::Table<OOBase::String,OOBase::uint32_t> m_mapFiles;
 		};
 	}
 }
 
 int Indigo::detail::ZipFile::open(const char* filename)
 {
+	static const OOBase::uint8_t END_OF_CDR[4] = { 0x50, 0x4b, 0x05, 0x06 };
+	static const OOBase::uint8_t CDR_HEADER[4] = { 0x50, 0x4b, 0x01, 0x02 };
+
 	int err = m_file.open(filename,false);
 	if (err)
 		return err;
@@ -49,33 +80,56 @@ int Indigo::detail::ZipFile::open(const char* filename)
 	if (len == OOBase::uint64_t(-1))
 		return OOBase::system_error();
 
-	// Find end of central directory record
+	// Step backwards looking for end of central directory record
+	OOBase::uint32_t cdr_size = 0;
 
-	OOBase::uint64_t eof_cdr = OOBase::uint64_t(-1);
-
-	// Step backwards looking for signatures...
 	OOBase::ScopedArrayPtr<OOBase::uint8_t,OOBase::ThreadLocalAllocator,256> buf;
-	for (OOBase::int64_t offset = len - 256;eof_cdr == OOBase::uint64_t(-1);)
+	for (OOBase::int64_t offset = len - 256;!cdr_size;)
 	{
 		if (offset < 0)
 			offset = 0;
 
-		OOBase::uint64_t p = m_file.seek(0,OOBase::File::seek_begin);
+		OOBase::uint64_t p = m_file.seek(offset,OOBase::File::seek_begin);
 		if (p == OOBase::uint64_t(-1))
 			return OOBase::system_error();
 
-		size_t len = m_file.read(buf.get(),256);
-		if (len == size_t(-1))
+		size_t chunk_len = m_file.read(buf.get(),256);
+		if (chunk_len == size_t(-1))
 			return OOBase::system_error();
 
 		// Scan forwards looking for signatures
-		for (OOBase::uint8_t* c = buf.get(); c < buf.get() + len - 4; ++c)
+		for (OOBase::uint8_t* c = buf.get(); c < buf.get() + chunk_len - 4; ++c)
 		{
-			static const OOBase::uint8_t END_OF_CDR[4] = { 0x50, 0x4b, 0x05, 0x06 };
 			if (*c == END_OF_CDR[0] && memcmp(c,END_OF_CDR,4) == 0)
 			{
-				eof_cdr = p + (c - buf.get());
-				break;
+				OOBase::uint64_t eof_cdr = p + (c - buf.get());
+				if (len - eof_cdr >= 22 && m_file.seek(eof_cdr,OOBase::File::seek_begin) == eof_cdr)
+				{
+					m_file.read(buf.get(),22);
+
+					OOBase::uint16_t disk_no = read_uint16(buf,4);
+					OOBase::uint16_t cdr_disk_no = read_uint16(buf,6);
+					OOBase::uint16_t cdr_entries_disk = read_uint16(buf,8);
+					OOBase::uint16_t cdr_entries = read_uint16(buf,10);
+					OOBase::uint32_t cdr_size_i = read_uint32(buf,12);
+					OOBase::uint32_t cdr_offset = read_uint32(buf,16);
+					OOBase::uint16_t comments = read_uint16(buf,20);
+					
+					if (cdr_size_i >= 46 && (eof_cdr + 22 + comments == len) && 
+						(disk_no == 0 && cdr_disk_no == 0 && cdr_entries_disk == cdr_entries) &&
+						(cdr_offset + cdr_size_i <= eof_cdr))
+					{
+						if (m_file.seek(cdr_offset,OOBase::File::seek_begin) == cdr_offset)
+						{
+							m_file.read(buf.get(),46);
+							if (memcmp(buf.get(),CDR_HEADER,4) == 0)
+							{
+								cdr_size = cdr_size_i;
+								break;
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -85,14 +139,54 @@ int Indigo::detail::ZipFile::open(const char* filename)
 			break;
 	}
 
-	if (eof_cdr == OOBase::uint64_t(-1))
+	if (!cdr_size)
 		LOG_ERROR_RETURN(("Failed to find end of central dictionary in zip %s",filename),EINVAL);
 
-	m_file.seek(eof_cdr,OOBase::File::seek_begin);
-	m_file.read(buf.get(),20);
+	// Now loop reading file entries
+	for (;;)
+	{
+		OOBase::uint16_t compression = read_uint16(buf,10);
+		OOBase::uint16_t filename_len = read_uint16(buf,28);
+		OOBase::uint16_t extra_len = read_uint16(buf,30);
+		OOBase::uint16_t comments = read_uint16(buf,32);
+		OOBase::uint16_t disk_no = read_uint16(buf,34);
+		OOBase::uint32_t offset = read_uint32(buf,42);
 
-	void* TODO; // TODO: Now check the central dictionary
+		if (disk_no != 0)
+			LOG_ERROR_RETURN(("Multi-disk zip file not supported: %s",filename),EINVAL);
 
+		if (filename_len == 0)
+			LOG_WARNING(("Ignoring empty filename in %s",filename));
+		else
+		{
+			if (!buf.resize(filename_len))
+				return ERROR_OUTOFMEMORY;
+
+			if (m_file.read(buf.get(),filename_len) != filename_len)
+				return OOBase::system_error();
+
+			OOBase::String strFilename;
+			if (!strFilename.assign(reinterpret_cast<char*>(buf.get()),filename_len))
+				return ERROR_OUTOFMEMORY;
+
+			if (m_mapFiles.insert(strFilename,offset) == m_mapFiles.end())
+				return ERROR_OUTOFMEMORY;
+		}
+
+		if (cdr_size <= OOBase::uint32_t(filename_len) + extra_len + comments + 46)
+			break;
+
+		cdr_size -= 46 + filename_len + extra_len + comments;
+		if (m_file.seek(extra_len + comments,OOBase::File::seek_current) == OOBase::uint64_t(-1))
+			return OOBase::system_error();
+
+		if (m_file.read(buf.get(),46) != 46)
+			LOG_ERROR_RETURN(("Failed to read central dictionary header in zip %s",filename),EINVAL);
+
+		if (memcmp(buf.get(),CDR_HEADER,4) != 0)
+			LOG_ERROR_RETURN(("Invalid central dictionary header in zip %s",filename),EINVAL);
+	}
+	
 	return 0;
 }
 
