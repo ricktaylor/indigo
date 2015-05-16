@@ -71,7 +71,7 @@ int Indigo::detail::ZipFile::open(const char* filename)
 		// Scan forwards looking for signatures
 		for (OOBase::uint8_t* c = buf.get(); c < buf.get() + len - 4; ++c)
 		{
-			static const uint8_t END_OF_CDR[4] = { 0x50, 0x4b, 0x05, 0x06 };
+			static const OOBase::uint8_t END_OF_CDR[4] = { 0x50, 0x4b, 0x05, 0x06 };
 			if (*c == END_OF_CDR[0] && memcmp(c,END_OF_CDR,4) == 0)
 			{
 				eof_cdr = p + (c - buf.get());

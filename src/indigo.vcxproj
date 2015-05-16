@@ -32,9 +32,11 @@
     <ClInclude Include="..\lib\VertexArrayObject.h" />
     <ClInclude Include="..\lib\Window.h" />
     <ClInclude Include="..\resources\resource.h" />
+    <ClInclude Include="App.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="Render.h" />
+    <ClInclude Include="ZipResource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\lib\BufferObject.cpp" />
@@ -47,12 +49,13 @@
     <ClCompile Include="..\lib\Texture.cpp" />
     <ClCompile Include="..\lib\VertexArrayObject.cpp" />
     <ClCompile Include="..\lib\Window.cpp" />
-    <ClCompile Include="LogicThread.cpp" />
+    <ClCompile Include="App.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Splash.cpp" />
     <ClCompile Include="StaticResources.cpp" />
+    <ClCompile Include="ZipResource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\3rdparty\glfw\x64\src\glfw.vcxproj">
