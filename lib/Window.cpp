@@ -117,21 +117,36 @@ void OOGL::Window::cb_on_move(GLFWwindow* window, int left, int top)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_moved)
+	{
+		// Make this context current
+		glfwMakeContextCurrent(pThis->m_glfw_window);
+
 		pThis->m_on_moved.invoke(*pThis,glm::ivec2(left,top));
+	}
 }
 
 void OOGL::Window::cb_on_size(GLFWwindow* window, int width, int height)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_sized)
+	{
+		// Make this context current
+		glfwMakeContextCurrent(pThis->m_glfw_window);
+
 		pThis->m_on_sized.invoke(*pThis,glm::ivec2(width,height));
+	}
 }
 
 void OOGL::Window::cb_on_close(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_close)
+	{
+		// Make this context current
+		glfwMakeContextCurrent(pThis->m_glfw_window);
+
 		pThis->m_on_close.invoke(*pThis);
+	}
 }
 
 void OOGL::Window::cb_on_focus(GLFWwindow* window, int focused)
@@ -155,7 +170,12 @@ void OOGL::Window::cb_on_character(GLFWwindow* window, unsigned int codepoint, i
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_character)
+	{
+		// Make this context current
+		glfwMakeContextCurrent(pThis->m_glfw_window);
+
 		pThis->m_on_character.invoke(*pThis,codepoint,mods);
+	}
 }
 
 void OOGL::Window::cb_on_key(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -163,6 +183,9 @@ void OOGL::Window::cb_on_key(GLFWwindow* window, int key, int scancode, int acti
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_keystroke)
 	{
+		// Make this context current
+		glfwMakeContextCurrent(pThis->m_glfw_window);
+
 		key_stroke_t keystroke = {key, scancode, action, mods};
 		pThis->m_on_keystroke.invoke(*pThis,keystroke);
 	}
