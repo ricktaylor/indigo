@@ -55,7 +55,7 @@ namespace Indigo
 		class ZipFile
 		{
 		public:
-			int open(const char* filename);
+			bool open(const char* filename);
 			const void* load(const OOBase::String& prefix, const char* name, size_t start, size_t length = size_t(-1));
 			OOBase::uint64_t size(const OOBase::String& prefix, const char* name);
 			bool exists(const OOBase::String& prefix, const char* name);
@@ -67,18 +67,18 @@ namespace Indigo
 	}
 }
 
-int Indigo::detail::ZipFile::open(const char* filename)
+bool Indigo::detail::ZipFile::open(const char* filename)
 {
 	static const OOBase::uint8_t END_OF_CDR[4] = { 0x50, 0x4b, 0x05, 0x06 };
 	static const OOBase::uint8_t CDR_HEADER[4] = { 0x50, 0x4b, 0x01, 0x02 };
 
 	int err = m_file.open(filename,false);
 	if (err)
-		return err;
+		LOG_ERROR_RETURN(("Failed to open file %s: %s",filename,OOBase::system_error_text(err)),false);
 
 	OOBase::uint64_t len = m_file.length();
 	if (len == OOBase::uint64_t(-1))
-		return OOBase::system_error();
+		LOG_ERROR_RETURN(("Failed to get file length: %s",OOBase::system_error_text()),false);
 
 	// Step backwards looking for end of central directory record
 	OOBase::uint32_t cdr_size = 0;
@@ -91,11 +91,11 @@ int Indigo::detail::ZipFile::open(const char* filename)
 
 		OOBase::uint64_t p = m_file.seek(offset,OOBase::File::seek_begin);
 		if (p == OOBase::uint64_t(-1))
-			return OOBase::system_error();
+			LOG_ERROR_RETURN(("Failed to get seek in file: %s",OOBase::system_error_text()),false);
 
 		size_t chunk_len = m_file.read(buf.get(),256);
 		if (chunk_len == size_t(-1))
-			return OOBase::system_error();
+			LOG_ERROR_RETURN(("Failed to read file: %s",OOBase::system_error_text()),false);
 
 		// Scan forwards looking for signatures
 		for (OOBase::uint8_t* c = buf.get(); c < buf.get() + chunk_len - 4; ++c)
@@ -140,7 +140,7 @@ int Indigo::detail::ZipFile::open(const char* filename)
 	}
 
 	if (!cdr_size)
-		LOG_ERROR_RETURN(("Failed to find end of central dictionary in zip %s",filename),EINVAL);
+		LOG_ERROR_RETURN(("Failed to find end of central dictionary in zip %s",filename),false);
 
 	// Now loop reading file entries
 	for (;;)
@@ -153,24 +153,24 @@ int Indigo::detail::ZipFile::open(const char* filename)
 		OOBase::uint32_t offset = read_uint32(buf,42);
 
 		if (disk_no != 0)
-			LOG_ERROR_RETURN(("Multi-disk zip file not supported: %s",filename),EINVAL);
+			LOG_ERROR_RETURN(("Multi-disk zip file not supported: %s",filename),false);
 
 		if (filename_len == 0)
 			LOG_WARNING(("Ignoring empty filename in %s",filename));
 		else
 		{
 			if (!buf.resize(filename_len))
-				return ERROR_OUTOFMEMORY;
+				LOG_ERROR_RETURN(("Failed to resize buffer: %s",OOBase::system_error_text()),false);
 
 			if (m_file.read(buf.get(),filename_len) != filename_len)
-				return OOBase::system_error();
+				LOG_ERROR_RETURN(("Failed to read file %s: %s",filename,OOBase::system_error_text()),false);
 
 			OOBase::String strFilename;
 			if (!strFilename.assign(reinterpret_cast<char*>(buf.get()),filename_len))
-				return ERROR_OUTOFMEMORY;
+				LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),false);
 
 			if (m_mapFiles.insert(strFilename,offset) == m_mapFiles.end())
-				return ERROR_OUTOFMEMORY;
+				LOG_ERROR_RETURN(("Failed to insert zip entry: %s",OOBase::system_error_text()),false);
 		}
 
 		if (cdr_size <= OOBase::uint32_t(filename_len) + extra_len + comments + 46)
@@ -178,31 +178,43 @@ int Indigo::detail::ZipFile::open(const char* filename)
 
 		cdr_size -= 46 + filename_len + extra_len + comments;
 		if (m_file.seek(extra_len + comments,OOBase::File::seek_current) == OOBase::uint64_t(-1))
-			return OOBase::system_error();
+			LOG_ERROR_RETURN(("Failed to get seek in file: %s",OOBase::system_error_text()),false);
 
 		if (m_file.read(buf.get(),46) != 46)
-			LOG_ERROR_RETURN(("Failed to read central dictionary header in zip %s",filename),EINVAL);
+			LOG_ERROR_RETURN(("Failed to read central dictionary header in zip %s",filename),false);
 
 		if (memcmp(buf.get(),CDR_HEADER,4) != 0)
-			LOG_ERROR_RETURN(("Invalid central dictionary header in zip %s",filename),EINVAL);
+			LOG_ERROR_RETURN(("Invalid central dictionary header in zip %s",filename),false);
 	}
 	
-	return 0;
+	return true;
 }
 
 const void* Indigo::detail::ZipFile::load(const OOBase::String& prefix, const char* name, size_t start, size_t length)
 {
+	OOBase::String filename(prefix);
+	if (!filename.append(name))
+		LOG_ERROR_RETURN(("Cannot append string: %s",OOBase::system_error_text()),NULL);
+
 	return NULL;
 }
 
 OOBase::uint64_t Indigo::detail::ZipFile::size(const OOBase::String& prefix, const char* name)
 {
+	OOBase::String filename(prefix);
+	if (!filename.append(name))
+		LOG_ERROR_RETURN(("Cannot append string: %s",OOBase::system_error_text()),OOBase::uint64_t(-1));
+
 	return 0;
 }
 
 bool Indigo::detail::ZipFile::exists(const OOBase::String& prefix, const char* name)
 {
-	return false;
+	OOBase::String filename(prefix);
+	if (!filename.append(name))
+		LOG_ERROR_RETURN(("Cannot append string: %s",OOBase::system_error_text()),false);
+
+	return m_mapFiles.exists(filename);
 }
 
 Indigo::ZipResource::ZipResource()
@@ -213,17 +225,17 @@ Indigo::ZipResource::ZipResource(const OOBase::SharedPtr<detail::ZipFile>& zip, 
 {
 }
 
-int Indigo::ZipResource::open(const char* filename)
+bool Indigo::ZipResource::open(const char* filename)
 {
 	OOBase::SharedPtr<detail::ZipFile> zip = OOBase::allocate_shared<detail::ZipFile>();
 	if (!zip)
-		return ERROR_OUTOFMEMORY;
+		LOG_ERROR_RETURN(("Faield to allocate: %s",OOBase::system_error_text()),false);
 
-	int err = zip->open(filename);
-	if (!err)
+	bool r = zip->open(filename);
+	if (r)
 		zip.swap(m_zip);
 
-	return err;
+	return r;
 }
 
 bool Indigo::ZipResource::is_open() const
@@ -261,5 +273,5 @@ bool Indigo::ZipResource::exists(const char* name)
 	if (!m_zip)
 		return false;
 
-	return m_zip->exists(m_prefix,name);;
+	return m_zip->exists(m_prefix,name);
 }

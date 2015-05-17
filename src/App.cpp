@@ -42,10 +42,9 @@ bool Indigo::Application::start(const OOBase::Table<OOBase::String,OOBase::Strin
 		LOG_ERROR_RETURN(("No zip file"),false);
 
 	ZipResource zip;
-	int err = zip.open(strZip.c_str());
-	if (err)
-		LOG_ERROR_RETURN(("Failed to open %s: %s",strZip.c_str(),OOBase::system_error_text(err)),false);
-
+	if (!zip.open(strZip.c_str()))
+		return false;
+		
 	return true;
 }
 

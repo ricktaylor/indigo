@@ -38,7 +38,7 @@ namespace Indigo
 	public:
 		ZipResource();
 
-		int open(const char* filename);
+		bool open(const char* filename);
 		bool is_open() const;
 
 		ZipResource sub_dir(const char* prefix);
