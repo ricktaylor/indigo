@@ -25,16 +25,16 @@
 
 bool showSplash();
 
-Indigo::Application::Application() : m_main_wnd(this)
+Indigo::Application::Application()
 {
 }
 
 bool Indigo::Application::start(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
-	//if (!showSplash())
-	//	return false;
+	if (!showSplash())
+		return false;
 
-	if (!m_main_wnd.create())
+	if (!m_main_wnd.create(this))
 		return false;
 
 	OOBase::String strZip;

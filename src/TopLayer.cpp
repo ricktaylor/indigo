@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2013 Rick Taylor
+// Copyright (C) 2015 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,41 +19,35 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_COMMON_H_INCLUDED
-#define INDIGO_COMMON_H_INCLUDED
+#include "MainWindow.h"
 
-// Mingw can include pid_t etc, which we don't want
-#if defined(__MINGW32__)
-#define _NO_OLDNAMES
-#endif
-
-//////////////////////////////////////////////
-
-#include <OOBase/CDRStream.h>
-#include <OOBase/Condition.h>
-#include <OOBase/Queue.h>
-#include <OOBase/Thread.h>
-#include <OOBase/Environment.h>
-#include <OOBase/Posix.h>
-#include <OOBase/CmdArgs.h>
-#include <OOBase/ConfigFile.h>
-#include <OOBase/Logger.h>
-#include <OOBase/Delegate.h>
-#include <OOBase/File.h>
-#include <OOBase/HashTable.h>
-
-#if defined(_MSC_VER)
-	//#include "Config_msvc.h"
-#elif defined(HAVE_CONFIG_H)
-	// Autoconf
-	#include <Config.h>
-#else
-#error Need some kind of configure scipt!
-#endif
-
-namespace Indigo
+Indigo::Render::TopLayer::TopLayer(Indigo::TopLayer* owner) : m_owner(owner)
 {
-	bool is_debug();
 }
 
-#endif // INDIGO_COMMON_H_INCLUDED
+bool Indigo::Render::TopLayer::create(const OOBase::SharedPtr<Render::MainWindow>& wnd)
+{
+	return wnd->add_layer(shared_from_this());
+}
+
+Indigo::TopLayer::TopLayer()
+{
+}
+
+bool Indigo::TopLayer::create(const OOBase::SharedPtr<Render::MainWindow>& wnd)
+{
+	OOBase::SharedPtr<Render::TopLayer> layer = OOBase::allocate_shared<Render::TopLayer,OOBase::ThreadLocalAllocator>(this);
+	if (!layer)
+		LOG_ERROR_RETURN(("Failed to allocate TopLayer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+	if (!layer->create(wnd))
+		return false;
+	
+	layer.swap(m_layer);
+	return true;
+}
+
+void Indigo::TopLayer::destroy()
+{
+	m_layer.reset();
+}

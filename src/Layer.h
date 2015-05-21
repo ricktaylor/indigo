@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2013 Rick Taylor
+// Copyright (C) 2015 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,41 +19,24 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_COMMON_H_INCLUDED
-#define INDIGO_COMMON_H_INCLUDED
+#ifndef INDIGO_LAYER_H_INCLUDED
+#define INDIGO_LAYER_H_INCLUDED
 
-// Mingw can include pid_t etc, which we don't want
-#if defined(__MINGW32__)
-#define _NO_OLDNAMES
-#endif
+#include "Common.h"
 
-//////////////////////////////////////////////
-
-#include <OOBase/CDRStream.h>
-#include <OOBase/Condition.h>
-#include <OOBase/Queue.h>
-#include <OOBase/Thread.h>
-#include <OOBase/Environment.h>
-#include <OOBase/Posix.h>
-#include <OOBase/CmdArgs.h>
-#include <OOBase/ConfigFile.h>
-#include <OOBase/Logger.h>
-#include <OOBase/Delegate.h>
-#include <OOBase/File.h>
-#include <OOBase/HashTable.h>
-
-#if defined(_MSC_VER)
-	//#include "Config_msvc.h"
-#elif defined(HAVE_CONFIG_H)
-	// Autoconf
-	#include <Config.h>
-#else
-#error Need some kind of configure scipt!
-#endif
+#include "../lib/Window.h"
 
 namespace Indigo
 {
-	bool is_debug();
+	namespace Render
+	{
+		class Layer
+		{
+		public:
+			virtual void on_draw(const OOGL::Window& win, OOGL::State& glState) = 0;
+			virtual void on_size(const OOGL::Window& win, const glm::ivec2& sz) {}
+		};
+	}
 }
 
-#endif // INDIGO_COMMON_H_INCLUDED
+#endif // INDIGO_LAYER_H_INCLUDED

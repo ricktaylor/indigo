@@ -32,38 +32,11 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace Indigo
-{
-	namespace detail
-	{
-		class MainWindowImpl
-		{
-		public:
-			MainWindowImpl(Indigo::MainWindow* parent);
-
-			bool create();
-
-		private:
-			Indigo::MainWindow* m_parent;
-
-			OOBase::SharedPtr<OOGL::Window> m_wnd;
-
-			float     m_ratio;
-			glm::vec2 m_dpmm;
-
-			void on_close(const OOGL::Window& win);
-			void on_draw(const OOGL::Window& win, OOGL::State& glState);
-			void on_move(const OOGL::Window& win, const glm::ivec2& pos);
-			void on_size(const OOGL::Window& win, const glm::ivec2& sz);
-		};
-	}
-}
-
-Indigo::detail::MainWindowImpl::MainWindowImpl(Indigo::MainWindow* parent) : m_parent(parent), m_ratio(0)
+Indigo::Render::MainWindow::MainWindow(Indigo::MainWindow* owner) : m_owner(owner), m_ratio(0)
 {
 }
 
-bool Indigo::detail::MainWindowImpl::create()
+bool Indigo::Render::MainWindow::create()
 {
 	unsigned int style = OOGL::Window::eWSresizable | OOGL::Window::eWSdecorated;
 	if (Indigo::is_debug())
@@ -73,15 +46,19 @@ bool Indigo::detail::MainWindowImpl::create()
 	if (!m_wnd || !m_wnd->is_valid())
 		return false;
 
-	m_wnd->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_close));
-	m_wnd->on_moved(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_move));
-	m_wnd->on_sized(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_size));
-	m_wnd->on_draw(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindowImpl::on_draw));
+	m_wnd->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindow::on_close));
+	m_wnd->on_moved(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindow::on_move));
+	m_wnd->on_sized(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindow::on_size));
+	m_wnd->on_draw(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindow::on_draw));
 
 	if (Indigo::is_debug())
 		OOGL::StateFns::get_current()->enable_logging();
 
 	glClearColor(0.f,0.f,0.f,0.f);
+	glEnable(GL_BLEND);
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	if (!Indigo::monitor_window(m_wnd))
 		LOG_ERROR_RETURN(("Failed to monitor window"),false);
@@ -92,31 +69,42 @@ bool Indigo::detail::MainWindowImpl::create()
 	return true;
 }
 
-void Indigo::detail::MainWindowImpl::on_close(const OOGL::Window& win)
+bool Indigo::Render::MainWindow::add_layer(const OOBase::SharedPtr<Layer>& layer)
 {
-	raise_event(OOBase::make_delegate(m_parent,&MainWindow::on_close));
+	return m_layers.push_back(layer) != m_layers.end();
 }
 
-void Indigo::detail::MainWindowImpl::on_move(const OOGL::Window& win, const glm::ivec2& pos)
+void Indigo::Render::MainWindow::on_close(const OOGL::Window& win)
+{
+	raise_event(OOBase::make_delegate(m_owner,&Indigo::MainWindow::on_close));
+}
+
+void Indigo::Render::MainWindow::on_move(const OOGL::Window& win, const glm::ivec2& pos)
 {
 	on_size(win,win.size());
 }
 
-void Indigo::detail::MainWindowImpl::on_size(const OOGL::Window& win, const glm::ivec2& sz)
+void Indigo::Render::MainWindow::on_size(const OOGL::Window& win, const glm::ivec2& sz)
 {
-	m_dpmm = win.dots_per_mm();
-	m_ratio = (sz.x * m_dpmm.x) / (sz.y * m_dpmm.y);
+	glm::vec2 dpmm = win.dots_per_mm();
+	m_ratio = (sz.x * dpmm.x) / (sz.y * dpmm.y);
 	glViewport(0, 0, sz.x, sz.y);
+
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i!=m_layers.end();++i)
+		(*i)->on_size(win,sz);
 }
 
-void Indigo::detail::MainWindowImpl::on_draw(const OOGL::Window& win, OOGL::State& glState)
+void Indigo::Render::MainWindow::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
 	glState.bind(GL_DRAW_FRAMEBUFFER,win.get_default_frame_buffer());
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i!=m_layers.end();++i)
+		(*i)->on_draw(win,glState);
 }
 
-Indigo::MainWindow::MainWindow(Application* app) : m_app(app)
+Indigo::MainWindow::MainWindow() : m_app(NULL)
 {
 }
 
@@ -125,43 +113,52 @@ Indigo::MainWindow::~MainWindow()
 	destroy();
 }
 
-bool Indigo::MainWindow::create()
+bool Indigo::MainWindow::create(Application* app)
 {
 	if (m_wnd)
 		LOG_ERROR_RETURN(("MainWindow already created"),false);
 
-	if (!render_call(&MainWindow::do_create,this))
+	if (!render_call(OOBase::make_delegate(this,&MainWindow::do_create)))
 		return false;
 
+	m_app = app;
 	return (m_wnd != NULL);
 }
 
 void Indigo::MainWindow::destroy()
 {
 	if (m_wnd)
-		render_call(&MainWindow::do_destroy,this);
+		render_call(OOBase::make_delegate(this,&MainWindow::do_destroy));
+
+	m_app = NULL;
 }
 
 bool Indigo::MainWindow::do_create()
 {
-	OOBase::SharedPtr<detail::MainWindowImpl> wnd = OOBase::allocate_shared<detail::MainWindowImpl,OOBase::ThreadLocalAllocator>(this);
+	OOBase::SharedPtr<Render::MainWindow> wnd = OOBase::allocate_shared<Render::MainWindow,OOBase::ThreadLocalAllocator>(this);
 	if (!wnd)
 		LOG_ERROR_RETURN(("Failed to allocate MainWindow: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 	if (!wnd->create())
 		return false;
 
-	m_wnd = wnd;
+	if (!m_top_layer.create(wnd))
+		return false;
+
+	wnd.swap(m_wnd);
 	return true;
 }
 
 bool Indigo::MainWindow::do_destroy()
 {
+	m_top_layer.destroy();
+
 	m_wnd.reset();
 	return true;
 }
 
 void Indigo::MainWindow::on_close()
 {
-	m_app->on_main_wnd_close();
+	if (m_app)
+		m_app->on_main_wnd_close();
 }

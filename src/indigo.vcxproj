@@ -34,8 +34,11 @@
     <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="GUILayer.h" />
+    <ClInclude Include="Layer.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="Render.h" />
+    <ClInclude Include="TopLayer.h" />
     <ClInclude Include="ZipResource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -50,11 +53,13 @@
     <ClCompile Include="..\lib\VertexArrayObject.cpp" />
     <ClCompile Include="..\lib\Window.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="GUILayer.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Splash.cpp" />
     <ClCompile Include="StaticResources.cpp" />
+    <ClCompile Include="TopLayer.cpp" />
     <ClCompile Include="ZipResource.cpp" />
   </ItemGroup>
   <ItemGroup>

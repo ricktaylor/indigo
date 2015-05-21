@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2014 Rick Taylor
+// Copyright (C) 2015 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -22,32 +22,57 @@
 #ifndef INDIGO_MAINWINDOW_H_INCLUDED
 #define INDIGO_MAINWINDOW_H_INCLUDED
 
-#include "Common.h"
+#include "TopLayer.h"
 
 namespace Indigo
 {
-	namespace detail
-	{
-		class MainWindowImpl;
-	}
-
 	class Application;
+	class MainWindow;
+	
+	namespace Render
+	{
+		class MainWindow
+		{
+			friend class Indigo::MainWindow;
+
+		public:
+			MainWindow(Indigo::MainWindow* owner);
+
+			bool add_layer(const OOBase::SharedPtr<Layer>& layer);
+			
+		private:
+			Indigo::MainWindow* m_owner;
+			OOBase::SharedPtr<OOGL::Window> m_wnd;
+			OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
+
+			float m_ratio;
+			
+			bool create();
+			
+			void on_close(const OOGL::Window& win);
+			void on_draw(const OOGL::Window& win, OOGL::State& glState);
+			void on_move(const OOGL::Window& win, const glm::ivec2& pos);
+			void on_size(const OOGL::Window& win, const glm::ivec2& sz);
+		};
+	}
 
 	class MainWindow : public OOBase::NonCopyable
 	{
-		friend class detail::MainWindowImpl;
+		friend class Render::MainWindow;
 
 	public:
-		MainWindow(Application* app);
+		MainWindow();
 		~MainWindow();
 
-		bool create();
+		bool create(Application* app);
 		void destroy();
 
-
+		TopLayer& top_layer();
+		
 	private:
 		Application* m_app;
-		OOBase::SharedPtr<detail::MainWindowImpl> m_wnd;
+		OOBase::SharedPtr<Render::MainWindow> m_wnd;
+		TopLayer m_top_layer;
 
 		bool do_create();
 		bool do_destroy();

@@ -31,24 +31,66 @@ namespace Indigo
 
 	bool render_call(bool (*fn)(void*), void* param);
 
-	template <typename T>
-	bool render_call(bool (T::*fn)(), T* p)
+	template <typename Allocator>
+	bool render_call(const OOBase::Delegate0<bool,Allocator>& delegate)
 	{
 		struct thunk
 		{
-			bool (T::*m_fn)();
-			T* m_this;
+			OOBase::Delegate0<bool,Allocator> const* m_delegate;
 
 			static bool call(void* p)
 			{
 				thunk* t = static_cast<thunk*>(p);
-				return (t->m_this->*t->m_fn)();
+				return t->m_delegate->invoke();
 			}
 		};
 
 		thunk t;
-		t.m_fn = fn;
-		t.m_this = p;
+		t.m_delegate = &delegate;
+		return render_call(&thunk::call,&t);
+	}
+
+	template <typename P1, typename Allocator>
+	bool render_call(const OOBase::Delegate0<bool,Allocator>& delegate, P1 p1)
+	{
+		struct thunk
+		{
+			OOBase::Delegate0<bool,Allocator> const* m_delegate;
+			P1 const* m_p1;
+
+			static bool call(void* p)
+			{
+				thunk* t = static_cast<thunk*>(p);
+				return t->m_delegate->invoke(*t->m_p1);
+			}
+		};
+
+		thunk t;
+		t.m_delegate = &delegate;
+		t.m_p1 = &p1;
+		return render_call(&thunk::call,&t);
+	}
+
+	template <typename P1, typename P2, typename Allocator>
+	bool render_call(const OOBase::Delegate0<bool,Allocator>& delegate, P1 p1, P2 p2)
+	{
+		struct thunk
+		{
+			OOBase::Delegate0<bool,Allocator> const* m_delegate;
+			P1 const* m_p1;
+			P2 const* m_p2;
+
+			static bool call(void* p)
+			{
+				thunk* t = static_cast<thunk*>(p);
+				return t->m_delegate->invoke(*t->m_p1,*t->m_p2);
+			}
+		};
+
+		thunk t;
+		t.m_delegate = &delegate;
+		t.m_p1 = &p1;
+		t.m_p2 = &p2;
 		return render_call(&thunk::call,&t);
 	}
 
