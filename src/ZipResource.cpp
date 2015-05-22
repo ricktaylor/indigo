@@ -145,7 +145,7 @@ bool Indigo::detail::ZipFile::open(const char* filename)
 	// Now loop reading file entries
 	for (;;)
 	{
-		OOBase::uint16_t compression = read_uint16(buf,10);
+		//OOBase::uint16_t compression = read_uint16(buf,10);
 		OOBase::uint16_t filename_len = read_uint16(buf,28);
 		OOBase::uint16_t extra_len = read_uint16(buf,30);
 		OOBase::uint16_t comments = read_uint16(buf,32);
@@ -194,7 +194,7 @@ const void* Indigo::detail::ZipFile::load(const OOBase::String& prefix, const ch
 {
 	OOBase::String filename(prefix);
 	if (!filename.append(name))
-		LOG_ERROR_RETURN(("Cannot append string: %s",OOBase::system_error_text()),NULL);
+		LOG_ERROR_RETURN(("Cannot append string: %s",OOBase::system_error_text()),(const void*)NULL);
 
 	return NULL;
 }

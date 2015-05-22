@@ -37,13 +37,15 @@ bool Indigo::Application::start(const OOBase::Table<OOBase::String,OOBase::Strin
 	if (!m_main_wnd.create(this))
 		return false;
 
-	OOBase::String strZip;
+
+
+	/*OOBase::String strZip;
 	if (!config_args.find("$1",strZip))
 		LOG_ERROR_RETURN(("No zip file"),false);
 
 	ZipResource zip;
 	if (!zip.open(strZip.c_str()))
-		return false;
+		return false;*/
 		
 	return true;
 }
