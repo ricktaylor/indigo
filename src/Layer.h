@@ -28,6 +28,8 @@
 
 namespace Indigo
 {
+	class MainWindow;
+
 	namespace Render
 	{
 		class Layer

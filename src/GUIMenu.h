@@ -19,35 +19,22 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "MainWindow.h"
+#ifndef INDIGO_GUIMENU_H_INCLUDED
+#define INDIGO_GUIMENU_H_INCLUDED
 
-Indigo::Render::TopLayer::TopLayer(Indigo::TopLayer* owner) : m_owner(owner)
+#include "GUILayer.h"
+
+namespace Indigo
 {
+	namespace GUIMenu
+	{
+		struct CreateParams : public GUIWidget::CreateParams
+		{
+
+		};
+
+		OOBase::uint32_t create(GUILayer& layer, const CreateParams& params);
+	};
 }
 
-bool Indigo::Render::TopLayer::create(const OOBase::SharedPtr<Render::MainWindow>& wnd)
-{
-	return wnd->add_layer(shared_from_this());
-}
-
-Indigo::TopLayer::TopLayer()
-{
-}
-
-bool Indigo::TopLayer::create(const OOBase::SharedPtr<Render::MainWindow>& wnd)
-{
-	OOBase::SharedPtr<Render::TopLayer> layer = OOBase::allocate_shared<Render::TopLayer,OOBase::ThreadLocalAllocator>(this);
-	if (!layer)
-		LOG_ERROR_RETURN(("Failed to allocate TopLayer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
-
-	if (!layer->create(wnd))
-		return false;
-	
-	layer.swap(m_layer);
-	return true;
-}
-
-void Indigo::TopLayer::destroy()
-{
-	m_layer.reset();
-}
+#endif // INDIGO_GUIMENU_H_INCLUDED

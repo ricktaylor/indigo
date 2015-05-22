@@ -30,35 +30,78 @@ namespace Indigo
 	{
 		class GUILayer;
 
-		class Widget
+		class GUIWidget
 		{
+			friend class GUILayer;
+
 		public:
-			OOBase::SharedPtr<Widget> parent() const;
+			GUIWidget(const OOBase::SharedPtr<GUIWidget>& parent);
+
+			OOBase::SharedPtr<GUIWidget> parent() const;
 			virtual GUILayer* layer() const;
 
-			virtual bool add_widget(const OOBase::SharedPtr<Widget>& widget);
+			virtual bool add_widget(const OOBase::SharedPtr<GUIWidget>& widget);
+			virtual bool remove_widget(const OOBase::SharedPtr<GUIWidget>& widget);
+
+			virtual bool on_destroy() { return true; }
+			virtual void on_draw(OOGL::State& glState);
 
 		protected:
-			OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator> m_children;
+			OOBase::SharedPtr<GUIWidget> m_parent;
+			OOBase::Vector<OOBase::SharedPtr<GUIWidget>,OOBase::ThreadLocalAllocator> m_children;
 		};
 
-		class GUILayer : public Layer
+		class GUILayer : public Layer, public GUIWidget, public OOBase::EnableSharedFromThis<GUILayer>
 		{
 		public:
 			GUILayer();
 			
-			OOBase::uint32_t add_widget(const OOBase::SharedPtr<Widget>& widget);
-			bool remove_widget(OOBase::uint32_t handle);
-			OOBase::SharedPtr<Widget> lookup_widget(OOBase::uint32_t handle);
+			GUILayer* layer() const;
+
+			OOBase::uint32_t register_widget(const OOBase::SharedPtr<GUIWidget>& widget);
+			bool unregister_widget(OOBase::uint32_t handle);
+			OOBase::SharedPtr<GUIWidget> lookup_widget(OOBase::uint32_t handle) const;
 
 		protected:
-			virtual void on_draw(const OOGL::Window& win, OOGL::State& glState);
+			void on_draw(const OOGL::Window& win, OOGL::State& glState);
 
 		private:
 			OOBase::uint32_t m_next_handle;
-			OOBase::HashTable<OOBase::uint32_t,OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator> m_handles;
+			OOBase::HashTable<OOBase::uint32_t,OOBase::SharedPtr<GUIWidget>,OOBase::ThreadLocalAllocator> m_handles;
+		};
+
+		class MainWindow;
+	}
+
+	namespace GUIWidget
+	{
+		struct CreateParams
+		{
+			OOBase::uint32_t m_parent;
 		};
 	}
+
+	class GUILayer
+	{
+	public:
+		bool create(const OOBase::SharedPtr<Render::MainWindow>& wnd);
+		void destroy();
+
+		OOBase::uint32_t create_widget(const OOBase::Delegate2<OOBase::SharedPtr<Render::GUIWidget>,const OOBase::SharedPtr<Render::GUIWidget>&,const GUIWidget::CreateParams*>& delegate, const GUIWidget::CreateParams* p);
+		bool destroy_widget(OOBase::uint32_t handle);
+
+	private:
+		struct WidgetCreateParams
+		{
+			OOBase::uint32_t m_handle;
+			const GUIWidget::CreateParams* m_params;
+			const OOBase::Delegate2<OOBase::SharedPtr<Render::GUIWidget>,const OOBase::SharedPtr<Render::GUIWidget>&,const GUIWidget::CreateParams*>* m_delegate;
+		};
+		OOBase::SharedPtr<Render::GUILayer> m_layer;
+
+		bool do_create_widget(WidgetCreateParams* p);
+		bool do_destroy_widget(OOBase::uint32_t handle);
+	};
 }
 
 #endif // INDIGO_GUILAYER_H_INCLUDED

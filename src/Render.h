@@ -51,11 +51,11 @@ namespace Indigo
 	}
 
 	template <typename P1, typename Allocator>
-	bool render_call(const OOBase::Delegate0<bool,Allocator>& delegate, P1 p1)
+	bool render_call(const OOBase::Delegate1<bool,P1,Allocator>& delegate, P1 p1)
 	{
 		struct thunk
 		{
-			OOBase::Delegate0<bool,Allocator> const* m_delegate;
+			OOBase::Delegate1<bool,P1,Allocator> const* m_delegate;
 			P1 const* m_p1;
 
 			static bool call(void* p)
@@ -72,11 +72,11 @@ namespace Indigo
 	}
 
 	template <typename P1, typename P2, typename Allocator>
-	bool render_call(const OOBase::Delegate0<bool,Allocator>& delegate, P1 p1, P2 p2)
+	bool render_call(const OOBase::Delegate2<bool,P1,P2,Allocator>& delegate, P1 p1, P2 p2)
 	{
 		struct thunk
 		{
-			OOBase::Delegate0<bool,Allocator> const* m_delegate;
+			OOBase::Delegate2<bool,P1,P2,Allocator> const* m_delegate;
 			P1 const* m_p1;
 			P2 const* m_p2;
 

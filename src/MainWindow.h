@@ -22,7 +22,7 @@
 #ifndef INDIGO_MAINWINDOW_H_INCLUDED
 #define INDIGO_MAINWINDOW_H_INCLUDED
 
-#include "TopLayer.h"
+#include "GUILayer.h"
 
 namespace Indigo
 {
@@ -67,12 +67,12 @@ namespace Indigo
 		bool create(Application* app);
 		void destroy();
 
-		TopLayer& top_layer();
+		GUILayer& top_layer();
 		
 	private:
 		Application* m_app;
 		OOBase::SharedPtr<Render::MainWindow> m_wnd;
-		TopLayer m_top_layer;
+		GUILayer m_top_layer;
 
 		bool do_create();
 		bool do_destroy();
