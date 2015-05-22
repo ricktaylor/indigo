@@ -22,7 +22,9 @@
 #include "MainWindow.h"
 #include "Render.h"
 
-Indigo::Render::GUIWidget::GUIWidget(const OOBase::SharedPtr<GUIWidget>& parent) : m_parent(parent)
+Indigo::Render::GUIWidget::GUIWidget(const OOBase::SharedPtr<GUIWidget>& parent, const Indigo::GUIWidget::CreateParams* params) :
+		m_parent(parent),
+		m_visible(params ? params->m_visible : true)
 {
 }
 
@@ -34,6 +36,18 @@ Indigo::Render::GUILayer* Indigo::Render::GUIWidget::layer() const
 OOBase::SharedPtr<Indigo::Render::GUIWidget> Indigo::Render::GUIWidget::parent() const
 {
 	return m_parent;
+}
+
+bool Indigo::Render::GUIWidget::visible() const
+{
+	return m_visible;
+}
+
+bool Indigo::Render::GUIWidget::visible(bool bShow)
+{
+	bool prev = m_visible;
+	m_visible = bShow;
+	return prev;
 }
 
 bool Indigo::Render::GUIWidget::add_widget(const OOBase::SharedPtr<GUIWidget>& widget)
@@ -49,10 +63,13 @@ bool Indigo::Render::GUIWidget::remove_widget(const OOBase::SharedPtr<GUIWidget>
 void Indigo::Render::GUIWidget::on_draw(OOGL::State& glState)
 {
 	for (OOBase::Vector<OOBase::SharedPtr<GUIWidget>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i!=m_children.end();++i)
-		(*i)->on_draw(glState);
+	{
+		if ((*i)->m_visible)
+			(*i)->on_draw(glState);
+	}
 }
 
-Indigo::Render::GUILayer::GUILayer() : GUIWidget(OOBase::SharedPtr<GUIWidget>()), m_next_handle(1)
+Indigo::Render::GUILayer::GUILayer() : GUIWidget(OOBase::SharedPtr<GUIWidget>(),NULL), m_next_handle(1)
 {
 	m_handles.insert(0,shared_from_this());
 }
@@ -161,4 +178,20 @@ bool Indigo::GUILayer::do_destroy_widget(OOBase::uint32_t handle)
 		parent->remove_widget(widget);
 
 	return m_layer->unregister_widget(handle);
+}
+
+bool Indigo::GUILayer::show_widget(OOBase::uint32_t handle, bool visible)
+{
+	render_call(OOBase::make_delegate(this,&GUILayer::do_show_widget),handle,&visible);
+	return visible;
+}
+
+bool Indigo::GUILayer::do_show_widget(OOBase::uint32_t handle, bool* visible)
+{
+	OOBase::SharedPtr<Render::GUIWidget> widget = m_layer->lookup_widget(handle);
+	if (!widget)
+		return false;
+
+	*visible = widget->visible(*visible);
+	return true;
 }

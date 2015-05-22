@@ -26,19 +26,29 @@
 
 namespace Indigo
 {
+	namespace GUIWidget
+	{
+		struct CreateParams
+		{
+			OOBase::uint32_t m_parent;
+			bool             m_visible;
+		};
+	}
+
 	namespace Render
 	{
 		class GUILayer;
 
 		class GUIWidget
 		{
-			friend class GUILayer;
-
 		public:
-			GUIWidget(const OOBase::SharedPtr<GUIWidget>& parent);
+			GUIWidget(const OOBase::SharedPtr<GUIWidget>& parent, const Indigo::GUIWidget::CreateParams* params);
 
 			OOBase::SharedPtr<GUIWidget> parent() const;
 			virtual GUILayer* layer() const;
+
+			bool visible() const;
+			bool visible(bool bShow = true);
 
 			virtual bool add_widget(const OOBase::SharedPtr<GUIWidget>& widget);
 			virtual bool remove_widget(const OOBase::SharedPtr<GUIWidget>& widget);
@@ -48,6 +58,7 @@ namespace Indigo
 
 		protected:
 			OOBase::SharedPtr<GUIWidget> m_parent;
+			bool m_visible;
 			OOBase::Vector<OOBase::SharedPtr<GUIWidget>,OOBase::ThreadLocalAllocator> m_children;
 		};
 
@@ -73,14 +84,6 @@ namespace Indigo
 		class MainWindow;
 	}
 
-	namespace GUIWidget
-	{
-		struct CreateParams
-		{
-			OOBase::uint32_t m_parent;
-		};
-	}
-
 	class GUILayer
 	{
 	public:
@@ -89,6 +92,8 @@ namespace Indigo
 
 		OOBase::uint32_t create_widget(const OOBase::Delegate2<OOBase::SharedPtr<Render::GUIWidget>,const OOBase::SharedPtr<Render::GUIWidget>&,const GUIWidget::CreateParams*>& delegate, const GUIWidget::CreateParams* p);
 		bool destroy_widget(OOBase::uint32_t handle);
+
+		bool show_widget(OOBase::uint32_t handle, bool visible = true);
 
 	private:
 		struct WidgetCreateParams
@@ -101,6 +106,7 @@ namespace Indigo
 
 		bool do_create_widget(WidgetCreateParams* p);
 		bool do_destroy_widget(OOBase::uint32_t handle);
+		bool do_show_widget(OOBase::uint32_t handle, bool* visible);
 	};
 }
 

@@ -26,29 +26,32 @@ namespace
 	class GUIMenu : public Indigo::Render::GUIWidget
 	{
 	public:
-		GUIMenu(const OOBase::SharedPtr<GUIWidget>& parent);
+		GUIMenu(const OOBase::SharedPtr<GUIWidget>& parent, const Indigo::GUIMenu::CreateParams* params);
 
 		static OOBase::SharedPtr<Indigo::Render::GUIWidget> create(const OOBase::SharedPtr<Indigo::Render::GUIWidget>& parent, const Indigo::GUIWidget::CreateParams* params);
+
+	private:
+		//void on_draw(OOGL::State& glState);
 	};
 }
 
-GUIMenu::GUIMenu(const OOBase::SharedPtr<GUIWidget>& parent) : Indigo::Render::GUIWidget(parent)
+GUIMenu::GUIMenu(const OOBase::SharedPtr<GUIWidget>& parent, const Indigo::GUIMenu::CreateParams* params) : Indigo::Render::GUIWidget(parent,params)
 {
 
+}
+
+OOBase::SharedPtr<Indigo::Render::GUIWidget> GUIMenu::create(const OOBase::SharedPtr<Indigo::Render::GUIWidget>& parent, const Indigo::GUIWidget::CreateParams* p)
+{
+	const Indigo::GUIMenu::CreateParams* params = static_cast<const Indigo::GUIMenu::CreateParams*>(p);
+
+	OOBase::SharedPtr<GUIMenu> menu = OOBase::allocate_shared<GUIMenu,OOBase::ThreadLocalAllocator>(parent,params);
+	if (!menu)
+		LOG_ERROR_RETURN(("Failed to allocate GUIMenu: %s",OOBase::system_error_text()),menu);
+
+	return menu;
 }
 
 OOBase::uint32_t Indigo::GUIMenu::create(GUILayer& layer, const Indigo::GUIMenu::CreateParams& params)
 {
 	return layer.create_widget(OOBase::make_delegate(&::GUIMenu::create),&params);
-}
-
-OOBase::SharedPtr<Indigo::Render::GUIWidget> GUIMenu::create(const OOBase::SharedPtr<Indigo::Render::GUIWidget>& parent, const Indigo::GUIWidget::CreateParams* p)
-{
-	//const Indigo::GUIMenu::CreateParams* params = static_cast<const Indigo::GUIMenu::CreateParams*>(p);
-
-	OOBase::SharedPtr<GUIMenu> menu = OOBase::allocate_shared<GUIMenu,OOBase::ThreadLocalAllocator>(parent);
-	if (!menu)
-		LOG_ERROR_RETURN(("Failed to allocate GUIMenu: %s",OOBase::system_error_text()),menu);
-
-	return menu;
 }
