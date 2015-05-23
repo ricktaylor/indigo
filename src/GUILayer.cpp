@@ -22,176 +22,53 @@
 #include "MainWindow.h"
 #include "Render.h"
 
-Indigo::Render::GUIWidget::GUIWidget(const OOBase::SharedPtr<GUIWidget>& parent, const Indigo::GUIWidget::CreateParams* params) :
-		m_parent(parent),
-		m_visible(params ? params->m_visible : true)
+namespace 
 {
-}
-
-Indigo::Render::GUILayer* Indigo::Render::GUIWidget::layer() const
-{
-	return m_parent ? m_parent->layer() : NULL;
-}
-
-OOBase::SharedPtr<Indigo::Render::GUIWidget> Indigo::Render::GUIWidget::parent() const
-{
-	return m_parent;
-}
-
-bool Indigo::Render::GUIWidget::visible() const
-{
-	return m_visible;
-}
-
-bool Indigo::Render::GUIWidget::visible(bool bShow)
-{
-	bool prev = m_visible;
-	m_visible = bShow;
-	return prev;
-}
-
-bool Indigo::Render::GUIWidget::add_widget(const OOBase::SharedPtr<GUIWidget>& widget)
-{
-	return m_children.push_back(widget) != m_children.end();
-}
-
-bool Indigo::Render::GUIWidget::remove_widget(const OOBase::SharedPtr<GUIWidget>& widget)
-{
-	return m_children.erase(widget) != 0;
-}
-
-void Indigo::Render::GUIWidget::on_draw(OOGL::State& glState)
-{
-	for (OOBase::Vector<OOBase::SharedPtr<GUIWidget>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i!=m_children.end();++i)
+	class Layer : public Indigo::Render::GUI::Widget, public Indigo::Render::Layer
 	{
-		if ((*i)->m_visible)
-			(*i)->on_draw(glState);
-	}
+	public:
+		bool create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd);
+
+	private:
+		void on_draw(const OOGL::Window& win, OOGL::State& glState) {}
+		void on_size(const OOGL::Window& win, const glm::ivec2& sz) {}
+	};
 }
 
-Indigo::Render::GUILayer::GUILayer() : GUIWidget(OOBase::SharedPtr<GUIWidget>(),NULL), m_next_handle(1)
+bool Layer::create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd)
 {
-	m_handles.insert(0,shared_from_this());
+	return wnd->add_layer(OOBase::static_pointer_cast<Layer>(shared_from_this()));
 }
 
-Indigo::Render::GUILayer* Indigo::Render::GUILayer::layer() const
+OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Layer::create_widget()
 {
-	return const_cast<GUILayer*>(this);
-}
-
-OOBase::uint32_t Indigo::Render::GUILayer::register_widget(const OOBase::SharedPtr<GUIWidget>& widget)
-{
-	OOBase::uint32_t h = 0;
-	while (m_handles.exists(h))
-		h = m_next_handle++;
-
-	if (m_handles.insert(h,widget) == m_handles.end())
-		LOG_ERROR_RETURN(("Failed to add widget to GUILayer"),0);
-
-	return h;
-}
-
-bool Indigo::Render::GUILayer::unregister_widget(OOBase::uint32_t handle)
-{
-	if (!handle)
-		return false;
-
-	return m_handles.remove(handle);
-}
-
-OOBase::SharedPtr<Indigo::Render::GUIWidget> Indigo::Render::GUILayer::lookup_widget(OOBase::uint32_t handle) const
-{
-	OOBase::HashTable<OOBase::uint32_t,OOBase::SharedPtr<GUIWidget>,OOBase::ThreadLocalAllocator>::const_iterator i = m_handles.find(handle);
-	if (i != m_handles.end())
-		return i->value;
-
-	return OOBase::SharedPtr<GUIWidget>();
-}
-
-void Indigo::Render::GUILayer::on_draw(const OOGL::Window& win, OOGL::State& glState)
-{
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
-	GUIWidget::on_draw(glState);
-}
-
-bool Indigo::GUILayer::create(const OOBase::SharedPtr<Render::MainWindow>& wnd)
-{
-	OOBase::SharedPtr<Render::GUILayer> layer = OOBase::allocate_shared<Render::GUILayer,OOBase::ThreadLocalAllocator>();
+	// Move this to a derived class
+	OOBase::SharedPtr<::Layer> layer = OOBase::allocate_shared<::Layer,OOBase::ThreadLocalAllocator>();
 	if (!layer)
-		LOG_ERROR_RETURN(("Failed to allocate GUILayer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+		LOG_ERROR(("Failed to allocate layer: %s",OOBase::system_error_text()));
 
-	if (!wnd->add_layer(layer))
+	return layer;
+}
+
+bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd)
+{
+	if (!Widget::create(OOBase::SharedPtr<Widget>()))
 		return false;
 
-	layer.swap(m_layer);
-	return true;
-}
-
-void Indigo::GUILayer::destroy()
-{
-	m_layer.reset();
-}
-
-OOBase::uint32_t Indigo::GUILayer::create_widget(const OOBase::Delegate2<OOBase::SharedPtr<Render::GUIWidget>,const OOBase::SharedPtr<Render::GUIWidget>&,const GUIWidget::CreateParams*>& delegate, const GUIWidget::CreateParams* p)
-{
-	WidgetCreateParams params;
-	params.m_handle = 0;
-	params.m_params = p;
-	params.m_delegate = &delegate;
-
-	if (!render_call(OOBase::make_delegate(this,&GUILayer::do_create_widget),&params))
-		return 0;
-
-	return params.m_handle;
-}
-
-bool Indigo::GUILayer::do_create_widget(WidgetCreateParams* p)
-{
-	OOBase::SharedPtr<Render::GUIWidget> parent = m_layer->lookup_widget(p->m_params->m_parent);
-	OOBase::SharedPtr<Render::GUIWidget> widget = p->m_delegate->invoke(parent,p->m_params);
-	if (!widget)
-		return false;
-
-	p->m_handle = m_layer->register_widget(widget);
-	if (p->m_handle && !parent->add_widget(widget))
+	if (!render_call(OOBase::make_delegate(this,&Layer::do_create),&wnd))
 	{
-		m_layer->unregister_widget(p->m_handle);
+		destroy();
 		return false;
 	}
+
 	return true;
 }
 
-bool Indigo::GUILayer::destroy_widget(OOBase::uint32_t handle)
+bool Indigo::GUI::Layer::do_create(OOBase::SharedPtr<Render::MainWindow>* wnd)
 {
-	return render_call(OOBase::make_delegate(this,&GUILayer::do_destroy_widget),handle);
-}
-
-bool Indigo::GUILayer::do_destroy_widget(OOBase::uint32_t handle)
-{
-	OOBase::SharedPtr<Render::GUIWidget> widget = m_layer->lookup_widget(handle);
-	if (!widget || !widget->on_destroy())
+	OOBase::SharedPtr<::Layer> layer(widget<::Layer>());
+	if (!layer)
 		return false;
 
-	OOBase::SharedPtr<Render::GUIWidget> parent = widget->parent();
-	if (parent)
-		parent->remove_widget(widget);
-
-	return m_layer->unregister_widget(handle);
-}
-
-bool Indigo::GUILayer::show_widget(OOBase::uint32_t handle, bool visible)
-{
-	render_call(OOBase::make_delegate(this,&GUILayer::do_show_widget),handle,&visible);
-	return visible;
-}
-
-bool Indigo::GUILayer::do_show_widget(OOBase::uint32_t handle, bool* visible)
-{
-	OOBase::SharedPtr<Render::GUIWidget> widget = m_layer->lookup_widget(handle);
-	if (!widget)
-		return false;
-
-	*visible = widget->visible(*visible);
-	return true;
+	return layer->create(*wnd);
 }

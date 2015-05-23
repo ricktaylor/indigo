@@ -23,6 +23,7 @@
 #define INDIGO_MAINWINDOW_H_INCLUDED
 
 #include "GUILayer.h"
+#include "Layer.h"
 
 namespace Indigo
 {
@@ -59,7 +60,7 @@ namespace Indigo
 	class MainWindow : public OOBase::NonCopyable
 	{
 		friend class Render::MainWindow;
-
+		
 	public:
 		MainWindow();
 		~MainWindow();
@@ -67,12 +68,12 @@ namespace Indigo
 		bool create(Application* app);
 		void destroy();
 
-		GUILayer& top_layer();
+		GUI::Layer& top_layer();
 		
 	private:
 		Application* m_app;
 		OOBase::SharedPtr<Render::MainWindow> m_wnd;
-		GUILayer m_top_layer;
+		GUI::Layer m_top_layer;
 
 		bool do_create();
 		bool do_destroy();

@@ -121,12 +121,17 @@ bool Indigo::MainWindow::create(Application* app)
 	if (!render_call(OOBase::make_delegate(this,&MainWindow::do_create)))
 		return false;
 
+	if (!m_top_layer.create(m_wnd))
+		return false;
+
 	m_app = app;
 	return (m_wnd != NULL);
 }
 
 void Indigo::MainWindow::destroy()
 {
+	m_top_layer.destroy();
+
 	if (m_wnd)
 		render_call(OOBase::make_delegate(this,&MainWindow::do_destroy));
 
@@ -142,17 +147,12 @@ bool Indigo::MainWindow::do_create()
 	if (!wnd->create())
 		return false;
 
-	if (!m_top_layer.create(wnd))
-		return false;
-
 	wnd.swap(m_wnd);
 	return true;
 }
 
 bool Indigo::MainWindow::do_destroy()
 {
-	m_top_layer.destroy();
-
 	m_wnd.reset();
 	return true;
 }
