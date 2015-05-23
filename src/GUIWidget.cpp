@@ -114,23 +114,23 @@ Indigo::GUI::Widget::~Widget()
 	destroy();
 }
 
-bool Indigo::GUI::Widget::create(const OOBase::SharedPtr<Widget>& parent)
+bool Indigo::GUI::Widget::create(Widget* parent)
 {
 	if (m_ptrWidget)
 		LOG_ERROR_RETURN(("Widget::Create called twice"),false);
 
-	return render_call(OOBase::make_delegate(this,&Widget::do_create),&parent);
+	return render_call(OOBase::make_delegate(this,&Widget::do_create),parent);
 }
 
-bool Indigo::GUI::Widget::do_create(const OOBase::SharedPtr<Widget>* parent)
+bool Indigo::GUI::Widget::do_create(Widget* parent)
 {
 	OOBase::SharedPtr<Render::GUI::Widget> widget = create_widget();
 	if (!widget)
 		LOG_ERROR_RETURN(("Failed to allocate Widget: %s",OOBase::system_error_text()),false);
 
 	OOBase::SharedPtr<Render::GUI::Widget> render_parent;
-	if (*parent)
-		render_parent = (*parent)->m_ptrWidget;
+	if (parent)
+		render_parent = parent->m_ptrWidget;
 
 	if (!widget->create(render_parent))
 		return false;

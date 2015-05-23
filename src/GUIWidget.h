@@ -57,10 +57,9 @@ namespace Indigo
 				virtual void remove_child(const OOBase::SharedPtr<Widget>& child) {}
 
 				virtual bool on_show(bool show) { return true; }
-				virtual bool on_enable(bool enabled) { return true; }
+				virtual bool on_enable(bool enabled) { return false; }
 				virtual bool on_focus(bool focused) { return false; }
-				virtual bool on_hilight(bool hilighted) { return true; }
-
+				virtual bool on_hilight(bool hilighted) { return false; }
 				virtual void on_refresh_layout() {}
 
 			private:
@@ -96,7 +95,7 @@ namespace Indigo
 			bool hilight(bool hilighted = true);
 
 		protected:
-			bool create(const OOBase::SharedPtr<Widget>& parent);
+			bool create(Widget* parent);
 
 			template <typename T>
 			OOBase::SharedPtr<T> widget() const
@@ -109,7 +108,7 @@ namespace Indigo
 		private:
 			OOBase::SharedPtr<Render::GUI::Widget> m_ptrWidget;
 
-			bool do_create(const OOBase::SharedPtr<Widget>* parent);
+			bool do_create(Widget* parent);
 			bool do_destroy();
 			bool get_visible(bool* visible);
 			bool set_visible(bool visible);

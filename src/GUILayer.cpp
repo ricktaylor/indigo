@@ -52,7 +52,7 @@ OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Layer::create_widget
 
 bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd)
 {
-	if (!Widget::create(OOBase::SharedPtr<Widget>()))
+	if (!Widget::create(NULL))
 		return false;
 
 	if (!render_call(OOBase::make_delegate(this,&Layer::do_create),&wnd))
