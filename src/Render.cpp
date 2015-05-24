@@ -152,6 +152,10 @@ namespace
 		}
 	};
 
+#if !defined(NDEBUG)
+	static const OOBase::Thread* s_render_thread = NULL;
+#endif
+
 	static EventQueue* s_event_queue = NULL;
 	static RenderQueue* s_render_queue = NULL;
 	static OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>* s_vecWindows;
@@ -287,6 +291,10 @@ bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase
 {
 	OOBase::Event started(false,false);
 
+#if !defined(NDEBUG)
+	s_render_thread = OOBase::Thread::self();
+#endif
+
 	thread_info ti;
 	ti.m_started = &started;
 	ti.m_config = &config_args;
@@ -327,6 +335,10 @@ static bool make_render_call(void* param)
 
 bool Indigo::render_call(bool (*fn)(void*), void* param)
 {
+#if !defined(NDEBUG)
+	assert(s_render_thread != OOBase::Thread::self());
+#endif
+
 	struct render_call_info rci;
 	rci.m_fn = fn;
 	rci.m_param = param;
@@ -365,6 +377,10 @@ static bool raise_event_i(void* param)
 
 bool Indigo::raise_event(void (*fn)(OOBase::CDRStream&), OOBase::CDRStream& stream)
 {
+#if !defined(NDEBUG)
+	assert(s_render_thread == OOBase::Thread::self());
+#endif
+
 	struct raise_event_thunk* ret = NULL;
 	OOBase::ThreadLocalAllocator::allocate_new(ret);
 	if (!ret)
