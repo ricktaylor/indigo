@@ -116,7 +116,7 @@ Indigo::GUI::Widget::~Widget()
 
 bool Indigo::GUI::Widget::create(Widget* parent)
 {
-	if (m_ptrWidget)
+	if (m_render_widget)
 		LOG_ERROR_RETURN(("Widget::Create called twice"),false);
 
 	return render_call(OOBase::make_delegate(this,&Widget::do_create),parent);
@@ -130,23 +130,23 @@ bool Indigo::GUI::Widget::do_create(Widget* parent)
 
 	OOBase::SharedPtr<Render::GUI::Widget> render_parent;
 	if (parent)
-		render_parent = parent->m_ptrWidget;
+		render_parent = parent->m_render_widget;
 
 	if (!widget->create(render_parent))
 		return false;
 
-	widget.swap(m_ptrWidget);
+	widget.swap(m_render_widget);
 	return true;
 }
 
 bool Indigo::GUI::Widget::destroy()
 {
-	return !m_ptrWidget || render_call(OOBase::make_delegate(this,&Widget::do_destroy));
+	return !m_render_widget || render_call(OOBase::make_delegate(this,&Widget::do_destroy));
 }
 
 bool Indigo::GUI::Widget::do_destroy()
 {
-	m_ptrWidget.reset();
+	m_render_widget.reset();
 	return true;
 }
 
@@ -160,7 +160,7 @@ bool Indigo::GUI::Widget::visible() const
 
 bool Indigo::GUI::Widget::get_visible(bool* visible)
 {
-	*visible = m_ptrWidget->visible();
+	*visible = m_render_widget->visible();
 	return true;
 }
 
@@ -171,7 +171,7 @@ bool Indigo::GUI::Widget::visible(bool show)
 
 bool Indigo::GUI::Widget::set_visible(bool visible)
 {
-	return m_ptrWidget->visible(visible);
+	return m_render_widget->visible(visible);
 }
 
 bool Indigo::GUI::Widget::enabled() const
@@ -184,7 +184,7 @@ bool Indigo::GUI::Widget::enabled() const
 
 bool Indigo::GUI::Widget::get_enabled(bool* enabled)
 {
-	*enabled = m_ptrWidget->enabled();
+	*enabled = m_render_widget->enabled();
 	return true;
 }
 
@@ -195,7 +195,7 @@ bool Indigo::GUI::Widget::enable(bool enabled)
 
 bool Indigo::GUI::Widget::set_enable(bool enabled)
 {
-	return m_ptrWidget->enable(enabled);
+	return m_render_widget->enable(enabled);
 }
 
 bool Indigo::GUI::Widget::focused() const
@@ -208,7 +208,7 @@ bool Indigo::GUI::Widget::focused() const
 
 bool Indigo::GUI::Widget::get_focused(bool* focused)
 {
-	*focused = m_ptrWidget->focused();
+	*focused = m_render_widget->focused();
 	return true;
 }
 
@@ -219,7 +219,7 @@ bool Indigo::GUI::Widget::focus(bool focus)
 
 bool Indigo::GUI::Widget::set_focus(bool focused)
 {
-	return m_ptrWidget->focus(focused);
+	return m_render_widget->focus(focused);
 }
 
 bool Indigo::GUI::Widget::hilighted() const
@@ -232,7 +232,7 @@ bool Indigo::GUI::Widget::hilighted() const
 
 bool Indigo::GUI::Widget::get_hilighted(bool* hilighted)
 {
-	*hilighted = m_ptrWidget->hilighted();
+	*hilighted = m_render_widget->hilighted();
 	return true;
 }
 
@@ -243,5 +243,5 @@ bool Indigo::GUI::Widget::hilight(bool hilight)
 
 bool Indigo::GUI::Widget::set_hilight(bool hilighted)
 {
-	return m_ptrWidget->hilight(hilighted);
+	return m_render_widget->hilight(hilighted);
 }

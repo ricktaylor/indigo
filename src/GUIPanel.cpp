@@ -19,30 +19,43 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_GUILAYER_H_INCLUDED
-#define INDIGO_GUILAYER_H_INCLUDED
-
 #include "GUIPanel.h"
+#include "Render.h"
 
-namespace Indigo
+bool Indigo::Render::GUI::Panel::create()
 {
-	namespace Render
-	{
-		class MainWindow;
-	}
-
-	namespace GUI
-	{
-		class Layer : public Panel
-		{
-		public:
-			bool create(OOBase::SharedPtr<Render::MainWindow>& wnd);
-
-		private:
-			bool do_create(OOBase::SharedPtr<Render::MainWindow>* wnd);
-			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
-		};
-	}
+	return true;
 }
 
-#endif // INDIGO_GUILAYER_H_INCLUDED
+OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Panel::create_widget()
+{
+	// Move this to a derived class
+	OOBase::SharedPtr<Indigo::Render::GUI::Panel> layer = OOBase::allocate_shared<Indigo::Render::GUI::Panel,OOBase::ThreadLocalAllocator>();
+	if (!layer)
+		LOG_ERROR(("Failed to allocate layer: %s",OOBase::system_error_text()));
+
+	return layer;
+}
+
+bool Indigo::GUI::Panel::create(Widget* parent)
+{
+	if (!Widget::create(parent))
+		return false;
+
+	if (!render_call(OOBase::make_delegate(this,&Panel::do_create)))
+	{
+		destroy();
+		return false;
+	}
+
+	return true;
+}
+
+bool Indigo::GUI::Panel::do_create()
+{
+	OOBase::SharedPtr<Indigo::Render::GUI::Panel> layer(render_widget<Indigo::Render::GUI::Panel>());
+	if (!layer)
+		return false;
+
+	return layer->create();
+}

@@ -98,15 +98,15 @@ namespace Indigo
 			bool create(Widget* parent);
 
 			template <typename T>
-			OOBase::SharedPtr<T> widget() const
+			OOBase::SharedPtr<T> render_widget() const
 			{
-				return OOBase::static_pointer_cast<T>(m_ptrWidget);
+				return OOBase::static_pointer_cast<T>(m_render_widget);
 			}
 
 			virtual OOBase::SharedPtr<Render::GUI::Widget> create_widget() = 0;
 
 		private:
-			OOBase::SharedPtr<Render::GUI::Widget> m_ptrWidget;
+			OOBase::SharedPtr<Render::GUI::Widget> m_render_widget;
 
 			bool do_create(Widget* parent);
 			bool do_destroy();

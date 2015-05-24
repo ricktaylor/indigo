@@ -19,30 +19,43 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_GUILAYER_H_INCLUDED
-#define INDIGO_GUILAYER_H_INCLUDED
+#ifndef INDIGO_GUIPANEL_H_INCLUDED
+#define INDIGO_GUIPANEL_H_INCLUDED
 
-#include "GUIPanel.h"
+#include "GUIWidget.h"
 
 namespace Indigo
 {
 	namespace Render
 	{
-		class MainWindow;
+		namespace GUI
+		{
+			class Panel : public Indigo::Render::GUI::Widget
+			{
+			public:
+				bool create();
+
+			protected:
+				virtual bool add_child(const OOBase::SharedPtr<Widget>& child) { return false; }
+				virtual void remove_child(const OOBase::SharedPtr<Widget>& child) {}
+
+			private:				
+			};
+		}
 	}
 
 	namespace GUI
 	{
-		class Layer : public Panel
+		class Panel : public Widget
 		{
 		public:
-			bool create(OOBase::SharedPtr<Render::MainWindow>& wnd);
+			bool create(Widget* parent);
 
 		private:
-			bool do_create(OOBase::SharedPtr<Render::MainWindow>* wnd);
+			bool do_create();
 			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
 		};
 	}
 }
 
-#endif // INDIGO_GUILAYER_H_INCLUDED
+#endif // INDIGO_GUIPANEL_H_INCLUDED

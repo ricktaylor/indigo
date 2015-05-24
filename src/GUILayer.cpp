@@ -24,7 +24,7 @@
 
 namespace 
 {
-	class Layer : public Indigo::Render::GUI::Widget, public Indigo::Render::Layer
+	class Layer : public Indigo::Render::GUI::Panel, public Indigo::Render::Layer
 	{
 	public:
 		bool create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd);
@@ -52,7 +52,7 @@ OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Layer::create_widget
 
 bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd)
 {
-	if (!Widget::create(NULL))
+	if (!Panel::create(NULL))
 		return false;
 
 	if (!render_call(OOBase::make_delegate(this,&Layer::do_create),&wnd))
@@ -66,7 +66,7 @@ bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd)
 
 bool Indigo::GUI::Layer::do_create(OOBase::SharedPtr<Render::MainWindow>* wnd)
 {
-	OOBase::SharedPtr<::Layer> layer(widget<::Layer>());
+	OOBase::SharedPtr<::Layer> layer(render_widget<::Layer>());
 	if (!layer)
 		return false;
 

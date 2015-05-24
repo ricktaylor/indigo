@@ -78,6 +78,9 @@
     <ClInclude Include="GUIWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GUIPanel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -135,6 +138,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GUIWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
