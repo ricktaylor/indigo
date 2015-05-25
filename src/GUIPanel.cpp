@@ -37,9 +37,9 @@ OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Panel::create_widget
 	return layer;
 }
 
-bool Indigo::GUI::Panel::create(Widget* parent)
+bool Indigo::GUI::Panel::create(Widget* parent, const glm::u16vec2& pos, const glm::u16vec2& min_size)
 {
-	if (!Widget::create(parent))
+	if (!Widget::create(parent,pos,min_size))
 		return false;
 
 	if (!render_call(OOBase::make_delegate(this,&Panel::do_create)))

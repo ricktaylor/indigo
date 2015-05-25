@@ -94,6 +94,31 @@ namespace Indigo
 		return render_call(&thunk::call,&t);
 	}
 
+	template <typename P1, typename P2, typename P3, typename Allocator>
+	bool render_call(const OOBase::Delegate3<bool,P1,P2,P3,Allocator>& delegate, P1 p1, P2 p2, P3 p3)
+	{
+		struct thunk
+		{
+			OOBase::Delegate3<bool,P1,P2,P3,Allocator> const* m_delegate;
+			P1 const* m_p1;
+			P2 const* m_p2;
+			P3 const* m_p3;
+
+			static bool call(void* p)
+			{
+				thunk* t = static_cast<thunk*>(p);
+				return t->m_delegate->invoke(*t->m_p1,*t->m_p2,*t->m_p3);
+			}
+		};
+
+		thunk t;
+		t.m_delegate = &delegate;
+		t.m_p1 = &p1;
+		t.m_p2 = &p2;
+		t.m_p3 = &p3;
+		return render_call(&thunk::call,&t);
+	}
+
 	bool raise_event(void (*fn)(OOBase::CDRStream&), OOBase::CDRStream& stream);
 
 	inline bool raise_event(const OOBase::Delegate0<void,OOBase::CrtAllocator>& delegate)

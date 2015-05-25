@@ -51,6 +51,8 @@
 #error Need some kind of configure scipt!
 #endif
 
+#include "../lib/OOGL.h"
+
 namespace Indigo
 {
 	bool is_debug();

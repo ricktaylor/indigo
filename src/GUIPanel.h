@@ -49,7 +49,7 @@ namespace Indigo
 		class Panel : public Widget
 		{
 		public:
-			bool create(Widget* parent);
+			bool create(Widget* parent, const glm::u16vec2& pos = glm::u16vec2(0), const glm::u16vec2& min_size = glm::u16vec2(-1));
 
 		private:
 			bool do_create();

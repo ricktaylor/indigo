@@ -26,17 +26,22 @@
 
 namespace Indigo
 {
+	namespace GUI
+	{
+		class Widget;
+	}
+
 	namespace Render
 	{
 		namespace GUI
 		{
 			class Widget : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<Widget>
 			{
+				friend class Indigo::GUI::Widget;
+
 			public:
 				Widget();
 				virtual ~Widget();
-
-				bool create(const OOBase::SharedPtr<Widget>& parent);
 
 				bool visible() const;
 				bool visible(bool show = true);
@@ -49,6 +54,15 @@ namespace Indigo
 
 				bool hilighted() const;
 				bool hilight(bool hilighted = true);
+
+				glm::u16vec2 size() const;
+				void size(const glm::u16vec2& sz);
+
+				glm::u16vec2 min_size() const;
+				void min_size(const glm::u16vec2& sz);
+
+				glm::u16vec2 max_size() const;
+				void max_size(const glm::u16vec2& sz);
 				
 			protected:
 				OOBase::WeakPtr<Widget> m_parent;
@@ -60,13 +74,24 @@ namespace Indigo
 				virtual bool on_enable(bool enabled) { return false; }
 				virtual bool on_focus(bool focused) { return false; }
 				virtual bool on_hilight(bool hilighted) { return false; }
-				virtual void on_refresh_layout() {}
+				
+				virtual void refresh_layout() {}
+
+				virtual glm::u16vec2 get_best_size() const { return glm::u16vec2(0); }
 
 			private:
 				bool m_visible;
 				bool m_enabled;
 				bool m_focused;
 				bool m_hilighted;
+				glm::i16vec2 m_pos;
+				glm::u16vec2 m_min_size;
+				glm::u16vec2 m_max_size;
+				glm::u16vec2 m_size;
+
+				bool create(const OOBase::SharedPtr<Widget>& parent, const glm::i16vec2& pos, const glm::u16vec2& min_size);
+				glm::u16vec2 do_get_best_size() const;
+				
 			};
 		}
 	}
@@ -95,7 +120,7 @@ namespace Indigo
 			bool hilight(bool hilighted = true);
 
 		protected:
-			bool create(Widget* parent);
+			bool create(Widget* parent, const glm::i16vec2& pos = glm::i16vec2(0), const glm::u16vec2& min_size = glm::u16vec2(-1));
 
 			template <typename T>
 			OOBase::SharedPtr<T> render_widget() const
@@ -108,7 +133,7 @@ namespace Indigo
 		private:
 			OOBase::SharedPtr<Render::GUI::Widget> m_render_widget;
 
-			bool do_create(Widget* parent);
+			bool do_create(Widget* parent, const glm::i16vec2* pos, const glm::u16vec2* min_size);
 			bool do_destroy();
 			bool get_visible(bool* visible);
 			bool set_visible(bool visible);

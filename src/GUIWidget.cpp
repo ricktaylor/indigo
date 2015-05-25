@@ -22,7 +22,7 @@
 #include "GUIWidget.h"
 #include "Render.h"
 
-Indigo::Render::GUI::Widget::Widget() : m_visible(false), m_enabled(true), m_focused(false), m_hilighted(false)
+Indigo::Render::GUI::Widget::Widget() : m_visible(false), m_enabled(true), m_focused(false), m_hilighted(false), m_max_size(-1)
 {
 
 }
@@ -34,13 +34,152 @@ Indigo::Render::GUI::Widget::~Widget()
 		parent->remove_child(shared_from_this());
 }
 
-bool Indigo::Render::GUI::Widget::create(const OOBase::SharedPtr<Widget>& parent)
+bool Indigo::Render::GUI::Widget::create(const OOBase::SharedPtr<Widget>& parent, const glm::i16vec2& pos, const glm::u16vec2& size)
 {
 	if (parent && !parent->add_child(shared_from_this()))
 		return false;
 
+	m_pos = pos;
+	m_min_size = size;
+	m_size = min_size();
+
 	m_parent = parent;
 	return true;
+}
+
+glm::u16vec2 Indigo::Render::GUI::Widget::size() const
+{
+	return m_size;
+}
+
+void Indigo::Render::GUI::Widget::size(const glm::u16vec2& sz)
+{
+	bool changed = false;
+
+	if ((m_min_size.x != -1 && m_size.x < m_min_size.x) || 
+		(m_min_size.y != -1 && m_size.y < m_min_size.y))
+	{
+		if (m_min_size.x != -1 && m_size.x < m_min_size.x)
+			m_size.x = m_min_size.x;
+
+		if (m_min_size.y != -1 && m_size.y < m_min_size.y)
+			m_size.y = m_min_size.y;
+
+		changed = true;
+	}
+
+	if (m_size.x > m_max_size.x || m_size.y > m_max_size.y)
+	{
+		if (m_size.x > m_max_size.x)
+			m_size.x = m_max_size.x;
+
+		if (m_size.y > m_max_size.y)
+			m_size.y = m_max_size.y;
+
+		changed = true;
+	}
+
+	if (changed && visible())
+	{
+		OOBase::SharedPtr<Widget> parent(m_parent);
+		if (parent)
+			parent->refresh_layout();
+	}
+}
+
+glm::u16vec2 Indigo::Render::GUI::Widget::min_size() const
+{
+	glm::u16vec2 min_size(m_min_size);
+	if (min_size.x == -1 || min_size.y == -1)
+	{
+		glm::u16vec2 best(do_get_best_size());
+
+		if (min_size.x == -1)
+			min_size.x = best.x;
+
+		if (min_size.y == -1)
+			min_size.y = best.y;
+	}
+	return min_size;
+}
+
+void Indigo::Render::GUI::Widget::min_size(const glm::u16vec2& sz)
+{
+	m_min_size = sz;
+
+	if (m_min_size.x != -1 && m_max_size.x < m_min_size.x)
+		m_max_size.x = m_min_size.x;
+
+	if (m_min_size.y != -1 && m_max_size.y < m_min_size.y)
+		m_max_size.y = m_min_size.y;
+
+	if ((m_min_size.x != -1 && m_size.x < m_min_size.x) || 
+		(m_min_size.y != -1 && m_size.y < m_min_size.y))
+	{
+		if (m_min_size.x != -1 && m_size.x < m_min_size.x)
+			m_size.x = m_min_size.x;
+
+		if (m_min_size.y != -1 && m_size.y < m_min_size.y)
+			m_size.y = m_min_size.y;
+
+		if (visible())
+		{
+			OOBase::SharedPtr<Widget> parent(m_parent);
+			if (parent)
+				parent->refresh_layout();
+		}
+	}
+}
+
+glm::u16vec2 Indigo::Render::GUI::Widget::max_size() const
+{
+	return m_max_size;
+}
+
+void Indigo::Render::GUI::Widget::max_size(const glm::u16vec2& sz)
+{
+	m_max_size = sz;
+
+	if (m_min_size.x != -1 && m_max_size.x < m_min_size.x)
+		m_max_size.x = m_min_size.x;
+
+	if (m_min_size.y != -1 && m_max_size.y < m_min_size.y)
+		m_max_size.y = m_min_size.y;
+
+	if (m_size.x > m_max_size.x || m_size.y > m_max_size.y)
+	{
+		if (m_size.x > m_max_size.x)
+			m_size.x = m_max_size.x;
+
+		if (m_size.y > m_max_size.y)
+			m_size.y = m_max_size.y;
+
+		if (visible())
+		{
+			OOBase::SharedPtr<Widget> parent(m_parent);
+			if (parent)
+				parent->refresh_layout();
+		}
+	}
+}
+
+glm::u16vec2 Indigo::Render::GUI::Widget::do_get_best_size() const
+{
+	glm::u16vec2 sz(get_best_size());
+
+	if (m_min_size.x != -1 && m_min_size.x > sz.x)
+		sz.x = m_min_size.x;
+
+	if (m_min_size.y != -1 && m_min_size.y > sz.y)
+		sz.y = m_min_size.y;
+
+	if (sz.x > m_max_size.x)
+		sz.x = m_max_size.x;
+
+	if (sz.y > m_max_size.y)
+		sz.y = m_max_size.y;
+
+	return sz;
 }
 
 bool Indigo::Render::GUI::Widget::visible() const
@@ -53,11 +192,16 @@ bool Indigo::Render::GUI::Widget::visible(bool show)
 {
 	if (!on_show(show))
 		return false;
+
+	bool changed = (m_visible != show);
 	m_visible = show;
 	
-	OOBase::SharedPtr<Widget> parent(m_parent);
-	if (parent)
-		parent->on_refresh_layout();
+	if (changed)
+	{
+		OOBase::SharedPtr<Widget> parent(m_parent);
+		if (parent)
+			parent->refresh_layout();
+	}
 
 	return true;
 }
@@ -114,15 +258,15 @@ Indigo::GUI::Widget::~Widget()
 	destroy();
 }
 
-bool Indigo::GUI::Widget::create(Widget* parent)
+bool Indigo::GUI::Widget::create(Widget* parent, const glm::i16vec2& pos, const glm::u16vec2& min_size)
 {
 	if (m_render_widget)
 		LOG_ERROR_RETURN(("Widget::Create called twice"),false);
 
-	return render_call(OOBase::make_delegate(this,&Widget::do_create),parent);
+	return render_call(OOBase::make_delegate(this,&Widget::do_create),parent,&pos,&min_size);
 }
 
-bool Indigo::GUI::Widget::do_create(Widget* parent)
+bool Indigo::GUI::Widget::do_create(Widget* parent, const glm::i16vec2* pos, const glm::u16vec2* min_size)
 {
 	OOBase::SharedPtr<Render::GUI::Widget> widget = create_widget();
 	if (!widget)
@@ -132,7 +276,7 @@ bool Indigo::GUI::Widget::do_create(Widget* parent)
 	if (parent)
 		render_parent = parent->m_render_widget;
 
-	if (!widget->create(render_parent))
+	if (!widget->create(render_parent,*pos,*min_size))
 		return false;
 
 	widget.swap(m_render_widget);
