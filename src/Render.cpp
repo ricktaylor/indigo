@@ -215,7 +215,7 @@ static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& conf
 	{
 		// Draw all windows
 		bool visible_window = false;
-		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();)
+		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
 		{
 			if (i->expired())
 				i = vecWindows.erase(i);
@@ -234,7 +234,7 @@ static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& conf
 			break;
 
 		// Swap all windows (this collects events)
-		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i!=vecWindows.end();)
+		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
 		{
 			if (i->expired())
 				i = vecWindows.erase(i);
@@ -405,5 +405,5 @@ bool Indigo::handle_events()
 
 bool Indigo::monitor_window(const OOBase::WeakPtr<OOGL::Window>& win)
 {
-	return s_vecWindows->push_back(win) != s_vecWindows->end();
+	return s_vecWindows->push_back(win);
 }

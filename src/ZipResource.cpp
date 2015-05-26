@@ -169,7 +169,7 @@ bool Indigo::detail::ZipFile::open(const char* filename)
 			if (!strFilename.assign(reinterpret_cast<char*>(buf.get()),filename_len))
 				LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),false);
 
-			if (m_mapFiles.insert(strFilename,offset) == m_mapFiles.end())
+			if (!m_mapFiles.insert(strFilename,offset))
 				LOG_ERROR_RETURN(("Failed to insert zip entry: %s",OOBase::system_error_text()),false);
 		}
 

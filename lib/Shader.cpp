@@ -149,7 +149,7 @@ void OOGL::Program::internal_use() const
 GLint OOGL::Program::uniform_location(const char* name) const
 {
 	map_t::iterator i = m_mapUniforms.find(name);
-	if (i != m_mapUniforms.end())
+	if (i)
 		return i->second;
 
 	GLint l = StateFns::get_current()->glGetUniformLocation(m_id,name);
@@ -165,7 +165,7 @@ GLint OOGL::Program::uniform_location(const char* name) const
 GLint OOGL::Program::attribute_location(const char* name) const
 {
 	map_t::iterator i = m_mapAttributes.find(name);
-	if (i != m_mapAttributes.end())
+	if (i)
 		return i->second;
 
 	GLint l = StateFns::get_current()->glGetAttribLocation(m_id,name);

@@ -69,7 +69,7 @@ void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<Bu
 	StateFns::get_current()->glVertexAttribIPointer(index,components,type,stride,reinterpret_cast<const GLvoid*>(offset));
 
 	OOBase::Table<GLuint,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLuint>,OOBase::ThreadLocalAllocator>::iterator i = m_attributes.find(index);
-	if (i != m_attributes.end())
+	if (i)
 		i->second = buffer;
 	else
 		m_attributes.insert(index,buffer);
@@ -87,7 +87,7 @@ void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<Bu
 	StateFns::get_current()->glVertexAttribPointer(index,components,type,normalized ? GL_TRUE : GL_FALSE,stride,reinterpret_cast<const GLvoid*>(offset));
 
 	OOBase::Table<GLuint,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLuint>,OOBase::ThreadLocalAllocator>::iterator i = m_attributes.find(index);
-	if (i != m_attributes.end())
+	if (i)
 		i->second = buffer;
 	else
 		m_attributes.insert(index,buffer);

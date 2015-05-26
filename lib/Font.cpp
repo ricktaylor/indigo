@@ -193,7 +193,7 @@ namespace
 				wide_val |= (c & 0x3F);
 			}
 
-			if (glyphs.push_back(wide_val) == glyphs.end())
+			if (!glyphs.push_back(wide_val))
 				break;
 
 			if (wide_val > 31 && wide_val != 127 && (wide_val < 128 || wide_val > 159))
@@ -417,7 +417,7 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 				ci.page = *data++;
 				ci.channel = *data++;
 
-				if (!(ok = (m_mapCharInfo.insert(id,ci) != m_mapCharInfo.end())))
+				if (!(ok = m_mapCharInfo.insert(id,ci)))
 					LOG_ERROR(("Failed to add character to table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
 			break;
@@ -429,7 +429,7 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 				ch.first = read_uint32(data);
 				ch.second = read_uint32(data);
 				float offset = read_int16(data) / static_cast<float>(m_size);
-				if (!(ok = (m_mapKerning.insert(ch,offset) != m_mapKerning.end())))
+				if (!(ok = m_mapKerning.insert(ch,offset)))
 					LOG_ERROR(("Failed to add character to kerning table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
 			break;
@@ -469,7 +469,7 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		return true;
 
 	bool found = false;	
-	for (free_list_t::iterator i=m_listFree.begin(); i!=m_listFree.end(); ++i)
+	for (free_list_t::iterator i=m_listFree.begin(); i; ++i)
 	{
 		if (i->second == len)
 		{
@@ -509,7 +509,7 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		m_ptrElements.swap(ptrNewElements);
 
 		free_list_t::iterator last = m_listFree.back();
-		if (last != m_listFree.end())
+		if (last)
 			last->second += new_size - m_allocated;
 		else
 			last = m_listFree.insert(m_allocated,new_size - m_allocated);
@@ -562,13 +562,13 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 			if (prev_glyph != OOBase::uint32_t(-1))
 			{
 				kern_map_t::iterator k = m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(prev_glyph,glyph));
-				if (k != m_mapKerning.end())
+				if (k)
 					text.m_length += k->second;
 			}
 			prev_glyph = glyph;
 
 			char_map_t::iterator i = m_mapCharInfo.find(glyph);
-			if (i == m_mapCharInfo.end())
+			if (!i)
 				i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>('?'));
 
 			a[0].x = text.m_length + i->second.left;
@@ -614,12 +614,12 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 void OOGL::Font::free_text(Text& text)
 {
 	free_list_t::iterator i = m_listFree.insert(text.m_glyph_start,text.m_glyph_len);
-	if (i != m_listFree.end())
+	if (i)
 	{
 		while (i != m_listFree.begin())
 		{
 			free_list_t::iterator j = i+1;
-			if (j != m_listFree.end() && j->first == i->first + i->second)
+			if (j && j->first == i->first + i->second)
 			{
 				// Merge i with j
 				i->second += j->second;

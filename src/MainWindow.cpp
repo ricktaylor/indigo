@@ -71,7 +71,7 @@ bool Indigo::Render::MainWindow::create()
 
 bool Indigo::Render::MainWindow::add_layer(const OOBase::SharedPtr<Layer>& layer)
 {
-	return m_layers.push_back(layer) != m_layers.end();
+	return m_layers.push_back(layer);
 }
 
 void Indigo::Render::MainWindow::on_close(const OOGL::Window& win)
@@ -90,7 +90,7 @@ void Indigo::Render::MainWindow::on_size(const OOGL::Window& win, const glm::ive
 	m_ratio = (sz.x * dpmm.x) / (sz.y * dpmm.y);
 	glViewport(0, 0, sz.x, sz.y);
 
-	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i!=m_layers.end();++i)
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
 		(*i)->on_size(win,sz);
 }
 
@@ -100,7 +100,7 @@ void Indigo::Render::MainWindow::on_draw(const OOGL::Window& win, OOGL::State& g
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i!=m_layers.end();++i)
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
 		(*i)->on_draw(win,glState);
 }
 

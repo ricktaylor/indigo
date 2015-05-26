@@ -160,13 +160,13 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::Sh
 	}
 
 	tex_unit_t::iterator i = tu->find(texture->target());
-	if (i == tu->end())
+	if (!i)
 	{
 		if (texture)
 		{
 			texture->internal_bind(*this,unit);
 
-			if (tu->insert(texture->target(),texture) == tu->end())
+			if (!tu->insert(texture->target(),texture))
 				LOG_WARNING(("Failed to add to texture unit cache"));
 		}
 	}
@@ -195,7 +195,7 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind_texture(GLuint texture, GLenu
 	else
 	{
 		tex_unit_t::iterator i = tu->find(target);
-		if (i == tu->end())
+		if (!i)
 			glBindTexture(target,texture);
 		else
 		{
@@ -221,14 +221,14 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::internal_bind(const OOBase::S
 {
 	OOBase::SharedPtr<BufferObject> prev;
 	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
-	if (i == m_buffer_objects.end())
+	if (!i)
 	{
 		if (buffer_object)
 			buffer_object->internal_bind(target);
 		else
 			m_state_fns.glBindBuffer(target,0);
 
-		if (m_buffer_objects.insert(target,buffer_object) == m_buffer_objects.end())
+		if (!m_buffer_objects.insert(target,buffer_object))
 			LOG_WARNING(("Failed to add to buffer object cache"));
 	}
 	else 
@@ -252,7 +252,7 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind_buffer(GLuint buffer, GL
 {
 	OOBase::SharedPtr<BufferObject> prev;
 	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
-	if (i != m_buffer_objects.end())
+	if (i)
 	{
 		prev = i->second;
 		if (!i->second || i->second->m_buffer != buffer)
@@ -271,9 +271,9 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind_buffer(GLuint buffer, GL
 void OOGL::State::update_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
 {
 	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
-	if (i == m_buffer_objects.end())
+	if (!i)
 	{
-		if (m_buffer_objects.insert(target,buffer_object) == m_buffer_objects.end())
+		if (!m_buffer_objects.insert(target,buffer_object))
 			LOG_WARNING(("Failed to add to buffer object cache"));
 	}
 	else if (i->second != buffer_object)
