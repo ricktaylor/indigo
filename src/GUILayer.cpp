@@ -42,8 +42,7 @@ bool Layer::create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd)
 
 OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Layer::create_widget()
 {
-	// Move this to a derived class
-	OOBase::SharedPtr<::Layer> layer = OOBase::allocate_shared<::Layer,OOBase::ThreadLocalAllocator>();
+	OOBase::SharedPtr< ::Layer> layer = OOBase::allocate_shared< ::Layer,OOBase::ThreadLocalAllocator>();
 	if (!layer)
 		LOG_ERROR(("Failed to allocate layer: %s",OOBase::system_error_text()));
 
@@ -55,7 +54,8 @@ bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd)
 	if (!Panel::create(NULL))
 		return false;
 
-	if (!render_call(OOBase::make_delegate(this,&Layer::do_create),&wnd))
+	bool ret = false;
+	if (!render_call(OOBase::make_delegate(this,&Layer::do_create),&ret,&wnd) || !ret)
 	{
 		destroy();
 		return false;
@@ -64,11 +64,7 @@ bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd)
 	return true;
 }
 
-bool Indigo::GUI::Layer::do_create(OOBase::SharedPtr<Render::MainWindow>* wnd)
+void Indigo::GUI::Layer::do_create(bool* ret_val, OOBase::SharedPtr<Render::MainWindow>* wnd)
 {
-	OOBase::SharedPtr<::Layer> layer(render_widget<::Layer>());
-	if (!layer)
-		return false;
-
-	return layer->create(*wnd);
+	*ret_val = render_widget< ::Layer>()->create(*wnd);
 }

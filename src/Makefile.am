@@ -42,8 +42,9 @@ indigo_SOURCES = \
 	App.cpp \
 	Main.cpp \
 	MainWindow.cpp \
+	GUIWidget.cpp \
+	GUIPanel.cpp \
 	GUILayer.cpp \
-	GUIMenu.cpp \
 	Splash.cpp
 		
 indigo_LDADD = \

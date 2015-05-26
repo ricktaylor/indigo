@@ -263,24 +263,32 @@ bool Indigo::GUI::Widget::create(Widget* parent, const glm::i16vec2& pos, const 
 	if (m_render_widget)
 		LOG_ERROR_RETURN(("Widget::Create called twice"),false);
 
-	return render_call(OOBase::make_delegate(this,&Widget::do_create),parent,&pos,&min_size);
+	bool ret = false;
+	return render_call(OOBase::make_delegate(this,&Widget::do_create),&ret,parent,&pos,&min_size) && ret;
 }
 
-bool Indigo::GUI::Widget::do_create(Widget* parent, const glm::i16vec2* pos, const glm::u16vec2* min_size)
+void Indigo::GUI::Widget::do_create(bool* ret_val, Widget* parent, const glm::i16vec2* pos, const glm::u16vec2* min_size)
 {
 	OOBase::SharedPtr<Render::GUI::Widget> widget = create_widget();
 	if (!widget)
-		LOG_ERROR_RETURN(("Failed to allocate Widget: %s",OOBase::system_error_text()),false);
+	{
+		LOG_ERROR(("Failed to allocate Widget: %s",OOBase::system_error_text()));
+		*ret_val = false;
+	}
+	else
+	{
+		OOBase::SharedPtr<Render::GUI::Widget> render_parent;
+		if (parent)
+			render_parent = parent->m_render_widget;
 
-	OOBase::SharedPtr<Render::GUI::Widget> render_parent;
-	if (parent)
-		render_parent = parent->m_render_widget;
-
-	if (!widget->create(render_parent,*pos,*min_size))
-		return false;
-
-	widget.swap(m_render_widget);
-	return true;
+		if (!widget->create(render_parent,*pos,*min_size))
+			*ret_val = false;
+		else
+		{
+			widget.swap(m_render_widget);
+			*ret_val = true;
+		}
+	}
 }
 
 bool Indigo::GUI::Widget::destroy()
@@ -288,10 +296,9 @@ bool Indigo::GUI::Widget::destroy()
 	return !m_render_widget || render_call(OOBase::make_delegate(this,&Widget::do_destroy));
 }
 
-bool Indigo::GUI::Widget::do_destroy()
+void Indigo::GUI::Widget::do_destroy()
 {
 	m_render_widget.reset();
-	return true;
 }
 
 bool Indigo::GUI::Widget::visible() const
@@ -302,20 +309,19 @@ bool Indigo::GUI::Widget::visible() const
 	return visible;
 }
 
-bool Indigo::GUI::Widget::get_visible(bool* visible)
+void Indigo::GUI::Widget::get_visible(bool* visible)
 {
 	*visible = m_render_widget->visible();
-	return true;
 }
 
 bool Indigo::GUI::Widget::visible(bool show)
 {
-	return render_call(OOBase::make_delegate(this,&Widget::set_visible),show);
+	return render_call(OOBase::make_delegate(this,&Widget::set_visible),&show) && show;
 }
 
-bool Indigo::GUI::Widget::set_visible(bool visible)
+void Indigo::GUI::Widget::set_visible(bool* visible)
 {
-	return m_render_widget->visible(visible);
+	*visible = m_render_widget->visible(visible);
 }
 
 bool Indigo::GUI::Widget::enabled() const
@@ -326,20 +332,19 @@ bool Indigo::GUI::Widget::enabled() const
 	return enabled;
 }
 
-bool Indigo::GUI::Widget::get_enabled(bool* enabled)
+void Indigo::GUI::Widget::get_enabled(bool* enabled)
 {
 	*enabled = m_render_widget->enabled();
-	return true;
 }
 
 bool Indigo::GUI::Widget::enable(bool enabled)
 {
-	return render_call(OOBase::make_delegate(this,&Widget::set_enable),enabled);
+	return render_call(OOBase::make_delegate(this,&Widget::set_enable),&enabled) && enabled;
 }
 
-bool Indigo::GUI::Widget::set_enable(bool enabled)
+void Indigo::GUI::Widget::set_enable(bool* enabled)
 {
-	return m_render_widget->enable(enabled);
+	*enabled = m_render_widget->enable(*enabled);
 }
 
 bool Indigo::GUI::Widget::focused() const
@@ -350,20 +355,19 @@ bool Indigo::GUI::Widget::focused() const
 	return focused;
 }
 
-bool Indigo::GUI::Widget::get_focused(bool* focused)
+void Indigo::GUI::Widget::get_focused(bool* focused)
 {
 	*focused = m_render_widget->focused();
-	return true;
 }
 
 bool Indigo::GUI::Widget::focus(bool focus)
 {
-	return render_call(OOBase::make_delegate(this,&Widget::set_focus),focus);
+	return render_call(OOBase::make_delegate(this,&Widget::set_focus),&focus) && focus;
 }
 
-bool Indigo::GUI::Widget::set_focus(bool focused)
+void Indigo::GUI::Widget::set_focus(bool* focused)
 {
-	return m_render_widget->focus(focused);
+	*focused = m_render_widget->focus(focused);
 }
 
 bool Indigo::GUI::Widget::hilighted() const
@@ -374,18 +378,17 @@ bool Indigo::GUI::Widget::hilighted() const
 	return hilighted;
 }
 
-bool Indigo::GUI::Widget::get_hilighted(bool* hilighted)
+void Indigo::GUI::Widget::get_hilighted(bool* hilighted)
 {
 	*hilighted = m_render_widget->hilighted();
-	return true;
 }
 
 bool Indigo::GUI::Widget::hilight(bool hilight)
 {
-	return render_call(OOBase::make_delegate(this,&Widget::set_hilight),hilight);
+	return render_call(OOBase::make_delegate(this,&Widget::set_hilight),&hilight) && hilight;
 }
 
-bool Indigo::GUI::Widget::set_hilight(bool hilighted)
+void Indigo::GUI::Widget::set_hilight(bool* hilighted)
 {
-	return m_render_widget->hilight(hilighted);
+	*hilighted = m_render_widget->hilight(hilighted);
 }

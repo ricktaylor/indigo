@@ -118,7 +118,8 @@ bool Indigo::MainWindow::create(Application* app)
 	if (m_wnd)
 		LOG_ERROR_RETURN(("MainWindow already created"),false);
 
-	if (!render_call(OOBase::make_delegate(this,&MainWindow::do_create)))
+	bool ret = false;
+	if (!render_call(OOBase::make_delegate(this,&MainWindow::do_create),&ret) || !ret)
 		return false;
 
 	if (!m_top_layer.create(m_wnd))
@@ -126,6 +127,23 @@ bool Indigo::MainWindow::create(Application* app)
 
 	m_app = app;
 	return (m_wnd != NULL);
+}
+
+void Indigo::MainWindow::do_create(bool* ret_val)
+{
+	OOBase::SharedPtr<Render::MainWindow> wnd = OOBase::allocate_shared<Render::MainWindow,OOBase::ThreadLocalAllocator>(this);
+	if (!wnd)
+	{
+		LOG_ERROR(("Failed to allocate MainWindow: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
+		*ret_val = false;
+	}
+	else if (!wnd->create())
+		*ret_val = false;
+	else
+	{
+		wnd.swap(m_wnd);
+		*ret_val = true;
+	}
 }
 
 void Indigo::MainWindow::destroy()
@@ -138,23 +156,9 @@ void Indigo::MainWindow::destroy()
 	m_app = NULL;
 }
 
-bool Indigo::MainWindow::do_create()
-{
-	OOBase::SharedPtr<Render::MainWindow> wnd = OOBase::allocate_shared<Render::MainWindow,OOBase::ThreadLocalAllocator>(this);
-	if (!wnd)
-		LOG_ERROR_RETURN(("Failed to allocate MainWindow: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
-
-	if (!wnd->create())
-		return false;
-
-	wnd.swap(m_wnd);
-	return true;
-}
-
-bool Indigo::MainWindow::do_destroy()
+void Indigo::MainWindow::do_destroy()
 {
 	m_wnd.reset();
-	return true;
 }
 
 void Indigo::MainWindow::on_close()

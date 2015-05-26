@@ -39,7 +39,7 @@ namespace Indigo
 			bool create(OOBase::SharedPtr<Render::MainWindow>& wnd);
 
 		private:
-			bool do_create(OOBase::SharedPtr<Render::MainWindow>* wnd);
+			void do_create(bool* ret_val, OOBase::SharedPtr<Render::MainWindow>* wnd);
 			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
 		};
 	}

@@ -26,33 +26,76 @@
 
 namespace Indigo
 {
+	namespace GUI
+	{
+		class Panel;
+	}
+
 	namespace Render
 	{
 		namespace GUI
 		{
-			class Panel : public Indigo::Render::GUI::Widget
+			class Sizer;
+
+			class Panel : public Widget
 			{
+				friend class Indigo::GUI::Panel;
 			public:
-				bool create();
 
 			protected:
 				virtual bool add_child(const OOBase::SharedPtr<Widget>& child) { return false; }
 				virtual void remove_child(const OOBase::SharedPtr<Widget>& child) {}
 
-			private:				
+			private:
+				OOBase::SharedPtr<Sizer> m_sizer;
 			};
 		}
 	}
 
 	namespace GUI
 	{
+		class Sizer : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<Sizer>
+		{
+			friend class Panel;
+		public:
+			bool create(unsigned int rows = 1, unsigned int columns = 1);
+			bool destroy();
+
+			bool fit(Panel& panel);
+
+			bool add_row(unsigned int rows = 1);
+			bool add_column(unsigned int columns = 1);
+
+			bool add_widget(const OOBase::SharedPtr<Widget>& widget, unsigned int row, unsigned int column = 0);
+			bool remove_widget(unsigned int row, unsigned int column = 0);
+			bool remove_widget(const OOBase::SharedPtr<Widget>& widget);
+
+		private:
+			OOBase::SharedPtr<Indigo::Render::GUI::Sizer> m_sizer;
+
+			void do_create(bool* ret_val, unsigned int rows, unsigned int columns);
+			void do_destroy();
+			void do_add_row(unsigned int rows);
+			void do_add_column(unsigned int columns);
+			void do_fit(bool* ret_val, Widget* panel);
+			void do_add_widget(bool* ret_val, OOBase::SharedPtr<Indigo::Render::GUI::Widget>* widget, unsigned int row, unsigned int column);
+			void do_remove_widget(bool* ret_val, Indigo::Render::GUI::Widget* widget, unsigned int row, unsigned int column);
+		};
+
 		class Panel : public Widget
 		{
 		public:
 			bool create(Widget* parent, const glm::u16vec2& pos = glm::u16vec2(0), const glm::u16vec2& min_size = glm::u16vec2(-1));
 
+			const OOBase::SharedPtr<Sizer>& sizer() const;
+			bool sizer(const OOBase::SharedPtr<Sizer>& s, bool fit = true);
+
+			bool layout();
+
 		private:
-			bool do_create();
+			OOBase::SharedPtr<Sizer> m_sizer;
+
+			void do_sizer(Sizer* s, bool* fit);
 			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
 		};
 	}

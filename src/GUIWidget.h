@@ -40,9 +40,6 @@ namespace Indigo
 				friend class Indigo::GUI::Widget;
 
 			public:
-				Widget();
-				virtual ~Widget();
-
 				bool visible() const;
 				bool visible(bool show = true);
 
@@ -65,6 +62,9 @@ namespace Indigo
 				void max_size(const glm::u16vec2& sz);
 				
 			protected:
+				Widget();
+				virtual ~Widget();
+
 				OOBase::WeakPtr<Widget> m_parent;
 
 				virtual bool add_child(const OOBase::SharedPtr<Widget>& child) { return false; }
@@ -91,7 +91,6 @@ namespace Indigo
 
 				bool create(const OOBase::SharedPtr<Widget>& parent, const glm::i16vec2& pos, const glm::u16vec2& min_size);
 				glm::u16vec2 do_get_best_size() const;
-				
 			};
 		}
 	}
@@ -100,6 +99,8 @@ namespace Indigo
 	{
 		class Widget : public OOBase::NonCopyable
 		{
+			friend class Sizer;
+
 		public:
 			Widget();
 			virtual ~Widget();
@@ -133,16 +134,16 @@ namespace Indigo
 		private:
 			OOBase::SharedPtr<Render::GUI::Widget> m_render_widget;
 
-			bool do_create(Widget* parent, const glm::i16vec2* pos, const glm::u16vec2* min_size);
-			bool do_destroy();
-			bool get_visible(bool* visible);
-			bool set_visible(bool visible);
-			bool get_enabled(bool* enabled);
-			bool set_enable(bool enabled);
-			bool get_focused(bool* focused);
-			bool set_focus(bool focused);
-			bool get_hilighted(bool* hilighted);
-			bool set_hilight(bool hilighted);
+			void do_create(bool* ret_val, Widget* parent, const glm::i16vec2* pos, const glm::u16vec2* min_size);
+			void do_destroy();
+			void get_visible(bool* visible);
+			void set_visible(bool* visible);
+			void get_enabled(bool* enabled);
+			void set_enable(bool* enabled);
+			void get_focused(bool* focused);
+			void set_focus(bool* focused);
+			void get_hilighted(bool* hilighted);
+			void set_hilight(bool* hilighted);
 		};
 	}
 }

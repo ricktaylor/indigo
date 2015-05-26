@@ -75,8 +75,8 @@ namespace Indigo
 		OOBase::SharedPtr<Render::MainWindow> m_wnd;
 		GUI::Layer m_top_layer;
 
-		bool do_create();
-		bool do_destroy();
+		void do_create(bool* ret_val);
+		void do_destroy();
 		void on_close();
 	};
 }
