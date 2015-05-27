@@ -40,6 +40,8 @@ namespace Indigo
 				friend class Indigo::GUI::Widget;
 
 			public:
+				bool shown() const;
+
 				bool visible() const;
 				bool visible(bool show = true);
 
@@ -53,7 +55,7 @@ namespace Indigo
 				bool hilight(bool hilighted = true);
 
 				glm::u16vec2 size() const;
-				void size(const glm::u16vec2& sz);
+				void size(const glm::u16vec2& sz, bool layout = true);
 
 				glm::u16vec2 min_size() const;
 				void min_size(const glm::u16vec2& sz);
@@ -61,6 +63,8 @@ namespace Indigo
 				glm::u16vec2 max_size() const;
 				void max_size(const glm::u16vec2& sz);
 				
+				virtual glm::u16vec2 get_best_size() const { return glm::u16vec2(0); }
+
 			protected:
 				Widget();
 				virtual ~Widget();
@@ -76,8 +80,6 @@ namespace Indigo
 				virtual bool on_hilight(bool hilighted) { return false; }
 				
 				virtual void refresh_layout() {}
-
-				virtual glm::u16vec2 get_best_size() const { return glm::u16vec2(0); }
 
 			private:
 				bool m_visible;
@@ -107,6 +109,7 @@ namespace Indigo
 
 			bool destroy();
 
+			bool shown() const;
 			bool visible() const;
 			bool visible(bool show = true);
 
@@ -136,6 +139,7 @@ namespace Indigo
 
 			void do_create(bool* ret_val, Widget* parent, const glm::i16vec2* pos, const glm::u16vec2* min_size);
 			void do_destroy();
+			void get_shown(bool* shown);
 			void get_visible(bool* visible);
 			void set_visible(bool* visible);
 			void get_enabled(bool* enabled);

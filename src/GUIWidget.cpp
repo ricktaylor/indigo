@@ -52,9 +52,9 @@ glm::u16vec2 Indigo::Render::GUI::Widget::size() const
 	return m_size;
 }
 
-void Indigo::Render::GUI::Widget::size(const glm::u16vec2& sz)
+void Indigo::Render::GUI::Widget::size(const glm::u16vec2& sz, bool layout)
 {
-	bool changed = false;
+	bool changed = (m_size != sz);
 
 	if ((m_min_size.x != -1 && m_size.x < m_min_size.x) || 
 		(m_min_size.y != -1 && m_size.y < m_min_size.y))
@@ -79,7 +79,7 @@ void Indigo::Render::GUI::Widget::size(const glm::u16vec2& sz)
 		changed = true;
 	}
 
-	if (changed && visible())
+	if (layout && changed && shown())
 	{
 		OOBase::SharedPtr<Widget> parent(m_parent);
 		if (parent)
@@ -122,7 +122,7 @@ void Indigo::Render::GUI::Widget::min_size(const glm::u16vec2& sz)
 		if (m_min_size.y != -1 && m_size.y < m_min_size.y)
 			m_size.y = m_min_size.y;
 
-		if (visible())
+		if (shown())
 		{
 			OOBase::SharedPtr<Widget> parent(m_parent);
 			if (parent)
@@ -154,7 +154,7 @@ void Indigo::Render::GUI::Widget::max_size(const glm::u16vec2& sz)
 		if (m_size.y > m_max_size.y)
 			m_size.y = m_max_size.y;
 
-		if (visible())
+		if (shown())
 		{
 			OOBase::SharedPtr<Widget> parent(m_parent);
 			if (parent)
@@ -182,10 +182,18 @@ glm::u16vec2 Indigo::Render::GUI::Widget::do_get_best_size() const
 	return sz;
 }
 
+bool Indigo::Render::GUI::Widget::shown() const
+{
+	if (!visible())
+		return false;
+
+	OOBase::SharedPtr<Widget> parent(m_parent);
+	return !parent || parent->shown();
+}
+
 bool Indigo::Render::GUI::Widget::visible() const
 {
-	OOBase::SharedPtr<Widget> parent(m_parent);
-	return m_visible && (!parent || parent->visible());
+	return m_visible;
 }
 
 bool Indigo::Render::GUI::Widget::visible(bool show)
@@ -209,12 +217,12 @@ bool Indigo::Render::GUI::Widget::visible(bool show)
 bool Indigo::Render::GUI::Widget::enabled() const
 {
 	OOBase::SharedPtr<Widget> parent(m_parent);
-	return m_enabled && visible() && (!parent || parent->enabled());
+	return m_enabled && shown() && (!parent || parent->enabled());
 }
 
 bool Indigo::Render::GUI::Widget::enable(bool enable)
 {
-	if (!visible() || !on_enable(enable))
+	if (!shown() || !on_enable(enable))
 		return false;
 
 	m_enabled = enable;
@@ -301,12 +309,21 @@ void Indigo::GUI::Widget::do_destroy()
 	m_render_widget.reset();
 }
 
+bool Indigo::GUI::Widget::shown() const
+{
+	bool shown = false;
+	return render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_shown),&shown) && shown;
+}
+
+void Indigo::GUI::Widget::get_shown(bool* shown)
+{
+	*shown = m_render_widget->shown();
+}
+
 bool Indigo::GUI::Widget::visible() const
 {
 	bool visible = false;
-	if (!render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_visible),&visible))
-		return false;
-	return visible;
+	return render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_visible),&visible) && visible;
 }
 
 void Indigo::GUI::Widget::get_visible(bool* visible)
@@ -327,9 +344,7 @@ void Indigo::GUI::Widget::set_visible(bool* visible)
 bool Indigo::GUI::Widget::enabled() const
 {
 	bool enabled = false;
-	if (!render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_enabled),&enabled))
-		return false;
-	return enabled;
+	return render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_enabled),&enabled) && enabled;
 }
 
 void Indigo::GUI::Widget::get_enabled(bool* enabled)
@@ -350,9 +365,7 @@ void Indigo::GUI::Widget::set_enable(bool* enabled)
 bool Indigo::GUI::Widget::focused() const
 {
 	bool focused = false;
-	if (!render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_focused),&focused))
-		return false;
-	return focused;
+	return render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_focused),&focused) && focused;
 }
 
 void Indigo::GUI::Widget::get_focused(bool* focused)
@@ -373,9 +386,7 @@ void Indigo::GUI::Widget::set_focus(bool* focused)
 bool Indigo::GUI::Widget::hilighted() const
 {
 	bool hilighted = false;
-	if (!render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_hilighted),&hilighted))
-		return false;
-	return hilighted;
+	return render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_hilighted),&hilighted) && hilighted;
 }
 
 void Indigo::GUI::Widget::get_hilighted(bool* hilighted)
