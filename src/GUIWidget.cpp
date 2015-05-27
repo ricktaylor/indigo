@@ -52,35 +52,29 @@ glm::u16vec2 Indigo::Render::GUI::Widget::size() const
 	return m_size;
 }
 
-void Indigo::Render::GUI::Widget::size(const glm::u16vec2& sz, bool layout)
+void Indigo::Render::GUI::Widget::size(const glm::u16vec2& sz)
 {
-	bool changed = (m_size != sz);
-
-	if ((m_min_size.x != -1 && m_size.x < m_min_size.x) || 
-		(m_min_size.y != -1 && m_size.y < m_min_size.y))
+	if (m_size != sz)
 	{
-		if (m_min_size.x != -1 && m_size.x < m_min_size.x)
-			m_size.x = m_min_size.x;
+		if ((m_min_size.x != -1 && m_size.x < m_min_size.x) || 
+			(m_min_size.y != -1 && m_size.y < m_min_size.y))
+		{
+			if (m_min_size.x != -1 && m_size.x < m_min_size.x)
+				m_size.x = m_min_size.x;
 
-		if (m_min_size.y != -1 && m_size.y < m_min_size.y)
-			m_size.y = m_min_size.y;
+			if (m_min_size.y != -1 && m_size.y < m_min_size.y)
+				m_size.y = m_min_size.y;
+		}
 
-		changed = true;
-	}
+		if (m_size.x > m_max_size.x || m_size.y > m_max_size.y)
+		{
+			if (m_size.x > m_max_size.x)
+				m_size.x = m_max_size.x;
 
-	if (m_size.x > m_max_size.x || m_size.y > m_max_size.y)
-	{
-		if (m_size.x > m_max_size.x)
-			m_size.x = m_max_size.x;
+			if (m_size.y > m_max_size.y)
+				m_size.y = m_max_size.y;
+		}
 
-		if (m_size.y > m_max_size.y)
-			m_size.y = m_max_size.y;
-
-		changed = true;
-	}
-
-	if (layout && changed && shown())
-	{
 		OOBase::SharedPtr<Widget> parent(m_parent);
 		if (parent)
 			parent->refresh_layout();
@@ -122,12 +116,9 @@ void Indigo::Render::GUI::Widget::min_size(const glm::u16vec2& sz)
 		if (m_min_size.y != -1 && m_size.y < m_min_size.y)
 			m_size.y = m_min_size.y;
 
-		if (shown())
-		{
-			OOBase::SharedPtr<Widget> parent(m_parent);
-			if (parent)
-				parent->refresh_layout();
-		}
+		OOBase::SharedPtr<Widget> parent(m_parent);
+		if (parent)
+			parent->refresh_layout();
 	}
 }
 
@@ -154,12 +145,9 @@ void Indigo::Render::GUI::Widget::max_size(const glm::u16vec2& sz)
 		if (m_size.y > m_max_size.y)
 			m_size.y = m_max_size.y;
 
-		if (shown())
-		{
-			OOBase::SharedPtr<Widget> parent(m_parent);
-			if (parent)
-				parent->refresh_layout();
-		}
+		OOBase::SharedPtr<Widget> parent(m_parent);
+		if (parent)
+			parent->refresh_layout();
 	}
 }
 
@@ -338,7 +326,7 @@ bool Indigo::GUI::Widget::visible(bool show)
 
 void Indigo::GUI::Widget::set_visible(bool* visible)
 {
-	*visible = m_render_widget->visible(visible);
+	*visible = m_render_widget->visible(*visible);
 }
 
 bool Indigo::GUI::Widget::enabled() const
@@ -380,7 +368,7 @@ bool Indigo::GUI::Widget::focus(bool focus)
 
 void Indigo::GUI::Widget::set_focus(bool* focused)
 {
-	*focused = m_render_widget->focus(focused);
+	*focused = m_render_widget->focus(*focused);
 }
 
 bool Indigo::GUI::Widget::hilighted() const
@@ -401,5 +389,5 @@ bool Indigo::GUI::Widget::hilight(bool hilight)
 
 void Indigo::GUI::Widget::set_hilight(bool* hilighted)
 {
-	*hilighted = m_render_widget->hilight(hilighted);
+	*hilighted = m_render_widget->hilight(*hilighted);
 }

@@ -55,7 +55,7 @@ namespace Indigo
 				bool hilight(bool hilighted = true);
 
 				glm::u16vec2 size() const;
-				void size(const glm::u16vec2& sz, bool layout = true);
+				void size(const glm::u16vec2& sz);
 
 				glm::u16vec2 min_size() const;
 				void min_size(const glm::u16vec2& sz);
