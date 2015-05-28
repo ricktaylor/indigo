@@ -54,16 +54,22 @@ namespace Indigo
 				bool hilighted() const;
 				bool hilight(bool hilighted = true);
 
-				glm::u16vec2 size() const;
-				void size(const glm::u16vec2& sz);
+				glm::i16vec2 position() const { return m_position; }
+				void position(const glm::i16vec2& pos);
+
+				glm::u16vec2 size() const { return m_size; }
+				glm::u16vec2 size(const glm::u16vec2& sz);
 
 				glm::u16vec2 min_size() const;
-				void min_size(const glm::u16vec2& sz);
+				glm::u16vec2 min_size(const glm::u16vec2& sz);
 
-				glm::u16vec2 max_size() const;
-				void max_size(const glm::u16vec2& sz);
+				glm::u16vec2 max_size() const { return m_max_size; }
+				glm::u16vec2 max_size(const glm::u16vec2& sz);
 				
-				virtual glm::u16vec2 get_best_size() const { return glm::u16vec2(0); }
+				virtual glm::u16vec2 client_size() const { return m_size; }
+				virtual glm::u16vec2 client_size(const glm::u16vec2& sz) { return size(sz); }
+
+				virtual glm::u16vec2 ideal_size() const;
 
 			protected:
 				Widget();
@@ -78,21 +84,18 @@ namespace Indigo
 				virtual bool on_enable(bool enabled) { return false; }
 				virtual bool on_focus(bool focused) { return false; }
 				virtual bool on_hilight(bool hilighted) { return false; }
-				
-				virtual void refresh_layout() {}
 
 			private:
 				bool m_visible;
 				bool m_enabled;
 				bool m_focused;
 				bool m_hilighted;
-				glm::i16vec2 m_pos;
+				glm::i16vec2 m_position;
 				glm::u16vec2 m_min_size;
 				glm::u16vec2 m_max_size;
 				glm::u16vec2 m_size;
 
 				bool create(const OOBase::SharedPtr<Widget>& parent, const glm::i16vec2& pos, const glm::u16vec2& min_size);
-				glm::u16vec2 do_get_best_size() const;
 			};
 		}
 	}

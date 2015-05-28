@@ -34,18 +34,17 @@ namespace Indigo
 				struct Item
 				{
 					OOBase::WeakPtr<Widget>        m_widget;
-					OOBase::uint16_t                   m_width;
-					OOBase::uint16_t                   m_height;
+					OOBase::uint16_t               m_width;
+					OOBase::uint16_t               m_height;
 					Indigo::GUI::Sizer::ItemLayout m_layout;
 				};
-
-				unsigned int m_rows;
-				unsigned int m_cols;
 
 				typedef OOBase::Table<OOBase::Pair<unsigned int,unsigned int>,Item,OOBase::Less<OOBase::Pair<unsigned int,unsigned int> >,OOBase::ThreadLocalAllocator> items_t;
 				items_t m_items;
 
-				void fit(Panel& panel);
+				glm::u16vec2 m_padding;
+
+				bool fit(Panel& panel);
 				bool layout(const Panel& panel);
 
 				bool add_widget(const OOBase::SharedPtr<Widget>& widget, unsigned int row, unsigned int column, const Indigo::GUI::Sizer::ItemLayout& layout);
@@ -53,31 +52,42 @@ namespace Indigo
 				bool remove_item(unsigned int row, unsigned int column);
 				bool remove_widget(Widget* widget);
 
-				glm::u16vec2 get_best_size() const;
+				glm::u16vec2 ideal_size() const;
+
+			private:
+				bool get_extents(OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& widths,
+							OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& heights,
+							OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_width,
+							OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_height);
+
+				bool do_layout(const Panel& panel,
+							OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& widths,
+							OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& heights,
+							OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_width,
+							OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_height);
 			};
 		}
 	}
 }
 
-glm::u16vec2 Indigo::Render::GUI::Sizer::get_best_size() const
+glm::u16vec2 Indigo::Render::GUI::Sizer::ideal_size() const
 {
 	OOBase::Vector<OOBase::uint16_t,OOBase::ThreadLocalAllocator> widths;
 	OOBase::Vector<OOBase::uint16_t,OOBase::ThreadLocalAllocator> heights;
-	OOBase::uint16_t max_width = 0;
-	OOBase::uint16_t max_height = 0;
+	OOBase::uint16_t ideal_width = 0;
+	OOBase::uint16_t ideal_height = 0;
 
 	for (items_t::const_iterator i=m_items.begin();i;++i)
 	{
 		glm::u16vec2 sz(0);
-		glm::u16vec2 border(i->second.m_layout.m_border_left+i->second.m_layout.m_border_right,i->second.m_layout.m_border_top+i->second.m_layout.m_border_bottom);
 		if (i->second.m_widget)
 		{
 			OOBase::SharedPtr<Widget> widget(i->second.m_widget.lock());
 			if (widget && widget->visible())
-				sz = widget->get_best_size() + border;
+				sz = widget->ideal_size() + m_padding;
 		}
 		else
-			sz = glm::u16vec2(i->second.m_width,i->second.m_height) + border;
+			sz = glm::u16vec2(i->second.m_width,i->second.m_height) + m_padding;
 
 		while (widths.size() <= i->first.first)
 		{
@@ -98,37 +108,36 @@ glm::u16vec2 Indigo::Render::GUI::Sizer::get_best_size() const
 	}
 
 	for (OOBase::Vector<OOBase::uint16_t,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
-		max_width += *i;
+		ideal_width += *i;
 	
+	if (ideal_width)
+		ideal_width += m_padding.x;
+
 	for (OOBase::Vector<OOBase::uint16_t,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
-		max_height += *i;
-		
-	return glm::u16vec2(max_width,max_height);
+		ideal_height += *i;
+
+	if (ideal_height)
+		ideal_height += m_padding.y;
+
+	return glm::u16vec2(ideal_width,ideal_height);
 }
 
-void Indigo::Render::GUI::Sizer::fit(Panel& panel)
+bool Indigo::Render::GUI::Sizer::get_extents(OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& widths,
+			OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& heights,
+			OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_width,
+			OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_height)
 {
-	panel.size(get_best_size());
-}
-
-bool Indigo::Render::GUI::Sizer::layout(const Panel& panel)
-{
-	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator> widths;
-	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator> heights;
-	OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t> max_width(0,0);
-	OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t> max_height(0,0);
 	for (items_t::iterator i=m_items.begin();i;++i)
 	{
 		glm::u16vec2 sz(0);
-		glm::u16vec2 border(i->second.m_layout.m_border_left+i->second.m_layout.m_border_right,i->second.m_layout.m_border_top+i->second.m_layout.m_border_bottom);
 		if (i->second.m_widget)
 		{
 			OOBase::SharedPtr<Widget> widget(i->second.m_widget.lock());
 			if (widget && widget->visible())
-				sz = widget->get_best_size() + border;
+				sz = widget->ideal_size() + m_padding;
 		}
 		else
-			sz = glm::u16vec2(i->second.m_width,i->second.m_height) + border;
+			sz = glm::u16vec2(i->second.m_width,i->second.m_height) + m_padding;
 
 		while (widths.size() <= i->first.first)
 		{
@@ -153,52 +162,156 @@ bool Indigo::Render::GUI::Sizer::layout(const Panel& panel)
 
 	for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
 	{
-		max_width.first += i->first;
-		max_width.second += i->second;
+		ideal_width.first += i->first;
+		ideal_width.second += i->second;
 	}
+	if (ideal_width.first)
+		ideal_width.first += m_padding.x;
 
 	for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
 	{
-		max_height.first += i->first;
-		max_height.second += i->second;
+		ideal_height.first += i->first;
+		ideal_height.second += i->second;
 	}
+	if (ideal_height.first)
+		ideal_height.first += m_padding.y;
 	
+	return true;
+}
+
+bool Indigo::Render::GUI::Sizer::fit(Panel& panel)
+{
+	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator> widths;
+	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator> heights;
+	OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t> ideal_width(0,0);
+	OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t> ideal_height(0,0);
+	if (!get_extents(widths,heights,ideal_width,ideal_height))
+		return false;
+
+	glm::u16vec2 size = panel.size();
+	if (panel.client_size(ideal_size()) == size)
+		return true;
+
+	return do_layout(panel,widths,heights,ideal_width,ideal_height);
+}
+
+bool Indigo::Render::GUI::Sizer::layout(const Panel& panel)
+{
+	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator> widths;
+	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator> heights;
+	OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t> ideal_width(0,0);
+	OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t> ideal_height(0,0);
+	if (!get_extents(widths,heights,ideal_width,ideal_height))
+		return false;
+
+	return do_layout(panel,widths,heights,ideal_width,ideal_height);
+}
+
+bool Indigo::Render::GUI::Sizer::do_layout(const Panel& panel,
+		OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& widths,
+		OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& heights,
+		OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_width,
+		OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_height)
+{
 	// Adjust the widths and heights
-	glm::u16vec2 panel_size = panel.size();
-	if (max_width.first < panel_size.x || max_height.first < panel_size.y)
-		LOG_ERROR_RETURN(("Failed to fit children into panel"),false);
-
-	float expand_x = static_cast<float>(panel_size.x - max_width.first) / max_width.second;
-	for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
-		i->first += static_cast<OOBase::uint16_t>(expand_x * i->second / max_width.second);
-
-	float expand_y = static_cast<float>(panel_size.y - max_height.first) / max_height.second;
-	for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
-		i->first += static_cast<OOBase::uint16_t>(expand_y * i->second / max_height.second);
-
-	for (items_t::iterator i=m_items.begin();i;++i)
+	glm::u16vec2 panel_size = panel.client_size();
+	if (panel_size.x != ideal_width.first)
 	{
-		if (i->second.m_widget)
+		float expand_x = static_cast<float>(panel_size.x - ideal_width.first) / ideal_width.second;
+		for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
 		{
-			OOBase::SharedPtr<Widget> widget(i->second.m_widget.lock());
-			if (widget && widget->visible())
-			{
-				OOBase::uint16_t space_width = widths[i->first.first].first;
-				OOBase::uint16_t space_height = heights[i->first.second].first;
-
-
-			}
+			int w = i->first + static_cast<int>(expand_x * i->second / ideal_width.second);
+			if (w < 0)
+				i->first = 0;
+			else
+				i->first = w;
 		}
 	}
+	if (panel_size.y != ideal_height.first)
+	{
+		float expand_y = static_cast<float>(panel_size.y - ideal_height.first) / ideal_height.second;
+		for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
+		{
+			int h = i->first + static_cast<int>(expand_y * i->second / ideal_height.second);
+			if (h < 0)
+				i->first = 0;
+			else
+				i->first = h;
+		}
+	}
+
+	// Loop through the grid
+	glm::i16vec2 cell_pos;
+	glm::u16vec2 cell_size;
+
+	unsigned int y = 0;
+	for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator k=heights.begin();k;++k)
+	{
+		cell_pos.x = 0;
+		if (k->first)
+		{
+			cell_pos.y += m_padding.y;
+			cell_size.y = k->first - m_padding.y;
+
+			unsigned int x = 0;
+			for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator j=widths.begin();j;++j)
+			{
+				if (j->first)
+				{
+					cell_pos.x += m_padding.x;
+					cell_size.x = j->first - m_padding.x;
+
+					items_t::iterator i = m_items.find(OOBase::Pair<unsigned int,unsigned int>(x,y));
+					if (i && i->second.m_widget)
+					{
+						OOBase::SharedPtr<Widget> widget(i->second.m_widget.lock());
+						if (widget && widget->visible())
+						{
+							glm::i16vec2 item_pos(cell_pos);
+							glm::u16vec2 item_size(widget->ideal_size());
+
+							// Expand if required
+							if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand)
+							{
+								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand_horiz)
+									item_size.x = cell_size.x;
+								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand_vert)
+									item_size.y = cell_size.y;
+
+								item_size = widget->size(item_size);
+							}
+
+							// Align if required
+							if (item_size != cell_size)
+							{
+								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_right)
+									item_pos.x = cell_pos.x + static_cast<int>(cell_size.x) - item_size.x;
+								else if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_hcentre)
+									item_pos.x = cell_pos.x + (static_cast<int>(cell_size.x) - item_size.x)/2;
+
+								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_top)
+									item_pos.y = cell_pos.y + static_cast<int>(cell_size.y) - item_size.y;
+								else if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_vcentre)
+									item_pos.y = cell_pos.y + (static_cast<int>(cell_size.y) - item_size.y)/2;
+
+								widget->position(item_pos);
+							}
+						}
+					}
+					cell_pos.x += j->first;
+				}
+				++x;
+			}
+			cell_pos.y += k->first;
+		}
+		++y;
+	}
+
+	return true;
 }
 
 bool Indigo::Render::GUI::Sizer::add_widget(const OOBase::SharedPtr<Widget>& widget, unsigned int row, unsigned int column, const Indigo::GUI::Sizer::ItemLayout& layout)
 {
-	if (row >= m_rows)
-		LOG_ERROR_RETURN(("Sizer: Adding item beyond max row"),false);
-	if (column >= m_cols)
-		LOG_ERROR_RETURN(("Sizer: Adding item beyond max column"),false);
-
 	Item item;
 	item.m_widget = widget;
 	item.m_layout = layout;
@@ -215,11 +328,6 @@ bool Indigo::Render::GUI::Sizer::add_widget(const OOBase::SharedPtr<Widget>& wid
 
 bool Indigo::Render::GUI::Sizer::add_spacer(OOBase::uint16_t width, OOBase::uint16_t height, unsigned int row, unsigned int column, const Indigo::GUI::Sizer::ItemLayout& layout)
 {
-	if (row >= m_rows)
-		LOG_ERROR_RETURN(("Sizer: Adding item beyond max row"),false);
-	if (column >= m_cols)
-		LOG_ERROR_RETURN(("Sizer: Adding item beyond max column"),false);
-
 	Item item;
 	item.m_width = width;
 	item.m_height = height;
@@ -250,30 +358,27 @@ bool Indigo::Render::GUI::Sizer::remove_item(unsigned int row, unsigned int colu
 	return m_items.remove(OOBase::Pair<unsigned int,unsigned int>(row,column));
 }
 
-bool Indigo::GUI::Sizer::create(unsigned int rows, unsigned int columns)
+bool Indigo::GUI::Sizer::create(OOBase::uint16_t hspace, OOBase::uint16_t vspace)
 {
 	ItemLayout def_layout;
-	def_layout.m_flags = ItemLayout::align_left | ItemLayout::align_top;
-	def_layout.m_border_left = 3;
-	def_layout.m_border_right = 3;
-	def_layout.m_border_top = 3;
-	def_layout.m_border_bottom = 3;
+	def_layout.m_flags = ItemLayout::expand | ItemLayout::align_left | ItemLayout::align_top;
 	def_layout.m_proportion = 0;
 
-	return create(def_layout,rows,columns);
+	return create(hspace,vspace,def_layout);
 }
 
-bool Indigo::GUI::Sizer::create(const ItemLayout& layout, unsigned int rows, unsigned int columns)
+bool Indigo::GUI::Sizer::create(OOBase::uint16_t hspace, OOBase::uint16_t vspace, const ItemLayout& layout)
 {
+	const glm::u16vec2 space(hspace,vspace);
 	bool ret = false;
-	if (!render_call(OOBase::make_delegate(this,&Sizer::do_create),&ret,rows,columns) || !ret)
+	if (!render_call(OOBase::make_delegate(this,&Sizer::do_create),&ret,&space) || !ret)
 		return false;
 
 	m_default_layout = layout;
 	return true;
 }
 
-void Indigo::GUI::Sizer::do_create(bool* ret_val, unsigned int rows, unsigned int columns)
+void Indigo::GUI::Sizer::do_create(bool* ret_val, const glm::u16vec2* space)
 {
 	OOBase::SharedPtr<Indigo::Render::GUI::Sizer> sizer = OOBase::allocate_shared<Indigo::Render::GUI::Sizer,OOBase::ThreadLocalAllocator>();
 	if (!sizer)
@@ -283,8 +388,7 @@ void Indigo::GUI::Sizer::do_create(bool* ret_val, unsigned int rows, unsigned in
 		return;
 	}
 
-	sizer->m_rows = rows;
-	sizer->m_cols = columns;
+	sizer->m_padding = *space;
 
 	sizer.swap(m_sizer);
 	*ret_val = true;
@@ -300,26 +404,6 @@ void Indigo::GUI::Sizer::do_destroy()
 	m_sizer.reset();
 }
 
-bool Indigo::GUI::Sizer::add_row(unsigned int rows)
-{
-	return m_sizer && rows > 0 && render_call(OOBase::make_delegate(this,&Sizer::do_add_row),rows);
-}
-
-void Indigo::GUI::Sizer::do_add_row(unsigned int rows)
-{
-	m_sizer->m_rows += rows;
-}
-
-bool Indigo::GUI::Sizer::add_column(unsigned int columns)
-{
-	return m_sizer && columns > 0 && render_call(OOBase::make_delegate(this,&Sizer::do_add_column),columns);
-}
-
-void Indigo::GUI::Sizer::do_add_column(unsigned int columns)
-{
-	m_sizer->m_cols += columns;
-}
-
 bool Indigo::GUI::Sizer::fit(Panel& panel)
 {
 	bool ret = false;
@@ -332,10 +416,7 @@ void Indigo::GUI::Sizer::do_fit(bool* ret_val, Widget* panel)
 	if (!render_panel)
 		*ret_val = false;
 	else
-	{
-		m_sizer->fit(*render_panel.get());
-		*ret_val = true;
-	}
+		*ret_val = m_sizer->fit(*render_panel.get());
 }
 
 bool Indigo::GUI::Sizer::layout(const Panel& panel)
@@ -410,12 +491,20 @@ void Indigo::Render::GUI::Panel::refresh_layout()
 		m_sizer->layout(*this);
 }
 
-glm::u16vec2 Indigo::Render::GUI::Panel::get_best_size() const
+glm::u16vec2 Indigo::Render::GUI::Panel::ideal_size() const
 {
-	if (!m_sizer)
-		return glm::u16vec2(0);
+	glm::u16vec2 sz(Widget::ideal_size());
+	if (m_sizer)
+	{
+		glm::u16vec2 sz2 = m_sizer->ideal_size();
+		if (sz2.x > sz.x)
+			sz.x = sz2.x;
 
-	return m_sizer->get_best_size();
+		if (sz2.y > sz.y)
+			sz.y = sz2.y;
+	}
+
+	return sz;
 }
 
 OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Panel::create_widget()
@@ -462,10 +551,8 @@ void Indigo::GUI::Panel::do_sizer(Sizer* s, bool* fit)
 	OOBase::SharedPtr<Indigo::Render::GUI::Panel> panel = render_widget<Indigo::Render::GUI::Panel>();
 	if (panel)
 	{
-		if (*fit)
-			s->m_sizer->fit(*panel.get());
-
-		panel->m_sizer = s->m_sizer;
+		if (!*fit || (*fit = s->m_sizer->fit(*panel.get())))
+			panel->m_sizer = s->m_sizer;
 	}
 }
 

@@ -39,76 +39,22 @@ bool Indigo::Render::GUI::Widget::create(const OOBase::SharedPtr<Widget>& parent
 	if (parent && !parent->add_child(shared_from_this()))
 		return false;
 
-	m_pos = pos;
+	m_position = pos;
 	m_min_size = size;
 	m_size = min_size();
-
 	m_parent = parent;
+
 	return true;
 }
 
-glm::u16vec2 Indigo::Render::GUI::Widget::size() const
+void Indigo::Render::GUI::Widget::position(const glm::i16vec2& pos)
 {
-	return m_size;
+	m_position = pos;
 }
 
-void Indigo::Render::GUI::Widget::size(const glm::u16vec2& sz)
+glm::u16vec2 Indigo::Render::GUI::Widget::size(const glm::u16vec2& sz)
 {
 	if (m_size != sz)
-	{
-		if ((m_min_size.x != -1 && m_size.x < m_min_size.x) || 
-			(m_min_size.y != -1 && m_size.y < m_min_size.y))
-		{
-			if (m_min_size.x != -1 && m_size.x < m_min_size.x)
-				m_size.x = m_min_size.x;
-
-			if (m_min_size.y != -1 && m_size.y < m_min_size.y)
-				m_size.y = m_min_size.y;
-		}
-
-		if (m_size.x > m_max_size.x || m_size.y > m_max_size.y)
-		{
-			if (m_size.x > m_max_size.x)
-				m_size.x = m_max_size.x;
-
-			if (m_size.y > m_max_size.y)
-				m_size.y = m_max_size.y;
-		}
-
-		OOBase::SharedPtr<Widget> parent(m_parent);
-		if (parent)
-			parent->refresh_layout();
-	}
-}
-
-glm::u16vec2 Indigo::Render::GUI::Widget::min_size() const
-{
-	glm::u16vec2 min_size(m_min_size);
-	if (min_size.x == -1 || min_size.y == -1)
-	{
-		glm::u16vec2 best(do_get_best_size());
-
-		if (min_size.x == -1)
-			min_size.x = best.x;
-
-		if (min_size.y == -1)
-			min_size.y = best.y;
-	}
-	return min_size;
-}
-
-void Indigo::Render::GUI::Widget::min_size(const glm::u16vec2& sz)
-{
-	m_min_size = sz;
-
-	if (m_min_size.x != -1 && m_max_size.x < m_min_size.x)
-		m_max_size.x = m_min_size.x;
-
-	if (m_min_size.y != -1 && m_max_size.y < m_min_size.y)
-		m_max_size.y = m_min_size.y;
-
-	if ((m_min_size.x != -1 && m_size.x < m_min_size.x) || 
-		(m_min_size.y != -1 && m_size.y < m_min_size.y))
 	{
 		if (m_min_size.x != -1 && m_size.x < m_min_size.x)
 			m_size.x = m_min_size.x;
@@ -116,49 +62,89 @@ void Indigo::Render::GUI::Widget::min_size(const glm::u16vec2& sz)
 		if (m_min_size.y != -1 && m_size.y < m_min_size.y)
 			m_size.y = m_min_size.y;
 
-		OOBase::SharedPtr<Widget> parent(m_parent);
-		if (parent)
-			parent->refresh_layout();
-	}
-}
-
-glm::u16vec2 Indigo::Render::GUI::Widget::max_size() const
-{
-	return m_max_size;
-}
-
-void Indigo::Render::GUI::Widget::max_size(const glm::u16vec2& sz)
-{
-	m_max_size = sz;
-
-	if (m_min_size.x != -1 && m_max_size.x < m_min_size.x)
-		m_max_size.x = m_min_size.x;
-
-	if (m_min_size.y != -1 && m_max_size.y < m_min_size.y)
-		m_max_size.y = m_min_size.y;
-
-	if (m_size.x > m_max_size.x || m_size.y > m_max_size.y)
-	{
 		if (m_size.x > m_max_size.x)
 			m_size.x = m_max_size.x;
 
 		if (m_size.y > m_max_size.y)
 			m_size.y = m_max_size.y;
-
-		OOBase::SharedPtr<Widget> parent(m_parent);
-		if (parent)
-			parent->refresh_layout();
 	}
+
+	return m_size;
 }
 
-glm::u16vec2 Indigo::Render::GUI::Widget::do_get_best_size() const
+glm::u16vec2 Indigo::Render::GUI::Widget::min_size() const
 {
-	glm::u16vec2 sz(get_best_size());
+	glm::u16vec2 min_size(m_min_size);
+	if (min_size.x == -1 || min_size.y == -1)
+	{
+		glm::u16vec2 ideal(ideal_size());
+		if (min_size.x == -1)
+			min_size.x = ideal.x;
 
-	if (m_min_size.x != -1 && m_min_size.x > sz.x)
+		if (min_size.y == -1)
+			min_size.y = ideal.y;
+	}
+
+	return min_size;
+}
+
+glm::u16vec2 Indigo::Render::GUI::Widget::min_size(const glm::u16vec2& sz)
+{
+	if (m_min_size != sz)
+	{
+		m_min_size = sz;
+
+		if (m_min_size.x != -1)
+		{
+			if (m_max_size.x < m_min_size.x)
+				m_max_size.x = m_min_size.x;
+
+			if (m_size.x < m_min_size.x)
+				m_size.x = m_min_size.x;
+		}
+
+		if (m_min_size.y != -1)
+		{
+			if (m_max_size.y < m_min_size.y)
+				m_max_size.y = m_min_size.y;
+
+			if (m_size.y < m_min_size.y)
+				m_size.y = m_min_size.y;
+		}
+	}
+
+	return m_size;
+}
+
+glm::u16vec2 Indigo::Render::GUI::Widget::max_size(const glm::u16vec2& sz)
+{
+	if (m_max_size != sz)
+	{
+		m_max_size = sz;
+
+		if (m_min_size.x != -1 && m_max_size.x < m_min_size.x)
+			m_max_size.x = m_min_size.x;
+
+		if (m_min_size.y != -1 && m_max_size.y < m_min_size.y)
+			m_max_size.y = m_min_size.y;
+
+		if (m_size.x > m_max_size.x)
+			m_size.x = m_max_size.x;
+
+		if (m_size.y > m_max_size.y)
+			m_size.y = m_max_size.y;
+	}
+
+	return m_size;
+}
+
+glm::u16vec2 Indigo::Render::GUI::Widget::ideal_size() const
+{
+	glm::u16vec2 sz(0);
+	if (m_min_size.x != -1)
 		sz.x = m_min_size.x;
 
-	if (m_min_size.y != -1 && m_min_size.y > sz.y)
+	if (m_min_size.y != -1)
 		sz.y = m_min_size.y;
 
 	if (sz.x > m_max_size.x)
@@ -186,19 +172,13 @@ bool Indigo::Render::GUI::Widget::visible() const
 
 bool Indigo::Render::GUI::Widget::visible(bool show)
 {
-	if (!on_show(show))
-		return false;
-
-	bool changed = (m_visible != show);
-	m_visible = show;
-	
-	if (changed)
+	if (show != m_visible)
 	{
-		OOBase::SharedPtr<Widget> parent(m_parent);
-		if (parent)
-			parent->refresh_layout();
+		if (!on_show(show))
+			return false;
+	
+		m_visible = show;
 	}
-
 	return true;
 }
 
@@ -210,10 +190,13 @@ bool Indigo::Render::GUI::Widget::enabled() const
 
 bool Indigo::Render::GUI::Widget::enable(bool enable)
 {
-	if (!shown() || !on_enable(enable))
-		return false;
+	if (enable != m_enabled)
+	{
+		if (!shown() || !on_enable(enable))
+			return false;
 
-	m_enabled = enable;
+		m_enabled = enable;
+	}
 	return true;
 }
 
@@ -224,10 +207,13 @@ bool Indigo::Render::GUI::Widget::focused() const
 
 bool Indigo::Render::GUI::Widget::focus(bool focused)
 {
-	if (!enabled() || !on_focus(focused))
-		return false;
+	if (focused != m_focused)
+	{
+		if (!enabled() || !on_focus(focused))
+			return false;
 
-	m_focused = focused;
+		m_focused = focused;
+	}
 	return true;
 }
 
@@ -238,10 +224,13 @@ bool Indigo::Render::GUI::Widget::hilighted() const
 
 bool Indigo::Render::GUI::Widget::hilight(bool hilighted)
 {
-	if (!enabled() || !on_hilight(hilighted))
-		return false;
+	if (hilighted != m_hilighted)
+	{
+		if (!enabled() || !on_hilight(hilighted))
+			return false;
 
-	m_hilighted = hilighted;
+		m_hilighted = hilighted;
+	}
 	return true;
 }
 

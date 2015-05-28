@@ -46,7 +46,7 @@ namespace Indigo
 				virtual bool add_child(const OOBase::SharedPtr<Widget>& child) { return false; }
 				virtual void remove_child(const OOBase::SharedPtr<Widget>& child) {}
 
-				virtual glm::u16vec2 get_best_size() const;
+				virtual glm::u16vec2 ideal_size() const;
 
 			private:
 				OOBase::SharedPtr<Sizer> m_sizer;
@@ -69,31 +69,24 @@ namespace Indigo
 					align_left = 0,
 					align_right = 1,
 					align_hcentre = 2,
-					expand_horiz = 3,
-					align_top = 0,
-					align_bottom = 1 << 2,
+					align_bottom = 0,
+					align_top = 1 << 2,
 					align_vcentre = 2 << 2,
-					expand_vert = 3 << 2,
-					expand = expand_horiz | expand_vert,
-					centre = align_hcentre | align_vcentre
+					align_centre = align_hcentre | align_vcentre,
+					expand_horiz = 1 << 4,
+					expand_vert = 2 << 4,
+					expand = expand_horiz | expand_vert
 				};
 				OOBase::uint16_t m_flags;
-				OOBase::uint16_t m_border_left;
-				OOBase::uint16_t m_border_right;
-				OOBase::uint16_t m_border_top;
-				OOBase::uint16_t m_border_bottom;
 				OOBase::uint16_t m_proportion;
 			};
 
-			bool create(unsigned int rows = 1, unsigned int columns = 1);
-			bool create(const ItemLayout& default_layout, unsigned int rows = 1, unsigned int columns = 1);
+			bool create(OOBase::uint16_t hspace, OOBase::uint16_t vspace);
+			bool create(OOBase::uint16_t hspace, OOBase::uint16_t vspace, const ItemLayout& default_layout);
 			bool destroy();
 
 			bool fit(Panel& panel);
 			bool layout(const Panel& panel);
-
-			bool add_row(unsigned int rows = 1);
-			bool add_column(unsigned int columns = 1);
 
 			bool add_widget(const OOBase::SharedPtr<Widget>& widget, unsigned int row, unsigned int column = 0, const ItemLayout* layout = NULL);
 			bool add_spacer(OOBase::uint16_t width, OOBase::uint16_t height, unsigned int row, unsigned int column = 0, const ItemLayout* layout = NULL);
@@ -105,10 +98,8 @@ namespace Indigo
 			OOBase::SharedPtr<Indigo::Render::GUI::Sizer> m_sizer;
 			ItemLayout m_default_layout;
 
-			void do_create(bool* ret_val, unsigned int rows, unsigned int columns);
+			void do_create(bool* ret_val, const glm::u16vec2* space);
 			void do_destroy();
-			void do_add_row(unsigned int rows);
-			void do_add_column(unsigned int columns);
 			void do_fit(bool* ret_val, Widget* panel);
 			void do_layout(bool* ret_val, const Widget* panel);
 			void do_add_widget(bool* ret_val, OOBase::SharedPtr<Indigo::Render::GUI::Widget>* widget, unsigned int row, unsigned int column, const ItemLayout* layout);
