@@ -121,7 +121,7 @@ void OOGL::Window::cb_on_move(GLFWwindow* window, int left, int top)
 		// Make this context current
 		glfwMakeContextCurrent(pThis->m_glfw_window);
 
-		pThis->m_on_moved.invoke(*pThis,glm::ivec2(left,top));
+		pThis->m_on_moved.invoke(*pThis,glm::u16vec2(left,top));
 	}
 }
 
@@ -133,7 +133,7 @@ void OOGL::Window::cb_on_size(GLFWwindow* window, int width, int height)
 		// Make this context current
 		glfwMakeContextCurrent(pThis->m_glfw_window);
 
-		pThis->m_on_sized.invoke(*pThis,glm::ivec2(width,height));
+		pThis->m_on_sized.invoke(*pThis,glm::u16vec2(width,height));
 	}
 }
 
@@ -201,12 +201,13 @@ const OOBase::SharedPtr<OOGL::Framebuffer>& OOGL::Window::get_default_frame_buff
 	return m_default_fb;
 }
 
-glm::ivec2 OOGL::Window::size() const
+glm::u16vec2 OOGL::Window::size() const
 {
-	int width,height;
-	glfwGetFramebufferSize(m_glfw_window,&width,&height);
+	int width = 0, height = 0;
+	if (m_glfw_window)
+		glfwGetFramebufferSize(m_glfw_window,&width,&height);
 
-	return glm::ivec2(width,height);
+	return glm::u16vec2(width,height);
 }
 
 GLFWmonitor* OOGL::Window::monitor() const
@@ -227,7 +228,7 @@ GLFWmonitor* OOGL::Window::monitor() const
 		int xpos, ypos;
 		glfwGetWindowPos(m_glfw_window,&xpos,&ypos);
 
-		glm::ivec2 centre(xpos - left + width/2,ypos - top + height/2);
+		glm::u16vec2 centre(xpos - left + width/2,ypos - top + height/2);
 
 		int count;
 		GLFWmonitor** monitors = glfwGetMonitors(&count);
@@ -297,16 +298,16 @@ OOBase::Delegate2<void,const OOGL::Window&,OOGL::State&,OOBase::ThreadLocalAlloc
 	return prev;
 }
 
-OOBase::Delegate2<void,const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_sized(const OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>& delegate)
+OOBase::Delegate2<void,const OOGL::Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_sized(const OOBase::Delegate2<void,const Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator>& delegate)
 {
-	OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> prev = m_on_sized;
+	OOBase::Delegate2<void,const Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator> prev = m_on_sized;
 	m_on_sized = delegate;
 	return prev;
 }
 
-OOBase::Delegate2<void,const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_moved(const OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>& delegate)
+OOBase::Delegate2<void,const OOGL::Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_moved(const OOBase::Delegate2<void,const Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator>& delegate)
 {
-	OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> prev = m_on_moved;
+	OOBase::Delegate2<void,const Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator> prev = m_on_moved;
 	m_on_moved = delegate;
 	return prev;
 }

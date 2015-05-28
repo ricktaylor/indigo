@@ -41,6 +41,8 @@ namespace Indigo
 
 			bool add_layer(const OOBase::SharedPtr<Layer>& layer);
 			
+			glm::u16vec2 size() const;
+
 		private:
 			Indigo::MainWindow* m_owner;
 			OOBase::SharedPtr<OOGL::Window> m_wnd;
@@ -52,8 +54,8 @@ namespace Indigo
 			
 			void on_close(const OOGL::Window& win);
 			void on_draw(const OOGL::Window& win, OOGL::State& glState);
-			void on_move(const OOGL::Window& win, const glm::ivec2& pos);
-			void on_size(const OOGL::Window& win, const glm::ivec2& sz);
+			void on_move(const OOGL::Window& win, const glm::u16vec2& pos);
+			void on_size(const OOGL::Window& win, const glm::u16vec2& sz);
 		};
 	}
 

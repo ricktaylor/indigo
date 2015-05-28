@@ -40,7 +40,9 @@ namespace Indigo
 			class Panel : public Widget
 			{
 				friend class Indigo::GUI::Panel;
+
 			public:
+				void layout();
 
 			protected:
 				virtual bool add_child(const OOBase::SharedPtr<Widget>& child) { return false; }
@@ -50,8 +52,6 @@ namespace Indigo
 
 			private:
 				OOBase::SharedPtr<Sizer> m_sizer;
-
-				void refresh_layout();
 			};
 		}
 	}
@@ -111,10 +111,10 @@ namespace Indigo
 		class Panel : public Widget
 		{
 		public:
-			bool create(Widget* parent, const glm::u16vec2& pos = glm::u16vec2(0), const glm::u16vec2& min_size = glm::u16vec2(-1));
+			bool create(Widget* parent, const glm::i16vec2& pos = glm::i16vec2(0), const glm::u16vec2& min_size = glm::u16vec2(-1));
 
 			const OOBase::SharedPtr<Sizer>& sizer() const;
-			bool sizer(const OOBase::SharedPtr<Sizer>& s, bool fit = true);
+			bool sizer(const OOBase::SharedPtr<Sizer>& s);
 
 			bool fit();
 			bool layout();
@@ -122,7 +122,7 @@ namespace Indigo
 		private:
 			OOBase::SharedPtr<Sizer> m_sizer;
 
-			void do_sizer(Sizer* s, bool* fit);
+			void do_sizer(Sizer* s, bool* ret_val);
 			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
 		};
 	}

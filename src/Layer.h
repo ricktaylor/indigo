@@ -36,7 +36,7 @@ namespace Indigo
 		{
 		public:
 			virtual void on_draw(const OOGL::Window& win, OOGL::State& glState) = 0;
-			virtual void on_size(const OOGL::Window& win, const glm::ivec2& sz) {}
+			virtual void on_size(const OOGL::Window& win, const glm::u16vec2& sz) {}
 		};
 	}
 }

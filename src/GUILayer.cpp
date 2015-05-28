@@ -31,13 +31,19 @@ namespace
 
 	private:
 		void on_draw(const OOGL::Window& win, OOGL::State& glState) {}
-		void on_size(const OOGL::Window& win, const glm::ivec2& sz) {}
+		void on_size(const OOGL::Window& win, const glm::u16vec2& sz);
 	};
 }
 
 bool Layer::create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd)
 {
 	return wnd->add_layer(OOBase::static_pointer_cast<Layer>(shared_from_this()));
+}
+
+void Layer::on_size(const OOGL::Window& win, const glm::u16vec2& sz)
+{
+	min_size(sz);
+	layout();
 }
 
 OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Layer::create_widget()
@@ -51,7 +57,7 @@ OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Layer::create_widget
 
 bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd)
 {
-	if (!Panel::create(NULL))
+	if (!Panel::create(NULL,glm::i16vec2(0),wnd->size()))
 		return false;
 
 	bool ret = false;

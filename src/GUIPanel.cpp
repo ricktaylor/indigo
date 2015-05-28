@@ -55,16 +55,16 @@ namespace Indigo
 				glm::u16vec2 ideal_size() const;
 
 			private:
-				bool get_extents(OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& widths,
-							OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& heights,
-							OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_width,
-							OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_height);
+				bool get_extents(OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>& widths,
+							OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>& heights,
+							OOBase::Pair<OOBase::uint16_t,unsigned int>& ideal_width,
+							OOBase::Pair<OOBase::uint16_t,unsigned int>& ideal_height);
 
 				bool do_layout(const Panel& panel,
-							OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& widths,
-							OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& heights,
-							OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_width,
-							OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_height);
+							OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>& widths,
+							OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>& heights,
+							OOBase::Pair<OOBase::uint16_t,unsigned int>& ideal_width,
+							OOBase::Pair<OOBase::uint16_t,unsigned int>& ideal_height);
 			};
 		}
 	}
@@ -122,10 +122,10 @@ glm::u16vec2 Indigo::Render::GUI::Sizer::ideal_size() const
 	return glm::u16vec2(ideal_width,ideal_height);
 }
 
-bool Indigo::Render::GUI::Sizer::get_extents(OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& widths,
-			OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& heights,
-			OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_width,
-			OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_height)
+bool Indigo::Render::GUI::Sizer::get_extents(OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>& widths,
+			OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>& heights,
+			OOBase::Pair<OOBase::uint16_t,unsigned int>& ideal_width,
+			OOBase::Pair<OOBase::uint16_t,unsigned int>& ideal_height)
 {
 	for (items_t::iterator i=m_items.begin();i;++i)
 	{
@@ -141,12 +141,12 @@ bool Indigo::Render::GUI::Sizer::get_extents(OOBase::Vector<OOBase::Pair<OOBase:
 
 		while (widths.size() <= i->first.first)
 		{
-			if (!widths.push_back(OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>(0,0)))
+			if (!widths.push_back(OOBase::Pair<OOBase::uint16_t,unsigned int>(0,0)))
 				LOG_ERROR_RETURN(("Failed to insert into vector: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 		while (heights.size() <= i->first.second)
 		{
-			if (!heights.push_back(OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>(0,0)))
+			if (!heights.push_back(OOBase::Pair<OOBase::uint16_t,unsigned int>(0,0)))
 				LOG_ERROR_RETURN(("Failed to insert into vector: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 
@@ -160,7 +160,7 @@ bool Indigo::Render::GUI::Sizer::get_extents(OOBase::Vector<OOBase::Pair<OOBase:
 		heights[i->first.second].second += i->second.m_layout.m_proportion;
 	}
 
-	for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
+	for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
 	{
 		ideal_width.first += i->first;
 		ideal_width.second += i->second;
@@ -168,7 +168,7 @@ bool Indigo::Render::GUI::Sizer::get_extents(OOBase::Vector<OOBase::Pair<OOBase:
 	if (ideal_width.first)
 		ideal_width.first += m_padding.x;
 
-	for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
+	for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
 	{
 		ideal_height.first += i->first;
 		ideal_height.second += i->second;
@@ -181,10 +181,10 @@ bool Indigo::Render::GUI::Sizer::get_extents(OOBase::Vector<OOBase::Pair<OOBase:
 
 bool Indigo::Render::GUI::Sizer::fit(Panel& panel)
 {
-	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator> widths;
-	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator> heights;
-	OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t> ideal_width(0,0);
-	OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t> ideal_height(0,0);
+	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator> widths;
+	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator> heights;
+	OOBase::Pair<OOBase::uint16_t,unsigned int> ideal_width(0,0);
+	OOBase::Pair<OOBase::uint16_t,unsigned int> ideal_height(0,0);
 	if (!get_extents(widths,heights,ideal_width,ideal_height))
 		return false;
 
@@ -197,10 +197,10 @@ bool Indigo::Render::GUI::Sizer::fit(Panel& panel)
 
 bool Indigo::Render::GUI::Sizer::layout(const Panel& panel)
 {
-	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator> widths;
-	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator> heights;
-	OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t> ideal_width(0,0);
-	OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t> ideal_height(0,0);
+	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator> widths;
+	OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator> heights;
+	OOBase::Pair<OOBase::uint16_t,unsigned int> ideal_width(0,0);
+	OOBase::Pair<OOBase::uint16_t,unsigned int> ideal_height(0,0);
 	if (!get_extents(widths,heights,ideal_width,ideal_height))
 		return false;
 
@@ -208,17 +208,17 @@ bool Indigo::Render::GUI::Sizer::layout(const Panel& panel)
 }
 
 bool Indigo::Render::GUI::Sizer::do_layout(const Panel& panel,
-		OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& widths,
-		OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>& heights,
-		OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_width,
-		OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>& ideal_height)
+		OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>& widths,
+		OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>& heights,
+		OOBase::Pair<OOBase::uint16_t,unsigned int>& ideal_width,
+		OOBase::Pair<OOBase::uint16_t,unsigned int>& ideal_height)
 {
 	// Adjust the widths and heights
 	glm::u16vec2 panel_size = panel.client_size();
 	if (panel_size.x != ideal_width.first)
 	{
 		float expand_x = static_cast<float>(panel_size.x - ideal_width.first) / ideal_width.second;
-		for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
+		for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
 		{
 			int w = i->first + static_cast<int>(expand_x * i->second / ideal_width.second);
 			if (w < 0)
@@ -230,7 +230,7 @@ bool Indigo::Render::GUI::Sizer::do_layout(const Panel& panel,
 	if (panel_size.y != ideal_height.first)
 	{
 		float expand_y = static_cast<float>(panel_size.y - ideal_height.first) / ideal_height.second;
-		for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
+		for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
 		{
 			int h = i->first + static_cast<int>(expand_y * i->second / ideal_height.second);
 			if (h < 0)
@@ -243,9 +243,8 @@ bool Indigo::Render::GUI::Sizer::do_layout(const Panel& panel,
 	// Loop through the grid
 	glm::i16vec2 cell_pos;
 	glm::u16vec2 cell_size;
-
 	unsigned int y = 0;
-	for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator k=heights.begin();k;++k)
+	for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>::iterator k=heights.begin();k;++k)
 	{
 		cell_pos.x = 0;
 		if (k->first)
@@ -254,7 +253,7 @@ bool Indigo::Render::GUI::Sizer::do_layout(const Panel& panel,
 			cell_size.y = k->first - m_padding.y;
 
 			unsigned int x = 0;
-			for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>,OOBase::ThreadLocalAllocator>::iterator j=widths.begin();j;++j)
+			for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>::iterator j=widths.begin();j;++j)
 			{
 				if (j->first)
 				{
@@ -363,7 +362,6 @@ bool Indigo::GUI::Sizer::create(OOBase::uint16_t hspace, OOBase::uint16_t vspace
 	ItemLayout def_layout;
 	def_layout.m_flags = ItemLayout::expand | ItemLayout::align_left | ItemLayout::align_top;
 	def_layout.m_proportion = 0;
-
 	return create(hspace,vspace,def_layout);
 }
 
@@ -485,7 +483,7 @@ void Indigo::GUI::Sizer::do_remove_widget(bool* ret_val, Indigo::Render::GUI::Wi
 	*ret_val = m_sizer->remove_widget(widget);
 }
 
-void Indigo::Render::GUI::Panel::refresh_layout()
+void Indigo::Render::GUI::Panel::layout()
 {
 	if (m_sizer)
 		m_sizer->layout(*this);
@@ -516,7 +514,7 @@ OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Panel::create_widget
 	return layer;
 }
 
-bool Indigo::GUI::Panel::create(Widget* parent, const glm::u16vec2& pos, const glm::u16vec2& min_size)
+bool Indigo::GUI::Panel::create(Widget* parent, const glm::i16vec2& pos, const glm::u16vec2& min_size)
 {
 	if (!Widget::create(parent,pos,min_size))
 		return false;
@@ -536,23 +534,25 @@ const OOBase::SharedPtr<Indigo::GUI::Sizer>& Indigo::GUI::Panel::sizer() const
 	return m_sizer;
 }
 
-bool Indigo::GUI::Panel::sizer(const OOBase::SharedPtr<Sizer>& s, bool fit)
+bool Indigo::GUI::Panel::sizer(const OOBase::SharedPtr<Sizer>& s)
 {
-	if (!render_call(OOBase::make_delegate(this,&Panel::do_sizer),s.get(),&fit) || !fit)
+	bool ret = false;
+	if (!render_call(OOBase::make_delegate(this,&Panel::do_sizer),s.get(),&ret) || !ret)
 		return false;
 
 	m_sizer = s;
 	return true;
 }
 
-void Indigo::GUI::Panel::do_sizer(Sizer* s, bool* fit)
+void Indigo::GUI::Panel::do_sizer(Sizer* s, bool* ret_val)
 {
-	*fit = true;
 	OOBase::SharedPtr<Indigo::Render::GUI::Panel> panel = render_widget<Indigo::Render::GUI::Panel>();
-	if (panel)
+	if (!panel)
+		*ret_val = false;
+	else
 	{
-		if (!*fit || (*fit = s->m_sizer->fit(*panel.get())))
-			panel->m_sizer = s->m_sizer;
+		panel->m_sizer = s->m_sizer;
+		*ret_val = true;
 	}
 }
 

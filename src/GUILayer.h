@@ -41,6 +41,8 @@ namespace Indigo
 		private:
 			void do_create(bool* ret_val, OOBase::SharedPtr<Render::MainWindow>* wnd);
 			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
+
+			glm::u16vec2 ideal_size() const;
 		};
 	}
 }

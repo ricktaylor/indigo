@@ -69,6 +69,14 @@ bool Indigo::Render::MainWindow::create()
 	return true;
 }
 
+glm::u16vec2 Indigo::Render::MainWindow::size() const
+{
+	glm::u16vec2 sz(0);
+	if (m_wnd)
+		sz = m_wnd->size();
+	return sz;
+}
+
 bool Indigo::Render::MainWindow::add_layer(const OOBase::SharedPtr<Layer>& layer)
 {
 	return m_layers.push_back(layer);
@@ -79,12 +87,12 @@ void Indigo::Render::MainWindow::on_close(const OOGL::Window& win)
 	raise_event(OOBase::make_delegate(m_owner,&Indigo::MainWindow::on_close));
 }
 
-void Indigo::Render::MainWindow::on_move(const OOGL::Window& win, const glm::ivec2& pos)
+void Indigo::Render::MainWindow::on_move(const OOGL::Window& win, const glm::u16vec2& pos)
 {
 	on_size(win,win.size());
 }
 
-void Indigo::Render::MainWindow::on_size(const OOGL::Window& win, const glm::ivec2& sz)
+void Indigo::Render::MainWindow::on_size(const OOGL::Window& win, const glm::u16vec2& sz)
 {
 	glm::vec2 dpmm = win.dots_per_mm();
 	m_ratio = (sz.x * dpmm.x) / (sz.y * dpmm.y);

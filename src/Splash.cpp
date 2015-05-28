@@ -215,8 +215,8 @@ namespace
 
 		void on_draw(const OOGL::Window& win, OOGL::State& glState);
 		void on_close(const OOGL::Window& win);
-		void on_move(const OOGL::Window& win, const glm::ivec2& pos);
-		void on_size(const OOGL::Window& win, const glm::ivec2& sz);
+		void on_move(const OOGL::Window& win, const glm::u16vec2& pos);
+		void on_size(const OOGL::Window& win, const glm::u16vec2& sz);
 		void on_character(const OOGL::Window& win, unsigned int codepoint, int mods);
 		void on_keystroke(const OOGL::Window& win, const OOGL::Window::key_stroke_t& keystroke);
 
@@ -291,15 +291,15 @@ bool Splash::create(void* p)
 	return true;
 }
 
-void Splash::on_move(const OOGL::Window& win, const glm::ivec2& pos)
+void Splash::on_move(const OOGL::Window& win, const glm::u16vec2& pos)
 {
-	glm::ivec2 sz = win.size();
+	glm::u16vec2 sz = win.size();
 	m_dpmm = win.dots_per_mm();
 	m_ratio = (sz.x * m_dpmm.x) / (sz.y * m_dpmm.y);
 	glViewport(0, 0, sz.x, sz.y);
 }
 
-void Splash::on_size(const OOGL::Window& win, const glm::ivec2& sz)
+void Splash::on_size(const OOGL::Window& win, const glm::u16vec2& sz)
 {
 	m_dpmm = win.dots_per_mm();
 	m_ratio = (sz.x * m_dpmm.x) / (sz.y * m_dpmm.y);
@@ -329,7 +329,7 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 		fps.printf("%.4f ms = %.4f fps",(now - m_start) * 1000.0,1.0/(now - m_start));
 		m_fps->text(fps.c_str());
 
-		glm::ivec2 sz = win.size();
+		glm::vec2 sz = win.size();
 		proj = glm::ortho(0.f, (float)sz.x, 0.f, (float)sz.y, 1.f, -1.f);
 		glm::mat4 model = glm::scale(glm::mat4(1),glm::vec3(32.f,32.f,0.f));
 
