@@ -25,13 +25,6 @@
 //////////////////////////////////////////////
 
 #include <OOBase/Base.h>
-/*
-
-#include <OOBase/Vector.h>
-#include <OOBase/List.h>
-#include <OOBase/String.h>
-
-#include <OOBase/SignalSlot.h>*/
 
 #if defined(_MSC_VER)
 	//#include "Config_msvc.h"

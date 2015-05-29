@@ -34,7 +34,7 @@ namespace OOGL
 		Image();
 		~Image();
 
-		bool load(ResourceBundle& resource, const char* name, int components = 0);
+		bool load(const ResourceBundle& resource, const char* name, int components = 0);
 		bool load(const unsigned char* buffer, int len, int components = 0);
 
 		glm::uvec2 size() const

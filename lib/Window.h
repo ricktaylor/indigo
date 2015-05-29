@@ -26,7 +26,7 @@
 #include "State.h"
 #include "StateFns.h"
 
-#include <OOBase/SignalSlot.h>
+#include <OOBase/Delegate.h>
 
 namespace OOGL
 {

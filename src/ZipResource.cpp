@@ -252,7 +252,7 @@ Indigo::ZipResource Indigo::ZipResource::sub_dir(const char* prefix)
 	return ZipResource(m_zip,new_prefix);
 }
 
-const void* Indigo::ZipResource::load(const char* name, size_t start, size_t length)
+const void* Indigo::ZipResource::load(const char* name, size_t start, size_t length) const
 {
 	if (!m_zip)
 		return NULL;
@@ -260,7 +260,7 @@ const void* Indigo::ZipResource::load(const char* name, size_t start, size_t len
 	return m_zip->load(m_prefix,name,start,length);
 }
 
-OOBase::uint64_t Indigo::ZipResource::size(const char* name)
+OOBase::uint64_t Indigo::ZipResource::size(const char* name) const
 {
 	if (!m_zip)
 		return 0;
@@ -268,7 +268,7 @@ OOBase::uint64_t Indigo::ZipResource::size(const char* name)
 	return m_zip->size(m_prefix,name);
 }
 
-bool Indigo::ZipResource::exists(const char* name)
+bool Indigo::ZipResource::exists(const char* name) const
 {
 	if (!m_zip)
 		return false;

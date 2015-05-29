@@ -40,7 +40,7 @@ namespace OOGL
 		Font();
 		~Font();
 
-		bool load(ResourceBundle& resource, const char* name);
+		bool load(const ResourceBundle& resource, const char* name);
 
 	private:
 		OOBase::uint16_t m_size;

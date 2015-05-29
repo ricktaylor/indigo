@@ -22,16 +22,21 @@
 #include "Image.h"
 #include "Render.h"
 
-bool Indigo::Image::load(Resource& resource, const char* name)
+Indigo::Image::~Image()
+{
+	destroy();
+}
+
+bool Indigo::Image::load(const OOGL::ResourceBundle& resource, const char* name)
 {
 	if (m_image)
 		return false;
 
 	bool ret = false;
-	return render_call(OOBase::make_delegate(this,&Image::do_load),&ret,&resource,name) && ret;
+	return render_call(OOBase::make_delegate(this,&Indigo::Image::do_load),&ret,&resource,name) && ret;
 }
 
-void Indigo::Image::do_load(bool* ret_val, Resource* resource, const char* name)
+void Indigo::Image::do_load(bool* ret_val, const OOGL::ResourceBundle* resource, const char* name)
 {
 	OOBase::SharedPtr<OOGL::Image> image = OOBase::allocate_shared<OOGL::Image>();
 	if (!image)
@@ -40,10 +45,20 @@ void Indigo::Image::do_load(bool* ret_val, Resource* resource, const char* name)
 		*ret_val = false;
 	}
 	else
-		*ret_val = image->load(resource->render_resource(),name);
+		*ret_val = image->load(*resource,name);
 
 	if (*ret_val)
 		image.swap(m_image);
+}
+
+bool Indigo::Image::destroy()
+{
+	return !m_image || render_call(OOBase::make_delegate(this,&Indigo::Image::do_destroy));
+}
+
+void Indigo::Image::do_destroy()
+{
+	m_image.reset();
 }
 
 glm::uvec2 Indigo::Image::size() const
@@ -70,4 +85,9 @@ void Indigo::Image::get_components(unsigned int* comp)
 {
 	if (m_image)
 		*comp = m_image->components();
+}
+
+OOBase::SharedPtr<OOGL::Image> Indigo::Image::render_image() const
+{
+	return m_image;
 }

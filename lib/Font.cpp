@@ -292,7 +292,7 @@ OOGL::Font::~Font()
 {
 }
 
-bool OOGL::Font::load(ResourceBundle& resource, const char* name)
+bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 {
 	if (!resource.exists(name))
 		LOG_ERROR_RETURN(("Failed to find resource %s",name),false);

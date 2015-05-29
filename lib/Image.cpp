@@ -63,7 +63,7 @@ OOGL::Image::~Image()
 		stbi_image_free(m_pixels);
 }
 
-bool OOGL::Image::load(ResourceBundle& resource, const char* name, int components)
+bool OOGL::Image::load(const ResourceBundle& resource, const char* name, int components)
 {
 	const unsigned char* buffer = static_cast<const unsigned char*>(resource.load(name));
 	if (!buffer)

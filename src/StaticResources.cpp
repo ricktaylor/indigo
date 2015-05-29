@@ -30,9 +30,9 @@ namespace
 	class StaticResources : public OOGL::ResourceBundle
 	{
 	public:
-		const void* load(const char* name, size_t start, size_t length = size_t(-1));
-		OOBase::uint64_t size(const char* name);
-		bool exists(const char* name);
+		const void* load(const char* name, size_t start, size_t length) const;
+		OOBase::uint64_t size(const char* name) const;
+		bool exists(const char* name) const;
 	};
 }
 
@@ -75,7 +75,7 @@ namespace
 	}
 }
 
-const void* StaticResources::load(const char* name, size_t start, size_t length)
+const void* StaticResources::load(const char* name, size_t start, size_t length) const
 {
 	const RES* r = find_resource(name);
 	if (!r || !r->data)
@@ -87,13 +87,13 @@ const void* StaticResources::load(const char* name, size_t start, size_t length)
 	return r->data + start;
 }
 
-OOBase::uint64_t StaticResources::size(const char* name)
+OOBase::uint64_t StaticResources::size(const char* name) const
 {
 	const RES* r = find_resource(name);
 	return (r ? r->length : 0);
 }
 
-bool StaticResources::exists(const char* name)
+bool StaticResources::exists(const char* name) const
 {
 	const RES* r = find_resource(name);
 	return (r && r->data);
@@ -130,7 +130,7 @@ namespace
 	}
 }
 
-const void* StaticResources::load(const char* name, size_t start, size_t length)
+const void* StaticResources::load(const char* name, size_t start, size_t length) const
 {
 	const RES* r = find_resource(name);
 	if (!r)
@@ -142,13 +142,13 @@ const void* StaticResources::load(const char* name, size_t start, size_t length)
 	return r->data + start;
 }
 
-OOBase::uint64_t StaticResources::size(const char* name)
+OOBase::uint64_t StaticResources::size(const char* name) const
 {
 	const RES* r = find_resource(name);
 	return (r ? r->length : 0);
 }
 
-bool StaticResources::exists(const char* name)
+bool StaticResources::exists(const char* name) const
 {
 	return find_resource(name) != NULL;
 }

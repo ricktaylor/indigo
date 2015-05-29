@@ -22,7 +22,7 @@
 #ifndef INDIGO_IMAGE_H_INCLUDED
 #define INDIGO_IMAGE_H_INCLUDED
 
-#include "Resource.h"
+#include "Common.h"
 
 #include "../lib/Image.h"
 
@@ -31,15 +31,21 @@ namespace Indigo
 	class Image
 	{
 	public:
-		bool load(Resource& resource, const char* name);
+		~Image();
+
+		bool load(const OOGL::ResourceBundle& resource, const char* name);
+		bool destroy();
 
 		glm::uvec2 size() const;
 		unsigned int components() const;
 
+		OOBase::SharedPtr<OOGL::Image> render_image() const;
+
 	private:
 		OOBase::SharedPtr<OOGL::Image> m_image;
 
-		void do_load(bool* ret_val, Resource* resource, const char* name);
+		void do_load(bool* ret_val, const OOGL::ResourceBundle* resource, const char* name);
+		void do_destroy();
 		void get_size(glm::uvec2* sz);
 		void get_components(unsigned int* comp);
 	};
