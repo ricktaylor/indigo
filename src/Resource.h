@@ -19,30 +19,20 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_GUILAYER_H_INCLUDED
-#define INDIGO_GUILAYER_H_INCLUDED
+#ifndef INDIGO_RESOURCE_H_INCLUDED
+#define INDIGO_RESOURCE_H_INCLUDED
 
-#include "GUIPanel.h"
+#include "Common.h"
+
+#include "../lib/Resource.h"
 
 namespace Indigo
 {
-	namespace Render
+	class Resource
 	{
-		class MainWindow;
-	}
-
-	namespace GUI
-	{
-		class Layer : public Panel
-		{
-		public:
-			bool create(OOBase::SharedPtr<Render::MainWindow>& wnd);
-
-		private:
-			void do_create(bool* ret_val, OOBase::SharedPtr<Render::MainWindow>* wnd);
-			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
-		};
-	}
+	public:
+		virtual OOGL::ResourceBundle& render_resource() = 0;
+	};
 }
 
-#endif // INDIGO_GUILAYER_H_INCLUDED
+#endif // INDIGO_RESOURCE_H_INCLUDED

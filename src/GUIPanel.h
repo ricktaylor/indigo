@@ -45,13 +45,15 @@ namespace Indigo
 				void layout();
 
 			protected:
-				virtual bool add_child(const OOBase::SharedPtr<Widget>& child) { return false; }
-				virtual void remove_child(const OOBase::SharedPtr<Widget>& child) {}
+				virtual bool add_child(const OOBase::SharedPtr<Widget>& child);
+				virtual void remove_child(const OOBase::SharedPtr<Widget>& child);
 
 				virtual glm::u16vec2 ideal_size() const;
+				virtual void draw(OOGL::State& glState, const glm::mat4& mvp);
 
 			private:
 				OOBase::SharedPtr<Sizer> m_sizer;
+				OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator> m_children;
 			};
 		}
 	}

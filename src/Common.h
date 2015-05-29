@@ -51,7 +51,9 @@
 #error Need some kind of configure scipt!
 #endif
 
-#include "../lib/OOGL.h"
+#include "../lib/State.h"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Indigo
 {

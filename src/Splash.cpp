@@ -284,9 +284,9 @@ bool Splash::create(void* p)
 	if (!Indigo::monitor_window(pThis->m_wnd))
 		LOG_ERROR_RETURN(("Failed to monitor window"),false);
 
+	pThis->self = pThis->shared_from_this();
 	pThis->on_size(*pThis->m_wnd,pThis->m_wnd->size());
 	pThis->m_wnd->visible(true);
-	pThis->self = pThis->shared_from_this();
 
 	return true;
 }

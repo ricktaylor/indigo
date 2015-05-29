@@ -30,7 +30,9 @@ namespace
 		bool create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd);
 
 	private:
-		void on_draw(const OOGL::Window& win, OOGL::State& glState) {}
+		glm::u16vec2 ideal_size() const;
+
+		void on_draw(const OOGL::Window& win, OOGL::State& glState);
 		void on_size(const OOGL::Window& win, const glm::u16vec2& sz);
 	};
 }
@@ -38,6 +40,24 @@ namespace
 bool Layer::create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd)
 {
 	return wnd->add_layer(OOBase::static_pointer_cast<Layer>(shared_from_this()));
+}
+
+glm::u16vec2 Layer::ideal_size() const
+{
+	return min_size();
+}
+
+void Layer::on_draw(const OOGL::Window& win, OOGL::State& glState)
+{
+	if (!shown())
+		return;
+
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+	glm::vec2 sz = size();
+	glm::mat4 proj = glm::ortho(0.f,sz.x,0.f,sz.y);
+
+	draw(glState,proj);
 }
 
 void Layer::on_size(const OOGL::Window& win, const glm::u16vec2& sz)

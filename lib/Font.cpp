@@ -354,19 +354,11 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 		case 3:
 			if (pages == 1)
 			{
-				if (!(ok = resource.exists(reinterpret_cast<const char*>(data))))
-					LOG_ERROR(("Missing font resource %s",reinterpret_cast<const char*>(data)));
-				else
-				{
-					const unsigned char* page_data = static_cast<const unsigned char*>(resource.load(reinterpret_cast<const char*>(data)));
-					size_t page_len = resource.size(reinterpret_cast<const char*>(data));
+				OOGL::Image img;
+				if ((ok = img.load(resource,reinterpret_cast<const char*>(data))))
+					ok = (m_ptrTexture = img.make_texture(GL_R8));
 
-					OOGL::Image img;
-					if ((ok = img.load(page_data,static_cast<int>(page_len))))
-						ok = (m_ptrTexture = img.make_texture(GL_R8));
-
-					data += len;
-				}
+				data += len;
 			}
 			else
 			{
@@ -377,21 +369,13 @@ bool OOGL::Font::load(ResourceBundle& resource, const char* name)
 				}
 				for (unsigned int p=0;ok && p<pages;++p)
 				{
-					if (!(ok = resource.exists(reinterpret_cast<const char*>(data))))
-						LOG_ERROR(("Missing font resource %s",reinterpret_cast<const char*>(data)));
-					else
+					OOGL::Image img;
+					if ((ok = img.load(resource,reinterpret_cast<const char*>(data))))
 					{
-						const unsigned char* page_data = static_cast<const unsigned char*>(resource.load(reinterpret_cast<const char*>(data)));
-						size_t page_len = resource.size(reinterpret_cast<const char*>(data));
-
-						OOGL::Image img;
-						if ((ok = img.load(page_data,static_cast<int>(page_len))))
-						{
-							// TODO: Load into array texture
-						}
-
-						data += len/pages;
+						// TODO: Load into array texture
 					}
+
+					data += len/pages;
 				}
 			}
 			break;

@@ -45,6 +45,7 @@ indigo_SOURCES = \
 	GUIWidget.cpp \
 	GUIPanel.cpp \
 	GUILayer.cpp \
+	Image.cpp \
 	Splash.cpp
 		
 indigo_LDADD = \

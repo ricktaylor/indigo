@@ -38,6 +38,7 @@ namespace Indigo
 			class Widget : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<Widget>
 			{
 				friend class Indigo::GUI::Widget;
+				friend class Panel;
 
 			public:
 				bool shown() const;
@@ -80,10 +81,12 @@ namespace Indigo
 				virtual bool add_child(const OOBase::SharedPtr<Widget>& child) { return false; }
 				virtual void remove_child(const OOBase::SharedPtr<Widget>& child) {}
 
-				virtual bool on_show(bool show) { return true; }
-				virtual bool on_enable(bool enabled) { return false; }
-				virtual bool on_focus(bool focused) { return false; }
-				virtual bool on_hilight(bool hilighted) { return false; }
+				virtual bool can_show(bool show) { return true; }
+				virtual bool can_enable(bool enabled) { return false; }
+				virtual bool can_focus(bool focused) { return false; }
+				virtual bool can_hilight(bool hilighted) { return false; }
+
+				virtual void draw(OOGL::State& glState, const glm::mat4& mvp) = 0;
 
 			private:
 				bool m_visible;

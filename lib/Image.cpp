@@ -20,22 +20,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Image.h"
+#include "Resource.h"
 
 #include <OOBase/Logger.h>
-
-extern "C"
-{
-	static void* wrap_malloc(size_t sz);
-	static void* wrap_realloc(void* p, size_t sz);
-	static void wrap_free(void* p);
-
-	#define STBI_MALLOC(sz)    wrap_malloc(sz)
-	#define STBI_REALLOC(p,sz) wrap_realloc(p,sz)
-	#define STBI_FREE(p)       wrap_free(p)
-
-	#define STB_IMAGE_IMPLEMENTATION
-	#include "../3rdparty/stb/stb_image.h"
-}
 
 static void* wrap_malloc(size_t sz)
 {
@@ -52,6 +39,16 @@ static void wrap_free(void* p)
 	OOBase::CrtAllocator::free(p);
 }
 
+extern "C"
+{
+	#define STBI_MALLOC(sz)    wrap_malloc(sz)
+	#define STBI_REALLOC(p,sz) wrap_realloc(p,sz)
+	#define STBI_FREE(p)       wrap_free(p)
+
+	#define STB_IMAGE_IMPLEMENTATION
+	#include "../3rdparty/stb/stb_image.h"
+}
+
 OOGL::Image::Image() :
 		m_width(0),
 		m_height(0),
@@ -66,31 +63,13 @@ OOGL::Image::~Image()
 		stbi_image_free(m_pixels);
 }
 
-bool OOGL::Image::load(const char* filename, int components)
+bool OOGL::Image::load(ResourceBundle& resource, const char* name, int components)
 {
-	if (m_pixels)
-	{
-		stbi_image_free(m_pixels);
+	const unsigned char* buffer = static_cast<const unsigned char*>(resource.load(name));
+	if (!buffer)
+		return false;
 
-		m_width = 0;
-		m_height = 0;
-		m_components = 0;
-		m_pixels = 0;
-	}
-
-	int x,y,c = 0;
-	void* p = stbi_load(filename,&x,&y,&c,components);
-	if (!p)
-		LOG_WARNING(("Failed to load image: %s\n",stbi_failure_reason()));
-	else
-	{
-		m_pixels = p;
-		m_width = x;
-		m_height = y;
-		m_components = c;
-	}
-
-	return (p != NULL);
+	return load(buffer,resource.size(name),components);
 }
 
 bool OOGL::Image::load(const unsigned char* buffer, int len, int components)

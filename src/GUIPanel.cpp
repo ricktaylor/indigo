@@ -505,6 +505,29 @@ glm::u16vec2 Indigo::Render::GUI::Panel::ideal_size() const
 	return sz;
 }
 
+bool Indigo::Render::GUI::Panel::add_child(const OOBase::SharedPtr<Widget>& child)
+{
+	return m_children.push_back(child);
+}
+
+void Indigo::Render::GUI::Panel::remove_child(const OOBase::SharedPtr<Widget>& child)
+{
+	m_children.erase(child);
+}
+
+void Indigo::Render::GUI::Panel::draw(OOGL::State& glState, const glm::mat4& mvp)
+{
+	for (OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i;++i)
+	{
+		if ((*i)->visible())
+		{
+			glm::i16vec2 p = (*i)->position();
+			glm::mat4 view = glm::translate(glm::mat4(1),glm::vec3(p.x,p.y,0));
+			(*i)->draw(glState,mvp * view);
+		}
+	}
+}
+
 OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Panel::create_widget()
 {
 	OOBase::SharedPtr<Indigo::Render::GUI::Panel> layer = OOBase::allocate_shared<Indigo::Render::GUI::Panel,OOBase::ThreadLocalAllocator>();

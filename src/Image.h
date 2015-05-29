@@ -19,30 +19,30 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_GUILAYER_H_INCLUDED
-#define INDIGO_GUILAYER_H_INCLUDED
+#ifndef INDIGO_IMAGE_H_INCLUDED
+#define INDIGO_IMAGE_H_INCLUDED
 
-#include "GUIPanel.h"
+#include "Resource.h"
+
+#include "../lib/Image.h"
 
 namespace Indigo
 {
-	namespace Render
+	class Image
 	{
-		class MainWindow;
-	}
+	public:
+		bool load(Resource& resource, const char* name);
 
-	namespace GUI
-	{
-		class Layer : public Panel
-		{
-		public:
-			bool create(OOBase::SharedPtr<Render::MainWindow>& wnd);
+		glm::uvec2 size() const;
+		unsigned int components() const;
 
-		private:
-			void do_create(bool* ret_val, OOBase::SharedPtr<Render::MainWindow>* wnd);
-			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
-		};
-	}
+	private:
+		OOBase::SharedPtr<OOGL::Image> m_image;
+
+		void do_load(bool* ret_val, Resource* resource, const char* name);
+		void get_size(glm::uvec2* sz);
+		void get_components(unsigned int* comp);
+	};
 }
 
-#endif // INDIGO_GUILAYER_H_INCLUDED
+#endif // INDIGO_IMAGE_H_INCLUDED

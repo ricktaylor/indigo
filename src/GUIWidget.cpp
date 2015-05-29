@@ -174,7 +174,7 @@ bool Indigo::Render::GUI::Widget::visible(bool show)
 {
 	if (show != m_visible)
 	{
-		if (!on_show(show))
+		if (!can_show(show))
 			return false;
 	
 		m_visible = show;
@@ -192,7 +192,7 @@ bool Indigo::Render::GUI::Widget::enable(bool enable)
 {
 	if (enable != m_enabled)
 	{
-		if (!shown() || !on_enable(enable))
+		if (!shown() || !can_enable(enable))
 			return false;
 
 		m_enabled = enable;
@@ -209,7 +209,7 @@ bool Indigo::Render::GUI::Widget::focus(bool focused)
 {
 	if (focused != m_focused)
 	{
-		if (!enabled() || !on_focus(focused))
+		if (!enabled() || !can_focus(focused))
 			return false;
 
 		m_focused = focused;
@@ -226,7 +226,7 @@ bool Indigo::Render::GUI::Widget::hilight(bool hilighted)
 {
 	if (hilighted != m_hilighted)
 	{
-		if (!enabled() || !on_hilight(hilighted))
+		if (!enabled() || !can_hilight(hilighted))
 			return false;
 
 		m_hilighted = hilighted;

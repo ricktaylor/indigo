@@ -19,30 +19,27 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_IMAGE_H_INCLUDED
-#define INDIGO_IMAGE_H_INCLUDED
+#ifndef OOGL_IMAGE_H_INCLUDED
+#define OOGL_IMAGE_H_INCLUDED
 
 #include "Texture.h"
 
 namespace OOGL
 {
+	class ResourceBundle;
+
 	class Image : public OOBase::NonCopyable
 	{
 	public:
 		Image();
 		~Image();
 
-		bool load(const char* filename, int components = 0);
+		bool load(ResourceBundle& resource, const char* name, int components = 0);
 		bool load(const unsigned char* buffer, int len, int components = 0);
 
-		size_t width() const
+		glm::uvec2 size() const
 		{
-			return m_width;
-		}
-
-		size_t height() const
-		{
-			return m_height;
+			return glm::uvec2(m_width,m_height);
 		}
 
 		unsigned int components() const
@@ -65,4 +62,4 @@ namespace OOGL
 	};
 }
 
-#endif // INDIGO_IMAGE_H_INCLUDED
+#endif // OOGL_IMAGE_H_INCLUDED
