@@ -69,7 +69,7 @@ bool OOGL::Image::load(const ResourceBundle& resource, const char* name, int com
 	if (!buffer)
 		return false;
 
-	return load(buffer,resource.size(name),components);
+	return load(buffer,static_cast<int>(resource.size(name)),components);
 }
 
 bool OOGL::Image::load(const unsigned char* buffer, int len, int components)

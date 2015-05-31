@@ -19,107 +19,59 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\lib\BufferObject.h" />
-    <ClInclude Include="..\lib\Font.h" />
-    <ClInclude Include="..\lib\Framebuffer.h" />
-    <ClInclude Include="..\lib\glext.h" />
-    <ClInclude Include="..\lib\Image.h" />
-    <ClInclude Include="..\lib\OOGL.h" />
-    <ClInclude Include="..\lib\Shader.h" />
-    <ClInclude Include="..\lib\State.h" />
-    <ClInclude Include="..\lib\StateFns.h" />
-    <ClInclude Include="..\lib\Texture.h" />
-    <ClInclude Include="..\lib\VertexArrayObject.h" />
-    <ClInclude Include="..\lib\Window.h" />
-    <ClInclude Include="..\resources\resource.h" />
-    <ClInclude Include="App.h" />
-    <ClInclude Include="Common.h" />
-    <ClInclude Include="GUILayer.h" />
-    <ClInclude Include="GUIPanel.h" />
-    <ClInclude Include="GUIWidget.h" />
-    <ClInclude Include="Layer.h" />
-    <ClInclude Include="MainWindow.h" />
-    <ClInclude Include="Render.h" />
-    <ClInclude Include="ZipResource.h" />
+    <ClCompile Include="BufferObject.cpp" />
+    <ClCompile Include="Font.cpp" />
+    <ClCompile Include="Framebuffer.cpp" />
+    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="State.cpp" />
+    <ClCompile Include="StateFns.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="VertexArrayObject.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\lib\BufferObject.cpp" />
-    <ClCompile Include="..\lib\Font.cpp" />
-    <ClCompile Include="..\lib\Framebuffer.cpp" />
-    <ClCompile Include="..\lib\Image.cpp" />
-    <ClCompile Include="..\lib\Shader.cpp" />
-    <ClCompile Include="..\lib\State.cpp" />
-    <ClCompile Include="..\lib\StateFns.cpp" />
-    <ClCompile Include="..\lib\Texture.cpp" />
-    <ClCompile Include="..\lib\VertexArrayObject.cpp" />
-    <ClCompile Include="..\lib\Window.cpp" />
-    <ClCompile Include="App.cpp" />
-    <ClCompile Include="GUILayer.cpp" />
-    <ClCompile Include="GUIPanel.cpp" />
-    <ClCompile Include="GUIWidget.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MainWindow.cpp" />
-    <ClCompile Include="Render.cpp" />
-    <ClCompile Include="Splash.cpp" />
-    <ClCompile Include="StaticResources.cpp" />
-    <ClCompile Include="ZipResource.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\3rdparty\glfw\x64\src\glfw.vcxproj">
-      <Project>{14b5a911-43eb-41cc-b0dd-8546c46603ee}</Project>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-    </ProjectReference>
-    <ProjectReference Include="..\lib\OOGL.vcxproj">
-      <Project>{14cbc351-a489-4554-80c2-cfef873bc6ea}</Project>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-    </ProjectReference>
-    <ProjectReference Include="..\oobase\src\OOBase.vcxproj">
-      <Project>{10616ef7-6939-463a-9af6-8a1f3e9f5b16}</Project>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\resources\Titillium-Regular.fnt" />
-    <None Include="..\resources\Titillium-Regular_0.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="..\resources\indigo.rc" />
+    <ClInclude Include="BufferObject.h" />
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="Framebuffer.h" />
+    <ClInclude Include="glext.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="OOGL.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="State.h" />
+    <ClInclude Include="StateFns.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="VertexArrayObject.h" />
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{45062950-051B-42F7-A502-3F0F39282C22}</ProjectGuid>
+    <ProjectGuid>{14CBC351-A489-4554-80C2-CFEF873BC6EA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Indigo</RootNamespace>
+    <RootNamespace>OOGL</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -138,29 +90,27 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <ExecutablePath>E:\Work\msvcconf\Win32\Release;$(ExecutablePath)</ExecutablePath>
     <OutDir>$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <ExecutablePath>E:\Work\msvcconf\Win32\Release;$(ExecutablePath)</ExecutablePath>
-    <OutDir>$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <ExecutablePath>E:\Work\msvcconf\Win32\Release;$(ExecutablePath)</ExecutablePath>
     <OutDir>$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
-    <ExecutablePath>E:\Work\msvcconf\Win32\Release;$(ExecutablePath)</ExecutablePath>
-    <OutDir>$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -169,22 +119,13 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;__MSVCCONF__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\oobase\include;..\3rdparty\glfw\include;..\3rdparty\glfw\include\GLFW;..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>msvcconf_vc10.exe "$(SolutionPath)" $(ProjectName)</Command>
-    </PreBuildEvent>
-    <PreBuildEvent>
-      <Message>Configuring project settings...</Message>
-    </PreBuildEvent>
-    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -192,22 +133,13 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;__MSVCCONF__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\oobase\include;..\3rdparty\glfw\include;..\3rdparty\glfw\include\GLFW;..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>msvcconf_vc10.exe "$(SolutionPath)" $(ProjectName)</Command>
-    </PreBuildEvent>
-    <PreBuildEvent>
-      <Message>Configuring project settings...</Message>
-    </PreBuildEvent>
-    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -217,9 +149,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\oobase\include;..\3rdparty\glfw\include;..\3rdparty\glfw\include\GLFW;..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -227,12 +158,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <PreBuildEvent>
-      <Command>msvcconf_vc10.exe "$(SolutionPath)" $(ProjectName)</Command>
-    </PreBuildEvent>
-    <PreBuildEvent>
-      <Message>Configuring project settings...</Message>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -242,23 +167,15 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;WIN32;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\oobase\include;..\3rdparty\glfw\include;..\3rdparty\glfw\include\GLFW;..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>msvcconf_vc10.exe "$(SolutionPath)" $(ProjectName)</Command>
-    </PreBuildEvent>
-    <PreBuildEvent>
-      <Message>Configuring project settings...</Message>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
