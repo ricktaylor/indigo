@@ -23,6 +23,7 @@
 #define INDIGO_GUIPANEL_H_INCLUDED
 
 #include "GUIWidget.h"
+#include "Image.h"
 
 namespace Indigo
 {
@@ -44,16 +45,24 @@ namespace Indigo
 			public:
 				void layout();
 
+				glm::u16vec4 borders() const;
+
+				glm::u16vec2 client_size() const;
+				glm::u16vec2 client_size(const glm::u16vec2& sz);
+
+				virtual glm::u16vec2 ideal_size() const;
+
 			protected:
 				virtual bool add_child(const OOBase::SharedPtr<Widget>& child);
 				virtual void remove_child(const OOBase::SharedPtr<Widget>& child);
 
-				virtual glm::u16vec2 ideal_size() const;
 				virtual void draw(OOGL::State& glState, const glm::mat4& mvp);
 
 			private:
 				OOBase::SharedPtr<Sizer> m_sizer;
+				OOBase::SharedPtr<OOGL::Image> m_background;
 				OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator> m_children;
+				glm::u16vec4 m_borders;
 			};
 		}
 	}
@@ -121,11 +130,21 @@ namespace Indigo
 			bool fit();
 			bool layout();
 
+			const OOBase::SharedPtr<Indigo::Image>& background() const;
+			bool background(const OOBase::SharedPtr<Indigo::Image>& image);
+
+			glm::u16vec4 borders() const;
+			bool borders(OOBase::uint16_t left, OOBase::uint16_t top, OOBase::uint16_t right, OOBase::uint16_t bottom);
+
 		private:
 			OOBase::SharedPtr<Sizer> m_sizer;
+			OOBase::SharedPtr<Indigo::Image> m_background;
 
 			void do_sizer(Sizer* s, bool* ret_val);
 			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
+			void do_background(Image* image, bool* ret_val);
+			void do_set_borders(glm::u16vec4* borders, bool* ret_val);
+			void do_get_borders(glm::u16vec4* borders);
 		};
 	}
 }

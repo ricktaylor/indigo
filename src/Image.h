@@ -28,7 +28,7 @@
 
 namespace Indigo
 {
-	class Image
+	class Image : public OOBase::NonCopyable
 	{
 	public:
 		~Image();

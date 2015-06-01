@@ -517,6 +517,9 @@ void Indigo::Render::GUI::Panel::remove_child(const OOBase::SharedPtr<Widget>& c
 
 void Indigo::Render::GUI::Panel::draw(OOGL::State& glState, const glm::mat4& mvp)
 {
+	if (m_background)
+		;
+
 	for (OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i;++i)
 	{
 		if ((*i)->visible())
@@ -526,6 +529,45 @@ void Indigo::Render::GUI::Panel::draw(OOGL::State& glState, const glm::mat4& mvp
 			(*i)->draw(glState,mvp * view);
 		}
 	}
+}
+
+glm::u16vec4 Indigo::Render::GUI::Panel::borders() const
+{
+	return m_borders;
+}
+
+glm::u16vec2 Indigo::Render::GUI::Panel::client_size() const
+{
+	glm::u16vec2 client_sz(size());
+	if (client_sz.x > m_borders.x + m_borders.z)
+		client_sz.x -= m_borders.x + m_borders.z;
+	else
+		client_sz.x = 0;
+
+	if (client_sz.y > m_borders.y + m_borders.w)
+		client_sz.y -= m_borders.y + m_borders.w;
+	else
+		client_sz.y = 0;
+
+	return client_sz;
+}
+
+glm::u16vec2 Indigo::Render::GUI::Panel::client_size(const glm::u16vec2& sz)
+{
+	glm::u16vec2 client_sz(sz.x + m_borders.x + m_borders.z, sz.y + m_borders.y + m_borders.w);
+	client_sz = size(client_sz);
+
+	if (client_sz.x > m_borders.x + m_borders.z)
+		client_sz.x -= m_borders.x + m_borders.z;
+	else
+		client_sz.x = 0;
+
+	if (client_sz.y > m_borders.y + m_borders.w)
+		client_sz.y -= m_borders.y + m_borders.w;
+	else
+		client_sz.y = 0;
+
+	return client_sz;
 }
 
 OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Panel::create_widget()
@@ -587,4 +629,67 @@ bool Indigo::GUI::Panel::fit()
 bool Indigo::GUI::Panel::layout()
 {
 	return !m_sizer || m_sizer->layout(*this);
+}
+
+const OOBase::SharedPtr<Indigo::Image>& Indigo::GUI::Panel::background() const
+{
+	return m_background;
+}
+
+bool Indigo::GUI::Panel::background(const OOBase::SharedPtr<Image>& image)
+{
+	bool ret = false;
+	if (!render_call(OOBase::make_delegate(this,&Panel::do_background),image.get(),&ret) || !ret)
+		return false;
+
+	m_background = image;
+	return true;
+}
+
+void Indigo::GUI::Panel::do_background(Image* image, bool* ret_val)
+{
+	OOBase::SharedPtr<Indigo::Render::GUI::Panel> panel = render_widget<Indigo::Render::GUI::Panel>();
+	if (!panel)
+		*ret_val = false;
+	else
+	{
+		OOBase::SharedPtr<OOGL::Image> bg = image->render_image();
+		if (bg && bg->valid())
+			bg.swap(panel->m_background);
+
+		*ret_val = true;
+	}
+}
+
+glm::u16vec4 Indigo::GUI::Panel::borders() const
+{
+	glm::u16vec4 borders(0);
+	render_call(OOBase::make_delegate(const_cast<Panel*>(this),&Panel::do_get_borders),&borders);
+	return borders;
+}
+
+void Indigo::GUI::Panel::do_get_borders(glm::u16vec4* borders)
+{
+	OOBase::SharedPtr<Indigo::Render::GUI::Panel> panel = render_widget<Indigo::Render::GUI::Panel>();
+	if (panel)
+		*borders = panel->m_borders;
+}
+
+bool Indigo::GUI::Panel::borders(OOBase::uint16_t left, OOBase::uint16_t top, OOBase::uint16_t right, OOBase::uint16_t bottom)
+{
+	glm::u16vec4 borders(left,top,right,bottom);
+	bool ret = false;
+	return render_call(OOBase::make_delegate(this,&Panel::do_set_borders),&borders,&ret) && ret;
+}
+
+void Indigo::GUI::Panel::do_set_borders(glm::u16vec4* borders, bool* ret_val)
+{
+	OOBase::SharedPtr<Indigo::Render::GUI::Panel> panel = render_widget<Indigo::Render::GUI::Panel>();
+	if (!panel)
+		*ret_val = false;
+	else
+	{
+		panel->m_borders = *borders;
+		*ret_val = true;
+	}
 }
