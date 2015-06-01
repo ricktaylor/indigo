@@ -44,6 +44,11 @@ OOGL::VertexArrayObject::~VertexArrayObject()
 		StateFns::get_current()->glDeleteVertexArrays(1,&m_array);
 }
 
+bool OOGL::VertexArrayObject::valid() const
+{
+	return (m_array != 0);
+}
+
 OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::VertexArrayObject::bind()
 {
 	return State::get_current()->bind(shared_from_this());

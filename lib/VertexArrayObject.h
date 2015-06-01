@@ -20,6 +20,8 @@ namespace OOGL
 		VertexArrayObject();
 		~VertexArrayObject();
 
+		bool valid() const;
+
 		static OOBase::SharedPtr<VertexArrayObject> none();
 
 		OOBase::SharedPtr<OOGL::VertexArrayObject> bind();

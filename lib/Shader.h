@@ -37,6 +37,8 @@ namespace OOGL
 		Shader(GLenum shaderType);
 		~Shader();
 
+		bool valid() const;
+
 		bool compile(const char* sz, GLint len = 0);
 		bool compile(const char *const *strings, GLsizei count);
 		bool compile(const char *const *strings, const GLint* lengths, GLsizei count);

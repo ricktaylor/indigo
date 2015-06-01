@@ -284,7 +284,7 @@ bool FontProgram::load_8bit_shader()
 	return true;
 }
 
-OOGL::Font::Font() : m_allocated(0)
+OOGL::Font::Font() : m_packing(0), m_allocated(0)
 {
 }
 
@@ -511,15 +511,18 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		}
 
 		OOBase::SharedPtr<Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance().program(m_packing);
-		GLint a = ptrProgram->attribute_location("in_Position");
-		m_ptrVAO->attribute(a,m_ptrVertices,2,GL_FLOAT,false,sizeof(attrib_data),offsetof(attrib_data,x));
-		m_ptrVAO->enable_attribute(a);
-
-		a = ptrProgram->attribute_location("in_TexCoord");
-		if (a != -1)
+		if (ptrProgram)
 		{
-			m_ptrVAO->attribute(a,m_ptrVertices,2,GL_UNSIGNED_SHORT,true,sizeof(attrib_data),offsetof(attrib_data,u));
+			GLint a = ptrProgram->attribute_location("in_Position");
+			m_ptrVAO->attribute(a,m_ptrVertices,2,GL_FLOAT,false,sizeof(attrib_data),offsetof(attrib_data,x));
 			m_ptrVAO->enable_attribute(a);
+
+			a = ptrProgram->attribute_location("in_TexCoord");
+			if (a != -1)
+			{
+				m_ptrVAO->attribute(a,m_ptrVertices,2,GL_UNSIGNED_SHORT,true,sizeof(attrib_data),offsetof(attrib_data,u));
+				m_ptrVAO->enable_attribute(a);
+			}
 		}
 
 		m_ptrVAO->element_array(m_ptrElements);
@@ -619,7 +622,7 @@ void OOGL::Font::free_text(Text& text)
 
 void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei len)
 {
-	if (len)
+	if (len && m_packing)
 	{
 		OOBase::SharedPtr<Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance().program(m_packing);
 	

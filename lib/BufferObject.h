@@ -60,6 +60,8 @@ namespace OOGL
 		BufferObject(GLenum target, GLenum usage, GLsizeiptr size, const void* data = NULL);
 		~BufferObject();
 
+		bool valid() const;
+
 		static OOBase::SharedPtr<BufferObject> none(GLenum target);
 		
 		OOBase::SharedPtr<OOGL::BufferObject> bind();

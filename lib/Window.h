@@ -47,18 +47,18 @@ namespace OOGL
 		Window(int width, int height, const char* title, unsigned int style = eWSdecorated, GLFWmonitor* monitor = NULL);
 		~Window();
 
-		bool is_valid() const;
+		bool valid() const;
 
-		bool is_visible() const;
+		bool visible() const;
 		void visible(bool show);
 
-		bool is_iconified() const;
+		bool iconified() const;
 		void iconify(bool minimize);
 
 		glm::u16vec2 size() const;
 		glm::vec2 dots_per_mm() const;
 
-		const OOBase::SharedPtr<Framebuffer>& get_default_frame_buffer() const;
+		const OOBase::SharedPtr<Framebuffer>& default_frame_buffer() const;
 
 		bool draw();
 		void swap();

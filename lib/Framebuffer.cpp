@@ -35,6 +35,11 @@ OOGL::Framebuffer::Framebuffer(GLuint id) :
 {
 }
 
+bool OOGL::Framebuffer::valid() const
+{
+	return m_id != GL_INVALID_VALUE;
+}
+
 OOBase::SharedPtr<OOGL::Framebuffer> OOGL::Framebuffer::get_default()
 {
 	OOBase::SharedPtr<Framebuffer> ret;

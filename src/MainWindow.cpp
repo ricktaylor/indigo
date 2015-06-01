@@ -43,7 +43,7 @@ bool Indigo::Render::MainWindow::create()
 		style |= OOGL::Window::eWSdebug_context;
 
 	m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(800,600,"Indigo",style);
-	if (!m_wnd || !m_wnd->is_valid())
+	if (!m_wnd || !m_wnd->valid())
 		return false;
 
 	m_wnd->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&MainWindow::on_close));
@@ -104,7 +104,7 @@ void Indigo::Render::MainWindow::on_size(const OOGL::Window& win, const glm::u16
 
 void Indigo::Render::MainWindow::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
-	glState.bind(GL_DRAW_FRAMEBUFFER,win.get_default_frame_buffer());
+	glState.bind(GL_DRAW_FRAMEBUFFER,win.default_frame_buffer());
 
 	glClear(GL_COLOR_BUFFER_BIT);
 

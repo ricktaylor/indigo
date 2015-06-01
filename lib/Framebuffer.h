@@ -36,6 +36,8 @@ namespace OOGL
 		Framebuffer();
 		~Framebuffer();
 
+		bool valid() const;
+
 		GLenum check() const;
 
 	private:

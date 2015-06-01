@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_FONT_H_INCLUDED
-#define INDIGO_FONT_H_INCLUDED
+#ifndef OOGL_FONT_H_INCLUDED
+#define OOGL_FONT_H_INCLUDED
 
 #include "State.h"
 #include "Resource.h"
@@ -105,4 +105,4 @@ namespace OOGL
 	};
 }
 
-#endif // INDIGO_FONT_H_INCLUDED
+#endif // OOGL_FONT_H_INCLUDED

@@ -192,6 +192,11 @@ OOGL::Texture::~Texture()
 		glDeleteTextures(1,&m_tex);
 }
 
+bool OOGL::Texture::valid() const
+{
+	return m_tex != 0;
+}
+
 OOBase::SharedPtr<OOGL::Texture> OOGL::Texture::none(GLenum target)
 {
 	return OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(0,target);

@@ -33,7 +33,13 @@ OOGL::Shader::Shader(GLenum shaderType) : m_id(StateFns::get_current()->glCreate
 
 OOGL::Shader::~Shader()
 {
-	StateFns::get_current()->glDeleteShader(m_id);
+	if (m_id)
+		StateFns::get_current()->glDeleteShader(m_id);
+}
+
+bool OOGL::Shader::valid() const
+{
+	return m_id != 0;
 }
 
 bool OOGL::Shader::compile(const GLchar* sz, GLint len)

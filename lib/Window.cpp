@@ -75,7 +75,7 @@ OOGL::Window::~Window()
 		glfwDestroyWindow(m_glfw_window);
 }
 
-bool OOGL::Window::is_visible() const
+bool OOGL::Window::visible() const
 {
 	if (!m_glfw_window)
 		return false;
@@ -94,7 +94,7 @@ void OOGL::Window::visible(bool show)
 	}
 }
 
-bool OOGL::Window::is_iconified() const
+bool OOGL::Window::iconified() const
 {
 	if (!m_glfw_window)
 		return false;
@@ -191,12 +191,12 @@ void OOGL::Window::cb_on_key(GLFWwindow* window, int key, int scancode, int acti
 	}
 }
 
-bool OOGL::Window::is_valid() const
+bool OOGL::Window::valid() const
 {
 	return m_glfw_window != NULL;
 }
 
-const OOBase::SharedPtr<OOGL::Framebuffer>& OOGL::Window::get_default_frame_buffer() const
+const OOBase::SharedPtr<OOGL::Framebuffer>& OOGL::Window::default_frame_buffer() const
 {
 	return m_default_fb;
 }
@@ -267,7 +267,7 @@ glm::vec2 OOGL::Window::dots_per_mm() const
 
 bool OOGL::Window::draw()
 {
-	if (!m_glfw_window || !is_visible() || is_iconified() || !m_on_draw)
+	if (!m_glfw_window || !visible() || iconified() || !m_on_draw)
 		return false;
 
 	// Make this context current

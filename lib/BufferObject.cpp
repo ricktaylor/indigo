@@ -60,6 +60,11 @@ OOGL::BufferObject::~BufferObject()
 		StateFns::get_current()->glDeleteBuffers(1,&m_buffer);
 }
 
+bool OOGL::BufferObject::valid() const
+{
+	return m_buffer != 0;
+}
+
 OOBase::SharedPtr<OOGL::BufferObject> OOGL::BufferObject::none(GLenum target)
 {
 	return OOBase::allocate_shared<BufferObject,OOBase::ThreadLocalAllocator>(target);

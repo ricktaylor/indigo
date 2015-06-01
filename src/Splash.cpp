@@ -250,7 +250,7 @@ bool Splash::create(void* p)
 		style |= OOGL::Window::eWSdebug_context;
 
 	pThis->m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(320,200,"Test",style);
-	if (!pThis->m_wnd || !pThis->m_wnd->is_valid())
+	if (!pThis->m_wnd || !pThis->m_wnd->valid())
 		return false;
 
 	if (Indigo::is_debug())
@@ -309,7 +309,7 @@ void Splash::on_size(const OOGL::Window& win, const glm::u16vec2& sz)
 void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
 	double now = glfwGetTime();
-	glState.bind(GL_DRAW_FRAMEBUFFER,win.get_default_frame_buffer());
+	glState.bind(GL_DRAW_FRAMEBUFFER,win.default_frame_buffer());
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
