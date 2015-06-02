@@ -209,7 +209,7 @@ namespace
 		FontProgram()
 		{}
 
-		const OOBase::SharedPtr<OOGL::Program>& program(OOBase::uint32_t packing); 
+		OOBase::SharedPtr<OOGL::Program> program(OOBase::uint32_t packing);
 
 	private:
 		OOBase::SharedPtr<OOGL::Program> m_ptr_ch1_8_Program;
@@ -217,24 +217,31 @@ namespace
 		bool load_8bit_shader();
 	};
 
-	struct attrib_data
+	struct vertex_data
 	{
 		float x;
 		float y;
 		GLushort u;
 		GLushort v;
 	};
+
+	static const unsigned int vertices_per_glyph = 4;
+	static const unsigned int elements_per_glyph = 6;
 }
 
-const OOBase::SharedPtr<OOGL::Program>& FontProgram::program(OOBase::uint32_t packing)
+OOBase::SharedPtr<OOGL::Program> FontProgram::program(OOBase::uint32_t packing)
 {
-	const OOBase::SharedPtr<OOGL::Program>& program = m_ptr_ch1_8_Program;
-	//switch (packing)
+	OOBase::SharedPtr<OOGL::Program> program;
+	switch (packing)
 	{
-	//default:
+	case 0x04040400:
 		if (!m_ptr_ch1_8_Program)
 			load_8bit_shader();
-	//	break;
+		program = m_ptr_ch1_8_Program;
+		break;
+
+	default:
+		break;
 	}
 	return program;
 }
@@ -478,16 +485,16 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		while (new_size < m_allocated + len)
 			new_size *= 2;
 
-		OOBase::SharedPtr<OOGL::BufferObject> ptrNewVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW,new_size * 4 * sizeof(attrib_data));
-		OOBase::SharedPtr<OOGL::BufferObject> ptrNewElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_DYNAMIC_DRAW,new_size * 6 * sizeof(GLuint));
+		OOBase::SharedPtr<OOGL::BufferObject> ptrNewVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW,new_size * vertices_per_glyph * sizeof(vertex_data));
+		OOBase::SharedPtr<OOGL::BufferObject> ptrNewElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_DYNAMIC_DRAW,new_size * elements_per_glyph * sizeof(GLuint));
 		if (!ptrNewVertices || !ptrNewElements)
 			LOG_ERROR_RETURN(("Failed to allocate VBO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 		if (m_ptrVertices)
-			ptrNewVertices->copy(0,m_ptrVertices,0,m_allocated * 4 * sizeof(attrib_data));
+			ptrNewVertices->copy(0,m_ptrVertices,0,m_allocated * vertices_per_glyph * sizeof(vertex_data));
 
 		if (m_ptrElements)
-			ptrNewElements->copy(0,m_ptrElements,0,m_allocated * 6 * sizeof(GLuint));
+			ptrNewElements->copy(0,m_ptrElements,0,m_allocated * elements_per_glyph * sizeof(GLuint));
 
 		m_ptrVertices.swap(ptrNewVertices);
 		m_ptrElements.swap(ptrNewElements);
@@ -499,10 +506,6 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 			last = m_listFree.insert(m_allocated,new_size - m_allocated);
 		m_allocated = new_size;
 		
-		text.m_glyph_start = last->first;
-		last->first += len;
-		last->second -= len;
-				
 		if (!m_ptrVAO)
 		{
 			m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
@@ -511,28 +514,32 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		}
 
 		OOBase::SharedPtr<Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance().program(m_packing);
-		if (ptrProgram)
-		{
-			GLint a = ptrProgram->attribute_location("in_Position");
-			m_ptrVAO->attribute(a,m_ptrVertices,2,GL_FLOAT,false,sizeof(attrib_data),offsetof(attrib_data,x));
-			m_ptrVAO->enable_attribute(a);
+		if (!ptrProgram)
+			return false;
 
-			a = ptrProgram->attribute_location("in_TexCoord");
-			if (a != -1)
-			{
-				m_ptrVAO->attribute(a,m_ptrVertices,2,GL_UNSIGNED_SHORT,true,sizeof(attrib_data),offsetof(attrib_data,u));
-				m_ptrVAO->enable_attribute(a);
-			}
+		text.m_glyph_start = last->first;
+		last->first += len;
+		last->second -= len;
+
+		GLint a = ptrProgram->attribute_location("in_Position");
+		m_ptrVAO->attribute(a,m_ptrVertices,2,GL_FLOAT,false,sizeof(vertex_data),offsetof(vertex_data,x));
+		m_ptrVAO->enable_attribute(a);
+
+		a = ptrProgram->attribute_location("in_TexCoord");
+		if (a != -1)
+		{
+			m_ptrVAO->attribute(a,m_ptrVertices,2,GL_UNSIGNED_SHORT,true,sizeof(vertex_data),offsetof(vertex_data,u));
+			m_ptrVAO->enable_attribute(a);
 		}
 
 		m_ptrVAO->element_array(m_ptrElements);
 	}
 
-	OOBase::SharedPtr<attrib_data> attribs = m_ptrVertices->auto_map<attrib_data>(GL_MAP_WRITE_BIT,text.m_glyph_start * 4 * sizeof(attrib_data),len * 4 * sizeof(attrib_data));
-	attrib_data* a = attribs.get();
-	OOBase::SharedPtr<GLuint> ei = m_ptrElements->auto_map<GLuint>(GL_MAP_WRITE_BIT,text.m_glyph_start * 6 * sizeof(GLuint),len * 6 * sizeof(GLuint));
+	OOBase::SharedPtr<vertex_data> attribs = m_ptrVertices->auto_map<vertex_data>(GL_MAP_WRITE_BIT,text.m_glyph_start * vertices_per_glyph * sizeof(vertex_data),len * vertices_per_glyph * sizeof(vertex_data));
+	vertex_data* a = attribs.get();
+	OOBase::SharedPtr<GLuint> ei = m_ptrElements->auto_map<GLuint>(GL_MAP_WRITE_BIT,text.m_glyph_start * elements_per_glyph * sizeof(GLuint),len * elements_per_glyph * sizeof(GLuint));
 	GLuint* e = ei.get();
-	GLuint idx = text.m_glyph_start * 4;
+	GLuint idx = text.m_glyph_start * vertices_per_glyph;
 
 	OOBase::uint32_t prev_glyph = OOBase::uint32_t(-1);
 	const OOBase::uint32_t* start = glyphs.data();
@@ -583,9 +590,9 @@ bool OOGL::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 			e[4] = idx + 1;
 			e[5] = idx + 3;
 
-			a += 4;
-			e += 6;
-			idx += 4;
+			a += vertices_per_glyph;
+			e += elements_per_glyph;
+			idx += vertices_per_glyph;
 
 			text.m_length += i->second.xadvance;
 		}
@@ -632,7 +639,7 @@ void OOGL::Font::draw(State& state, const glm::mat4& mvp, const glm::vec4& colou
 		ptrProgram->uniform("in_Colour",colour);
 		ptrProgram->uniform("MVP",mvp);
 
-		m_ptrVAO->draw_elements(GL_TRIANGLES,6 * len,GL_UNSIGNED_INT,start * 6 * sizeof(GLuint));
+		m_ptrVAO->draw_elements(GL_TRIANGLES,elements_per_glyph * len,GL_UNSIGNED_INT,start * elements_per_glyph * sizeof(GLuint));
 	}
 }
 
