@@ -262,6 +262,7 @@ namespace Indigo
 		return raise_event(&thunk::member_event,stream);
 	}
 
+	bool quit_loop();
 	bool handle_events();
 
 	bool monitor_window(const OOBase::WeakPtr<OOGL::Window>& win);

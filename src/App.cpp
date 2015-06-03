@@ -65,5 +65,5 @@ bool Indigo::Application::run(const OOBase::Table<OOBase::String,OOBase::String>
 
 void Indigo::Application::on_main_wnd_close()
 {
-	m_main_wnd.destroy();
+	quit_loop();
 }

@@ -103,7 +103,7 @@ namespace
 	class RenderQueue : public Queue
 	{
 	public:
-		bool dequeue()
+		bool dequeue(bool& stop)
 		{
 			OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock,false);
 			if (!guard.try_acquire())
@@ -115,7 +115,10 @@ namespace
 				guard.release();
 
 				if (!item.m_callback)
+				{
+					stop = true;
 					break;
+				}
 
 				if (!(*item.m_callback)(item.m_param))
 					return false;
@@ -126,7 +129,7 @@ namespace
 			return true;
 		}
 
-		bool dequeue_block(const OOBase::Timeout& timeout = OOBase::Timeout())
+		bool dequeue_block(bool& stop, const OOBase::Timeout& timeout = OOBase::Timeout())
 		{
 			OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
 			while (m_queue.empty())
@@ -141,7 +144,10 @@ namespace
 				guard.release();
 
 				if (!item.m_callback)
+				{
+					stop = true;
 					break;
+				}
 
 				if (!(*item.m_callback)(item.m_param))
 					return false;
@@ -204,62 +210,58 @@ static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& conf
 
 	// Loop blocking until we have windows
 	bool res = true;
-	while (vecWindows.empty())
+	bool stop = false;
+	do
 	{
-		res = s_render_queue->dequeue_block();
-		if (!res)
-			break;
-	}
+		while (vecWindows.empty() && res && !stop)
+			res = s_render_queue->dequeue_block(stop);
 
-	while (res)
-	{
-		// Draw all windows
-		bool visible_window = false;
-		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
+		while (res && !stop)
 		{
-			if (i->expired())
-				i = vecWindows.erase(i);
-			else
+			// Draw all windows
+			bool visible_window = false;
+			for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
 			{
-				if (i->lock()->draw())
-					visible_window = true;
-				++i;
+				if (i->expired())
+					i = vecWindows.erase(i);
+				else
+				{
+					if (i->lock()->draw())
+						visible_window = true;
+					++i;
+				}
 			}
+
+			// Update animations
+
+			// Get render commands
+			if (vecWindows.empty() || !(res = s_render_queue->dequeue(stop)) || stop)
+				break;
+
+			// Swap all windows (this collects events)
+			for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
+			{
+				if (i->expired())
+					i = vecWindows.erase(i);
+				else
+				{
+					i->lock()->swap();
+					++i;
+				}
+			}
+
+			// Poll for UI events
+			if (visible_window)
+				glfwPollEvents();
+			else
+				glfwWaitEvents();
 		}
 
-		// Update animations
-
-		// Get render commands
-		if (vecWindows.empty() || !(res = s_render_queue->dequeue()))
-			break;
-
-		// Swap all windows (this collects events)
-		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
-		{
-			if (i->expired())
-				i = vecWindows.erase(i);
-			else
-			{
-				i->lock()->swap();
-				++i;
-			}
-		}
-
-		// Poll for UI events
-		if (visible_window)
-			glfwPollEvents();
-		else
-			glfwWaitEvents();
-	}
+	} while (res && !stop);
 
 	glfwTerminate();
 
 	return res;
-}
-
-static bool stop_thread(void*)
-{
-	return false;
 }
 
 static int logic_thread_start(void* param)
@@ -276,13 +278,8 @@ static int logic_thread_start(void* param)
 	int err = (*ti.m_fn)(*ti.m_config) ? EXIT_SUCCESS : EXIT_FAILURE;
 
 	// Tell the render thread we have finished
-	render_queue.enqueue(&stop_thread);
-
-	if (err != EXIT_SUCCESS)
-	{
-		// Wait for the render thread to stop using render_queue
+	if (render_queue.enqueue(NULL))
 		s_event_queue->dequeue();
-	}
 
 	return err;
 }
@@ -313,13 +310,10 @@ bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase
 
 	// Now run the draw_thread (it must be the main thread)
 	bool res = draw_thread(config_args);
+	if (res)
+		s_event_queue->enqueue(NULL,reinterpret_cast<void*>(1));
 
-	// Send a quit to the logic_thread
-	if (event_queue.enqueue(NULL,reinterpret_cast<void*>(1)))
-	{
-		// Wait for logic thread to end
-		logic->join();
-	}
+	logic->join();
 
 	return res;
 }
@@ -401,6 +395,16 @@ bool Indigo::raise_event(void (*fn)(OOBase::CDRStream&), OOBase::CDRStream& stre
 bool Indigo::handle_events()
 {
 	return s_event_queue->dequeue();
+}
+
+static bool do_quit_loop(void* p)
+{
+	return s_event_queue->enqueue(NULL,p);
+}
+
+bool Indigo::quit_loop()
+{
+	return render_call(&do_quit_loop,reinterpret_cast<void*>(1));
 }
 
 bool Indigo::monitor_window(const OOBase::WeakPtr<OOGL::Window>& win)
