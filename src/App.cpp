@@ -23,6 +23,11 @@
 #include "Render.h"
 #include "ZipResource.h"
 
+namespace Indigo
+{
+	OOGL::ResourceBundle& static_resources();
+}
+
 bool showSplash();
 
 Indigo::Application::Application()
@@ -31,13 +36,11 @@ Indigo::Application::Application()
 
 bool Indigo::Application::start(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
 {
-	if (!showSplash())
-		return false;
+	//if (!showSplash())
+	//	return false;
 
 	if (!m_main_wnd.create(this))
 		return false;
-
-
 
 	/*OOBase::String strZip;
 	if (!config_args.find("$1",strZip))
@@ -46,7 +49,27 @@ bool Indigo::Application::start(const OOBase::Table<OOBase::String,OOBase::Strin
 	ZipResource zip;
 	if (!zip.open(strZip.c_str()))
 		return false;*/
-		
+
+	OOBase::SharedPtr<GUI::Sizer> sizer = OOBase::allocate_shared<GUI::Sizer>();
+	if (!sizer)
+		LOG_ERROR_RETURN(("Failed to create sizer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+	OOBase::SharedPtr<GUI::Panel> start_menu = OOBase::allocate_shared<GUI::Panel>();
+	if (!start_menu)
+		LOG_ERROR_RETURN(("Failed to create start_menu: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+	if (!start_menu->create(&m_main_wnd.top_layer(),glm::u16vec2(48,48)) ||
+		!sizer->create(8,8) ||
+		!start_menu->sizer(sizer) ||
+		!start_menu->background(static_resources(),"menu_border.png") ||
+		!start_menu->borders(15,15,15,15) ||
+		!start_menu->visible(true) ||
+		!m_main_wnd.top_layer().sizer()->add_widget(start_menu,1,1) ||
+		!m_main_wnd.top_layer().visible(true))
+	{
+		return false;
+	}
+
 	return true;
 }
 

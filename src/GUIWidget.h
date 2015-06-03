@@ -58,8 +58,8 @@ namespace Indigo
 				glm::i16vec2 position() const { return m_position; }
 				void position(const glm::i16vec2& pos);
 
-				glm::u16vec2 size() const { return m_size; }
-				glm::u16vec2 size(const glm::u16vec2& sz);
+				virtual glm::u16vec2 size() const { return m_size; }
+				virtual glm::u16vec2 size(const glm::u16vec2& sz);
 
 				glm::u16vec2 min_size() const;
 				glm::u16vec2 min_size(const glm::u16vec2& sz);
@@ -130,7 +130,7 @@ namespace Indigo
 			bool hilight(bool hilighted = true);
 
 		protected:
-			bool create(Widget* parent, const glm::i16vec2& pos = glm::i16vec2(0), const glm::u16vec2& min_size = glm::u16vec2(-1));
+			bool create(Widget* parent, const glm::u16vec2& min_size = glm::u16vec2(-1), const glm::i16vec2& pos = glm::i16vec2(0));
 
 			template <typename T>
 			OOBase::SharedPtr<T> render_widget() const

@@ -19,12 +19,17 @@ bin_PROGRAMS = indigo
 bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 	$(AM_V_CC)$(CC_FOR_BUILD) $(INCLUDES) $(AM_CFLAGS) -o $@ $(top_srcdir)/tools/bin2c.c
 	
-%.c: ../resources/%.png bin2c
+%.h: ../resources/%.png bin2c
 	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
 	
-%.c: ../resources/%.fnt bin2c
+%.h: ../resources/%.fnt bin2c
 	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
-
+	
+BUILT_SOURCES = \
+	Titillium-Regular_0.h \
+	Titillium-Regular.h \
+	menu_border.h
+	
 indigo_SOURCES = \
 	../lib/Window.cpp \
 	../lib/Framebuffer.cpp \
@@ -46,6 +51,7 @@ indigo_SOURCES = \
 	GUIPanel.cpp \
 	GUILayer.cpp \
 	Image.cpp \
+	NinePatch.cpp \
 	Font.cpp \
 	Splash.cpp
 		

@@ -49,15 +49,15 @@ glm::u16vec2 Layer::ideal_size() const
 
 void Layer::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
-	if (!shown())
-		return;
+	if (shown())
+	{
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+		glm::vec2 sz = size();
+		glm::mat4 proj = glm::ortho(0.f,sz.x,0.f,sz.y);
 
-	glm::vec2 sz = size();
-	glm::mat4 proj = glm::ortho(0.f,sz.x,0.f,sz.y);
-
-	draw(glState,proj);
+		draw(glState,proj);
+	}
 }
 
 void Layer::on_size(const OOGL::Window& win, const glm::u16vec2& sz)
@@ -77,7 +77,7 @@ OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Layer::create_widget
 
 bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd)
 {
-	if (!Panel::create(NULL,glm::i16vec2(0),wnd->size()))
+	if (!Panel::create(NULL,wnd->size()))
 		return false;
 
 	bool ret = false;

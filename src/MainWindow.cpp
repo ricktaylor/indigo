@@ -130,7 +130,15 @@ bool Indigo::MainWindow::create(Application* app)
 	if (!render_call(OOBase::make_delegate(this,&MainWindow::do_create),&ret) || !ret)
 		return false;
 
+	// Set up top layer
 	if (!m_top_layer.create(m_wnd))
+		return false;
+
+	OOBase::SharedPtr<GUI::Sizer> sizer = OOBase::allocate_shared<GUI::Sizer>();
+	if (!sizer)
+		LOG_ERROR_RETURN(("Failed to create sizer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+	if (!sizer->create(0,0) || !m_top_layer.sizer(sizer))
 		return false;
 
 	m_app = app;
@@ -173,4 +181,9 @@ void Indigo::MainWindow::on_close()
 {
 	if (m_app)
 		m_app->on_main_wnd_close();
+}
+
+Indigo::GUI::Layer& Indigo::MainWindow::top_layer()
+{
+	return m_top_layer;
 }

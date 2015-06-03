@@ -24,6 +24,7 @@
 
 #include "GUIWidget.h"
 #include "Image.h"
+#include "NinePatch.h"
 
 namespace Indigo
 {
@@ -45,10 +46,17 @@ namespace Indigo
 			public:
 				void layout();
 
-				glm::u16vec4 borders() const;
+				const glm::u16vec4& borders() const;
+				void borders(const glm::u16vec4& b);
 
-				glm::u16vec2 client_size() const;
-				glm::u16vec2 client_size(const glm::u16vec2& sz);
+				const OOBase::SharedPtr<OOGL::Texture>& texture() const;
+				bool texture(const OOBase::SharedPtr<OOGL::Texture>& tex, const glm::u16vec2& tex_size);
+
+				virtual glm::u16vec2 size() const { return Widget::size(); }
+				virtual glm::u16vec2 size(const glm::u16vec2& sz);
+
+				virtual glm::u16vec2 client_size() const;
+				virtual glm::u16vec2 client_size(const glm::u16vec2& sz);
 
 				virtual glm::u16vec2 ideal_size() const;
 
@@ -60,9 +68,13 @@ namespace Indigo
 
 			private:
 				OOBase::SharedPtr<Sizer> m_sizer;
-				OOBase::SharedPtr<OOGL::Image> m_background;
-				OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator> m_children;
+				NinePatch m_background;
+				OOBase::SharedPtr<OOGL::Texture> m_texture;
+				glm::u16vec2 m_tex_size;
 				glm::u16vec4 m_borders;
+				OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator> m_children;
+
+				void layout_background(const glm::u16vec2& sz);
 			};
 		}
 	}
@@ -72,7 +84,11 @@ namespace Indigo
 		class Sizer : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<Sizer>
 		{
 			friend class Panel;
+
 		public:
+			Sizer();
+			~Sizer();
+
 			struct ItemLayout
 			{
 				enum eLayoutFlags
@@ -122,7 +138,7 @@ namespace Indigo
 		class Panel : public Widget
 		{
 		public:
-			bool create(Widget* parent, const glm::i16vec2& pos = glm::i16vec2(0), const glm::u16vec2& min_size = glm::u16vec2(-1));
+			bool create(Widget* parent, const glm::u16vec2& min_size = glm::u16vec2(-1), const glm::i16vec2& pos = glm::i16vec2(0));
 
 			const OOBase::SharedPtr<Sizer>& sizer() const;
 			bool sizer(const OOBase::SharedPtr<Sizer>& s);
@@ -132,6 +148,7 @@ namespace Indigo
 
 			const OOBase::SharedPtr<Indigo::Image>& background() const;
 			bool background(const OOBase::SharedPtr<Indigo::Image>& image);
+			bool background(const OOGL::ResourceBundle& resource, const char* name);
 
 			glm::u16vec4 borders() const;
 			bool borders(OOBase::uint16_t left, OOBase::uint16_t top, OOBase::uint16_t right, OOBase::uint16_t bottom);

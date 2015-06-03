@@ -243,7 +243,7 @@ Indigo::GUI::Widget::~Widget()
 	destroy();
 }
 
-bool Indigo::GUI::Widget::create(Widget* parent, const glm::i16vec2& pos, const glm::u16vec2& min_size)
+bool Indigo::GUI::Widget::create(Widget* parent, const glm::u16vec2& min_size, const glm::i16vec2& pos)
 {
 	if (m_render_widget)
 		LOG_ERROR_RETURN(("Widget::Create called twice"),false);

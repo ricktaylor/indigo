@@ -71,6 +71,7 @@ namespace
 				return &s_resources[i];
 			}
 		}
+		LOG_ERROR(("Failed to find static resource %s",name));
 		return NULL;
 	}
 }
@@ -104,8 +105,9 @@ bool StaticResources::exists(const char* name) const
 namespace
 {
 	// Include the bin2c files here
-	#include "Titillium-Regular_0.c"
-	#include "Titillium-Regular.c"
+	#include "Titillium-Regular_0.h"
+	#include "Titillium-Regular.h"
+	#include "menu_border.h"
 
 	struct RES
 	{
@@ -117,6 +119,7 @@ namespace
 	{
 		{ "Titillium-Regular.fnt", s_Titillium_Regular, sizeof(s_Titillium_Regular) },
 		{ "Titillium-Regular.bin_0.png", s_Titillium_Regular_0, sizeof(s_Titillium_Regular_0) },
+		{ "menu_border.png", s_Titillium_Regular_0, sizeof(s_Titillium_Regular_0) },
 	};
 
 	const RES* find_resource(const char* name)
@@ -126,6 +129,7 @@ namespace
 			if (strcmp(name,s_resources[i].name) == 0)
 				return &s_resources[i];
 		}
+		LOG_ERROR(("Failed to find static resource %s",name));
 		return NULL;
 	}
 }
