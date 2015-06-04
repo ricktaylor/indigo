@@ -41,7 +41,7 @@ namespace OOGL
 		const OOBase::SharedPtr<BufferObject>& element_array() const;
 
 		void draw(GLenum mode, GLint first, GLsizei count);
-		void draw(GLenum mode, const GLint* firsts, const GLsizei* counts, GLsizei primcount);
+		void multi_draw(GLenum mode, const GLint* firsts, const GLsizei* counts, GLsizei drawcount);
 
 		void draw_instanced(GLenum mode, GLint first, GLsizei count, GLsizei instances);
 		void draw_instanced(GLenum mode, GLint first, GLsizei count, GLsizei instances, GLuint baseinstance);
@@ -50,8 +50,8 @@ namespace OOGL
 		void draw_elements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
 		void draw_elements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset = 0);
 		void draw_elements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
-		void draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
-		void draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint* basevertices);
+		void multi_draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount);
+		void multi_draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount, const GLint* basevertices);
 
 		void draw_elements_instanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances);
 		void draw_elements_instanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances, GLint basevertex);

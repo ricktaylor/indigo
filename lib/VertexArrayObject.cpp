@@ -149,10 +149,10 @@ void OOGL::VertexArrayObject::draw_instanced(GLenum mode, GLint first, GLsizei c
 		StateFns::get_current()->glDrawArraysInstanced(mode,first,count,instances);
 }
 
-void OOGL::VertexArrayObject::draw(GLenum mode, const GLint* firsts, const GLsizei* counts, GLsizei primcount)
+void OOGL::VertexArrayObject::multi_draw(GLenum mode, const GLint* firsts, const GLsizei* counts, GLsizei drawcount)
 {
 	State::get_current()->bind(shared_from_this());
-	StateFns::get_current()->glMultiDrawArrays(mode,firsts,counts,primcount);
+	StateFns::get_current()->glMultiDrawArrays(mode,firsts,counts,drawcount);
 }
 
 void OOGL::VertexArrayObject::draw_elements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset)
@@ -190,19 +190,19 @@ void OOGL::VertexArrayObject::draw_elements(GLenum mode, GLuint start, GLuint en
 		StateFns::get_current()->glDrawRangeElementsBaseVertex(mode,start,end,count,type,offset,basevertex);
 }
 
-void OOGL::VertexArrayObject::draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
+void OOGL::VertexArrayObject::multi_draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount)
 {
 	State::get_current()->bind(shared_from_this());
-	StateFns::get_current()->glMultiDrawElements(mode,counts,type,offsets,primcount);
+	StateFns::get_current()->glMultiDrawElements(mode,counts,type,offsets,drawcount);
 }
 
-void OOGL::VertexArrayObject::draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint* basevertices)
+void OOGL::VertexArrayObject::multi_draw_elements(GLenum mode, const GLsizei* counts, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount, const GLint* basevertices)
 {
 	State::get_current()->bind(shared_from_this());
 	if (!basevertices)
-		StateFns::get_current()->glMultiDrawElements(mode,counts,type,offsets,primcount);
+		StateFns::get_current()->glMultiDrawElements(mode,counts,type,offsets,drawcount);
 	else
-		StateFns::get_current()->glMultiDrawElementsBaseVertex(mode,counts,type,offsets,primcount,basevertices);
+		StateFns::get_current()->glMultiDrawElementsBaseVertex(mode,counts,type,offsets,drawcount,basevertices);
 }
 
 void OOGL::VertexArrayObject::draw_elements_instanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances)

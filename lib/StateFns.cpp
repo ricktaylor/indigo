@@ -2043,7 +2043,7 @@ void OOGL::StateFns::glVertexAttribIPointer(GLuint index, GLint size, GLenum typ
 	}
 }
 
-void OOGL::StateFns::check_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
+void OOGL::StateFns::check_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount)
 {
 	m_fn_glMultiDrawArrays = glfwGetProcAddress("glMultiDrawArrays");
 	if (m_fn_glMultiDrawArrays)
@@ -2059,19 +2059,19 @@ void OOGL::StateFns::check_glMultiDrawArrays(GLenum mode, const GLint *first, co
 	if (!m_fn_glMultiDrawArrays)
 		m_thunk_glMultiDrawArrays = &StateFns::emulate_glMultiDrawArrays;
 	
-	(this->*m_thunk_glMultiDrawArrays)(mode,first,count,primcount);
+	(this->*m_thunk_glMultiDrawArrays)(mode,first,count,drawcount);
 }
 
-void OOGL::StateFns::call_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
+void OOGL::StateFns::call_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount)
 {
-	(*((PFNGLMULTIDRAWARRAYSPROC)m_fn_glMultiDrawArrays))(mode,first,count,primcount);
+	(*((PFNGLMULTIDRAWARRAYSPROC)m_fn_glMultiDrawArrays))(mode,first,count,drawcount);
 
 	OOGL_CHECK("glMultiDrawArrays");
 }
 
-void OOGL::StateFns::emulate_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
+void OOGL::StateFns::emulate_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount)
 {
-	for (GLsizei i = 0; i < primcount; ++i)
+	for (GLsizei i = 0; i < drawcount; ++i)
 	{
 		if (count[i] > 0)
 		{
@@ -2082,9 +2082,9 @@ void OOGL::StateFns::emulate_glMultiDrawArrays(GLenum mode, const GLint *first, 
 	}
 }
 
-void OOGL::StateFns::glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount)
+void OOGL::StateFns::glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount)
 {
-	(this->*m_thunk_glMultiDrawArrays)(mode,first,count,primcount);
+	(this->*m_thunk_glMultiDrawArrays)(mode,first,count,drawcount);
 
 	OOGL_CHECK("glMultiDrawArrays");
 }
@@ -2269,7 +2269,7 @@ void OOGL::StateFns::glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum
 	(this->*m_thunk_glDrawElementsBaseVertex)(mode,count,type,offset,basevertex);
 }
 
-void OOGL::StateFns::check_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
+void OOGL::StateFns::check_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount)
 {
 	if (!m_fn_glMultiDrawElements)
 	{
@@ -2288,19 +2288,19 @@ void OOGL::StateFns::check_glMultiDrawElements(GLenum mode, const GLsizei *count
 	if (!m_fn_glMultiDrawElements)
 		m_thunk_glMultiDrawElements = &StateFns::emulate_glMultiDrawElements;
 	
-	(this->*m_thunk_glMultiDrawElements)(mode,count,type,offsets,primcount);
+	(this->*m_thunk_glMultiDrawElements)(mode,count,type,offsets,drawcount);
 }
 
-void OOGL::StateFns::call_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
+void OOGL::StateFns::call_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount)
 {
-	(*((PFNGLMULTIDRAWELEMENTSPROC)m_fn_glMultiDrawElements))(mode,count,type,(const void* const*)offsets,primcount);
+	(*((PFNGLMULTIDRAWELEMENTSPROC)m_fn_glMultiDrawElements))(mode,count,type,(const void* const*)offsets,drawcount);
 
 	OOGL_CHECK("glMultiDrawElements");
 }
 
-void OOGL::StateFns::emulate_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
+void OOGL::StateFns::emulate_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount)
 {
-	for (GLsizei i = 0; i < primcount; ++i)
+	for (GLsizei i = 0; i < drawcount; ++i)
 	{
 		if (count[i] > 0)
 		{
@@ -2311,12 +2311,12 @@ void OOGL::StateFns::emulate_glMultiDrawElements(GLenum mode, const GLsizei *cou
 	}
 }
 
-void OOGL::StateFns::glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount)
+void OOGL::StateFns::glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount)
 {
-	(this->*m_thunk_glMultiDrawElements)(mode,count,type,offsets,primcount);
+	(this->*m_thunk_glMultiDrawElements)(mode,count,type,offsets,drawcount);
 }
 
-void OOGL::StateFns::check_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
+void OOGL::StateFns::check_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount, const GLint *basevertex)
 {
 	if (isGLversion(3,2) || glfwExtensionSupported("GL_ARB_draw_elements_base_vertex") == GL_TRUE)
 	{
@@ -2328,28 +2328,28 @@ void OOGL::StateFns::check_glMultiDrawElementsBaseVertex(GLenum mode, const GLsi
 	if (!m_fn_glMultiDrawElementsBaseVertex)
 		m_thunk_glMultiDrawElementsBaseVertex = &StateFns::emulate_glMultiDrawElementsBaseVertex;
 	
-	(this->*m_thunk_glMultiDrawElementsBaseVertex)(mode,count,type,offsets,primcount,basevertex);
+	(this->*m_thunk_glMultiDrawElementsBaseVertex)(mode,count,type,offsets,drawcount,basevertex);
 }
 
-void OOGL::StateFns::call_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
+void OOGL::StateFns::call_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount, const GLint *basevertex)
 {
-	(*m_fn_glMultiDrawElementsBaseVertex)(mode,count,type,(const void* const*)offsets,primcount,basevertex);
+	(*m_fn_glMultiDrawElementsBaseVertex)(mode,count,type,(const void* const*)offsets,drawcount,basevertex);
 
 	OOGL_CHECK("glMultiDrawElementsBaseVertex");
 }
 
-void OOGL::StateFns::emulate_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
+void OOGL::StateFns::emulate_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount, const GLint *basevertex)
 {
-	for (GLsizei i = 0; i < primcount; ++i)
+	for (GLsizei i = 0; i < drawcount; ++i)
 	{
 		if (count[i] > 0)
 			glDrawElementsBaseVertex(mode,count[i],type,offsets[i],basevertex[i]);
 	}
 }
 
-void OOGL::StateFns::glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex)
+void OOGL::StateFns::glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount, const GLint *basevertex)
 {
-	(this->*m_thunk_glMultiDrawElementsBaseVertex)(mode,count,type,offsets,primcount,basevertex);
+	(this->*m_thunk_glMultiDrawElementsBaseVertex)(mode,count,type,offsets,drawcount,basevertex);
 }
 
 void OOGL::StateFns::check_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLsizei instances)

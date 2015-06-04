@@ -110,9 +110,9 @@ namespace OOGL
 		void glEnableVertexArrayAttrib(const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
 		void glDisableVertexArrayAttrib(const OOBase::SharedPtr<VertexArrayObject>& vao, GLuint index);
 
-		void glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount);
-		void glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
-		void glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex);
+		void glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount);
+		void glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount);
+		void glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount, const GLint *basevertex);
 		bool check_glDrawElementsBaseVertex();
 		void glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset, GLint basevertex);
 		void glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLsizeiptr offset);
@@ -340,9 +340,9 @@ namespace OOGL
 
 		void (StateFns::*m_thunk_glMultiDrawArrays)(GLenum,const GLint*,const GLsizei*,GLsizei);
 		GLFWglproc m_fn_glMultiDrawArrays;
-		void check_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount);
-		void call_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount);
-		void emulate_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei primcount);
+		void check_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount);
+		void call_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount);
+		void emulate_glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount);
 
 		void (StateFns::*m_thunk_glDrawArraysInstanced)(GLenum,GLint,GLsizei,GLsizei);
 		GLFWglproc m_fn_glDrawArraysInstanced;
@@ -371,15 +371,15 @@ namespace OOGL
 		
 		void (StateFns::*m_thunk_glMultiDrawElements)(GLenum,const GLsizei*,GLenum,const GLsizeiptr*,GLsizei);
 		GLFWglproc m_fn_glMultiDrawElements;
-		void check_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
-		void call_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
-		void emulate_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount);
+		void check_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount);
+		void call_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount);
+		void emulate_glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount);
 
 		void (StateFns::*m_thunk_glMultiDrawElementsBaseVertex)(GLenum,const GLsizei*,GLenum,const GLsizeiptr*,GLsizei,const GLint*);
 		PFNGLMULTIDRAWELEMENTSBASEVERTEXPROC m_fn_glMultiDrawElementsBaseVertex;
-		void check_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex);
-		void call_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex);
-		void emulate_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei primcount, const GLint *basevertex);
+		void check_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount, const GLint *basevertex);
+		void call_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount, const GLint *basevertex);
+		void emulate_glMultiDrawElementsBaseVertex(GLenum mode, const GLsizei *count, GLenum type, const GLsizeiptr* offsets, GLsizei drawcount, const GLint *basevertex);
 
 		void (StateFns::*m_thunk_glDrawElementsInstanced)(GLenum,GLsizei,GLenum,GLsizeiptr,GLsizei);
 		GLFWglproc m_fn_glDrawElementsInstanced;
