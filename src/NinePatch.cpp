@@ -214,7 +214,7 @@ GLsizei NinePatchFactory::alloc_patch(const glm::u16vec2& size, const glm::u16ve
 
 void NinePatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size)
 {
-	unsigned int ushort_max = 0x10000;
+	unsigned int ushort_max = 0xFFFF;
 
 	OOBase::SharedPtr<vertex_data> attribs = m_ptrVertices->auto_map<vertex_data>(GL_MAP_WRITE_BIT,patch * vertices_per_patch * sizeof(vertex_data),vertices_per_patch * sizeof(vertex_data));
 	vertex_data* a = attribs.get();
@@ -225,9 +225,9 @@ void NinePatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, con
 	a[2].x = a[3].x - borders.z;
 
 	a[0].u = 0;
-	a[1].u = borders.x * (ushort_max / tex_size.x);
-	a[2].u = (tex_size.x - borders.z) * (ushort_max / tex_size.x);
-	a[3].u = ushort_max - 1;
+	a[1].u = static_cast<float>(borders.x) / tex_size.x * ushort_max;
+	a[2].u = static_cast<float>(tex_size.x - borders.z) / tex_size.x * ushort_max;
+	a[3].u = ushort_max;
 
 	for (size_t i=0;i<4;++i)
 	{
@@ -241,9 +241,9 @@ void NinePatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, con
 		a[i+12].u = a[i+8].u = a[i+4].u = a[i].u;
 
 		a[i].v = 0;
-		a[i+4].v = borders.w * (ushort_max / tex_size.y);
-		a[i+8].v = (tex_size.y - borders.y) * (ushort_max / tex_size.y);
-		a[i+12].v = ushort_max - 1;
+		a[i+4].v = static_cast<float>(borders.w) / tex_size.y * ushort_max;
+		a[i+8].v = static_cast<float>(tex_size.y - borders.y) / tex_size.y * ushort_max;
+		a[i+12].v = ushort_max;
 	}
 }
 

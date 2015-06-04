@@ -574,8 +574,8 @@ bool Indigo::Render::GUI::Panel::texture(const OOBase::SharedPtr<OOGL::Texture>&
 	if (!m_texture || !m_texture->valid())
 		return false;
 
-	m_texture->parameter(GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	m_texture->parameter(GL_TEXTURE_MIN_FILTER,GL_NEAREST_MIPMAP_NEAREST);
+	m_texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	m_texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
 	m_texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 	m_texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 
@@ -723,7 +723,7 @@ void Indigo::GUI::Panel::do_background(Image* image, bool* ret_val)
 	{
 		OOBase::SharedPtr<OOGL::Image> bg = image->render_image();
 		if (bg && bg->valid())
-			*ret_val = panel->texture(bg->make_texture(GL_RGB8),bg->size());
+			*ret_val = panel->texture(bg->make_texture(GL_RGBA8),bg->size());
 	}
 }
 
