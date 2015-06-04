@@ -252,7 +252,7 @@ bool FontProgram::load_8bit_shader()
 	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
 	if (!shaders[0]->compile(
 			"#version 120\n"
-			"attribute vec3 in_Position;\n"
+			"attribute vec2 in_Position;\n"
 			"attribute vec2 in_TexCoord;\n"
 			"uniform vec4 in_Colour;\n"
 			"uniform mat4 MVP;\n"
@@ -261,7 +261,7 @@ bool FontProgram::load_8bit_shader()
 			"void main() {\n"
 			"	pass_Colour = in_Colour;\n"
 			"	pass_TexCoord = in_TexCoord;\n"
-			"	gl_Position = MVP * vec4(in_Position,1.0);\n"
+			"	gl_Position = MVP * vec4(in_Position,0.0,1.0);\n"
 			"}\n"))
 	{
 		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
@@ -441,6 +441,8 @@ bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 	{
 		m_ptrTexture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 		m_ptrTexture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+		m_ptrTexture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+		m_ptrTexture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	}
 
 	if (data != end)
