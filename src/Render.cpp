@@ -215,7 +215,7 @@ static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& conf
 		if (draw_rate > 15000.f)
 			draw_rate = 15000.f;
 
-		wait.reset(0,sixty_fps - draw_rate);
+		wait.reset(0,static_cast<unsigned int>(sixty_fps - draw_rate));
 
 		// Get render commands
 		res = s_render_queue->dequeue(stop,wait);

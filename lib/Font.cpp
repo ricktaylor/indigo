@@ -400,10 +400,10 @@ bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 				float height = read_uint16(data);
 				OOBase::int32_t x = read_int16(data);
 				OOBase::int32_t y = read_int16(data);
-				ci.u0 = u / tex_width * ushort_max;
-				ci.v0 = v / tex_height * ushort_max;
-				ci.u1 = (u + width) / tex_width * ushort_max;
-				ci.v1 = (v + height) / tex_height * ushort_max;
+				ci.u0 = static_cast<OOBase::uint16_t>(u / tex_width * ushort_max);
+				ci.v0 = static_cast<OOBase::uint16_t>(v / tex_height * ushort_max);
+				ci.u1 = static_cast<OOBase::uint16_t>((u + width) / tex_width * ushort_max);
+				ci.v1 = static_cast<OOBase::uint16_t>((v + height) / tex_height * ushort_max);
 				ci.left = x / size;
 				ci.top = 1.0f - (y / size);
 				ci.right = (x + width) / size;

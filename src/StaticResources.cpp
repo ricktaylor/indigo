@@ -54,7 +54,8 @@ namespace
 	RES s_resources[] =
 	{
 		{ "Titillium-Regular.fnt", IDR_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
-		{ "Titillium-Regular.bin_0.png", IDR_TITILLIUM_0, RT_RCDATA, NULL, NULL, 0 },
+		{ "Titillium-Regular.bin_0.png", IDB_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
+		{ "menu_border.png", IDB_MENU_BORDER, RT_RCDATA, NULL, NULL, 0 },
 	};
 
 	const RES* find_resource(const char* name)

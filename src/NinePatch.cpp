@@ -203,8 +203,8 @@ GLsizei NinePatchFactory::alloc_patch(const glm::u16vec2& size, const glm::u16ve
 	GLuint idx = patch * vertices_per_patch;
 	for (size_t i=0;i<12;++i)
 	{
-		e[i*2] = idx + i;
-		e[i*2 + 1] = idx + i + 4;
+		e[i*2] = static_cast<GLuint>(idx + i);
+		e[i*2 + 1] = static_cast<GLuint>(idx + i + 4);
 	}
 
 	layout_patch(patch,size,borders,tex_size);
@@ -225,8 +225,8 @@ void NinePatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, con
 	a[2].x = a[3].x - borders.z;
 
 	a[0].u = 0;
-	a[1].u = static_cast<float>(borders.x) / tex_size.x * ushort_max;
-	a[2].u = static_cast<float>(tex_size.x - borders.z) / tex_size.x * ushort_max;
+	a[1].u = static_cast<GLushort>(static_cast<float>(borders.x) / tex_size.x * ushort_max);
+	a[2].u = static_cast<GLushort>(static_cast<float>(tex_size.x - borders.z) / tex_size.x * ushort_max);
 	a[3].u = ushort_max;
 
 	for (size_t i=0;i<4;++i)
@@ -241,8 +241,8 @@ void NinePatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, con
 		a[i+12].u = a[i+8].u = a[i+4].u = a[i].u;
 
 		a[i].v = 0;
-		a[i+4].v = static_cast<float>(borders.w) / tex_size.y * ushort_max;
-		a[i+8].v = static_cast<float>(tex_size.y - borders.y) / tex_size.y * ushort_max;
+		a[i+4].v = static_cast<GLushort>(static_cast<float>(borders.w) / tex_size.y * ushort_max);
+		a[i+8].v = static_cast<GLushort>(static_cast<float>(tex_size.y - borders.y) / tex_size.y * ushort_max);
 		a[i+12].v = ushort_max;
 	}
 }
