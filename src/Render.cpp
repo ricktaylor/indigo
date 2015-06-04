@@ -220,23 +220,29 @@ static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& conf
 		// Get render commands
 		res = s_render_queue->dequeue(stop,wait);
 
-		// Swap all windows (this collects events)
-		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
+		// Poll for UI events
+		if (!visible_window)
+			glfwWaitEvents();
+		else
 		{
-			if (i->expired())
-				i = vecWindows.erase(i);
-			else
+			do
 			{
-				i->lock()->swap();
-				++i;
+				glfwPollEvents();
+			}
+			while (!wait.has_expired());
+
+			// Swap all windows (this collects events)
+			for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
+			{
+				if (i->expired())
+					i = vecWindows.erase(i);
+				else
+				{
+					i->lock()->swap();
+					++i;
+				}
 			}
 		}
-
-		// Poll for UI events
-		if (visible_window)
-			glfwPollEvents();
-		else
-			glfwWaitEvents();
 	}
 
 	glfwTerminate();
