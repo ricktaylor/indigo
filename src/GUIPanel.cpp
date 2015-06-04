@@ -100,10 +100,10 @@ glm::u16vec2 Indigo::Render::GUI::Sizer::ideal_size() const
 				LOG_ERROR_RETURN(("Failed to insert into vector: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),glm::u16vec2(0));
 		}
 
-		if (sz.x < widths[i->first.first])
+		if (sz.x > widths[i->first.first])
 			widths[i->first.first] = sz.x;
 
-		if (sz.y < heights[i->first.second])
+		if (sz.y > heights[i->first.second])
 			heights[i->first.second] = sz.y;
 	}
 
@@ -150,10 +150,10 @@ bool Indigo::Render::GUI::Sizer::get_extents(OOBase::Vector<OOBase::Pair<OOBase:
 				LOG_ERROR_RETURN(("Failed to insert into vector: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 
-		if (sz.x < widths[i->first.first].first)
+		if (sz.x > widths[i->first.first].first)
 			widths[i->first.first].first = sz.x;
 
-		if (sz.y < heights[i->first.second].first)
+		if (sz.y > heights[i->first.second].first)
 			heights[i->first.second].first = sz.y;
 
 		widths[i->first.first].second += i->second.m_layout.m_proportion;
@@ -215,7 +215,7 @@ bool Indigo::Render::GUI::Sizer::do_layout(const Panel& panel,
 {
 	// Adjust the widths and heights
 	glm::u16vec2 panel_size = panel.client_size();
-	if (panel_size.x != ideal_width.first)
+	if (panel_size.x != ideal_width.first && ideal_width.second)
 	{
 		float expand_x = static_cast<float>(panel_size.x - ideal_width.first) / ideal_width.second;
 		for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
@@ -227,7 +227,7 @@ bool Indigo::Render::GUI::Sizer::do_layout(const Panel& panel,
 				i->first = w;
 		}
 	}
-	if (panel_size.y != ideal_height.first)
+	if (panel_size.y != ideal_height.first && ideal_height.second)
 	{
 		float expand_y = static_cast<float>(panel_size.y - ideal_height.first) / ideal_height.second;
 		for (OOBase::Vector<OOBase::Pair<OOBase::uint16_t,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
@@ -270,31 +270,31 @@ bool Indigo::Render::GUI::Sizer::do_layout(const Panel& panel,
 							glm::u16vec2 item_size(widget->ideal_size());
 
 							// Expand if required
-							if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand)
+							if (item_size != cell_size)
 							{
-								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand_horiz)
-									item_size.x = cell_size.x;
-								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand_vert)
-									item_size.y = cell_size.y;
+								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand)
+								{
+									if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand_horiz)
+										item_size.x = cell_size.x;
+									if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand_vert)
+										item_size.y = cell_size.y;
 
-								item_size = widget->size(item_size);
+									item_size = widget->size(item_size);
+								}
 							}
 
 							// Align if required
-							if (item_size != cell_size)
-							{
-								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_right)
-									item_pos.x = cell_pos.x + static_cast<int>(cell_size.x) - item_size.x;
-								else if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_hcentre)
-									item_pos.x = cell_pos.x + (static_cast<int>(cell_size.x) - item_size.x)/2;
+							if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_right)
+								item_pos.x = cell_pos.x + static_cast<int>(cell_size.x) - item_size.x;
+							else if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_hcentre)
+								item_pos.x = cell_pos.x + (static_cast<int>(cell_size.x) - item_size.x)/2;
 
-								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_top)
-									item_pos.y = cell_pos.y + static_cast<int>(cell_size.y) - item_size.y;
-								else if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_vcentre)
-									item_pos.y = cell_pos.y + (static_cast<int>(cell_size.y) - item_size.y)/2;
+							if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_top)
+								item_pos.y = cell_pos.y + static_cast<int>(cell_size.y) - item_size.y;
+							else if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_vcentre)
+								item_pos.y = cell_pos.y + (static_cast<int>(cell_size.y) - item_size.y)/2;
 
-								widget->position(item_pos);
-							}
+							widget->position(item_pos);
 						}
 					}
 					cell_pos.x += j->first;
@@ -526,7 +526,7 @@ void Indigo::Render::GUI::Panel::remove_child(const OOBase::SharedPtr<Widget>& c
 
 void Indigo::Render::GUI::Panel::draw(OOGL::State& glState, const glm::mat4& mvp)
 {
-	m_background.draw(glState,mvp);
+	m_background.draw(glState,m_texture,mvp);
 
 	for (OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i;++i)
 	{
@@ -573,6 +573,11 @@ bool Indigo::Render::GUI::Panel::texture(const OOBase::SharedPtr<OOGL::Texture>&
 	m_texture = tex;
 	if (!m_texture || !m_texture->valid())
 		return false;
+
+	m_texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	m_texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	m_texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	m_texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 
 	if (tex_size != m_tex_size)
 	{

@@ -39,7 +39,7 @@ namespace
 		void free_patch(GLsizei p);
 		void layout_patch(GLsizei patch, const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size);
 
-		void draw(OOGL::State& state, const glm::mat4& mvp, const GLint* firsts, const GLsizei* counts, GLsizei primcount);
+		void draw(OOGL::State& state, const glm::mat4& mvp, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount);
 
 	private:
 		typedef OOBase::Table<GLsizei,GLsizei,OOBase::Less<GLsizei>,OOBase::ThreadLocalAllocator> free_list_t;
@@ -86,13 +86,13 @@ bool NinePatchFactory::create_program()
 		shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
 		if (!shaders[0]->compile(
 				"#version 120\n"
-				"attribute vec3 in_Position;\n"
+				"attribute vec2 in_Position;\n"
 				"attribute vec2 in_TexCoord;\n"
 				"uniform mat4 MVP;\n"
 				"varying vec2 pass_TexCoord;\n"
 				"void main() {\n"
 				"	pass_TexCoord = in_TexCoord;\n"
-				"	gl_Position = MVP * vec4(in_Position,1.0);\n"
+				"	gl_Position = MVP * vec4(in_Position,0.0,1.0);\n"
 				"}\n"))
 		{
 			LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
@@ -214,33 +214,35 @@ GLsizei NinePatchFactory::alloc_patch(const glm::u16vec2& size, const glm::u16ve
 
 void NinePatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size)
 {
+	unsigned int ushort_max = 0x10000;
+
 	OOBase::SharedPtr<vertex_data> attribs = m_ptrVertices->auto_map<vertex_data>(GL_MAP_WRITE_BIT,patch * vertices_per_patch * sizeof(vertex_data),vertices_per_patch * sizeof(vertex_data));
 	vertex_data* a = attribs.get();
 
 	a[0].x = 0;
 	a[1].x = borders.x;
-	a[2].x = size.x - borders.z;
-	a[3].x = size.x;
+	a[3].x = size.x - 1;
+	a[2].x = a[3].x - borders.z;
 
 	a[0].u = 0;
-	a[1].u = borders.x;
-	a[2].u = tex_size.x - borders.z;
-	a[3].u = tex_size.x;
+	a[1].u = borders.x * (ushort_max / tex_size.x);
+	a[2].u = (tex_size.x - 1 - borders.z) * (ushort_max / tex_size.x);
+	a[3].u = ushort_max - 1;
 
 	for (size_t i=0;i<4;++i)
 	{
 		a[i+12].x = a[i+8].x = a[i+4].x = a[i].x;
 
-		a[i].y = size.y;
-		a[i+4].y = size.y - borders.y;
+		a[i].y = size.y - 1;
+		a[i+4].y = a[i].y - borders.y;
 		a[i+8].y = borders.w;
 		a[i+12].y = 0;
 
 		a[i+12].u = a[i+8].u = a[i+4].u = a[i].u;
 
-		a[i].v = tex_size.y;
-		a[i+4].v = tex_size.y - borders.y;
-		a[i+8].v = borders.w;
+		a[i].v = ushort_max - 1;
+		a[i+4].v = (tex_size.y - 1 - borders.y) * (ushort_max / tex_size.y);
+		a[i+8].v = borders.w * (ushort_max / tex_size.y);
 		a[i+12].v = 0;
 	}
 }
@@ -267,7 +269,7 @@ void NinePatchFactory::free_patch(GLsizei p)
 	}
 }
 
-void NinePatchFactory::draw(OOGL::State& state, const glm::mat4& mvp, const GLint* firsts, const GLsizei* counts, GLsizei primcount)
+void NinePatchFactory::draw(OOGL::State& state, const glm::mat4& mvp, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount)
 {
 	if (m_ptrProgram)
 	{
@@ -275,7 +277,7 @@ void NinePatchFactory::draw(OOGL::State& state, const glm::mat4& mvp, const GLin
 
 		m_ptrProgram->uniform("MVP",mvp);
 
-		m_ptrVAO->draw(GL_TRIANGLE_STRIP,firsts,counts,primcount);
+		m_ptrVAO->multi_draw_elements(GL_TRIANGLE_STRIP,counts,GL_UNSIGNED_INT,firsts,drawcount);
 	}
 }
 
@@ -371,10 +373,12 @@ void Indigo::Render::NinePatch::layout(const glm::u16vec2& size, const glm::u16v
 	}
 }
 
-void Indigo::Render::NinePatch::draw(OOGL::State& state, const glm::mat4& mvp) const
+void Indigo::Render::NinePatch::draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp) const
 {
 	if (m_patch != GLsizei(-1))
 	{
+		state.bind(0,texture);
+
 		if (m_counts[0])
 		{
 			if (m_counts[2])

@@ -56,10 +56,12 @@ glm::u16vec2 Indigo::Render::GUI::Widget::size(const glm::u16vec2& sz)
 {
 	if (m_size != sz)
 	{
-		if (m_min_size.x != -1 && m_size.x < m_min_size.x)
+		m_size = sz;
+
+		if (m_min_size.x != glm::u16vec2::value_type(-1) && m_size.x < m_min_size.x)
 			m_size.x = m_min_size.x;
 
-		if (m_min_size.y != -1 && m_size.y < m_min_size.y)
+		if (m_min_size.y != glm::u16vec2::value_type(-1) && m_size.y < m_min_size.y)
 			m_size.y = m_min_size.y;
 
 		if (m_size.x > m_max_size.x)
@@ -75,13 +77,13 @@ glm::u16vec2 Indigo::Render::GUI::Widget::size(const glm::u16vec2& sz)
 glm::u16vec2 Indigo::Render::GUI::Widget::min_size() const
 {
 	glm::u16vec2 min_size(m_min_size);
-	if (min_size.x == -1 || min_size.y == -1)
+	if (min_size.x == glm::u16vec2::value_type(-1) || min_size.y == glm::u16vec2::value_type(-1))
 	{
 		glm::u16vec2 ideal(ideal_size());
-		if (min_size.x == -1)
+		if (min_size.x == glm::u16vec2::value_type(-1))
 			min_size.x = ideal.x;
 
-		if (min_size.y == -1)
+		if (min_size.y == glm::u16vec2::value_type(-1))
 			min_size.y = ideal.y;
 	}
 
@@ -94,7 +96,7 @@ glm::u16vec2 Indigo::Render::GUI::Widget::min_size(const glm::u16vec2& sz)
 	{
 		m_min_size = sz;
 
-		if (m_min_size.x != -1)
+		if (m_min_size.x != glm::u16vec2::value_type(-1))
 		{
 			if (m_max_size.x < m_min_size.x)
 				m_max_size.x = m_min_size.x;
@@ -103,7 +105,7 @@ glm::u16vec2 Indigo::Render::GUI::Widget::min_size(const glm::u16vec2& sz)
 				m_size.x = m_min_size.x;
 		}
 
-		if (m_min_size.y != -1)
+		if (m_min_size.y != glm::u16vec2::value_type(-1))
 		{
 			if (m_max_size.y < m_min_size.y)
 				m_max_size.y = m_min_size.y;
@@ -122,10 +124,10 @@ glm::u16vec2 Indigo::Render::GUI::Widget::max_size(const glm::u16vec2& sz)
 	{
 		m_max_size = sz;
 
-		if (m_min_size.x != -1 && m_max_size.x < m_min_size.x)
+		if (m_min_size.x != glm::u16vec2::value_type(-1) && m_max_size.x < m_min_size.x)
 			m_max_size.x = m_min_size.x;
 
-		if (m_min_size.y != -1 && m_max_size.y < m_min_size.y)
+		if (m_min_size.y != glm::u16vec2::value_type(-1) && m_max_size.y < m_min_size.y)
 			m_max_size.y = m_min_size.y;
 
 		if (m_size.x > m_max_size.x)
@@ -141,10 +143,10 @@ glm::u16vec2 Indigo::Render::GUI::Widget::max_size(const glm::u16vec2& sz)
 glm::u16vec2 Indigo::Render::GUI::Widget::ideal_size() const
 {
 	glm::u16vec2 sz(0);
-	if (m_min_size.x != -1)
+	if (m_min_size.x != glm::u16vec2::value_type(-1))
 		sz.x = m_min_size.x;
 
-	if (m_min_size.y != -1)
+	if (m_min_size.y != glm::u16vec2::value_type(-1))
 		sz.y = m_min_size.y;
 
 	if (sz.x > m_max_size.x)

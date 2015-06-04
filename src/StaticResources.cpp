@@ -119,7 +119,7 @@ namespace
 	{
 		{ "Titillium-Regular.fnt", s_Titillium_Regular, sizeof(s_Titillium_Regular) },
 		{ "Titillium-Regular.bin_0.png", s_Titillium_Regular_0, sizeof(s_Titillium_Regular_0) },
-		{ "menu_border.png", s_Titillium_Regular_0, sizeof(s_Titillium_Regular_0) },
+		{ "menu_border.png", s_menu_border, sizeof(s_menu_border) },
 	};
 
 	const RES* find_resource(const char* name)

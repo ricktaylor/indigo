@@ -72,16 +72,13 @@ namespace
 	class EventQueue : public Queue
 	{
 	public:
-		bool dequeue(const OOBase::Timeout& timeout = OOBase::Timeout())
+		bool dequeue()
 		{
 			OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
 			for (;;)
 			{
 				while (m_queue.empty())
-				{
-					if (!m_cond.wait(m_lock,timeout))
-						return false;
-				}
+					m_cond.wait(m_lock);
 
 				for (Item item;m_queue.pop(&item);)
 				{
@@ -92,68 +89,45 @@ namespace
 						return item.m_param == reinterpret_cast<void*>(1);
 
 					if (!(*item.m_callback)(item.m_param))
-						return false;
+						break;
 
 					guard.acquire();
 				}
 			}
+			return false;
 		}
 	};
 
 	class RenderQueue : public Queue
 	{
 	public:
-		bool dequeue(bool& stop)
+		bool dequeue(bool& stop, const OOBase::Timeout& timeout = OOBase::Timeout())
 		{
-			OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock,false);
-			if (!guard.try_acquire())
-				return true;
-
-			// Get next buffer
-			for (Item item;m_queue.pop(&item);)
+			do
 			{
-				guard.release();
-
-				if (!item.m_callback)
+				OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
+				while (m_queue.empty())
 				{
-					stop = true;
-					break;
+					if (!m_cond.wait(m_lock,timeout))
+						return true;
 				}
 
-				if (!(*item.m_callback)(item.m_param))
-					return false;
-
-				if (!guard.try_acquire())
-					break;
-			}
-			return true;
-		}
-
-		bool dequeue_block(bool& stop, const OOBase::Timeout& timeout = OOBase::Timeout())
-		{
-			OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
-			while (m_queue.empty())
-			{
-				if (!m_cond.wait(m_lock,timeout))
-					return true;
-			}
-
-			// Get next buffer
-			for (Item item;m_queue.pop(&item);)
-			{
-				guard.release();
-
-				if (!item.m_callback)
+				// Get next buffer
+				for (Item item;m_queue.pop(&item);)
 				{
-					stop = true;
-					break;
+					guard.release();
+
+					if (!item.m_callback)
+						stop = true;
+					else if (!(*item.m_callback)(item.m_param))
+						return false;
+
+					if (!guard.acquire(timeout))
+						return true;
 				}
-
-				if (!(*item.m_callback)(item.m_param))
-					return false;
-
-				guard.acquire();
 			}
+			while (!stop);
+
 			return true;
 		}
 	};
@@ -175,7 +149,7 @@ namespace
 
 	struct render_call_info
 	{
-		bool (*m_fn)(void*);
+		Queue::callback_t m_fn;
 		void* m_param;
 	};
 
@@ -211,53 +185,59 @@ static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& conf
 	// Loop blocking until we have windows
 	bool res = true;
 	bool stop = false;
-	do
+	OOBase::Clock draw_clock;
+	float draw_rate = 15000.f;
+	const float sixty_fps = (1.f / 60) * 1000000;
+	OOBase::Timeout wait;
+	while (res && !stop)
 	{
-		while (vecWindows.empty() && res && !stop)
-			res = s_render_queue->dequeue_block(stop);
+		draw_clock.reset();
 
-		while (res && !stop)
+		// Draw all windows
+		bool visible_window = false;
+		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
 		{
-			// Draw all windows
-			bool visible_window = false;
-			for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
-			{
-				if (i->expired())
-					i = vecWindows.erase(i);
-				else
-				{
-					if (i->lock()->draw())
-						visible_window = true;
-					++i;
-				}
-			}
-
-			// Update animations
-
-			// Get render commands
-			if (vecWindows.empty() || !(res = s_render_queue->dequeue(stop)) || stop)
-				break;
-
-			// Swap all windows (this collects events)
-			for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
-			{
-				if (i->expired())
-					i = vecWindows.erase(i);
-				else
-				{
-					i->lock()->swap();
-					++i;
-				}
-			}
-
-			// Poll for UI events
-			if (visible_window)
-				glfwPollEvents();
+			if (i->expired())
+				i = vecWindows.erase(i);
 			else
-				glfwWaitEvents();
+			{
+				if (i->lock()->draw())
+					visible_window = true;
+				++i;
+			}
 		}
 
-	} while (res && !stop);
+		// Update animations
+
+
+		// Accumulate average draw rate
+		draw_rate = ((draw_rate*3) + draw_clock.microseconds()) / 4.f;
+		if (draw_rate > 15000.f)
+			draw_rate = 15000.f;
+
+		wait.reset(0,sixty_fps - draw_rate);
+
+		// Get render commands
+		res = s_render_queue->dequeue(stop,wait);
+
+		// Swap all windows (this collects events)
+		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
+		{
+			if (i->expired())
+				i = vecWindows.erase(i);
+			else
+			{
+				i->lock()->swap();
+				++i;
+			}
+		}
+
+		// Poll for UI events
+		if (visible_window)
+			glfwPollEvents();
+		else
+			glfwWaitEvents();
+	}
 
 	glfwTerminate();
 

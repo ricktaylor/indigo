@@ -58,19 +58,19 @@ bool Indigo::Application::start(const OOBase::Table<OOBase::String,OOBase::Strin
 	if (!start_menu)
 		LOG_ERROR_RETURN(("Failed to create start_menu: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
-	if (!start_menu->create(&m_main_wnd.top_layer(),glm::u16vec2(48,48)) ||
-		!sizer->create(8,8) ||
-		!start_menu->sizer(sizer) ||
-		!start_menu->background(static_resources(),"menu_border.png") ||
-		!start_menu->borders(15,15,15,15) ||
-		!start_menu->visible(true) ||
-		!m_main_wnd.top_layer().sizer()->add_widget(start_menu,1,1) ||
-		!m_main_wnd.top_layer().visible(true))
-	{
-		return false;
-	}
+	GUI::Sizer::ItemLayout layout = {0};
+	layout.m_flags = GUI::Sizer::ItemLayout::align_centre;
+	layout.m_proportion = 1;
 
-	return true;
+	return start_menu->create(&m_main_wnd.top_layer(),glm::u16vec2(48,48)) &&
+			sizer->create(8,8) &&
+			start_menu->sizer(sizer) &&
+			start_menu->background(static_resources(),"menu_border.png") &&
+			start_menu->borders(15,15,15,15) &&
+			start_menu->visible(true) &&
+			m_main_wnd.top_layer().sizer()->add_widget(start_menu,0,0,&layout) &&
+			m_main_wnd.top_layer().visible(true) &&
+			m_main_wnd.show();
 }
 
 bool Indigo::Application::run(const OOBase::Table<OOBase::String,OOBase::String>& config_args)

@@ -63,9 +63,6 @@ bool Indigo::Render::MainWindow::create()
 	if (!Indigo::monitor_window(m_wnd))
 		LOG_ERROR_RETURN(("Failed to monitor window"),false);
 
-	on_size(*m_wnd,m_wnd->size());
-	m_wnd->visible(true);
-
 	return true;
 }
 
@@ -89,7 +86,7 @@ void Indigo::Render::MainWindow::on_close(const OOGL::Window& win)
 
 void Indigo::Render::MainWindow::on_move(const OOGL::Window& win, const glm::u16vec2& pos)
 {
-	on_size(win,win.size());
+	//on_size(win,win.size());
 }
 
 void Indigo::Render::MainWindow::on_size(const OOGL::Window& win, const glm::u16vec2& sz)
@@ -147,15 +144,12 @@ bool Indigo::MainWindow::create(Application* app)
 
 void Indigo::MainWindow::do_create(bool* ret_val)
 {
+	*ret_val = false;
+
 	OOBase::SharedPtr<Render::MainWindow> wnd = OOBase::allocate_shared<Render::MainWindow,OOBase::ThreadLocalAllocator>(this);
 	if (!wnd)
-	{
 		LOG_ERROR(("Failed to allocate MainWindow: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
-		*ret_val = false;
-	}
-	else if (!wnd->create())
-		*ret_val = false;
-	else
+	else if (wnd->create())
 	{
 		wnd.swap(m_wnd);
 		*ret_val = true;
@@ -186,4 +180,15 @@ void Indigo::MainWindow::on_close()
 Indigo::GUI::Layer& Indigo::MainWindow::top_layer()
 {
 	return m_top_layer;
+}
+
+bool Indigo::MainWindow::show()
+{
+	return render_call(OOBase::make_delegate(this,&MainWindow::do_show));
+}
+
+void Indigo::MainWindow::do_show()
+{
+	m_wnd->on_size(*m_wnd->m_wnd,m_wnd->m_wnd->size());
+	m_wnd->m_wnd->visible(true);
 }

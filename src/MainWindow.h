@@ -70,6 +70,8 @@ namespace Indigo
 		bool create(Application* app);
 		void destroy();
 
+		bool show();
+
 		GUI::Layer& top_layer();
 		
 	private:
@@ -78,6 +80,7 @@ namespace Indigo
 		GUI::Layer m_top_layer;
 
 		void do_create(bool* ret_val);
+		void do_show();
 		void do_destroy();
 		void on_close();
 	};
