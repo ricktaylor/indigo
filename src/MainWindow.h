@@ -48,8 +48,6 @@ namespace Indigo
 			OOBase::SharedPtr<OOGL::Window> m_wnd;
 			OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
 
-			float m_ratio;
-			
 			bool create();
 			
 			void on_close(const OOGL::Window& win);

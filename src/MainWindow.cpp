@@ -32,7 +32,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-Indigo::Render::MainWindow::MainWindow(Indigo::MainWindow* owner) : m_owner(owner), m_ratio(0)
+Indigo::Render::MainWindow::MainWindow(Indigo::MainWindow* owner) : m_owner(owner)
 {
 }
 
@@ -91,8 +91,6 @@ void Indigo::Render::MainWindow::on_move(const OOGL::Window& win, const glm::u16
 
 void Indigo::Render::MainWindow::on_size(const OOGL::Window& win, const glm::u16vec2& sz)
 {
-	glm::vec2 dpmm = win.dots_per_mm();
-	m_ratio = (sz.x * dpmm.x) / (sz.y * dpmm.y);
 	glViewport(0, 0, sz.x, sz.y);
 
 	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
