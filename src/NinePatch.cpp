@@ -221,29 +221,29 @@ void NinePatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, con
 
 	a[0].x = 0;
 	a[1].x = borders.x;
-	a[3].x = size.x - 1;
+	a[3].x = size.x;
 	a[2].x = a[3].x - borders.z;
 
 	a[0].u = 0;
 	a[1].u = borders.x * (ushort_max / tex_size.x);
-	a[2].u = (tex_size.x - 1 - borders.z) * (ushort_max / tex_size.x);
+	a[2].u = (tex_size.x - borders.z) * (ushort_max / tex_size.x);
 	a[3].u = ushort_max - 1;
 
 	for (size_t i=0;i<4;++i)
 	{
 		a[i+12].x = a[i+8].x = a[i+4].x = a[i].x;
 
-		a[i].y = size.y - 1;
+		a[i].y = size.y;
 		a[i+4].y = a[i].y - borders.y;
 		a[i+8].y = borders.w;
 		a[i+12].y = 0;
 
 		a[i+12].u = a[i+8].u = a[i+4].u = a[i].u;
 
-		a[i].v = ushort_max - 1;
-		a[i+4].v = (tex_size.y - 1 - borders.y) * (ushort_max / tex_size.y);
-		a[i+8].v = borders.w * (ushort_max / tex_size.y);
-		a[i+12].v = 0;
+		a[i].v = 0;
+		a[i+4].v = borders.w * (ushort_max / tex_size.y);
+		a[i+8].v = (tex_size.y - borders.y) * (ushort_max / tex_size.y);
+		a[i+12].v = ushort_max - 1;
 	}
 }
 
