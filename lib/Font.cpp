@@ -312,7 +312,8 @@ bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 		LOG_ERROR_RETURN(("Failed to load font data: Format not recognised"),false);
 
 	const unsigned char* end = data + len;
-	unsigned int tex_width, tex_height, pages;
+	float tex_width, tex_height, size;
+	unsigned int pages;
 	OOBase::Vector<const char*,OOBase::ThreadLocalAllocator> vecPages;
 
 	bool ok = true;
@@ -324,14 +325,14 @@ bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 		switch (type)
 		{
 		case 1:
-			m_size = read_uint16(data);
+			size = m_size = read_uint16(data);
 			OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %u",data + 12,m_size);
 			data += len - 2;
 			break;
 
 		case 2:
 			assert(len == 15);
-			m_line_height = read_uint16(data) / static_cast<float>(m_size);
+			m_line_height = read_uint16(data) / size;
 			data += 2;
 			tex_width = read_uint16(data);
 			tex_height = read_uint16(data);
@@ -390,21 +391,25 @@ bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 		case 4:
 			for (size_t c = 0;ok && c < len / 20; ++c)
 			{
-				unsigned int ushort_max = 0x10000;
+				unsigned int ushort_max = 0xFFFF;
 				struct char_info ci;
 				OOBase::uint32_t id = read_uint32(data);
-				ci.u0 = read_uint16(data) * (ushort_max / tex_width);
-				ci.v0 = read_uint16(data) * (ushort_max / tex_height);
-				OOBase::uint16_t width = read_uint16(data);
-				OOBase::uint16_t height = read_uint16(data);
-				ci.u1 = ci.u0 + (width  * (ushort_max / tex_width));
-				ci.v1 = ci.v0 + (height  * (ushort_max / tex_height));
-				ci.left = read_int16(data) / static_cast<float>(m_size);
-				ci.top = 1.0f - (read_int16(data) / static_cast<float>(m_size));
-				ci.right = ci.left + (width / static_cast<float>(m_size));
-				ci.bottom = ci.top - (height / static_cast<float>(m_size));
+				OOBase::uint32_t u = read_uint16(data);
+				OOBase::uint32_t v = read_uint16(data);
+				float width = read_uint16(data);
+				float height = read_uint16(data);
+				OOBase::int32_t x = read_int16(data);
+				OOBase::int32_t y = read_int16(data);
+				ci.u0 = u / tex_width * ushort_max;
+				ci.v0 = v / tex_height * ushort_max;
+				ci.u1 = (u + width) / tex_width * ushort_max;
+				ci.v1 = (v + height) / tex_height * ushort_max;
+				ci.left = x / size;
+				ci.top = 1.0f - (y / size);
+				ci.right = (x + width) / size;
+				ci.bottom = 1.0f - ((y + height) / size);
 
-				ci.xadvance = read_int16(data) / static_cast<float>(m_size);
+				ci.xadvance = read_int16(data) / size;
 				ci.page = *data++;
 				ci.channel = *data++;
 
@@ -419,7 +424,7 @@ bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 				OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> ch;
 				ch.first = read_uint32(data);
 				ch.second = read_uint32(data);
-				float offset = read_int16(data) / static_cast<float>(m_size);
+				float offset = read_int16(data) / size;
 				if (!(ok = m_mapKerning.insert(ch,offset)))
 					LOG_ERROR(("Failed to add character to kerning table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
