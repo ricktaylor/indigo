@@ -57,14 +57,14 @@ namespace Indigo
 				bool hilighted() const;
 				bool hilight(bool hilighted = true);
 
-				glm::i16vec2 position() const { return m_position; }
+				const glm::i16vec2& position() const { return m_position; }
 				void position(const glm::i16vec2& pos);
 
-				virtual glm::u16vec2 size() const { return m_size; }
+				const glm::u16vec2& size() const { return m_size; }
 				virtual glm::u16vec2 size(const glm::u16vec2& sz);
 
 				glm::u16vec2 min_size() const;
-				glm::u16vec2 min_size(const glm::u16vec2& sz);
+				virtual glm::u16vec2 min_size(const glm::u16vec2& sz);
 
 				glm::u16vec2 max_size() const { return m_max_size; }
 				glm::u16vec2 max_size(const glm::u16vec2& sz);
@@ -88,7 +88,7 @@ namespace Indigo
 				virtual bool can_focus(bool focused) { return false; }
 				virtual bool can_hilight(bool hilighted) { return false; }
 
-				virtual const OOGL::Window& window() const;
+				virtual const OOBase::SharedPtr<OOGL::Window>& window() const;
 
 				virtual void draw(OOGL::State& glState, const glm::mat4& mvp) = 0;
 

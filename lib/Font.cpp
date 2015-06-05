@@ -312,7 +312,7 @@ bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 		LOG_ERROR_RETURN(("Failed to load font data: Format not recognised"),false);
 
 	const unsigned char* end = data + len;
-	float tex_width, tex_height, size;
+	float tex_width, tex_height;
 	unsigned int pages;
 	OOBase::Vector<const char*,OOBase::ThreadLocalAllocator> vecPages;
 
@@ -325,14 +325,16 @@ bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 		switch (type)
 		{
 		case 1:
-			size = m_size = read_uint16(data);
-			OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %u",data + 12,m_size);
-			data += len - 2;
+			{
+				OOBase::uint16_t size = read_uint16(data);
+				OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %u",data + 12,size);
+				data += len - 2;
+			}
 			break;
 
 		case 2:
 			assert(len == 15);
-			m_line_height = read_uint16(data) / size;
+			m_line_height = read_uint16(data);
 			data += 2;
 			tex_width = read_uint16(data);
 			tex_height = read_uint16(data);
@@ -404,12 +406,12 @@ bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 				ci.v0 = static_cast<OOBase::uint16_t>(v / tex_height * ushort_max);
 				ci.u1 = static_cast<OOBase::uint16_t>((u + width) / tex_width * ushort_max);
 				ci.v1 = static_cast<OOBase::uint16_t>((v + height) / tex_height * ushort_max);
-				ci.left = x / size;
-				ci.top = 1.0f - (y / size);
-				ci.right = (x + width) / size;
-				ci.bottom = 1.0f - ((y + height) / size);
+				ci.left = x / m_line_height;
+				ci.top = 1.0f - (y / m_line_height);
+				ci.right = (x + width) / m_line_height;
+				ci.bottom = 1.0f - ((y + height) / m_line_height);
 
-				ci.xadvance = read_int16(data) / size;
+				ci.xadvance = read_int16(data) / m_line_height;
 				ci.page = *data++;
 				ci.channel = *data++;
 
@@ -424,7 +426,7 @@ bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 				OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> ch;
 				ch.first = read_uint32(data);
 				ch.second = read_uint32(data);
-				float offset = read_int16(data) / size;
+				float offset = read_int16(data) / m_line_height;
 				if (!(ok = m_mapKerning.insert(ch,offset)))
 					LOG_ERROR(("Failed to add character to kerning table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
 			}
@@ -679,6 +681,11 @@ bool OOGL::Text::text(const char* sz, size_t len)
 		ret = m_font->alloc_text(*this,sz,len);
 			
 	return ret;
+}
+
+const OOBase::SharedPtr<OOGL::Font>& OOGL::Text::font() const
+{
+	return m_font;
 }
 
 float OOGL::Text::length() const

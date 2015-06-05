@@ -74,9 +74,9 @@ glm::u16vec2 Indigo::Render::MainWindow::size() const
 	return sz;
 }
 
-const OOGL::Window& Indigo::Render::MainWindow::window() const
+const OOBase::SharedPtr<OOGL::Window>& Indigo::Render::MainWindow::window() const
 {
-	return *m_wnd;
+	return m_wnd;
 }
 
 bool Indigo::Render::MainWindow::add_layer(const OOBase::SharedPtr<Layer>& layer)
@@ -192,6 +192,11 @@ bool Indigo::MainWindow::show()
 
 void Indigo::MainWindow::do_show()
 {
-	m_wnd->on_size(*m_wnd->m_wnd,m_wnd->m_wnd->size());
-	m_wnd->m_wnd->visible(true);
+	m_wnd->on_size(*m_wnd->window(),m_wnd->window()->size());
+	m_wnd->window()->visible(true);
+}
+
+const OOBase::SharedPtr<OOGL::Window>& Indigo::MainWindow::window() const
+{
+	return m_wnd->window();
 }

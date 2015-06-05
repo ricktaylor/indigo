@@ -19,36 +19,35 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_IMAGE_H_INCLUDED
-#define INDIGO_IMAGE_H_INCLUDED
+#ifndef INDIGO_GUILABEL_H_INCLUDED
+#define INDIGO_GUILABEL_H_INCLUDED
 
-#include "Common.h"
-
-#include "../lib/Image.h"
+#include "GUIWidget.h"
+#include "Font.h"
 
 namespace Indigo
 {
-	class Image : public OOBase::NonCopyable
+	namespace GUI
 	{
-	public:
-		~Image();
+		class Label : public Widget
+		{
+		public:
+			bool create(Widget* parent, const OOBase::String& text = OOBase::String(), const OOBase::SharedPtr<Font>& font = OOBase::SharedPtr<Font>(), const glm::u16vec2& min_size = glm::u16vec2(-1), const glm::i16vec2& pos = glm::i16vec2(0));
 
-		bool load(const OOGL::ResourceBundle& resource, const char* name);
-		bool destroy();
+			const OOBase::String& text() const;
+			bool text(const OOBase::String& text);
 
-		glm::uvec2 size() const;
-		unsigned int components() const;
+			const OOBase::SharedPtr<Font>& font() const;
+			bool font(const OOBase::SharedPtr<Font>& font);
 
-		const OOBase::SharedPtr<OOGL::Image>& render_image() const;
+		private:
+			OOBase::String m_text;
+			OOBase::SharedPtr<Font> m_font;
 
-	private:
-		OOBase::SharedPtr<OOGL::Image> m_image;
-
-		void do_load(bool* ret_val, const OOGL::ResourceBundle* resource, const char* name);
-		void do_destroy();
-		void get_size(glm::uvec2* sz);
-		void get_components(unsigned int* comp);
-	};
+			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
+			void set_text(bool* ret_val, const OOBase::String* text, Font* font);
+		};
+	}
 }
 
-#endif // INDIGO_IMAGE_H_INCLUDED
+#endif // INDIGO_GUILABEL_H_INCLUDED

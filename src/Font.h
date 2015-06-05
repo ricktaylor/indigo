@@ -25,21 +25,24 @@
 #include "Common.h"
 
 #include "../lib/Font.h"
+#include "../lib/Window.h"
 
 namespace Indigo
 {
 	class Font : public OOBase::NonCopyable
 	{
 	public:
+		Font(const OOBase::SharedPtr<OOGL::Window>& wnd);
 		~Font();
 
 		bool load(const OOGL::ResourceBundle& resource, const char* name);
 		bool destroy();
 
-		OOBase::SharedPtr<OOGL::Font> render_font() const;
+		const OOBase::SharedPtr<OOGL::Font>& render_font() const;
 
 	private:
-		OOBase::SharedPtr<OOGL::Font> m_font;
+		OOBase::SharedPtr<OOGL::Window> m_wnd;
+		OOBase::SharedPtr<OOGL::Font>   m_font;
 
 		void do_load(bool* ret_val, const OOGL::ResourceBundle* resource, const char* name);
 		void do_destroy();

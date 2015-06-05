@@ -164,8 +164,8 @@ void OOGL::Window::cb_on_refresh(GLFWwindow* window)
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->valid())
 	{
-		pThis->draw();
-		pThis->swap();
+		//pThis->draw();
+		//pThis->swap();
 	}
 }
 

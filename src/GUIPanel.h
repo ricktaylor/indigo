@@ -52,8 +52,9 @@ namespace Indigo
 				const OOBase::SharedPtr<OOGL::Texture>& texture() const;
 				bool texture(const OOBase::SharedPtr<OOGL::Texture>& tex, const glm::u16vec2& tex_size);
 
-				virtual glm::u16vec2 size() const { return Widget::size(); }
 				virtual glm::u16vec2 size(const glm::u16vec2& sz);
+
+				virtual glm::u16vec2 min_size(const glm::u16vec2& sz);
 
 				virtual glm::u16vec2 client_size() const;
 				virtual glm::u16vec2 client_size(const glm::u16vec2& sz);

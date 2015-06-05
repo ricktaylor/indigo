@@ -43,7 +43,7 @@ namespace Indigo
 			
 			glm::u16vec2 size() const;
 
-			const OOGL::Window& window() const;
+			const OOBase::SharedPtr<OOGL::Window>& window() const;
 
 		private:
 			Indigo::MainWindow* m_owner;
@@ -74,6 +74,8 @@ namespace Indigo
 
 		GUI::Layer& top_layer();
 		
+		const OOBase::SharedPtr<OOGL::Window>& window() const;
+
 	private:
 		Application* m_app;
 		OOBase::SharedPtr<Render::MainWindow> m_wnd;

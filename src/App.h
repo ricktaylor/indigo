@@ -35,10 +35,14 @@ namespace Indigo
 
 	private:
 		MainWindow m_main_wnd;
+		OOBase::SharedPtr<GUI::Panel> m_start_menu;
 
 		Application();
 
 		bool start(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
+		bool create_mainwnd();
+
+		bool show_menu();
 	};
 }
 

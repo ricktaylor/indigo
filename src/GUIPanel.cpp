@@ -188,8 +188,8 @@ bool Indigo::Render::GUI::Sizer::fit(Panel& panel)
 	if (!get_extents(widths,heights,ideal_width,ideal_height))
 		return false;
 
-	glm::u16vec2 size = panel.size();
-	if (panel.client_size(ideal_size()) == size)
+	glm::u16vec2 size = panel.Widget::size();
+	if (panel.client_size(glm::u16vec2(ideal_width.first,ideal_height.first)) == size)
 		return true;
 
 	return do_layout(panel,widths,heights,ideal_width,ideal_height);
@@ -267,7 +267,7 @@ bool Indigo::Render::GUI::Sizer::do_layout(const Panel& panel,
 						if (widget && widget->visible())
 						{
 							glm::i16vec2 item_pos(cell_pos);
-							glm::u16vec2 item_size(widget->ideal_size());
+							glm::u16vec2 item_size(widget->size());
 
 							// Expand if required
 							if (item_size != cell_size && (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand))
@@ -502,6 +502,9 @@ glm::u16vec2 Indigo::Render::GUI::Panel::ideal_size() const
 	if (m_sizer)
 	{
 		glm::u16vec2 sz2 = m_sizer->ideal_size();
+		sz2.x += m_borders.x + m_borders.z;
+		sz2.y += m_borders.y + m_borders.w;
+
 		if (sz2.x > sz.x)
 			sz.x = sz2.x;
 
@@ -542,7 +545,7 @@ glm::u16vec2 Indigo::Render::GUI::Panel::size(const glm::u16vec2& sz)
 	glm::u16vec2 new_sz = Widget::size(sz);
 	if (old_sz != new_sz)
 	{
-		window().make_current();
+		window()->make_current();
 
 		layout_background(new_sz);
 	}
@@ -559,11 +562,17 @@ void Indigo::Render::GUI::Panel::borders(const glm::u16vec4& b)
 {
 	if (m_borders != b)
 	{
+		glm::u16vec2 sz(Widget::min_size());
+		sz.x -= m_borders.x + m_borders.z;
+		sz.y -= m_borders.y + m_borders.w;
+
 		m_borders = b;
 
-		window().make_current();
+		min_size(sz);
 
-		layout_background(size());
+		window()->make_current();
+
+		layout_background(Widget::size());
 	}
 }
 
@@ -578,7 +587,7 @@ bool Indigo::Render::GUI::Panel::texture(const OOBase::SharedPtr<OOGL::Texture>&
 	if (!m_texture || !m_texture->valid())
 		return false;
 
-	window().make_current();
+	window()->make_current();
 
 	m_texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 	m_texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
@@ -588,7 +597,7 @@ bool Indigo::Render::GUI::Panel::texture(const OOBase::SharedPtr<OOGL::Texture>&
 	if (tex_size != m_tex_size)
 	{
 		m_tex_size = tex_size;
-		layout_background(size());
+		layout_background(Widget::size());
 	}
 	return true;
 }
@@ -599,9 +608,21 @@ void Indigo::Render::GUI::Panel::layout_background(const glm::u16vec2& sz)
 		m_background.layout(sz,m_borders,m_tex_size);
 }
 
+glm::u16vec2 Indigo::Render::GUI::Panel::min_size(const glm::u16vec2& sz)
+{
+	glm::u16vec2 new_sz(sz);
+	if (new_sz.x != glm::u16vec2::value_type(-1) && new_sz.x < m_borders.x + m_borders.z)
+		new_sz.x = m_borders.x + m_borders.z;
+
+	if (new_sz.y != glm::u16vec2::value_type(-1) && new_sz.y < m_borders.y + m_borders.w)
+		new_sz.y = m_borders.y + m_borders.w;
+
+	return Widget::min_size(new_sz);
+}
+
 glm::u16vec2 Indigo::Render::GUI::Panel::client_size() const
 {
-	glm::u16vec2 client_sz(size());
+	glm::u16vec2 client_sz(Widget::size());
 	if (client_sz.x > m_borders.x + m_borders.z)
 		client_sz.x -= m_borders.x + m_borders.z;
 	else

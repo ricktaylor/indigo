@@ -42,8 +42,9 @@ namespace OOGL
 
 		bool load(const ResourceBundle& resource, const char* name);
 
+		float line_height() const { return m_line_height; }
+
 	private:
-		OOBase::uint16_t m_size;
 		float m_line_height;
 		OOBase::uint32_t m_packing;
 

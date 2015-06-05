@@ -22,6 +22,11 @@
 #include "Font.h"
 #include "Render.h"
 
+Indigo::Font::Font(const OOBase::SharedPtr<OOGL::Window>& wnd) : m_wnd(wnd)
+{
+	assert(wnd && wnd->valid());
+}
+
 Indigo::Font::~Font()
 {
 	destroy();
@@ -45,7 +50,11 @@ void Indigo::Font::do_load(bool* ret_val, const OOGL::ResourceBundle* resource, 
 		*ret_val = false;
 	}
 	else
+	{
+		m_wnd->make_current();
+
 		*ret_val = font->load(*resource,name);
+	}
 
 	if (*ret_val)
 		font.swap(m_font);
@@ -58,10 +67,11 @@ bool Indigo::Font::destroy()
 
 void Indigo::Font::do_destroy()
 {
+	m_wnd->make_current();
 	m_font.reset();
 }
 
-OOBase::SharedPtr<OOGL::Font> Indigo::Font::render_font() const
+const OOBase::SharedPtr<OOGL::Font>& Indigo::Font::render_font() const
 {
 	return m_font;
 }

@@ -87,7 +87,7 @@ void Indigo::Image::get_components(unsigned int* comp)
 		*comp = m_image->components();
 }
 
-OOBase::SharedPtr<OOGL::Image> Indigo::Image::render_image() const
+const OOBase::SharedPtr<OOGL::Image>& Indigo::Image::render_image() const
 {
 	return m_image;
 }

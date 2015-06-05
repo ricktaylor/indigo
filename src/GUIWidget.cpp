@@ -47,7 +47,7 @@ bool Indigo::Render::GUI::Widget::create(const OOBase::SharedPtr<Widget>& parent
 	return true;
 }
 
-const OOGL::Window& Indigo::Render::GUI::Widget::window() const
+const OOBase::SharedPtr<OOGL::Window>& Indigo::Render::GUI::Widget::window() const
 {
 	return m_parent.lock()->window();
 }

@@ -33,7 +33,7 @@ namespace
 		OOBase::SharedPtr<Indigo::Render::MainWindow> m_wnd;
 
 		glm::u16vec2 ideal_size() const;
-		const OOGL::Window& window() const;
+		const OOBase::SharedPtr<OOGL::Window>& window() const;
 
 		void on_draw(const OOGL::Window& win, OOGL::State& glState);
 		void on_size(const OOGL::Window& win, const glm::u16vec2& sz);
@@ -51,14 +51,14 @@ bool Layer::create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd)
 	return true;
 }
 
-const OOGL::Window& Layer::window() const
+const OOBase::SharedPtr<OOGL::Window>& Layer::window() const
 {
 	return m_wnd->window();
 }
 
 glm::u16vec2 Layer::ideal_size() const
 {
-	return size();
+	return Widget::size();
 }
 
 void Layer::on_draw(const OOGL::Window& win, OOGL::State& glState)

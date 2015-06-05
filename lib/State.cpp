@@ -81,11 +81,11 @@ OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBa
 		prev = m_draw_fb;
 		if (m_draw_fb != fb || m_read_fb != fb)
 		{
-			if (fb)
-				fb->internal_bind(GL_FRAMEBUFFER);
-
 			m_draw_fb = fb;
 			m_read_fb = fb;
+
+			if (fb)
+				fb->internal_bind(GL_FRAMEBUFFER);
 		}
 	}
 	else if (target == GL_DRAW_FRAMEBUFFER)
@@ -93,10 +93,10 @@ OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBa
 		prev = m_draw_fb;
 		if (m_draw_fb != fb)
 		{
+			m_draw_fb = fb;
+
 			if (fb)
 				fb->internal_bind(GL_DRAW_FRAMEBUFFER);
-
-			m_draw_fb = fb;
 		}
 	}
 	else if (target == GL_READ_FRAMEBUFFER)
@@ -104,10 +104,10 @@ OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBa
 		prev = m_read_fb;
 		if (m_read_fb != fb)
 		{
+			m_read_fb = fb;
+
 			if (fb)
 				fb->internal_bind(GL_READ_FRAMEBUFFER);
-
-			m_read_fb = fb;
 		}
 	}
 
@@ -164,10 +164,10 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::Sh
 	{
 		if (texture)
 		{
-			texture->internal_bind(*this,unit);
-
 			if (!tu->insert(texture->target(),texture))
 				LOG_WARNING(("Failed to add to texture unit cache"));
+
+			texture->internal_bind(*this,unit);
 		}
 	}
 	else
@@ -175,10 +175,10 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::Sh
 		prev = i->second;
 		if (prev != texture)
 		{
+			i->second = texture;
+
 			if (texture)
 				texture->internal_bind(*this,unit);
-
-			i->second = texture;
 		}
 	}
 
@@ -236,12 +236,12 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::internal_bind(const OOBase::S
 		prev = i->second;
 		if (i->second != buffer_object)
 		{
+			i->second = buffer_object;
+
 			if (buffer_object)
 				buffer_object->internal_bind(target);
 			else
 				m_state_fns.glBindBuffer(target,0);
-
-			i->second = buffer_object;
 		}
 	}
 
@@ -286,10 +286,10 @@ OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::State::bind(const OOBase::Share
 
 	if (m_current_vao != vao)
 	{
+		m_current_vao = vao;
+
 		if (vao)
 			vao->internal_bind();
-		
-		m_current_vao = vao;
 	}
 
 	return prev;
