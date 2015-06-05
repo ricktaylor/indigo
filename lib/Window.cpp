@@ -162,8 +162,11 @@ void OOGL::Window::cb_on_iconify(GLFWwindow* window, int iconified)
 void OOGL::Window::cb_on_refresh(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
-	if (pThis && pThis->draw())
+	if (pThis && pThis->valid())
+	{
+		pThis->draw();
 		pThis->swap();
+	}
 }
 
 void OOGL::Window::cb_on_character(GLFWwindow* window, unsigned int codepoint, int mods)
@@ -265,17 +268,15 @@ glm::vec2 OOGL::Window::dots_per_mm() const
 	return res;
 }
 
-bool OOGL::Window::draw()
+void OOGL::Window::draw()
 {
-	if (!m_glfw_window || !visible() || iconified() || !m_on_draw)
-		return false;
+	if (m_glfw_window && visible() && !iconified() && m_on_draw)
+	{
+		// Make this context current
+		glfwMakeContextCurrent(m_glfw_window);
 
-	// Make this context current
-	glfwMakeContextCurrent(m_glfw_window);
-
-	m_on_draw.invoke(*this,*m_state);
-
-	return true;
+		m_on_draw.invoke(*this,*m_state);
+	}
 }
 
 void OOGL::Window::swap()

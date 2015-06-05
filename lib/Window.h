@@ -60,7 +60,7 @@ namespace OOGL
 
 		const OOBase::SharedPtr<Framebuffer>& default_frame_buffer() const;
 
-		bool draw();
+		void draw();
 		void swap();
 
 		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> on_close(const OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator>& delegate);

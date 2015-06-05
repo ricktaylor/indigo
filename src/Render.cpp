@@ -194,15 +194,13 @@ static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& conf
 		draw_clock.reset();
 
 		// Draw all windows
-		bool visible_window = false;
 		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
 		{
 			if (i->expired())
 				i = vecWindows.erase(i);
 			else
 			{
-				if (i->lock()->draw())
-					visible_window = true;
+				i->lock()->draw();
 				++i;
 			}
 		}
@@ -221,26 +219,21 @@ static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& conf
 		res = s_render_queue->dequeue(stop,wait);
 
 		// Poll for UI events
-		if (!visible_window)
-			glfwWaitEvents();
-		else
+		do
 		{
-			do
-			{
-				glfwPollEvents();
-			}
-			while (!wait.has_expired());
+			glfwPollEvents();
+		}
+		while (!wait.has_expired());
 
-			// Swap all windows (this collects events)
-			for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
+		// Swap all windows (this collects events)
+		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
+		{
+			if (i->expired())
+				i = vecWindows.erase(i);
+			else
 			{
-				if (i->expired())
-					i = vecWindows.erase(i);
-				else
-				{
-					i->lock()->swap();
-					++i;
-				}
+				i->lock()->swap();
+				++i;
 			}
 		}
 	}
