@@ -101,10 +101,10 @@ void Label::draw(OOGL::State& glState, const glm::mat4& mvp)
 		glm::u16vec2 sz = size();
 		double length = m_text->length();
 
-		glm::mat4 model = glm::scale(glm::mat4(1),glm::vec3(sz.x/length,sz.y,0.f));
-		model = glm::translate(model,glm::vec3(p.x,p.y,0.f));
+		glm::mat4 model = glm::translate(glm::mat4(1),glm::vec3(p.x,p.y,0.f));
+		model = glm::scale(model,glm::vec3(sz.x/length,sz.y,0.f));
 
-		m_text->draw(glState,mvp * model,glm::vec4(255));
+		m_text->draw(glState,mvp * model,glm::vec4(255,255,255,255));
 	}
 }
 

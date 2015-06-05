@@ -526,16 +526,15 @@ void Indigo::Render::GUI::Panel::remove_child(const OOBase::SharedPtr<Widget>& c
 
 void Indigo::Render::GUI::Panel::draw(OOGL::State& glState, const glm::mat4& mvp)
 {
-	m_background.draw(glState,m_texture,mvp);
+	glm::i16vec2 p = position();
+	glm::mat4 child_mvp = mvp * glm::translate(glm::mat4(1),glm::vec3(p.x,p.y,0));
+
+	m_background.draw(glState,m_texture,child_mvp);
 
 	for (OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i;++i)
 	{
 		if ((*i)->visible())
-		{
-			glm::i16vec2 p = (*i)->position();
-			glm::mat4 view = glm::translate(glm::mat4(1),glm::vec3(p.x,p.y,0));
-			(*i)->draw(glState,mvp * view);
-		}
+			(*i)->draw(glState,child_mvp);
 	}
 }
 
