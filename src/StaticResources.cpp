@@ -54,7 +54,7 @@ namespace
 	RES s_resources[] =
 	{
 		{ "Titillium-Regular.fnt", IDR_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
-		{ "Titillium-Regular.bin_0.png", IDB_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
+		{ "Titillium-Regular_0.png", IDB_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
 		{ "menu_border.png", IDB_MENU_BORDER, RT_RCDATA, NULL, NULL, 0 },
 	};
 
@@ -119,7 +119,7 @@ namespace
 	const RES s_resources[] =
 	{
 		{ "Titillium-Regular.fnt", s_Titillium_Regular, sizeof(s_Titillium_Regular) },
-		{ "Titillium-Regular.bin_0.png", s_Titillium_Regular_0, sizeof(s_Titillium_Regular_0) },
+		{ "Titillium-Regular_0.png", s_Titillium_Regular_0, sizeof(s_Titillium_Regular_0) },
 		{ "menu_border.png", s_menu_border, sizeof(s_menu_border) },
 	};
 
