@@ -74,6 +74,11 @@ glm::u16vec2 Indigo::Render::MainWindow::size() const
 	return sz;
 }
 
+const OOGL::Window& Indigo::Render::MainWindow::window() const
+{
+	return *m_wnd;
+}
+
 bool Indigo::Render::MainWindow::add_layer(const OOBase::SharedPtr<Layer>& layer)
 {
 	return m_layers.push_back(layer);

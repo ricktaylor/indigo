@@ -60,8 +60,9 @@ namespace OOGL
 
 		const OOBase::SharedPtr<Framebuffer>& default_frame_buffer() const;
 
-		void draw();
-		void swap();
+		void make_current() const;
+		void draw() const;
+		void swap() const;
 
 		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> on_close(const OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator>& delegate);
 		OOBase::Delegate2<void,const Window&,State&,OOBase::ThreadLocalAllocator> on_draw(const OOBase::Delegate2<void,const Window&,State&,OOBase::ThreadLocalAllocator>& delegate);

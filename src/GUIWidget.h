@@ -24,6 +24,8 @@
 
 #include "Common.h"
 
+#include "../lib/Window.h"
+
 namespace Indigo
 {
 	namespace GUI
@@ -85,6 +87,8 @@ namespace Indigo
 				virtual bool can_enable(bool enabled) { return false; }
 				virtual bool can_focus(bool focused) { return false; }
 				virtual bool can_hilight(bool hilighted) { return false; }
+
+				virtual const OOGL::Window& window() const;
 
 				virtual void draw(OOGL::State& glState, const glm::mat4& mvp) = 0;
 

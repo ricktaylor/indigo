@@ -544,7 +544,11 @@ glm::u16vec2 Indigo::Render::GUI::Panel::size(const glm::u16vec2& sz)
 	glm::u16vec2 old_sz = Widget::size();
 	glm::u16vec2 new_sz = Widget::size(sz);
 	if (old_sz != new_sz)
+	{
+		window().make_current();
+
 		layout_background(new_sz);
+	}
 
 	return new_sz;
 }
@@ -559,6 +563,9 @@ void Indigo::Render::GUI::Panel::borders(const glm::u16vec4& b)
 	if (m_borders != b)
 	{
 		m_borders = b;
+
+		window().make_current();
+
 		layout_background(size());
 	}
 }
@@ -573,6 +580,8 @@ bool Indigo::Render::GUI::Panel::texture(const OOBase::SharedPtr<OOGL::Texture>&
 	m_texture = tex;
 	if (!m_texture || !m_texture->valid())
 		return false;
+
+	window().make_current();
 
 	m_texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 	m_texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);

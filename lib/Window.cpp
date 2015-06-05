@@ -268,7 +268,13 @@ glm::vec2 OOGL::Window::dots_per_mm() const
 	return res;
 }
 
-void OOGL::Window::draw()
+void OOGL::Window::make_current() const
+{
+	if (m_glfw_window)
+		glfwMakeContextCurrent(m_glfw_window);
+}
+
+void OOGL::Window::draw() const
 {
 	if (m_glfw_window && visible() && !iconified() && m_on_draw)
 	{
@@ -279,7 +285,7 @@ void OOGL::Window::draw()
 	}
 }
 
-void OOGL::Window::swap()
+void OOGL::Window::swap() const
 {
 	if (m_glfw_window)
 		glfwSwapBuffers(m_glfw_window);

@@ -30,7 +30,10 @@ namespace
 		bool create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd);
 
 	private:
+		OOBase::SharedPtr<Indigo::Render::MainWindow> m_wnd;
+
 		glm::u16vec2 ideal_size() const;
+		const OOGL::Window& window() const;
 
 		void on_draw(const OOGL::Window& win, OOGL::State& glState);
 		void on_size(const OOGL::Window& win, const glm::u16vec2& sz);
@@ -39,9 +42,18 @@ namespace
 
 bool Layer::create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd)
 {
+	if (!wnd->add_layer(OOBase::static_pointer_cast<Layer>(shared_from_this())))
+		return false;
+
+	m_wnd = wnd;
 	size(wnd->size());
 
-	return wnd->add_layer(OOBase::static_pointer_cast<Layer>(shared_from_this()));
+	return true;
+}
+
+const OOGL::Window& Layer::window() const
+{
+	return m_wnd->window();
 }
 
 glm::u16vec2 Layer::ideal_size() const

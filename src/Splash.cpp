@@ -351,6 +351,9 @@ void Splash::on_draw(const OOGL::Window& win, OOGL::State& glState)
 void Splash::on_character(const OOGL::Window& win, unsigned int codepoint, int mods)
 {
 	m_str.append(static_cast<char>(codepoint));
+
+	win.make_current();
+
 	m_text->text(m_str.c_str());
 }
 
@@ -360,6 +363,8 @@ void Splash::on_keystroke(const OOGL::Window& win, const OOGL::Window::key_strok
 	{
 		if (!m_str.empty())
 		{
+			win.make_current();
+
 			m_str.assign(m_str.c_str(),m_str.length()-1);
 			m_text->text(m_str.c_str());
 		}
