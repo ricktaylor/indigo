@@ -270,17 +270,14 @@ bool Indigo::Render::GUI::Sizer::do_layout(const Panel& panel,
 							glm::u16vec2 item_size(widget->ideal_size());
 
 							// Expand if required
-							if (item_size != cell_size)
+							if (item_size != cell_size && (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand))
 							{
-								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand)
-								{
-									if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand_horiz)
-										item_size.x = cell_size.x;
-									if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand_vert)
-										item_size.y = cell_size.y;
+								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand_horiz)
+									item_size.x = cell_size.x;
+								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand_vert)
+									item_size.y = cell_size.y;
 
-									item_size = widget->size(item_size);
-								}
+								item_size = widget->size(item_size);
 							}
 
 							// Align if required
