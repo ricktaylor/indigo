@@ -326,8 +326,11 @@ bool OOGL::Font::load(const ResourceBundle& resource, const char* name)
 		{
 		case 1:
 			{
-				OOBase::uint16_t size = read_uint16(data);
-				OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %u",data + 12,size);
+				OOBase::int16_t size = read_int16(data);
+				if (size >= 0)
+					OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %dpx",data + 12,size);
+				else
+					OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %dpt",data + 12,-size);
 				data += len - 2;
 			}
 			break;
