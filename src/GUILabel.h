@@ -32,6 +32,8 @@ namespace Indigo
 		class Label : public Widget
 		{
 		public:
+			Label();
+
 			bool create(Widget* parent, const OOBase::String& text = OOBase::String(), const OOBase::SharedPtr<Font>& font = OOBase::SharedPtr<Font>(), const glm::u16vec2& min_size = glm::u16vec2(-1), const glm::i16vec2& pos = glm::i16vec2(0));
 
 			const OOBase::String& text() const;
@@ -40,12 +42,17 @@ namespace Indigo
 			const OOBase::SharedPtr<Font>& font() const;
 			bool font(const OOBase::SharedPtr<Font>& font);
 
+			const glm::u8vec4& colour() const;
+			bool colour(const glm::u8vec4& col);
+
 		private:
 			OOBase::String m_text;
 			OOBase::SharedPtr<Font> m_font;
+			glm::u8vec4 m_colour;
 
 			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
 			void set_text(bool* ret_val, const OOBase::String* text, Font* font);
+			void set_colour(bool* ret_val, glm::vec4* c);
 		};
 	}
 }

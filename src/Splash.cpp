@@ -253,6 +253,8 @@ bool Splash::create(void* p)
 	if (!pThis->m_wnd || !pThis->m_wnd->valid())
 		return false;
 
+	pThis->m_wnd->make_current();
+
 	if (Indigo::is_debug())
 		OOGL::StateFns::get_current()->enable_logging();
 

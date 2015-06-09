@@ -68,7 +68,7 @@ bool Indigo::Application::create_mainwnd()
 	if (!sizer)
 		LOG_ERROR_RETURN(("Failed to create sizer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
-	if (!sizer->create(8,8) ||
+	if (!sizer->create(0,0) ||
 			!m_start_menu->sizer(sizer) ||
 			!m_start_menu->background(static_resources(),"menu_border.png") ||
 			!m_start_menu->borders(9,9,9,9))
@@ -87,16 +87,17 @@ bool Indigo::Application::create_mainwnd()
 	layout.m_flags = GUI::Sizer::ItemLayout::expand;
 	layout.m_proportion = 1;
 
-	for (int i=0;i<10;++i)
+	for (int i=0;i<2;++i)
 	{
 		OOBase::SharedPtr<GUI::Label> label = OOBase::allocate_shared<GUI::Label>();
 		if (!label)
 			LOG_ERROR_RETURN(("Failed to create label: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 		OOBase::String str;
-		str.printf("Item %d",i);
+		str.printf("Item gW|\x62j_%d",i);
 
 		if (!label->create(m_start_menu.get(),str,font) ||
+			!label->colour(glm::u8vec4(192,224,225,255)) ||
 			!label->visible(true) ||
 			!sizer->add_widget(label,0,i,&layout))
 		{

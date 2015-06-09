@@ -29,16 +29,25 @@ namespace
 	class Label : public Indigo::Render::GUI::Widget
 	{
 	public:
+		Label();
+
 		bool set_text(const OOBase::String* text, Indigo::Font* font);
+		bool set_colour(const glm::vec4& colour);
 
 	private:
 		OOBase::SharedPtr<OOGL::Text> m_text;
+		glm::vec4 m_colour;
 
 		void draw(OOGL::State& glState, const glm::mat4& mvp);
 
 		glm::u16vec2 ideal_size() const;
 		glm::u16vec2 text_size() const;
 	};
+}
+
+Label::Label() : m_colour(1.f)
+{
+
 }
 
 glm::u16vec2 Label::ideal_size() const
@@ -73,6 +82,8 @@ bool Label::set_text(const OOBase::String* text, Indigo::Font* font)
 		m_text.reset();
 	else if (font || !m_text)
 	{
+		window()->make_current();
+
 		// Font change, reallocate text
 		OOBase::SharedPtr<OOGL::Font> render_font = font->render_font();
 		if (!render_font)
@@ -86,10 +97,18 @@ bool Label::set_text(const OOBase::String* text, Indigo::Font* font)
 	}
 	else
 	{
+		window()->make_current();
+
 		// Text change
 		if (!m_text->text(text->c_str(),text->length()))
 			return false;
 	}
+	return true;
+}
+
+bool Label::set_colour(const glm::vec4& colour)
+{
+	m_colour = colour;
 	return true;
 }
 
@@ -99,13 +118,16 @@ void Label::draw(OOGL::State& glState, const glm::mat4& mvp)
 	{
 		glm::i16vec2 p = position();
 		glm::u16vec2 sz = size();
-		double length = m_text->length();
 
 		glm::mat4 model = glm::translate(glm::mat4(1),glm::vec3(p.x,p.y,0.f));
-		model = glm::scale(model,glm::vec3(sz.x/length,sz.y,0.f));
+		model = glm::scale(model,glm::vec3(sz.x/m_text->length(),sz.y,0.f));
 
-		m_text->draw(glState,mvp * model,glm::vec4(255,255,255,255));
+		m_text->draw(glState,mvp * model,m_colour);
 	}
+}
+
+Indigo::GUI::Label::Label() : m_colour(255)
+{
 }
 
 OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Label::create_widget()
@@ -176,4 +198,28 @@ bool Indigo::GUI::Label::font(const OOBase::SharedPtr<Font>& font)
 void Indigo::GUI::Label::set_text(bool* ret_val, const OOBase::String* text, Font* font)
 {
 	*ret_val = render_widget< ::Label>()->set_text(text,font);
+}
+
+const glm::u8vec4& Indigo::GUI::Label::colour() const
+{
+	return m_colour;
+}
+
+bool Indigo::GUI::Label::colour(const glm::u8vec4& col)
+{
+	if (m_colour != col)
+	{
+		glm::vec4 fcol(col.r/255.f,col.g/255.f,col.b/255.f,col.a/255.f);
+		bool ret = false;
+		if (!render_call(OOBase::make_delegate(this,&Label::set_colour),&ret,&fcol) || !ret)
+			return false;
+
+		m_colour = col;
+	}
+	return true;
+}
+
+void Indigo::GUI::Label::set_colour(bool* ret_val, glm::vec4* c)
+{
+	*ret_val = render_widget< ::Label>()->set_colour(*c);
 }

@@ -531,6 +531,8 @@ void Indigo::Render::GUI::Panel::draw(OOGL::State& glState, const glm::mat4& mvp
 
 	m_background.draw(glState,m_texture,child_mvp);
 
+	child_mvp = glm::translate(child_mvp,glm::vec3(m_borders.x,m_borders.w,0));
+
 	for (OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i;++i)
 	{
 		if ((*i)->visible())
