@@ -141,6 +141,8 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::internal_bind(const OOBase::Shared
 
 OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::SharedPtr<Texture>& texture)
 {
+	assert(texture && texture->valid());
+
 	OOBase::SharedPtr<OOGL::Texture> prev;
 
 	tex_unit_t* tu = m_vecTexUnits.at(unit);
@@ -150,34 +152,32 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::Sh
 		{
 			LOG_WARNING(("Failed to resize texture unit cache"));
 
-			if (texture)
-				texture->internal_bind(*this,unit);
+			texture->internal_bind(*this,unit);
 
 			return prev;
 		}
-
 		tu = m_vecTexUnits.at(unit);
 	}
 
 	tex_unit_t::iterator i = tu->find(texture->target());
 	if (!i)
 	{
-		if (texture)
-		{
-			if (!tu->insert(texture->target(),texture))
-				LOG_WARNING(("Failed to add to texture unit cache"));
+		texture->internal_bind(*this,unit);
 
-			texture->internal_bind(*this,unit);
-		}
+		tex_pair p;
+		p.texture = texture->m_tex;
+		p.tex_ptr = texture;
+
+		if (!tu->insert(texture->target(),p))
+			LOG_WARNING(("Failed to add to texture unit cache"));
 	}
 	else
 	{
-		prev = i->second;
+		prev = i->second.tex_ptr;
 		if (prev != texture)
 		{
-			i->second = texture;
-
-			if (texture)
+			i->second.tex_ptr = texture;
+			if (i->second.texture != texture->m_tex)
 				texture->internal_bind(*this,unit);
 		}
 	}
@@ -185,31 +185,64 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::Sh
 	return prev;
 }
 
-OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind_texture(GLuint texture, GLenum target)
+void OOGL::State::bind_texture(GLuint texture, GLenum target)
 {
-	OOBase::SharedPtr<OOGL::Texture> prev;
+	bool bind = false;
 
 	tex_unit_t* tu = m_vecTexUnits.at(m_active_texture_unit);
 	if (!tu)
-		glBindTexture(target,texture);
-	else
+	{
+		if (!m_vecTexUnits.resize(m_active_texture_unit + 1))
+		{
+			LOG_WARNING(("Failed to resize texture unit cache"));
+
+			bind = true;
+		}
+		else
+			tu = m_vecTexUnits.at(m_active_texture_unit);
+	}
+	if (tu)
 	{
 		tex_unit_t::iterator i = tu->find(target);
 		if (!i)
-			glBindTexture(target,texture);
-		else
 		{
-			prev = i->second;
-			if (prev->m_tex != texture)
-			{
-				glBindTexture(target,texture);
+			tex_pair p;
+			p.texture = texture;
 
-				tu->erase(i);
-			}
+			if (!tu->insert(target,p))
+				LOG_WARNING(("Failed to add to texture unit cache"));
+
+			bind = true;
 		}
+		else if (i->second.texture != texture)
+		{
+			i->second.texture = texture;
+
+			bind = true;
+		}
+
 	}
 
-	return prev;
+	if (bind)
+	{
+		glBindTexture(target,texture);
+
+		OOGL_CHECK("glBindTexture");
+	}
+}
+
+void OOGL::State::update_texture_binding(GLuint texture, GLenum target)
+{
+	tex_unit_t* tu = m_vecTexUnits.at(m_active_texture_unit);
+	if (tu)
+	{
+		tex_unit_t::iterator i = tu->find(target);
+		if (i && i->second.texture != texture)
+		{
+			i->second.tex_ptr.reset();
+			i->second.texture = texture;
+		}
+	}
 }
 
 OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object)
@@ -248,24 +281,16 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::internal_bind(const OOBase::S
 	return prev;
 }
 
-OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind_buffer(GLuint buffer, GLenum target)
+void OOGL::State::bind_buffer(GLuint buffer, GLenum target)
 {
-	OOBase::SharedPtr<BufferObject> prev;
+	bool bind = true;
+
 	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
-	if (i)
-	{
-		prev = i->second;
-		if (!i->second || i->second->m_buffer != buffer)
-		{
-			m_state_fns.glBindBuffer(target,buffer);
+	if (i && i->second && i->second->m_buffer == buffer)
+		bind = false;
 
-			m_buffer_objects.erase(i);
-		}
-	}
-
-	m_state_fns.glBindBuffer(target,buffer);
-
-	return prev;
+	if (bind)
+		m_state_fns.glBindBuffer(target,buffer);
 }
 
 void OOGL::State::update_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)

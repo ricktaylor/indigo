@@ -66,11 +66,17 @@ namespace OOGL
 		OOBase::SharedPtr<Program>           m_current_program;
 		OOBase::SharedPtr<VertexArrayObject> m_current_vao;
 		
-		OOBase::SharedPtr<Texture> bind_texture(GLuint texture, GLenum target);
-		typedef OOBase::Table<GLuint,OOBase::SharedPtr<Texture>,OOBase::Less<GLuint>,OOBase::ThreadLocalAllocator> tex_unit_t;
+		struct tex_pair
+		{
+			GLuint texture;
+			OOBase::SharedPtr<Texture> tex_ptr;
+		};
+		typedef OOBase::Table<GLuint,tex_pair,OOBase::Less<GLuint>,OOBase::ThreadLocalAllocator> tex_unit_t;
 		OOBase::Vector<tex_unit_t,OOBase::ThreadLocalAllocator> m_vecTexUnits;
+		void bind_texture(GLuint texture, GLenum target);
+		void update_texture_binding(GLuint texture, GLenum target);
 
-		OOBase::SharedPtr<BufferObject> bind_buffer(GLuint buffer, GLenum target);
+		void bind_buffer(GLuint buffer, GLenum target);
 		OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator> m_buffer_objects;
 
 		State(StateFns& fns);

@@ -716,7 +716,11 @@ void OOGL::StateFns::call_glBindTextureUnit(State&, GLuint unit, GLenum, GLuint 
 void OOGL::StateFns::emulate_glBindTextureUnit(State& state, GLuint unit, GLenum target, GLuint texture)
 {
 	state.activate_texture_unit(unit);
-	state.bind_texture(texture,target);
+	state.update_texture_binding(texture,target);
+
+	glBindTexture(target,texture);
+
+	OOGL_CHECK("glBindTexture");
 }
 
 void OOGL::StateFns::call_glMultiBindTexture(State& state, GLuint unit, GLenum target, GLuint texture)
@@ -1791,10 +1795,7 @@ void OOGL::StateFns::check_glCopyBufferSubData(const OOBase::SharedPtr<BufferObj
 	}
 
 	if (!m_fn_glCopyBufferSubData)
-	{
-		LOG_DEBUG(("Using emulated glCopyBufferSubData function"));
 		m_thunk_glCopyBufferSubData = &StateFns::emulate_glCopyBufferSubData;
-	}
 
 	(this->*m_thunk_glCopyBufferSubData)(write,writeoffset,read,readoffset,size);
 }
@@ -2058,7 +2059,7 @@ void OOGL::StateFns::check_glMultiDrawArrays(GLenum mode, const GLint *first, co
 
 	if (!m_fn_glMultiDrawArrays)
 		m_thunk_glMultiDrawArrays = &StateFns::emulate_glMultiDrawArrays;
-	
+
 	(this->*m_thunk_glMultiDrawArrays)(mode,first,count,drawcount);
 }
 

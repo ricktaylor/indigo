@@ -53,6 +53,7 @@ namespace OOGL
 	class BufferObject : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<BufferObject>
 	{
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
+		friend class VertexArrayObject;
 		friend class State;
 		friend class StateFns;
 

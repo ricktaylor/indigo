@@ -59,6 +59,7 @@ namespace OOGL
 
 	private:
 		GLuint m_array;
+		bool   m_binds_element_array;
 
 		OOBase::Table<GLuint,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLuint>,OOBase::ThreadLocalAllocator> m_attributes;
 		OOBase::SharedPtr<BufferObject> m_element_array;
