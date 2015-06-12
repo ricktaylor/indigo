@@ -178,7 +178,10 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::Sh
 		{
 			i->second.tex_ptr = texture;
 			if (i->second.texture != texture->m_tex)
+			{
 				texture->internal_bind(*this,unit);
+				i->second.texture = texture->m_tex;
+			}
 		}
 	}
 
