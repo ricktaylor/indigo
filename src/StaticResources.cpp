@@ -56,6 +56,10 @@ namespace
 		{ "Titillium-Regular.fnt", IDR_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
 		{ "Titillium-Regular_0.png", IDB_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
 		{ "menu_border.png", IDB_MENU_BORDER, RT_RCDATA, NULL, NULL, 0 },
+		{ "NinePatch.vert", IDR_NINEPATCH_VS, RT_RCDATA, NULL, NULL, 0 },
+		{ "NinePatch.frag", IDR_NINEPATCH_FS, RT_RCDATA, NULL, NULL, 0 },
+		{ "Font_8bit.vert", IDR_FONT_8BIT_VS, RT_RCDATA, NULL, NULL, 0 },
+		{ "Font_8bit.frag", IDR_FONT_8BIT_FS, RT_RCDATA, NULL, NULL, 0 },
 	};
 
 	const RES* find_resource(const char* name)

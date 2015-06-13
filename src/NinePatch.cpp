@@ -27,6 +27,11 @@
 
 #include <OOBase/TLSSingleton.h>
 
+namespace Indigo
+{
+	OOGL::ResourceBundle& static_resources();
+}
+
 namespace
 {
 	class NinePatchFactory
@@ -84,32 +89,13 @@ bool NinePatchFactory::create_program()
 	{
 		OOBase::SharedPtr<OOGL::Shader> shaders[2];
 		shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
-		if (!shaders[0]->compile(
-				"#version 120\n"
-				"attribute vec2 in_Position;\n"
-				"attribute vec2 in_TexCoord;\n"
-				"uniform mat4 MVP;\n"
-				"varying vec2 pass_TexCoord;\n"
-				"void main() {\n"
-				"	pass_TexCoord = in_TexCoord;\n"
-				"	gl_Position = MVP * vec4(in_Position,0.0,1.0);\n"
-				"}\n"))
-		{
+		if (!shaders[0]->compile(Indigo::static_resources(),"NinePatch.vert"))
 			LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
-		}
-
+		
 		shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
-		if (!shaders[1]->compile(
-				"#version 120\n"
-				"uniform sampler2D texture0;\n"
-				"varying vec2 pass_TexCoord;\n"
-				"void main() {\n"
-				"	gl_FragColor = texture2D(texture0,pass_TexCoord);\n"
-				"}\n"))
-		{
+		if (!shaders[1]->compile(Indigo::static_resources(),"NinePatch.frag"))
 			LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()),false);
-		}
-
+		
 		OOBase::SharedPtr<OOGL::Program> program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
 		if (!program)
 			LOG_ERROR_RETURN(("Failed to allocate shader program: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);

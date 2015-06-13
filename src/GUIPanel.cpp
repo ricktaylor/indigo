@@ -276,9 +276,11 @@ bool Indigo::Render::GUI::Sizer::do_layout(const Panel& panel,
 									item_size.x = cell_size.x;
 								if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::expand_vert)
 									item_size.y = cell_size.y;
-
-								item_size = widget->size(item_size);
 							}
+							else
+								item_size = widget->ideal_size();
+
+							item_size = widget->size(item_size);
 
 							// Align if required
 							if (i->second.m_layout.m_flags & Indigo::GUI::Sizer::ItemLayout::align_right)

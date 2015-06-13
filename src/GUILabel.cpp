@@ -21,8 +21,7 @@
 
 #include "GUILabel.h"
 #include "Render.h"
-
-#include "../lib/Font.h"
+#include "Font.h"
 
 namespace
 {
@@ -35,7 +34,7 @@ namespace
 		bool set_colour(const glm::vec4& colour);
 
 	private:
-		OOBase::SharedPtr<OOGL::Text> m_text;
+		OOBase::SharedPtr<Indigo::Render::Text> m_text;
 		glm::vec4 m_colour;
 
 		void draw(OOGL::State& glState, const glm::mat4& mvp);
@@ -85,11 +84,11 @@ bool Label::set_text(const OOBase::String* text, Indigo::Font* font)
 		window()->make_current();
 
 		// Font change, reallocate text
-		OOBase::SharedPtr<OOGL::Font> render_font = font->render_font();
+		OOBase::SharedPtr<Indigo::Render::Font> render_font = font->render_font();
 		if (!render_font)
 			LOG_ERROR_RETURN(("Label font not loaded"),false);
 
-		OOBase::SharedPtr<OOGL::Text> render_text = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(render_font,text->c_str(),text->length());
+		OOBase::SharedPtr<Indigo::Render::Text> render_text = OOBase::allocate_shared<Indigo::Render::Text,OOBase::ThreadLocalAllocator>(render_font,text->c_str(),text->length());
 		if (!render_text)
 			LOG_ERROR_RETURN(("Failed to allocate Text: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 

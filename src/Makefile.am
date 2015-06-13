@@ -24,8 +24,18 @@ bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 	
 %.h: ../resources/%.fnt bin2c
 	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
+
+%.h: ../resources/%.vert bin2c
+	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
+
+%.h: ../resources/%.frag bin2c
+	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
 	
 BUILT_SOURCES = \
+	Font_8bit.frag \
+	Font_8bit.vert \
+	NinePatch.frag \
+	NinePatch.vert \
 	Titillium-Regular_0.h \
 	Titillium-Regular.h \
 	menu_border.h
@@ -40,7 +50,6 @@ indigo_SOURCES = \
 	../lib/BufferObject.cpp \
 	../lib/VertexArrayObject.cpp \
 	../lib/Image.cpp \
-	../lib/Font.cpp \
 	StaticResources.cpp \
 	ZipResource.cpp \
 	Render.cpp \

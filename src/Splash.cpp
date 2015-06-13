@@ -19,11 +19,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "Font.h"
 #include "Render.h"
 #include "../lib/BufferObject.h"
 #include "../lib/VertexArrayObject.h"
 #include "../lib/Shader.h"
-#include "../lib/Font.h"
 #include "../lib/Resource.h"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -227,8 +227,8 @@ namespace
 
 		double m_start;
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_str;
-		OOBase::SharedPtr<OOGL::Text> m_text;
-		OOBase::SharedPtr<OOGL::Text> m_fps;
+		OOBase::SharedPtr<Indigo::Render::Text> m_text;
+		OOBase::SharedPtr<Indigo::Render::Text> m_fps;
 	};
 }
 
@@ -267,15 +267,15 @@ bool Splash::create(void* p)
 
 	pThis->m_tri.setup();
 
-	OOBase::SharedPtr<OOGL::Font> fnt = OOBase::allocate_shared<OOGL::Font,OOBase::ThreadLocalAllocator>();
+	OOBase::SharedPtr<Indigo::Render::Font> fnt = OOBase::allocate_shared<Indigo::Render::Font,OOBase::ThreadLocalAllocator>();
 	if (!fnt)
 		LOG_ERROR_RETURN(("Failed to load font"),false);
 
 	if (!fnt->load(Indigo::static_resources(),"Titillium-Regular.fnt"))
 		return false;
 
-	pThis->m_text = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt,"Now try typing!");
-	pThis->m_fps = OOBase::allocate_shared<OOGL::Text,OOBase::ThreadLocalAllocator>(fnt);
+	pThis->m_text = OOBase::allocate_shared<Indigo::Render::Text,OOBase::ThreadLocalAllocator>(fnt,"Now try typing!");
+	pThis->m_fps = OOBase::allocate_shared<Indigo::Render::Text,OOBase::ThreadLocalAllocator>(fnt);
 
 	glClearColor(0.f,0.f,0.f,0.f);
 	glEnable(GL_BLEND);

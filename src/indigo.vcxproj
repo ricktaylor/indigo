@@ -103,7 +103,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\resources\Font_8bit.frag" />
+    <None Include="..\resources\Font_8bit.vert" />
     <None Include="..\resources\menu_border.png" />
+    <None Include="..\resources\NinePatch.frag" />
+    <None Include="..\resources\NinePatch.vert" />
     <None Include="..\resources\Titillium-Regular.fnt" />
     <None Include="..\resources\Titillium-Regular_0.png" />
   </ItemGroup>

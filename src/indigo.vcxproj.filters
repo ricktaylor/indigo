@@ -166,6 +166,18 @@
     <None Include="..\resources\menu_border.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\resources\Font_8bit.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\resources\Font_8bit.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\resources\NinePatch.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\resources\NinePatch.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\indigo.rc">

@@ -84,17 +84,25 @@ bool Indigo::Application::create_mainwnd()
 		return false;
 
 	GUI::Sizer::ItemLayout layout = {0};
-	layout.m_flags = GUI::Sizer::ItemLayout::expand;
+	layout.m_flags = GUI::Sizer::ItemLayout::align_centre;
 	layout.m_proportion = 1;
 
-	for (int i=0;i<2;++i)
+	const char* items[] = 
+	{
+		" Quit ",
+		" Credits ",
+		" Load Game ",
+		" New Game "
+	};
+
+	for (int i=0;i<sizeof(items)/sizeof(items[0]);++i)
 	{
 		OOBase::SharedPtr<GUI::Label> label = OOBase::allocate_shared<GUI::Label>();
 		if (!label)
 			LOG_ERROR_RETURN(("Failed to create label: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 		OOBase::String str;
-		str.printf("Item gW|\x62j_%d",i);
+		str.assign(items[i]);
 
 		if (!label->create(m_start_menu.get(),str,font) ||
 			!label->colour(glm::u8vec4(192,224,225,255)) ||
