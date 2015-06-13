@@ -77,6 +77,14 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
+    <ProjectReference Include="..\3rdparty\lua.vcxproj">
+      <Project>{9c8bfc7b-9da6-483d-99a5-da2129fb0007}</Project>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
     <ProjectReference Include="..\lib\OOGL.vcxproj">
       <Project>{14cbc351-a489-4554-80c2-cfef873bc6ea}</Project>
       <Private>false</Private>
