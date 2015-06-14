@@ -66,10 +66,10 @@ namespace Indigo
 				OOBase::uint8_t page;
 				OOBase::uint8_t channel;
 			};
-			typedef OOBase::Table<OOBase::uint32_t,struct char_info,OOBase::Less<OOBase::uint32_t>,OOBase::ThreadLocalAllocator> char_map_t;
+			typedef OOBase::HashTable<OOBase::uint32_t,struct char_info,OOBase::ThreadLocalAllocator> char_map_t;
 			char_map_t m_mapCharInfo;
 
-			typedef OOBase::Table<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>,float,OOBase::Less<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> >,OOBase::ThreadLocalAllocator> kern_map_t;
+			typedef OOBase::HashTable<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>,float,OOBase::ThreadLocalAllocator> kern_map_t;
 			kern_map_t m_mapKerning;
 
 			typedef OOBase::Table<GLsizei,GLsizei,OOBase::Less<GLsizei>,OOBase::ThreadLocalAllocator> free_list_t;

@@ -43,6 +43,16 @@
     <ClInclude Include="VertexArrayObject.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\oobase\src\OOBase.vcxproj">
+      <Project>{10616ef7-6939-463a-9af6-8a1f3e9f5b16}</Project>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{14CBC351-A489-4554-80C2-CFEF873BC6EA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

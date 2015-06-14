@@ -26,6 +26,8 @@
 
 #include <OOBase/SharedPtr.h>
 #include <OOBase/Table.h>
+#include <OOBase/HashTable.h>
+#include <OOBase/List.h>
 
 namespace OOGL
 {
@@ -71,13 +73,13 @@ namespace OOGL
 			GLuint texture;
 			OOBase::SharedPtr<Texture> tex_ptr;
 		};
-		typedef OOBase::Table<GLuint,tex_pair,OOBase::Less<GLuint>,OOBase::ThreadLocalAllocator> tex_unit_t;
+		typedef OOBase::HashTable<GLuint,tex_pair,OOBase::ThreadLocalAllocator> tex_unit_t;
 		OOBase::Vector<tex_unit_t,OOBase::ThreadLocalAllocator> m_vecTexUnits;
 		void bind_texture(GLuint texture, GLenum target);
 		void update_texture_binding(GLuint texture, GLenum target);
 
 		void bind_buffer(GLuint buffer, GLenum target);
-		OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator> m_buffer_objects;
+		OOBase::HashTable<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::ThreadLocalAllocator> m_buffer_objects;
 
 		State(StateFns& fns);
 		void reset();

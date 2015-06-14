@@ -256,7 +256,7 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind(const OOBase::SharedPtr<
 OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::internal_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
 {
 	OOBase::SharedPtr<BufferObject> prev;
-	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
+	OOBase::HashTable<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
 	if (!i)
 	{
 		if (buffer_object)
@@ -288,7 +288,7 @@ void OOGL::State::bind_buffer(GLuint buffer, GLenum target)
 {
 	bool bind = true;
 
-	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
+	OOBase::HashTable<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
 	if (i && i->second && i->second->m_buffer == buffer)
 		bind = false;
 
@@ -298,7 +298,7 @@ void OOGL::State::bind_buffer(GLuint buffer, GLenum target)
 
 void OOGL::State::update_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
 {
-	OOBase::Table<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::Less<GLenum>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
+	OOBase::HashTable<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);
 	if (!i)
 	{
 		if (!m_buffer_objects.insert(target,buffer_object))
