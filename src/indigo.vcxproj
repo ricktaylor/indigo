@@ -19,16 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\lib\BufferObject.h" />
-    <ClInclude Include="..\lib\Framebuffer.h" />
-    <ClInclude Include="..\lib\glext.h" />
-    <ClInclude Include="..\lib\OOGL.h" />
-    <ClInclude Include="..\lib\Shader.h" />
-    <ClInclude Include="..\lib\State.h" />
-    <ClInclude Include="..\lib\StateFns.h" />
-    <ClInclude Include="..\lib\Texture.h" />
-    <ClInclude Include="..\lib\VertexArrayObject.h" />
-    <ClInclude Include="..\lib\Window.h" />
     <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="Common.h" />
@@ -45,14 +35,6 @@
     <ClInclude Include="ZipResource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\lib\BufferObject.cpp" />
-    <ClCompile Include="..\lib\Framebuffer.cpp" />
-    <ClCompile Include="..\lib\Shader.cpp" />
-    <ClCompile Include="..\lib\State.cpp" />
-    <ClCompile Include="..\lib\StateFns.cpp" />
-    <ClCompile Include="..\lib\Texture.cpp" />
-    <ClCompile Include="..\lib\VertexArrayObject.cpp" />
-    <ClCompile Include="..\lib\Window.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="GUILabel.cpp" />
