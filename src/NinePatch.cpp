@@ -182,7 +182,8 @@ GLsizei NinePatchFactory::alloc_patch(const glm::u16vec2& size, const glm::u16ve
 		}
 
 		m_ptrVAO->element_array(m_ptrElements);
-		OOGL::State::get_current()->bind(OOGL::VertexArrayObject::none());
+
+		m_ptrVAO->unbind();
 	}
 
 	OOBase::SharedPtr<GLuint> ei = m_ptrElements->auto_map<GLuint>(GL_MAP_WRITE_BIT,patch * elements_per_patch * sizeof(GLuint),elements_per_patch * sizeof(GLuint));

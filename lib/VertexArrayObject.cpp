@@ -57,6 +57,11 @@ OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::VertexArrayObject::bind()
 	return State::get_current()->bind(shared_from_this());
 }
 
+OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::VertexArrayObject::unbind()
+{
+	return State::get_current()->unbind_vao();
+}
+
 void OOGL::VertexArrayObject::internal_bind() const
 {
 	StateFns::get_current()->glBindVertexArray(m_array);

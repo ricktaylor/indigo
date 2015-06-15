@@ -525,7 +525,8 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		}
 
 		m_ptrVAO->element_array(m_ptrElements);
-		OOGL::State::get_current()->bind(OOGL::VertexArrayObject::none());
+
+		m_ptrVAO->unbind();
 	}
 
 	OOBase::SharedPtr<vertex_data> attribs = m_ptrVertices->auto_map<vertex_data>(GL_MAP_WRITE_BIT,text.m_glyph_start * vertices_per_glyph * sizeof(vertex_data),len * vertices_per_glyph * sizeof(vertex_data));

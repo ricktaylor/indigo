@@ -89,6 +89,7 @@ namespace OOGL
 		void reset();
 
 		GLuint activate_texture_unit(GLuint unit);
+		OOBase::SharedPtr<OOGL::VertexArrayObject> unbind_vao();
 
 		void update_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
 		OOBase::SharedPtr<BufferObject> internal_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);

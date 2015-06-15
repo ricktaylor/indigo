@@ -306,7 +306,12 @@ void OOGL::State::bind_buffer(GLuint buffer, GLenum target)
 		bind = false;
 
 	if (bind)
+	{
 		m_state_fns.glBindBuffer(target,buffer);
+
+		if (i && i->second)
+			m_buffer_objects.erase(i);
+	}
 }
 
 void OOGL::State::update_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
@@ -331,6 +336,23 @@ OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::State::bind(const OOBase::Share
 
 		if (vao)
 			vao->internal_bind();
+	}
+
+	return prev;
+}
+
+OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::State::unbind_vao()
+{
+	OOBase::SharedPtr<VertexArrayObject> prev = m_current_vao;
+
+	if (m_current_vao->m_array != 0)
+	{
+		m_current_vao.reset();
+
+		m_state_fns.glBindVertexArray(0);
+
+		// VAO bind sets the GL_ELEMENT_ARRAY_BUFFER binding
+		bind_buffer(0,GL_ELEMENT_ARRAY_BUFFER);
 	}
 
 	return prev;
