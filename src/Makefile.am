@@ -67,12 +67,13 @@ indigo_SOURCES = \
 		
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \
+	@top_builddir@/3rdparty/liblua.la \
 	@top_builddir@/3rdparty/glfw/src/libglfw3.a
 	
 indigo_LDADD += -lGL
 
 if WIN32
-#indigo_SOURCES += Indigo.rc
+indigo_SOURCES += ../resources/indigo.rc
 indigo_LDADD += -lole32 -lrpcrt4
 else
 indigo_LDADD += -lX11 -lXrandr -lXi -lXxf86vm -lXcursor -lXinerama
