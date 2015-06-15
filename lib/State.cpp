@@ -147,7 +147,7 @@ GLuint OOGL::State::active_texture_unit() const
 	return m_active_texture_unit;
 }
 
-OOBase::SharedPtr<OOGL::Texture> OOGL::State::internal_bind(const OOBase::SharedPtr<Texture>& texture)
+OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind_texture_active_unit(const OOBase::SharedPtr<Texture>& texture)
 {
 	return bind(m_active_texture_unit,texture);
 }
@@ -263,10 +263,10 @@ void OOGL::State::update_texture_binding(GLuint texture, GLenum target)
 
 OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind(const OOBase::SharedPtr<BufferObject>& buffer_object)
 {
-	return internal_bind(buffer_object,buffer_object ? buffer_object->m_target : 0);
+	return bind_buffer_target(buffer_object,buffer_object ? buffer_object->m_target : 0);
 }
 
-OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::internal_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
+OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind_buffer_target(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target)
 {
 	OOBase::SharedPtr<BufferObject> prev;
 	OOBase::HashTable<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::ThreadLocalAllocator>::iterator i = m_buffer_objects.find(target);

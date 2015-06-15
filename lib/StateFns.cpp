@@ -716,7 +716,6 @@ void OOGL::StateFns::call_glBindTextureUnit(State&, GLuint unit, GLenum, GLuint 
 void OOGL::StateFns::emulate_glBindTextureUnit(State& state, GLuint unit, GLenum target, GLuint texture)
 {
 	state.activate_texture_unit(unit);
-	state.update_texture_binding(texture,target);
 
 	glBindTexture(target,texture);
 
@@ -1029,7 +1028,7 @@ void OOGL::StateFns::call_glTexSubImage1D(GLuint texture, GLenum target, GLint l
 
 void OOGL::StateFns::call_glTexSubImage1D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void* pixels)
 {
-	State::get_current()->internal_bind(texture);
+	State::get_current()->bind_texture_active_unit(texture);
 
 	glTexSubImage1D(texture->m_target,level,xoffset,width,format,type,pixels);
 
@@ -1127,7 +1126,7 @@ void OOGL::StateFns::call_glTexSubImage2D(GLuint texture, GLenum target, GLint l
 
 void OOGL::StateFns::call_glTexSubImage2D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* pixels)
 {
-	State::get_current()->internal_bind(texture);
+	State::get_current()->bind_texture_active_unit(texture);
 
 	glTexSubImage2D(texture->m_target,level,xoffset,yoffset,width,height,format,type,pixels);
 
@@ -1229,7 +1228,7 @@ void OOGL::StateFns::call_glTexSubImage3D(GLuint texture, GLenum target, GLint l
 
 void OOGL::StateFns::call_glTexSubImage3D_2(const OOBase::SharedPtr<Texture>& texture, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void* pixels)
 {
-	State::get_current()->internal_bind(texture);
+	State::get_current()->bind_texture_active_unit(texture);
 
 	(*((PFNGLTEXSUBIMAGE3DPROC)m_fn_glTextureSubImage3D))(texture->m_target,level,xoffset,yoffset,zoffset,width,height,depth,format,type,pixels);
 
@@ -1284,7 +1283,7 @@ void OOGL::StateFns::call_glTextureParameterfEXT(const OOBase::SharedPtr<Texture
 
 void OOGL::StateFns::call_glTexParameterf(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLfloat val)
 {
-	State::get_current()->internal_bind(texture);
+	State::get_current()->bind_texture_active_unit(texture);
 
 	glTexParameterf(texture->m_target,name,val);
 
@@ -1334,7 +1333,7 @@ void OOGL::StateFns::call_glTextureParameterfvEXT(const OOBase::SharedPtr<Textur
 
 void OOGL::StateFns::call_glTexParameterfv(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLfloat* val)
 {
-	State::get_current()->internal_bind(texture);
+	State::get_current()->bind_texture_active_unit(texture);
 
 	glTexParameterfv(texture->m_target,name,val);
 
@@ -1384,7 +1383,7 @@ void OOGL::StateFns::call_glTextureParameteriEXT(const OOBase::SharedPtr<Texture
 
 void OOGL::StateFns::call_glTexParameteri(const OOBase::SharedPtr<Texture>& texture, GLenum name, GLint val)
 {
-	State::get_current()->internal_bind(texture);
+	State::get_current()->bind_texture_active_unit(texture);
 
 	glTexParameteri(texture->m_target,name,val);
 
@@ -1434,7 +1433,7 @@ void OOGL::StateFns::call_glTextureParameterivEXT(const OOBase::SharedPtr<Textur
 
 void OOGL::StateFns::call_glTexParameteriv(const OOBase::SharedPtr<Texture>& texture, GLenum name, const GLint* val)
 {
-	State::get_current()->internal_bind(texture);
+	State::get_current()->bind_texture_active_unit(texture);
 
 	glTexParameteriv(texture->m_target,name,val);
 
@@ -1810,8 +1809,8 @@ void OOGL::StateFns::call_glCopyNamedBufferSubData(const OOBase::SharedPtr<Buffe
 void OOGL::StateFns::call_glCopyBufferSubData(const OOBase::SharedPtr<BufferObject>& write, GLintptr writeoffset, const OOBase::SharedPtr<BufferObject>& read, GLintptr readoffset, GLsizeiptr size)
 {
 	OOBase::SharedPtr<State> ptrState = State::get_current();
-	ptrState->internal_bind(read,GL_COPY_READ_BUFFER);
-	ptrState->internal_bind(write,GL_COPY_WRITE_BUFFER);
+	ptrState->bind_buffer_target(read,GL_COPY_READ_BUFFER);
+	ptrState->bind_buffer_target(write,GL_COPY_WRITE_BUFFER);
 
 	(*((PFNGLCOPYBUFFERSUBDATAPROC)m_fn_glCopyBufferSubData))(GL_COPY_READ_BUFFER,GL_COPY_WRITE_BUFFER,readoffset,writeoffset,size);
 

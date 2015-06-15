@@ -92,8 +92,8 @@ namespace OOGL
 		OOBase::SharedPtr<OOGL::VertexArrayObject> unbind_vao();
 
 		void update_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
-		OOBase::SharedPtr<BufferObject> internal_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
-		OOBase::SharedPtr<Texture> internal_bind(const OOBase::SharedPtr<Texture>& texture);
+		OOBase::SharedPtr<BufferObject> bind_buffer_target(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
+		OOBase::SharedPtr<Texture> bind_texture_active_unit(const OOBase::SharedPtr<Texture>& texture);
 
 		// Singleton support
 		OOBase::HashTable<const void*,void*,OOBase::ThreadLocalAllocator> m_mapSingletons;
