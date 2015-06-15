@@ -60,6 +60,9 @@ namespace OOGL
 
 		GLuint active_texture_unit() const;
 
+		bool get_singleton(const void* key, void** val);
+		bool set_singleton(const void* key, void* val, void (*destructor)(void*) = NULL);
+
 	private:
 		StateFns&                            m_state_fns;
 		OOBase::SharedPtr<Framebuffer>       m_draw_fb;
@@ -82,6 +85,7 @@ namespace OOGL
 		OOBase::HashTable<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::ThreadLocalAllocator> m_buffer_objects;
 
 		State(StateFns& fns);
+		~State();
 		void reset();
 
 		GLuint activate_texture_unit(GLuint unit);
@@ -89,7 +93,81 @@ namespace OOGL
 		void update_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
 		OOBase::SharedPtr<BufferObject> internal_bind(const OOBase::SharedPtr<BufferObject>& buffer_object, GLenum target);
 		OOBase::SharedPtr<Texture> internal_bind(const OOBase::SharedPtr<Texture>& texture);
+
+		// Singleton support
+		OOBase::HashTable<const void*,void*,OOBase::ThreadLocalAllocator> m_mapSingletons;
+		struct singleton_t
+		{
+			const void* m_key;
+			void (*m_destructor)(void*);
+		};
+		OOBase::List<singleton_t,OOBase::ThreadLocalAllocator> m_listSingletonDestructors;
 	};
+
+	template <typename T>
+	class ContextSingleton : public OOBase::NonCopyable
+	{
+	public:
+		static T* instance_ptr()
+		{
+			void* inst = NULL;
+			if (!State::get_current()->get_singleton(&s_sentinal,&inst))
+				inst = init();
+
+			return static_cast<T*>(inst);
+		}
+
+		static T& instance()
+		{
+			T* i = instance_ptr();
+			if (!i)
+				OOBase_CallCriticalFailure("Null instance pointer");
+
+			return *i;
+		}
+
+	private:
+		static const int s_sentinal;
+
+		static void* init()
+		{
+			// We do this long-hand so T can friend us
+			void* t = OOBase::ThreadLocalAllocator::allocate(sizeof(T),OOBase::alignment_of<T>::value);
+			if (!t)
+				OOBase_CallCriticalFailure(ERROR_OUTOFMEMORY);
+
+			// Add destructor before calling constructor
+			if (!State::get_current()->set_singleton(&s_sentinal,t,&destroy))
+			{
+				OOBase::ThreadLocalAllocator::free(t);
+				OOBase_CallCriticalFailure(ERROR_OUTOFMEMORY);
+			}
+
+#if defined(OOBASE_HAVE_EXCEPTIONS)
+			try
+			{
+#endif
+				::new (t) T();
+#if defined(OOBASE_HAVE_EXCEPTIONS)
+			}
+			catch (...)
+			{
+				OOBase::ThreadLocalAllocator::free(t);
+				throw;
+			}
+#endif
+			return t;
+		}
+
+		static void destroy(void* p)
+		{
+			if (p)
+				OOBase::ThreadLocalAllocator::delete_free(static_cast<T*>(p));
+		}
+	};
+
+	template <typename T>
+	const int ContextSingleton<T>::s_sentinal = 1;
 
 	void glCheckError(const char* fn, const char* file, unsigned int line);
 }

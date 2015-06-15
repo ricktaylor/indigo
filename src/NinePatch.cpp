@@ -67,7 +67,7 @@ namespace
 		bool create_program();
 	};
 
-	typedef OOBase::TLSSingleton<NinePatchFactory> NinePatchFactory_t;
+	typedef OOGL::ContextSingleton<NinePatchFactory> NinePatchFactory_t;
 
 	static const unsigned int vertices_per_patch = 16;
 	static const unsigned int elements_per_patch = 24;

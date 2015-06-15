@@ -42,8 +42,21 @@ OOGL::State::State(StateFns& fns) :
 {
 }
 
+OOGL::State::~State()
+{
+	// You probably want to use reset()...
+}
+
 void OOGL::State::reset()
 {
+	for (singleton_t val;m_listSingletonDestructors.pop_back(&val);)
+	{
+		OOBase::HashTable<const void*,void*,OOBase::ThreadLocalAllocator>::iterator i = m_mapSingletons.find(val.m_key);
+		if (i)
+			(*val.m_destructor)(i->second);
+	}
+	m_mapSingletons.clear();
+
 	// Make sure we unbind everything
 	m_read_fb.reset();
 
@@ -338,4 +351,50 @@ OOBase::SharedPtr<OOGL::Program> OOGL::State::use(const OOBase::SharedPtr<Progra
 	}
 
 	return prev;
+}
+
+bool OOGL::State::get_singleton(const void* key, void** val)
+{
+	OOBase::HashTable<const void*,void*,OOBase::ThreadLocalAllocator>::iterator i = m_mapSingletons.find(key);
+	if (!i)
+		return false;
+
+	if (val)
+		*val = i->second;
+
+	return true;
+}
+
+bool OOGL::State::set_singleton(const void* key, void* val, void (*destructor)(void*))
+{
+	OOBase::HashTable<const void*,void*,OOBase::ThreadLocalAllocator>::iterator i = m_mapSingletons.find(key);
+	if (i)
+	{
+		if (destructor)
+		{
+			for (OOBase::List<singleton_t,OOBase::ThreadLocalAllocator>::iterator j=m_listSingletonDestructors.begin();j;++j)
+			{
+				if (j->m_key == key)
+				{
+					j->m_destructor = destructor;
+					break;
+				}
+			}
+		}
+
+		i->second = val;
+		return true;
+	}
+
+	if (destructor)
+	{
+		singleton_t v;
+		v.m_key = key;
+		v.m_destructor = destructor;
+
+		if (!m_listSingletonDestructors.push_back(v))
+			return false;
+	}
+
+	return m_mapSingletons.insert(key,val);
 }

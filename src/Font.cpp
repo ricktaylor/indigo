@@ -271,7 +271,7 @@ bool FontProgram::load_8bit_shader()
 	return true;
 }
 
-Indigo::Render::Font::Font() : m_packing(0), m_allocated(0)
+Indigo::Render::Font::Font() : m_line_height(0.f), m_packing(0), m_allocated(0)
 {
 }
 
@@ -331,7 +331,7 @@ bool Indigo::Render::Font::load(const OOGL::ResourceBundle& resource, const char
 			{
 				m_packing = read_uint32(data);
 				if (m_packing == 0x04040400)
-					ok = (!!OOBase::TLSSingleton<FontProgram>::instance().program(m_packing));
+					ok = (!!OOGL::ContextSingleton<FontProgram>::instance().program(m_packing));
 				else
 				{
 					// TODO: Funky packing
@@ -505,7 +505,7 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 				LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 
-		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance().program(m_packing);
+		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_packing);
 		if (!ptrProgram)
 			return false;
 
@@ -624,7 +624,7 @@ void Indigo::Render::Font::draw(OOGL::State& state, const glm::mat4& mvp, const 
 {
 	if (len && m_packing)
 	{
-		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOBase::TLSSingleton<FontProgram>::instance().program(m_packing);
+		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_packing);
 	
 		state.use(ptrProgram);
 		state.bind(0,m_ptrTexture);
