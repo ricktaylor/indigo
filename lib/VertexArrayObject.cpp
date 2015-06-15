@@ -24,16 +24,13 @@
 #include "StateFns.h"
 #include "BufferObject.h"
 
-OOGL::VertexArrayObject::VertexArrayObject() : m_array(0), m_binds_element_array(false)
+OOGL::VertexArrayObject::VertexArrayObject() : m_array(0)
 {
-	m_binds_element_array = StateFns::get_current()->isGLversion(3,0);
-
 	StateFns::get_current()->glGenVertexArrays(1,&m_array);
 }
 
-OOGL::VertexArrayObject::VertexArrayObject(GLuint array) : m_array(array), m_binds_element_array(false)
+OOGL::VertexArrayObject::VertexArrayObject(GLuint array) : m_array(array)
 {
-	m_binds_element_array = StateFns::get_current()->isGLversion(3,0);
 }
 
 OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::VertexArrayObject::none()
@@ -66,14 +63,8 @@ void OOGL::VertexArrayObject::internal_bind() const
 {
 	StateFns::get_current()->glBindVertexArray(m_array);
 
-	if (m_element_array)
-	{
-		// VAO bind sets the GL_ELEMENT_ARRAY_BUFFER binding
-		State::get_current()->update_bind(m_element_array,GL_ELEMENT_ARRAY_BUFFER);
-
-		if (!m_binds_element_array)
-			m_element_array->internal_bind(GL_ELEMENT_ARRAY_BUFFER);
-	}
+	// VAO bind sets the GL_ELEMENT_ARRAY_BUFFER binding
+	State::get_current()->update_bind(m_element_array,GL_ELEMENT_ARRAY_BUFFER);
 }
 
 void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, GLsizei stride, GLsizeiptr offset)

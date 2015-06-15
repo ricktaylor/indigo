@@ -352,7 +352,7 @@ OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::State::unbind_vao()
 		m_state_fns.glBindVertexArray(0);
 
 		// VAO bind sets the GL_ELEMENT_ARRAY_BUFFER binding
-		bind_buffer(0,GL_ELEMENT_ARRAY_BUFFER);
+		m_buffer_objects.remove(GL_ELEMENT_ARRAY_BUFFER);
 	}
 
 	return prev;
