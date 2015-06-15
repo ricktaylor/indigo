@@ -19,26 +19,26 @@ bin_PROGRAMS = indigo
 bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 	$(AM_V_CC)$(CC_FOR_BUILD) $(INCLUDES) $(AM_CFLAGS) -o $@ $(top_srcdir)/tools/bin2c.c
 	
-%.h: ../resources/%.png bin2c
+%.png.h: ../resources/%.png bin2c
 	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
 	
-%.h: ../resources/%.fnt bin2c
+%.fnt.h: ../resources/%.fnt bin2c
 	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
 
-%.h: ../resources/%.vert bin2c
-	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
+%.vert.h: ../resources/%.vert bin2c
+	$(AM_V_GEN)./bin2c "$<" "$@" "$*_vert"
 
-%.h: ../resources/%.frag bin2c
-	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
+%.frag.h: ../resources/%.frag bin2c
+	$(AM_V_GEN)./bin2c "$<" "$@" "$*_frag"
 	
 BUILT_SOURCES = \
-	Font_8bit.frag \
-	Font_8bit.vert \
-	NinePatch.frag \
-	NinePatch.vert \
-	Titillium-Regular_0.h \
-	Titillium-Regular.h \
-	menu_border.h
+	Font_8bit.vert.h \
+	Font_8bit.frag.h \
+	NinePatch.vert.h \
+	NinePatch.frag.h \
+	Titillium-Regular_0.png.h \
+	Titillium-Regular.fnt.h \
+	menu_border.png.h
 	
 indigo_SOURCES = \
 	../lib/Window.cpp \
