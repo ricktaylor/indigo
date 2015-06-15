@@ -1,20 +1,20 @@
 include $(top_srcdir)/m4/ltrc.inc
 
-AM_CPPFLAGS = \
+bin_PROGRAMS = indigo
+
+indigo_CPPFLAGS = \
 	-I@top_srcdir@/oobase/include \
 	-I@top_builddir@/oobase/include \
 	-I@top_srcdir@/3rdparty/glfw/include \
 	-I@top_srcdir@/3rdparty/glm
 	
-AM_CFLAGS = $(PTHREAD_CFLAGS)
-AM_CXXFLAGS = $(PTHREAD_CFLAGS)
-AM_LDFLAGS = $(PTHREAD_LIBS)
+indigo_CFLAGS = $(PTHREAD_CFLAGS)
+indigo_CXXFLAGS = $(PTHREAD_CFLAGS)
+indigo_LDFLAGS = $(PTHREAD_LIBS)
 
 if WIN32
-AM_CPPFLAGS += -D_WIN32_WINNT=0x0502
+indigo_CPPFLAGS += -D_WIN32_WINNT=0x0502
 endif
-
-bin_PROGRAMS = indigo
 
 bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 	$(AM_V_CC)$(CC_FOR_BUILD) $(INCLUDES) $(AM_CFLAGS) -o $@ $(top_srcdir)/tools/bin2c.c
