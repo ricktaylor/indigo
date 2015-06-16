@@ -657,7 +657,7 @@ glm::u16vec2 Indigo::Render::GUI::Panel::client_size(const glm::u16vec2& sz)
 	return client_sz;
 }
 
-OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Panel::create_widget()
+OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Panel::create_render_widget()
 {
 	OOBase::SharedPtr<Indigo::Render::GUI::Panel> layer = OOBase::allocate_shared<Indigo::Render::GUI::Panel,OOBase::ThreadLocalAllocator>();
 	if (!layer)

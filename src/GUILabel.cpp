@@ -129,7 +129,7 @@ Indigo::GUI::Label::Label() : m_colour(255)
 {
 }
 
-OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Label::create_widget()
+OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Label::create_render_widget()
 {
 	OOBase::SharedPtr< ::Label> label = OOBase::allocate_shared< ::Label,OOBase::ThreadLocalAllocator>();
 	if (!label)

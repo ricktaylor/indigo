@@ -142,7 +142,7 @@ namespace Indigo
 				return OOBase::static_pointer_cast<T>(m_render_widget);
 			}
 
-			virtual OOBase::SharedPtr<Render::GUI::Widget> create_widget() = 0;
+			virtual OOBase::SharedPtr<Render::GUI::Widget> create_render_widget() = 0;
 
 		private:
 			OOBase::SharedPtr<Render::GUI::Widget> m_render_widget;

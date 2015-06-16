@@ -261,7 +261,7 @@ bool Indigo::GUI::Widget::create(Widget* parent, const glm::u16vec2& min_size, c
 
 void Indigo::GUI::Widget::do_create(bool* ret_val, Widget* parent, const glm::i16vec2* pos, const glm::u16vec2* min_size)
 {
-	OOBase::SharedPtr<Render::GUI::Widget> widget = create_widget();
+	OOBase::SharedPtr<Render::GUI::Widget> widget = create_render_widget();
 	if (!widget)
 	{
 		LOG_ERROR(("Failed to allocate Widget: %s",OOBase::system_error_text()));

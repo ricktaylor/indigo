@@ -50,7 +50,7 @@ namespace Indigo
 			OOBase::SharedPtr<Font> m_font;
 			glm::u8vec4 m_colour;
 
-			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
+			OOBase::SharedPtr<Render::GUI::Widget> create_render_widget();
 			void set_text(bool* ret_val, const OOBase::String* text, Font* font);
 			void set_colour(bool* ret_val, glm::vec4* c);
 		};

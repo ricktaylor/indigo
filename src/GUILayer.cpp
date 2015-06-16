@@ -80,7 +80,7 @@ void Layer::on_size(const OOGL::Window& win, const glm::u16vec2& sz)
 	layout();
 }
 
-OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Layer::create_widget()
+OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Layer::create_render_widget()
 {
 	OOBase::SharedPtr< ::Layer> layer = OOBase::allocate_shared< ::Layer,OOBase::ThreadLocalAllocator>();
 	if (!layer)

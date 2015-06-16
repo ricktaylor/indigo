@@ -159,7 +159,7 @@ namespace Indigo
 			OOBase::SharedPtr<Indigo::Image> m_background;
 
 			void do_sizer(Sizer* s, bool* ret_val);
-			OOBase::SharedPtr<Render::GUI::Widget> create_widget();
+			OOBase::SharedPtr<Render::GUI::Widget> create_render_widget();
 			void do_background(Image* image, bool* ret_val);
 			void do_set_borders(glm::u16vec4* borders, bool* ret_val);
 			void do_get_borders(glm::u16vec4* borders);
