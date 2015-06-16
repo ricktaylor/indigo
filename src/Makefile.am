@@ -60,6 +60,8 @@ indigo_SOURCES = \
 	GUIPanel.cpp \
 	GUILayer.cpp \
 	GUILabel.cpp \
+	GUISizer.cpp \
+	GUIGridSizer.cpp \
 	Image.cpp \
 	NinePatch.cpp \
 	Font.cpp \

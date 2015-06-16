@@ -23,6 +23,7 @@
 #define INDIGO_GUIPANEL_H_INCLUDED
 
 #include "GUIWidget.h"
+#include "GUISizer.h"
 #include "Image.h"
 #include "NinePatch.h"
 
@@ -37,8 +38,6 @@ namespace Indigo
 	{
 		namespace GUI
 		{
-			class Sizer;
-
 			class Panel : public Widget
 			{
 				friend class Indigo::GUI::Panel;
@@ -82,60 +81,6 @@ namespace Indigo
 
 	namespace GUI
 	{
-		class Sizer : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<Sizer>
-		{
-			friend class Panel;
-
-		public:
-			Sizer();
-			~Sizer();
-
-			struct ItemLayout
-			{
-				enum eLayoutFlags
-				{
-					align_left = 0,
-					align_right = 1,
-					align_hcentre = 2,
-					align_bottom = 0,
-					align_top = 1 << 2,
-					align_vcentre = 2 << 2,
-					align_centre = align_hcentre | align_vcentre,
-					expand_horiz = 1 << 4,
-					expand_vert = 2 << 4,
-					expand = expand_horiz | expand_vert
-				};
-				OOBase::uint16_t m_flags;
-				OOBase::uint16_t m_proportion;
-			};
-
-			bool create(OOBase::uint16_t hspace, OOBase::uint16_t vspace);
-			bool create(OOBase::uint16_t hspace, OOBase::uint16_t vspace, const ItemLayout& default_layout);
-			bool destroy();
-
-			bool fit(Panel& panel);
-			bool layout(const Panel& panel);
-
-			bool add_widget(const OOBase::SharedPtr<Widget>& widget, unsigned int row, unsigned int column = 0, const ItemLayout* layout = NULL);
-			bool add_spacer(OOBase::uint16_t width, OOBase::uint16_t height, unsigned int row, unsigned int column = 0, const ItemLayout* layout = NULL);
-
-			bool remove_item(unsigned int row, unsigned int column);
-			bool remove_widget(const OOBase::SharedPtr<Widget>& widget);
-
-		private:
-			OOBase::SharedPtr<Indigo::Render::GUI::Sizer> m_sizer;
-			ItemLayout m_default_layout;
-
-			void do_create(bool* ret_val, const glm::u16vec2* space);
-			void do_destroy();
-			void do_fit(bool* ret_val, Widget* panel);
-			void do_layout(bool* ret_val, const Widget* panel);
-			void do_add_widget(bool* ret_val, OOBase::SharedPtr<Indigo::Render::GUI::Widget>* widget, unsigned int row, unsigned int column, const ItemLayout* layout);
-			void do_add_spacer(bool* ret_val, OOBase::Pair<OOBase::uint16_t,OOBase::uint16_t>* pos, OOBase::Pair<unsigned int,unsigned int>* idx, const ItemLayout* layout);
-			void do_remove_widget(bool* ret_val, Indigo::Render::GUI::Widget* widget);
-			void do_remove_item(bool* ret_val, unsigned int row, unsigned int column);
-		};
-
 		class Panel : public Widget
 		{
 		public:

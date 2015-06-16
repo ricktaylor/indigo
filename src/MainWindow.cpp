@@ -23,6 +23,7 @@
 #include "App.h"
 #include "Render.h"
 #include "Font.h"
+#include "GUIGridSizer.h"
 
 #include "../lib/Shader.h"
 
@@ -132,7 +133,7 @@ bool Indigo::MainWindow::create(Application* app)
 	if (!m_top_layer.create(m_wnd))
 		return false;
 
-	OOBase::SharedPtr<GUI::Sizer> sizer = OOBase::allocate_shared<GUI::Sizer>();
+	OOBase::SharedPtr<GUI::GridSizer> sizer = OOBase::allocate_shared<GUI::GridSizer>();
 	if (!sizer)
 		LOG_ERROR_RETURN(("Failed to create sizer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 

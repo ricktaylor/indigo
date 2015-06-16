@@ -24,6 +24,7 @@
 #include "ZipResource.h"
 #include "Font.h"
 #include "GUILabel.h"
+#include "GUIGridSizer.h"
 
 namespace Indigo
 {
@@ -64,7 +65,7 @@ bool Indigo::Application::create_mainwnd()
 	if (!m_start_menu->create(&m_main_wnd.top_layer()))
 		return false;
 
-	OOBase::SharedPtr<GUI::Sizer> sizer = OOBase::allocate_shared<GUI::Sizer>();
+	OOBase::SharedPtr<GUI::GridSizer> sizer = OOBase::allocate_shared<GUI::GridSizer>();
 	if (!sizer)
 		LOG_ERROR_RETURN(("Failed to create sizer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
@@ -95,7 +96,7 @@ bool Indigo::Application::create_mainwnd()
 		" New Game "
 	};
 
-	for (int i=0;i<sizeof(items)/sizeof(items[0]);++i)
+	for (size_t i=0;i<sizeof(items)/sizeof(items[0]);++i)
 	{
 		OOBase::SharedPtr<GUI::Label> label = OOBase::allocate_shared<GUI::Label>();
 		if (!label)
@@ -118,7 +119,7 @@ bool Indigo::Application::create_mainwnd()
 
 	layout.m_flags = GUI::Sizer::ItemLayout::align_centre;
 
-	if (!m_main_wnd.top_layer().sizer()->add_widget(m_start_menu,0,0,&layout) ||
+	if (!OOBase::static_pointer_cast<GUI::GridSizer>(m_main_wnd.top_layer().sizer())->add_widget(m_start_menu,0,0,&layout) ||
 			!m_main_wnd.top_layer().layout())
 		return false;
 
