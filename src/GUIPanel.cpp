@@ -72,9 +72,9 @@ void Indigo::Render::GUI::Panel::draw(OOGL::State& glState, const glm::mat4& mvp
 		if (m_background && m_background->valid())
 		{
 			if (m_style_flags & Indigo::GUI::Panel::colour_border)
-				m_background->draw(glState,Widget::style()->background_colour(),Widget::style()->background_image(),child_mvp);
+				m_background->draw(glState,Widget::style()->border_colour(),Widget::style()->border_image(),child_mvp);
 			else
-				m_background->draw(glState,glm::vec4(1.f),Widget::style()->background_image(),child_mvp);
+				m_background->draw(glState,glm::vec4(1.f),Widget::style()->border_image(),child_mvp);
 		}
 
 		const glm::u16vec4& borders = Widget::style()->borders();
@@ -105,7 +105,7 @@ void Indigo::Render::GUI::Panel::style(const OOBase::SharedPtr<Style>& new_style
 	bool refresh = false;
 	if (!new_style || !old_style)
 		refresh = true;
-	else if (new_style->borders() != old_style->borders() || new_style->background_image_size() != old_style->background_image_size())
+	else if (new_style->borders() != old_style->borders() || new_style->border_image_size() != old_style->border_image_size())
 		refresh = true;
 
 	Widget::style(new_style);
@@ -132,12 +132,12 @@ bool Indigo::Render::GUI::Panel::refresh_background()
 		const OOBase::SharedPtr<Style>& style = Widget::style();
 		if (!m_background)
 		{
-			m_background = OOBase::allocate_shared<NinePatch,OOBase::ThreadLocalAllocator>(Widget::size(),style->borders(),style->background_image_size());
+			m_background = OOBase::allocate_shared<NinePatch,OOBase::ThreadLocalAllocator>(Widget::size(),style->borders(),style->border_image_size());
 			if (!m_background)
 				LOG_ERROR_RETURN(("Failed to allocate NinePatch: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 		else
-			m_background->layout(Widget::size(),style->borders(),style->background_image_size());
+			m_background->layout(Widget::size(),style->borders(),style->border_image_size());
 	}
 	return true;
 }

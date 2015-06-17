@@ -22,12 +22,12 @@
 #include "GUIStyle.h"
 #include "Render.h"
 
-Indigo::Render::GUI::Style::Style() : m_foreground_colour(1.f), m_background_colour(1.f), m_borders(0)
+Indigo::Render::GUI::Style::Style() : m_foreground_colour(1.f), m_border_colour(1.f), m_borders(0)
 {
 
 }
 
-Indigo::GUI::Style::Style() : m_foreground_colour(255), m_background_colour(255), m_borders(0)
+Indigo::GUI::Style::Style() : m_foreground_colour(255), m_border_colour(255), m_borders(0)
 {
 
 }
@@ -85,9 +85,9 @@ bool Indigo::GUI::Style::clone(const OOBase::SharedPtr<Style>& orig)
 	m_wnd = orig->m_wnd;
 	m_font = orig->m_font;
 	m_foreground_colour = orig->m_foreground_colour;
-	m_background_colour = orig->m_background_colour;
+	m_border_colour = orig->m_border_colour;
 	m_borders = orig->m_borders;
-	m_background_image = orig->m_background_image;
+	m_border_image = orig->m_border_image;
 
 	return true;
 }
@@ -104,9 +104,9 @@ void Indigo::GUI::Style::do_clone(bool* ret_val, Render::GUI::Style* orig)
 	{
 		style->m_font = orig->m_font;
 		style->m_foreground_colour = orig->m_foreground_colour;
-		style->m_background_colour = orig->m_background_colour;
-		style->m_background_image = orig->m_background_image;
-		style->m_background_image_size = orig->m_background_image_size;
+		style->m_border_colour = orig->m_border_colour;
+		style->m_border_image = orig->m_border_image;
+		style->m_border_image_size = orig->m_border_image_size;
 		style->m_borders = orig->m_borders;
 
 		m_render_style.swap(style);
@@ -174,40 +174,40 @@ void Indigo::GUI::Style::set_foreground_colour(bool* ret_val, glm::vec4* c)
 	*ret_val = true;
 }
 
-bool Indigo::GUI::Style::background_colour(const glm::u8vec4& col)
+bool Indigo::GUI::Style::border_colour(const glm::u8vec4& col)
 {
 	if (!m_render_style)
 		LOG_ERROR_RETURN(("Style::create not called!"),false);
 
-	if (m_background_colour != col)
+	if (m_border_colour != col)
 	{
 		glm::vec4 fcol(col.r/255.f,col.g/255.f,col.b/255.f,col.a/255.f);
 		bool ret = false;
-		if (!render_call(OOBase::make_delegate(this,&Style::set_background_colour),&ret,&fcol) || !ret)
+		if (!render_call(OOBase::make_delegate(this,&Style::set_border_colour),&ret,&fcol) || !ret)
 			return false;
 
-		m_background_colour = col;
+		m_border_colour = col;
 	}
 	return true;
 }
 
-void Indigo::GUI::Style::set_background_colour(bool* ret_val, glm::vec4* c)
+void Indigo::GUI::Style::set_border_colour(bool* ret_val, glm::vec4* c)
 {
-	m_render_style->m_background_colour = *c;
+	m_render_style->m_border_colour = *c;
 	*ret_val = true;
 }
 
-bool Indigo::GUI::Style::background_image(const OOBase::SharedPtr<Image>& image)
+bool Indigo::GUI::Style::border_image(const OOBase::SharedPtr<Image>& image)
 {
 	bool ret = false;
-	if (!render_call(OOBase::make_delegate(this,&Style::set_background_image),&ret,image.get()) || !ret)
+	if (!render_call(OOBase::make_delegate(this,&Style::set_border_image),&ret,image.get()) || !ret)
 		return false;
 
-	m_background_image = image;
+	m_border_image = image;
 	return true;
 }
 
-bool Indigo::GUI::Style::background_image(const OOGL::ResourceBundle& resource, const char* name)
+bool Indigo::GUI::Style::border_image(const OOGL::ResourceBundle& resource, const char* name)
 {
 	OOBase::SharedPtr<Image> image = OOBase::allocate_shared<Image>();
 	if (!image)
@@ -216,10 +216,10 @@ bool Indigo::GUI::Style::background_image(const OOGL::ResourceBundle& resource, 
 	if (!image->load(resource,name))
 		return false;
 
-	return background_image(image);
+	return border_image(image);
 }
 
-void Indigo::GUI::Style::set_background_image(bool* ret_val, Image* image)
+void Indigo::GUI::Style::set_border_image(bool* ret_val, Image* image)
 {
 	*ret_val = false;
 	OOBase::SharedPtr<OOGL::Image> bg = image->render_image();
@@ -235,8 +235,8 @@ void Indigo::GUI::Style::set_background_image(bool* ret_val, Image* image)
 			t->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 			t->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 
-			m_render_style->m_background_image.swap(t);
-			m_render_style->m_background_image_size = bg->size();
+			m_render_style->m_border_image.swap(t);
+			m_render_style->m_border_image_size = bg->size();
 			*ret_val = true;
 		}
 	}

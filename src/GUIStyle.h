@@ -48,17 +48,17 @@ namespace Indigo
 
 				const OOBase::SharedPtr<Font>& font() const { return m_font; }
 				const glm::vec4& foreground_colour() const { return m_foreground_colour; }
-				const glm::vec4& background_colour() const { return m_background_colour; }
-				const OOBase::SharedPtr<OOGL::Texture>& background_image() const { return m_background_image; }
-				const glm::u16vec2& background_image_size() const { return m_background_image_size; }
+				const glm::vec4& border_colour() const { return m_border_colour; }
+				const OOBase::SharedPtr<OOGL::Texture>& border_image() const { return m_border_image; }
+				const glm::u16vec2& border_image_size() const { return m_border_image_size; }
 				const glm::u16vec4& borders() const { return m_borders; }
 
 			private:
 				OOBase::SharedPtr<Font> m_font;
 				glm::vec4 m_foreground_colour;
-				glm::vec4 m_background_colour;
-				OOBase::SharedPtr<OOGL::Texture> m_background_image;
-				glm::u16vec2 m_background_image_size;
+				glm::vec4 m_border_colour;
+				OOBase::SharedPtr<OOGL::Texture> m_border_image;
+				glm::u16vec2 m_border_image_size;
 				glm::u16vec4 m_borders;
 			};
 		}
@@ -86,24 +86,24 @@ namespace Indigo
 			bool borders(OOBase::uint16_t left, OOBase::uint16_t top, OOBase::uint16_t right, OOBase::uint16_t bottom);
 			bool borders(const glm::u16vec4& b);
 
-			const OOBase::SharedPtr<Indigo::Image>& background_image() const;
-			bool background_image(const OOBase::SharedPtr<Indigo::Image>& image);
-			bool background_image(const OOGL::ResourceBundle& resource, const char* name);
+			const OOBase::SharedPtr<Indigo::Image>& border_image() const;
+			bool border_image(const OOBase::SharedPtr<Indigo::Image>& image);
+			bool border_image(const OOGL::ResourceBundle& resource, const char* name);
 
 			const glm::u8vec4& foreground_colour() const { return m_foreground_colour; }
 			bool foreground_colour(const glm::u8vec4& col);
 
-			const glm::u8vec4& background_colour() const { return m_background_colour; }
-			bool background_colour(const glm::u8vec4& col);
+			const glm::u8vec4& border_colour() const { return m_border_colour; }
+			bool border_colour(const glm::u8vec4& col);
 
 		private:
 			OOBase::SharedPtr<OOGL::Window> m_wnd;
 			OOBase::SharedPtr<Render::GUI::Style> m_render_style;
 			OOBase::SharedPtr<Font> m_font;
 			glm::u8vec4 m_foreground_colour;
-			glm::u8vec4 m_background_colour;
+			glm::u8vec4 m_border_colour;
 			glm::u16vec4 m_borders;
-			OOBase::SharedPtr<Indigo::Image> m_background_image;
+			OOBase::SharedPtr<Indigo::Image> m_border_image;
 
 			void do_create(bool* ret_val);
 			void do_destroy();
@@ -111,9 +111,9 @@ namespace Indigo
 
 			void set_font(bool* ret_val, Font* font);
 			void set_foreground_colour(bool* ret_val, glm::vec4* c);
-			void set_background_colour(bool* ret_val, glm::vec4* c);
+			void set_border_colour(bool* ret_val, glm::vec4* c);
 			void set_borders(bool* ret_val, const glm::u16vec4* borders);
-			void set_background_image(bool* ret_val, Image* image);
+			void set_border_image(bool* ret_val, Image* image);
 		};
 	}
 }

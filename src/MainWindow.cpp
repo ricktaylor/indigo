@@ -135,8 +135,8 @@ bool Indigo::MainWindow::create(Application* app)
 		LOG_ERROR_RETURN(("Failed to create style: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 	if (!style->font(static_resources(),"Titillium-Regular.fnt") ||
-			!style->background_colour(glm::u8vec4(192,224,225,255)) ||
-			!style->background_image(static_resources(),"menu_border.png") ||
+			!style->foreground_colour(glm::u8vec4(192,224,225,255)) ||
+			!style->border_image(static_resources(),"menu_border.png") ||
 			!style->borders(9,9,9,9))
 	{
 		return false;
