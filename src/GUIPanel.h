@@ -65,10 +65,10 @@ namespace Indigo
 			private:
 				OOBase::SharedPtr<Sizer> m_sizer;
 				unsigned int m_style_flags;
-				OOBase::SharedPtr<NinePatch> m_background;
+				OOBase::SharedPtr<NinePatch> m_border;
 				OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator> m_children;
 
-				bool refresh_background();
+				bool refresh_border();
 				bool set_style_flags(unsigned int flags, bool refresh);
 			};
 		}

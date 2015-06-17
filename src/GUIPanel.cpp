@@ -69,12 +69,12 @@ void Indigo::Render::GUI::Panel::draw(OOGL::State& glState, const glm::mat4& mvp
 
 	if (m_style_flags & Indigo::GUI::Panel::show_border)
 	{
-		if (m_background && m_background->valid())
+		if (m_border && m_border->valid())
 		{
 			if (m_style_flags & Indigo::GUI::Panel::colour_border)
-				m_background->draw(glState,Widget::style()->border_colour(),Widget::style()->border_image(),child_mvp);
+				m_border->draw(glState,Widget::style()->border_colour(),Widget::style()->border_image(),child_mvp);
 			else
-				m_background->draw(glState,glm::vec4(1.f),Widget::style()->border_image(),child_mvp);
+				m_border->draw(glState,glm::vec4(1.f),Widget::style()->border_image(),child_mvp);
 		}
 
 		const glm::u16vec4& borders = Widget::style()->borders();
@@ -94,7 +94,7 @@ glm::u16vec2 Indigo::Render::GUI::Panel::size(const glm::u16vec2& sz)
 	glm::u16vec2 old_sz = Widget::size();
 	glm::u16vec2 new_sz = Widget::size(sz);
 	if (old_sz != new_sz)
-		refresh_background();
+		refresh_border();
 
 	return new_sz;
 }
@@ -111,7 +111,7 @@ void Indigo::Render::GUI::Panel::style(const OOBase::SharedPtr<Style>& new_style
 	Widget::style(new_style);
 
 	if (refresh)
-		refresh_background();
+		refresh_border();
 }
 
 bool Indigo::Render::GUI::Panel::set_style_flags(unsigned int flags, bool refresh)
@@ -120,24 +120,24 @@ bool Indigo::Render::GUI::Panel::set_style_flags(unsigned int flags, bool refres
 		return true;
 
 	m_style_flags = flags;
-	return !refresh || refresh_background();
+	return !refresh || refresh_border();
 }
 
-bool Indigo::Render::GUI::Panel::refresh_background()
+bool Indigo::Render::GUI::Panel::refresh_border()
 {
 	if (m_style_flags & Indigo::GUI::Panel::show_border)
 	{
 		window()->make_current();
 
 		const OOBase::SharedPtr<Style>& style = Widget::style();
-		if (!m_background)
+		if (!m_border)
 		{
-			m_background = OOBase::allocate_shared<NinePatch,OOBase::ThreadLocalAllocator>(Widget::size(),style->borders(),style->border_image_size());
-			if (!m_background)
+			m_border = OOBase::allocate_shared<NinePatch,OOBase::ThreadLocalAllocator>(Widget::size(),style->borders(),style->border_image_size());
+			if (!m_border)
 				LOG_ERROR_RETURN(("Failed to allocate NinePatch: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 		else
-			m_background->layout(Widget::size(),style->borders(),style->border_image_size());
+			m_border->layout(Widget::size(),style->borders(),style->border_image_size());
 	}
 	return true;
 }

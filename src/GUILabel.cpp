@@ -22,6 +22,7 @@
 #include "GUILabel.h"
 #include "Render.h"
 #include "Font.h"
+#include "NinePatch.h"
 
 namespace
 {
@@ -35,13 +36,16 @@ namespace
 	private:
 		OOBase::String m_string;
 		OOBase::SharedPtr<Indigo::Render::Text> m_text;
+		OOBase::SharedPtr<Indigo::Render::NinePatch> m_border;
 
 		void draw(OOGL::State& glState, const glm::mat4& mvp);
 
+		glm::u16vec2 size(const glm::u16vec2& sz);
 		glm::u16vec2 ideal_size() const;
 		glm::u16vec2 text_size() const;
 
 		void style(const OOBase::SharedPtr<Indigo::Render::GUI::Style>& s);
+		bool refresh_border();
 	};
 }
 
@@ -52,15 +56,28 @@ Label::Label()
 void Label::style(const OOBase::SharedPtr<Indigo::Render::GUI::Style>& new_style)
 {
 	const OOBase::SharedPtr<Indigo::Render::GUI::Style>& old_style = Widget::style();
-	bool refresh = false;
+	bool refresh_text = false;
+	bool refresh_bdr = false;
 	if (!old_style || !new_style)
-		refresh = true;
-	else if (old_style->font() != new_style->font())
-		refresh = true;
+	{
+		refresh_text = true;
+		refresh_bdr = true;
+	}
+	else
+	{
+		if (old_style->font() != new_style->font())
+			refresh_text = true;
+
+		if (new_style->borders() != old_style->borders() || new_style->border_image_size() != old_style->border_image_size())
+			refresh_bdr = true;
+	}
 
 	Widget::style(new_style);
 
-	if (refresh)
+	if (refresh_bdr)
+		refresh_border();
+
+	if (refresh_text)
 	{
 		OOBase::SharedPtr<Indigo::Render::Text> render_text;
 
@@ -81,10 +98,46 @@ void Label::style(const OOBase::SharedPtr<Indigo::Render::GUI::Style>& new_style
 	}
 }
 
+bool Label::refresh_border()
+{
+	//if (m_style_flags & Indigo::GUI::Panel::show_border)
+	{
+		window()->make_current();
+
+		const OOBase::SharedPtr<Indigo::Render::GUI::Style>& style = Widget::style();
+		if (!m_border)
+		{
+			m_border = OOBase::allocate_shared<Indigo::Render::NinePatch,OOBase::ThreadLocalAllocator>(Widget::size(),style->borders(),style->border_image_size());
+			if (!m_border)
+				LOG_ERROR_RETURN(("Failed to allocate NinePatch: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+		}
+		else
+			m_border->layout(Widget::size(),style->borders(),style->border_image_size());
+	}
+	return true;
+}
+
+glm::u16vec2 Label::size(const glm::u16vec2& sz)
+{
+	glm::u16vec2 old_sz = Widget::size();
+	glm::u16vec2 new_sz = Widget::size(sz);
+	if (old_sz != new_sz)
+		refresh_border();
+
+	return new_sz;
+}
+
 glm::u16vec2 Label::ideal_size() const
 {
 	glm::u16vec2 sz(Widget::ideal_size());
 	glm::u16vec2 text_sz(text_size());
+
+	if (Widget::style())
+	{
+		const glm::u16vec4& borders = Widget::style()->borders();
+		text_sz.x += borders.x + borders.z;
+		text_sz.y += borders.y + borders.w;
+	}
 
 	if (text_sz.x < sz.x)
 		text_sz.x = sz.x;
@@ -141,15 +194,29 @@ bool Label::set_text(const OOBase::String* text)
 
 void Label::draw(OOGL::State& glState, const glm::mat4& mvp)
 {
+	glm::i16vec2 p = position();
+	glm::mat4 child_mvp = mvp * glm::translate(glm::mat4(1),glm::vec3(p.x,p.y,0));
+
+	if (m_border && m_border->valid())
+		m_border->draw(glState,Widget::style()->border_colour(),Widget::style()->border_image(),child_mvp);
+
 	if (m_text)
 	{
-		glm::i16vec2 p = position();
-		glm::u16vec2 sz = size();
+		glm::u16vec2 sz = Widget::size();
 
-		glm::mat4 model = glm::translate(glm::mat4(1),glm::vec3(p.x,p.y,0.f));
-		model = glm::scale(model,glm::vec3(sz.x/m_text->length(),sz.y,0.f));
+		if (Widget::style())
+		{
+			const glm::u16vec4& borders = Widget::style()->borders();
+			if (borders.x || borders.w)
+				child_mvp = glm::translate(child_mvp,glm::vec3(borders.x,borders.w,0));
 
-		m_text->draw(glState,mvp * model,Widget::style()->foreground_colour());
+			sz.x -= borders.x + borders.z;
+			sz.y -= borders.y + borders.w;
+		}
+
+		child_mvp = glm::scale(child_mvp,glm::vec3(sz.x/m_text->length(),sz.y,0.f));
+
+		m_text->draw(glState,child_mvp,Widget::style()->foreground_colour());
 	}
 }
 
