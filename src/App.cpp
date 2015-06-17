@@ -124,11 +124,12 @@ bool Indigo::Application::run(const OOBase::Table<OOBase::String,OOBase::String>
 	if (!Indigo::handle_events())
 		return false;
 
-	OOBase::Logger::log(OOBase::Logger::Information,"Quit");
+	app.m_main_wnd.destroy();
 	return true;
 }
 
 void Indigo::Application::on_main_wnd_close()
 {
+	OOBase::Logger::log(OOBase::Logger::Information,"Quit");
 	quit_loop();
 }
