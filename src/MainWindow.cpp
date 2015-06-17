@@ -130,7 +130,19 @@ bool Indigo::MainWindow::create(Application* app)
 		return false;
 
 	// Set up top layer
-	if (!m_top_layer.create(m_wnd))
+	OOBase::SharedPtr<GUI::Style> style = OOBase::allocate_shared<GUI::Style>();
+	if (!style || !style->create(m_wnd->m_wnd))
+		LOG_ERROR_RETURN(("Failed to create style: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+	if (!style->font(static_resources(),"Titillium-Regular.fnt") ||
+			!style->background_colour(glm::u8vec4(192,224,225,255)) ||
+			!style->background_image(static_resources(),"menu_border.png") ||
+			!style->borders(9,9,9,9))
+	{
+		return false;
+	}
+
+	if (!m_top_layer.create(m_wnd,style))
 		return false;
 
 	OOBase::SharedPtr<GUI::GridSizer> sizer = OOBase::allocate_shared<GUI::GridSizer>();

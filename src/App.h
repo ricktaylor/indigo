@@ -44,6 +44,8 @@ namespace Indigo
 
 		bool show_menu();
 	};
+
+	OOGL::ResourceBundle& static_resources();
 }
 
 #endif // INDIGO_APP_H_INCLUDED

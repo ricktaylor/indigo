@@ -36,7 +36,7 @@ namespace Indigo
 		class Layer : public Panel
 		{
 		public:
-			bool create(OOBase::SharedPtr<Render::MainWindow>& wnd);
+			bool create(OOBase::SharedPtr<Render::MainWindow>& wnd, const OOBase::SharedPtr<Style>& style);
 
 		private:
 			void do_create(bool* ret_val, OOBase::SharedPtr<Render::MainWindow>* wnd);

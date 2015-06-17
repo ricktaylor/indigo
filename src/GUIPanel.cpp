@@ -22,6 +22,11 @@
 #include "GUIPanel.h"
 #include "Render.h"
 
+Indigo::Render::GUI::Panel::Panel() : m_style_flags(0)
+{
+
+}
+
 void Indigo::Render::GUI::Panel::layout()
 {
 	if (m_sizer)
@@ -34,8 +39,9 @@ glm::u16vec2 Indigo::Render::GUI::Panel::ideal_size() const
 	if (m_sizer)
 	{
 		glm::u16vec2 sz2 = m_sizer->ideal_size();
-		sz2.x += m_borders.x + m_borders.z;
-		sz2.y += m_borders.y + m_borders.w;
+		glm::u16vec4 borders = style()->borders();
+		sz2.x += borders.x + borders.z;
+		sz2.y += borders.y + borders.w;
 
 		if (sz2.x > sz.x)
 			sz.x = sz2.x;
@@ -61,9 +67,17 @@ void Indigo::Render::GUI::Panel::draw(OOGL::State& glState, const glm::mat4& mvp
 	glm::i16vec2 p = position();
 	glm::mat4 child_mvp = mvp * glm::translate(glm::mat4(1),glm::vec3(p.x,p.y,0));
 
-	m_background.draw(glState,m_texture,child_mvp);
+	if (m_style_flags & Indigo::GUI::Panel::show_border)
+	{
+		if (m_style_flags & Indigo::GUI::Panel::colour_border)
+			m_background.draw(glState,style()->background_colour(),style()->background_image(),child_mvp);
+		else
+			m_background.draw(glState,glm::vec4(1.f),style()->background_image(),child_mvp);
 
-	child_mvp = glm::translate(child_mvp,glm::vec3(m_borders.x,m_borders.w,0));
+		glm::u16vec4 borders = style()->borders();
+		if (borders.x || borders.w)
+			child_mvp = glm::translate(child_mvp,glm::vec3(borders.x,borders.w,0));
+	}
 
 	for (OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i;++i)
 	{
@@ -76,22 +90,33 @@ glm::u16vec2 Indigo::Render::GUI::Panel::size(const glm::u16vec2& sz)
 {
 	glm::u16vec2 old_sz = Widget::size();
 	glm::u16vec2 new_sz = Widget::size(sz);
-	if (old_sz != new_sz)
+	if (old_sz != new_sz && (m_style_flags & Indigo::GUI::Panel::show_border))
 	{
 		window()->make_current();
 
-		layout_background(new_sz);
+		m_background.layout(new_sz,style()->borders(),style()->background_image_size());
 	}
 
 	return new_sz;
 }
 
-const glm::u16vec4& Indigo::Render::GUI::Panel::borders() const
+bool Indigo::Render::GUI::Panel::set_style_flags(unsigned int flags, bool refresh)
 {
-	return m_borders;
+	m_style_flags = flags;
+	if (refresh)
+	{
+		if (m_style_flags & Indigo::GUI::Panel::show_border)
+		{
+			window()->make_current();
+
+			m_background.layout(Widget::size(),style()->borders(),style()->background_image_size());
+		}
+	}
+
+	return true;
 }
 
-void Indigo::Render::GUI::Panel::borders(const glm::u16vec4& b)
+/*void Indigo::Render::GUI::Panel::borders(const glm::u16vec4& b)
 {
 	if (m_borders != b)
 	{
@@ -103,66 +128,58 @@ void Indigo::Render::GUI::Panel::borders(const glm::u16vec4& b)
 
 		min_size(sz);
 
-		window()->make_current();
-
-		layout_background(Widget::size());
+		if (m_style_flags & Indigo::GUI::Panel::show_border)
+		{
+			window()->make_current();
+			m_background.layout(Widget::size(),style()->borders(),style()->background_image_size());
+		}
 	}
-}
+}*/
 
-const OOBase::SharedPtr<OOGL::Texture>& Indigo::Render::GUI::Panel::texture() const
-{
-	return m_texture;
-}
 
-bool Indigo::Render::GUI::Panel::texture(const OOBase::SharedPtr<OOGL::Texture>& tex, const glm::u16vec2& tex_size)
+/*bool Indigo::Render::GUI::Panel::texture(const OOBase::SharedPtr<OOGL::Texture>& tex, const glm::u16vec2& tex_size)
 {
 	m_texture = tex;
 	if (!m_texture || !m_texture->valid())
 		return false;
 
-	window()->make_current();
-
-	m_texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	m_texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	m_texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	m_texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-
 	if (tex_size != m_tex_size)
 	{
 		m_tex_size = tex_size;
-		layout_background(Widget::size());
+
+		if (m_style_flags & Indigo::GUI::Panel::show_border)
+		{
+			window()->make_current();
+			m_background.layout(Widget::size(),style()->borders(),style()->background_image_size());
+		}
 	}
 	return true;
-}
-
-void Indigo::Render::GUI::Panel::layout_background(const glm::u16vec2& sz)
-{
-	if (m_texture && m_texture->valid() && sz.x && sz.y)
-		m_background.layout(sz,m_borders,m_tex_size);
-}
+}*/
 
 glm::u16vec2 Indigo::Render::GUI::Panel::min_size(const glm::u16vec2& sz)
 {
+	glm::u16vec4 borders = style()->borders();
 	glm::u16vec2 new_sz(sz);
-	if (new_sz.x != glm::u16vec2::value_type(-1) && new_sz.x < m_borders.x + m_borders.z)
-		new_sz.x = m_borders.x + m_borders.z;
+	if (new_sz.x != glm::u16vec2::value_type(-1) && new_sz.x < borders.x + borders.z)
+		new_sz.x = borders.x + borders.z;
 
-	if (new_sz.y != glm::u16vec2::value_type(-1) && new_sz.y < m_borders.y + m_borders.w)
-		new_sz.y = m_borders.y + m_borders.w;
+	if (new_sz.y != glm::u16vec2::value_type(-1) && new_sz.y < borders.y + borders.w)
+		new_sz.y = borders.y + borders.w;
 
 	return Widget::min_size(new_sz);
 }
 
 glm::u16vec2 Indigo::Render::GUI::Panel::client_size() const
 {
+	glm::u16vec4 borders = style()->borders();
 	glm::u16vec2 client_sz(Widget::size());
-	if (client_sz.x > m_borders.x + m_borders.z)
-		client_sz.x -= m_borders.x + m_borders.z;
+	if (client_sz.x > borders.x + borders.z)
+		client_sz.x -= borders.x + borders.z;
 	else
 		client_sz.x = 0;
 
-	if (client_sz.y > m_borders.y + m_borders.w)
-		client_sz.y -= m_borders.y + m_borders.w;
+	if (client_sz.y > borders.y + borders.w)
+		client_sz.y -= borders.y + borders.w;
 	else
 		client_sz.y = 0;
 
@@ -171,16 +188,17 @@ glm::u16vec2 Indigo::Render::GUI::Panel::client_size() const
 
 glm::u16vec2 Indigo::Render::GUI::Panel::client_size(const glm::u16vec2& sz)
 {
-	glm::u16vec2 client_sz(sz.x + m_borders.x + m_borders.z, sz.y + m_borders.y + m_borders.w);
+	glm::u16vec4 borders = style()->borders();
+	glm::u16vec2 client_sz(sz.x + borders.x + borders.z, sz.y + borders.y + borders.w);
 	client_sz = size(client_sz);
 
-	if (client_sz.x > m_borders.x + m_borders.z)
-		client_sz.x -= m_borders.x + m_borders.z;
+	if (client_sz.x > borders.x + borders.z)
+		client_sz.x -= borders.x + borders.z;
 	else
 		client_sz.x = 0;
 
-	if (client_sz.y > m_borders.y + m_borders.w)
-		client_sz.y -= m_borders.y + m_borders.w;
+	if (client_sz.y > borders.y + borders.w)
+		client_sz.y -= borders.y + borders.w;
 	else
 		client_sz.y = 0;
 
@@ -196,13 +214,12 @@ OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Panel::create_render
 	return layer;
 }
 
-bool Indigo::GUI::Panel::create(Widget* parent, const glm::u16vec2& min_size, const glm::i16vec2& pos)
+bool Indigo::GUI::Panel::create(Widget* parent, unsigned int style_flags, const glm::u16vec2& min_size, const glm::i16vec2& pos)
 {
 	if (!Widget::create(parent,min_size,pos))
 		return false;
 
-	bool fit = true;
-	if (m_sizer && (!render_call(OOBase::make_delegate(this,&Panel::do_sizer),m_sizer.get(),&fit) || !fit))
+	if (!common_create(style_flags))
 	{
 		destroy();
 		return false;
@@ -211,22 +228,65 @@ bool Indigo::GUI::Panel::create(Widget* parent, const glm::u16vec2& min_size, co
 	return true;
 }
 
+bool Indigo::GUI::Panel::create(Widget* parent, const OOBase::SharedPtr<Style>& style, unsigned int style_flags, const glm::u16vec2& min_size, const glm::i16vec2& pos)
+{
+	if (!Widget::create(parent,style,min_size,pos))
+		return false;
+
+	if (!common_create(style_flags))
+	{
+		destroy();
+		return false;
+	}
+
+	return true;
+}
+
+bool Indigo::GUI::Panel::common_create(unsigned int flags)
+{
+	bool ret = false;
+	if (flags)
+	{
+		if (!render_call(OOBase::make_delegate(this,&Panel::set_style_flags),&ret,flags) || !ret)
+			return false;
+	}
+
+	ret = false;
+	return !m_sizer || (render_call(OOBase::make_delegate(this,&Panel::do_sizer),&ret,m_sizer.get()) && ret);
+}
+
 const OOBase::SharedPtr<Indigo::GUI::Sizer>& Indigo::GUI::Panel::sizer() const
 {
 	return m_sizer;
 }
 
+unsigned int Indigo::GUI::Panel::style_flags() const
+{
+	return render_widget<Render::GUI::Panel>()->m_style_flags;
+}
+
+bool Indigo::GUI::Panel::style_flags(unsigned int flags)
+{
+	bool ret = true;
+	return render_call(OOBase::make_delegate(this,&Panel::set_style_flags),&ret,flags) && ret;
+}
+
+void Indigo::GUI::Panel::set_style_flags(bool* ret_val, unsigned int flags)
+{
+	*ret_val = render_widget<Render::GUI::Panel>()->set_style_flags(flags,*ret_val);
+}
+
 bool Indigo::GUI::Panel::sizer(const OOBase::SharedPtr<Sizer>& s)
 {
 	bool ret = false;
-	if (!render_call(OOBase::make_delegate(this,&Panel::do_sizer),s.get(),&ret) || !ret)
+	if (!render_call(OOBase::make_delegate(this,&Panel::do_sizer),&ret,s.get()) || !ret)
 		return false;
 
 	m_sizer = s;
 	return true;
 }
 
-void Indigo::GUI::Panel::do_sizer(Sizer* s, bool* ret_val)
+void Indigo::GUI::Panel::do_sizer(bool* ret_val, Sizer* s)
 {
 	OOBase::SharedPtr<Indigo::Render::GUI::Panel> panel = render_widget<Indigo::Render::GUI::Panel>();
 	if (!panel)
@@ -246,76 +306,4 @@ bool Indigo::GUI::Panel::fit()
 bool Indigo::GUI::Panel::layout()
 {
 	return !m_sizer || m_sizer->layout(*this);
-}
-
-const OOBase::SharedPtr<Indigo::Image>& Indigo::GUI::Panel::background() const
-{
-	return m_background;
-}
-
-bool Indigo::GUI::Panel::background(const OOBase::SharedPtr<Image>& image)
-{
-	bool ret = false;
-	if (!render_call(OOBase::make_delegate(this,&Panel::do_background),image.get(),&ret) || !ret)
-		return false;
-
-	m_background = image;
-	return true;
-}
-
-bool Indigo::GUI::Panel::background(const OOGL::ResourceBundle& resource, const char* name)
-{
-	OOBase::SharedPtr<Image> image = OOBase::allocate_shared<Image>();
-	if (!image)
-		LOG_ERROR_RETURN(("Failed to allocate image: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
-
-	if (!image->load(resource,name))
-		return false;
-
-	return background(image);
-}
-
-void Indigo::GUI::Panel::do_background(Image* image, bool* ret_val)
-{
-	*ret_val = false;
-	OOBase::SharedPtr<Indigo::Render::GUI::Panel> panel = render_widget<Indigo::Render::GUI::Panel>();
-	if (panel)
-	{
-		OOBase::SharedPtr<OOGL::Image> bg = image->render_image();
-		if (bg && bg->valid())
-			*ret_val = panel->texture(bg->make_texture(GL_RGBA8),bg->size());
-	}
-}
-
-glm::u16vec4 Indigo::GUI::Panel::borders() const
-{
-	glm::u16vec4 borders(0);
-	render_call(OOBase::make_delegate(const_cast<Panel*>(this),&Panel::do_get_borders),&borders);
-	return borders;
-}
-
-void Indigo::GUI::Panel::do_get_borders(glm::u16vec4* borders)
-{
-	OOBase::SharedPtr<Indigo::Render::GUI::Panel> panel = render_widget<Indigo::Render::GUI::Panel>();
-	if (panel)
-		*borders = panel->borders();
-}
-
-bool Indigo::GUI::Panel::borders(OOBase::uint16_t left, OOBase::uint16_t top, OOBase::uint16_t right, OOBase::uint16_t bottom)
-{
-	glm::u16vec4 borders(left,top,right,bottom);
-	bool ret = false;
-	return render_call(OOBase::make_delegate(this,&Panel::do_set_borders),&borders,&ret) && ret;
-}
-
-void Indigo::GUI::Panel::do_set_borders(glm::u16vec4* borders, bool* ret_val)
-{
-	OOBase::SharedPtr<Indigo::Render::GUI::Panel> panel = render_widget<Indigo::Render::GUI::Panel>();
-	if (!panel)
-		*ret_val = false;
-	else
-	{
-		panel->borders(*borders);
-		*ret_val = true;
-	}
 }

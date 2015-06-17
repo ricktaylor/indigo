@@ -22,15 +22,14 @@
 #ifndef INDIGO_GUIWIDGET_H_INCLUDED
 #define INDIGO_GUIWIDGET_H_INCLUDED
 
-#include "Common.h"
-
-#include "../lib/Window.h"
+#include "GUIStyle.h"
 
 namespace Indigo
 {
 	namespace GUI
 	{
 		class Widget;
+		class Style;
 	}
 
 	namespace Render
@@ -92,6 +91,8 @@ namespace Indigo
 
 				virtual void draw(OOGL::State& glState, const glm::mat4& mvp) = 0;
 
+				const OOBase::SharedPtr<Style>& style() const { return m_style; }
+
 			private:
 				bool m_visible;
 				bool m_enabled;
@@ -101,8 +102,9 @@ namespace Indigo
 				glm::u16vec2 m_min_size;
 				glm::u16vec2 m_max_size;
 				glm::u16vec2 m_size;
+				OOBase::SharedPtr<Style> m_style;
 
-				bool create(const OOBase::SharedPtr<Widget>& parent, const glm::i16vec2& pos, const glm::u16vec2& min_size);
+				bool create(const OOBase::SharedPtr<Widget>& parent, const OOBase::SharedPtr<Style>& style, const glm::i16vec2& pos, const glm::u16vec2& min_size);
 			};
 		}
 	}
@@ -112,6 +114,7 @@ namespace Indigo
 		class Widget : public OOBase::NonCopyable
 		{
 			friend class Sizer;
+			friend class Style;
 
 		public:
 			Widget();
@@ -133,8 +136,12 @@ namespace Indigo
 			bool hilighted() const;
 			bool hilight(bool hilighted = true);
 
+			const OOBase::SharedPtr<Style>& style() const { return m_style; }
+			bool style(const OOBase::SharedPtr<Style>& s);
+
 		protected:
 			bool create(Widget* parent, const glm::u16vec2& min_size = glm::u16vec2(-1), const glm::i16vec2& pos = glm::i16vec2(0));
+			bool create(Widget* parent, const OOBase::SharedPtr<Style>& style, const glm::u16vec2& min_size = glm::u16vec2(-1), const glm::i16vec2& pos = glm::i16vec2(0));
 
 			template <typename T>
 			OOBase::SharedPtr<T> render_widget() const
@@ -146,8 +153,9 @@ namespace Indigo
 
 		private:
 			OOBase::SharedPtr<Render::GUI::Widget> m_render_widget;
+			OOBase::SharedPtr<Style> m_style;
 
-			void do_create(bool* ret_val, Widget* parent, const glm::i16vec2* pos, const glm::u16vec2* min_size);
+			void do_create(bool* ret_val, Widget* parent, const OOBase::SharedPtr<Style>* style, const glm::i16vec2* pos, const glm::u16vec2* min_size);
 			void do_destroy();
 			void get_shown(bool* shown);
 			void get_visible(bool* visible);
@@ -158,6 +166,7 @@ namespace Indigo
 			void set_focus(bool* focused);
 			void get_hilighted(bool* hilighted);
 			void set_hilight(bool* hilighted);
+			void set_style(OOBase::SharedPtr<Render::GUI::Style>* style);
 		};
 	}
 }

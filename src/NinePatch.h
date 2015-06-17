@@ -42,7 +42,7 @@ namespace Indigo
 
 			void layout(const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size);
 
-			void draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp) const;
+			void draw(OOGL::State& state, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp) const;
 
 		private:
 			GLsizei    m_patch;

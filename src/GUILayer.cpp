@@ -89,9 +89,9 @@ OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Layer::create_render
 	return layer;
 }
 
-bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd)
+bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd, const OOBase::SharedPtr<Style>& style)
 {
-	if (!Panel::create(NULL))
+	if (!Panel::create(NULL,style,Panel::no_border))
 		return false;
 
 	bool ret = false;

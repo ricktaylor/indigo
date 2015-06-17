@@ -44,7 +44,7 @@ namespace
 		void free_patch(GLsizei p);
 		void layout_patch(GLsizei patch, const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size);
 
-		void draw(OOGL::State& state, const glm::mat4& mvp, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount);
+		void draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount);
 
 	private:
 		typedef OOBase::Table<GLsizei,GLsizei,OOBase::Less<GLsizei>,OOBase::ThreadLocalAllocator> free_list_t;
@@ -257,12 +257,13 @@ void NinePatchFactory::free_patch(GLsizei p)
 	}
 }
 
-void NinePatchFactory::draw(OOGL::State& state, const glm::mat4& mvp, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount)
+void NinePatchFactory::draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount)
 {
 	if (m_ptrProgram)
 	{
 		state.use(m_ptrProgram);
 
+		m_ptrProgram->uniform("in_Colour",colour);
 		m_ptrProgram->uniform("MVP",mvp);
 
 		m_ptrVAO->multi_draw_elements(GL_TRIANGLE_STRIP,counts,GL_UNSIGNED_INT,firsts,drawcount);
@@ -361,7 +362,7 @@ void Indigo::Render::NinePatch::layout(const glm::u16vec2& size, const glm::u16v
 	}
 }
 
-void Indigo::Render::NinePatch::draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp) const
+void Indigo::Render::NinePatch::draw(OOGL::State& state, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp) const
 {
 	if (m_patch != GLsizei(-1))
 	{
@@ -370,16 +371,16 @@ void Indigo::Render::NinePatch::draw(OOGL::State& state, const OOBase::SharedPtr
 		if (m_counts[0])
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(state,mvp,m_firsts,m_counts,3);
+				NinePatchFactory_t::instance().draw(state,mvp,colour,m_firsts,m_counts,3);
 			else
-				NinePatchFactory_t::instance().draw(state,mvp,m_firsts,m_counts,2);
+				NinePatchFactory_t::instance().draw(state,mvp,colour,m_firsts,m_counts,2);
 		}
 		else
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(state,mvp,&m_firsts[1],&m_counts[1],2);
+				NinePatchFactory_t::instance().draw(state,mvp,colour,&m_firsts[1],&m_counts[1],2);
 			else
-				NinePatchFactory_t::instance().draw(state,mvp,&m_firsts[1],&m_counts[1],1);
+				NinePatchFactory_t::instance().draw(state,mvp,colour,&m_firsts[1],&m_counts[1],1);
 		}
 	}
 }

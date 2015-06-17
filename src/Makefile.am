@@ -56,6 +56,7 @@ indigo_SOURCES = \
 	App.cpp \
 	Main.cpp \
 	MainWindow.cpp \
+	GUIStyle.cpp \
 	GUIWidget.cpp \
 	GUIPanel.cpp \
 	GUILayer.cpp \

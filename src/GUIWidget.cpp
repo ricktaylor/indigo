@@ -34,7 +34,7 @@ Indigo::Render::GUI::Widget::~Widget()
 		parent->remove_child(shared_from_this());
 }
 
-bool Indigo::Render::GUI::Widget::create(const OOBase::SharedPtr<Widget>& parent, const glm::i16vec2& pos, const glm::u16vec2& size)
+bool Indigo::Render::GUI::Widget::create(const OOBase::SharedPtr<Widget>& parent, const OOBase::SharedPtr<Style>& style, const glm::i16vec2& pos, const glm::u16vec2& size)
 {
 	if (parent && !parent->add_child(shared_from_this()))
 		return false;
@@ -43,6 +43,7 @@ bool Indigo::Render::GUI::Widget::create(const OOBase::SharedPtr<Widget>& parent
 	m_min_size = size;
 	m_size = min_size();
 	m_parent = parent;
+	m_style = style;
 
 	return true;
 }
@@ -252,14 +253,22 @@ Indigo::GUI::Widget::~Widget()
 
 bool Indigo::GUI::Widget::create(Widget* parent, const glm::u16vec2& min_size, const glm::i16vec2& pos)
 {
+	if (!parent)
+		LOG_ERROR_RETURN(("Widget::Create called with NULL parent and no style"),false);
+
+	return create(parent,parent->style(),min_size,pos);
+}
+
+bool Indigo::GUI::Widget::create(Widget* parent, const OOBase::SharedPtr<Style>& style, const glm::u16vec2& min_size, const glm::i16vec2& pos)
+{
 	if (m_render_widget)
 		LOG_ERROR_RETURN(("Widget::Create called twice"),false);
 
 	bool ret = false;
-	return render_call(OOBase::make_delegate(this,&Widget::do_create),&ret,parent,&pos,&min_size) && ret;
+	return render_call(OOBase::make_delegate(this,&Widget::do_create),&ret,parent,&style,&pos,&min_size) && ret;
 }
 
-void Indigo::GUI::Widget::do_create(bool* ret_val, Widget* parent, const glm::i16vec2* pos, const glm::u16vec2* min_size)
+void Indigo::GUI::Widget::do_create(bool* ret_val, Widget* parent, const OOBase::SharedPtr<Style>* style, const glm::i16vec2* pos, const glm::u16vec2* min_size)
 {
 	OOBase::SharedPtr<Render::GUI::Widget> widget = create_render_widget();
 	if (!widget)
@@ -273,11 +282,12 @@ void Indigo::GUI::Widget::do_create(bool* ret_val, Widget* parent, const glm::i1
 		if (parent)
 			render_parent = parent->m_render_widget;
 
-		if (!widget->create(render_parent,*pos,*min_size))
+		if (!widget->create(render_parent,(*style)->m_render_style,*pos,*min_size))
 			*ret_val = false;
 		else
 		{
 			widget.swap(m_render_widget);
+			m_style = *style;
 			*ret_val = true;
 		}
 	}
@@ -296,7 +306,7 @@ void Indigo::GUI::Widget::do_destroy()
 bool Indigo::GUI::Widget::shown() const
 {
 	bool shown = false;
-	return render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_shown),&shown) && shown;
+	return m_render_widget && render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_shown),&shown) && shown;
 }
 
 void Indigo::GUI::Widget::get_shown(bool* shown)
@@ -307,7 +317,7 @@ void Indigo::GUI::Widget::get_shown(bool* shown)
 bool Indigo::GUI::Widget::visible() const
 {
 	bool visible = false;
-	return render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_visible),&visible) && visible;
+	return m_render_widget && render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_visible),&visible) && visible;
 }
 
 void Indigo::GUI::Widget::get_visible(bool* visible)
@@ -317,7 +327,7 @@ void Indigo::GUI::Widget::get_visible(bool* visible)
 
 bool Indigo::GUI::Widget::visible(bool show)
 {
-	return render_call(OOBase::make_delegate(this,&Widget::set_visible),&show) && show;
+	return m_render_widget && render_call(OOBase::make_delegate(this,&Widget::set_visible),&show) && show;
 }
 
 void Indigo::GUI::Widget::set_visible(bool* visible)
@@ -328,7 +338,7 @@ void Indigo::GUI::Widget::set_visible(bool* visible)
 bool Indigo::GUI::Widget::enabled() const
 {
 	bool enabled = false;
-	return render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_enabled),&enabled) && enabled;
+	return m_render_widget && render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_enabled),&enabled) && enabled;
 }
 
 void Indigo::GUI::Widget::get_enabled(bool* enabled)
@@ -338,7 +348,7 @@ void Indigo::GUI::Widget::get_enabled(bool* enabled)
 
 bool Indigo::GUI::Widget::enable(bool enabled)
 {
-	return render_call(OOBase::make_delegate(this,&Widget::set_enable),&enabled) && enabled;
+	return m_render_widget && render_call(OOBase::make_delegate(this,&Widget::set_enable),&enabled) && enabled;
 }
 
 void Indigo::GUI::Widget::set_enable(bool* enabled)
@@ -349,7 +359,7 @@ void Indigo::GUI::Widget::set_enable(bool* enabled)
 bool Indigo::GUI::Widget::focused() const
 {
 	bool focused = false;
-	return render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_focused),&focused) && focused;
+	return m_render_widget && render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_focused),&focused) && focused;
 }
 
 void Indigo::GUI::Widget::get_focused(bool* focused)
@@ -359,7 +369,7 @@ void Indigo::GUI::Widget::get_focused(bool* focused)
 
 bool Indigo::GUI::Widget::focus(bool focus)
 {
-	return render_call(OOBase::make_delegate(this,&Widget::set_focus),&focus) && focus;
+	return m_render_widget && render_call(OOBase::make_delegate(this,&Widget::set_focus),&focus) && focus;
 }
 
 void Indigo::GUI::Widget::set_focus(bool* focused)
@@ -370,7 +380,7 @@ void Indigo::GUI::Widget::set_focus(bool* focused)
 bool Indigo::GUI::Widget::hilighted() const
 {
 	bool hilighted = false;
-	return render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_hilighted),&hilighted) && hilighted;
+	return m_render_widget && render_call(OOBase::make_delegate(const_cast<Widget*>(this),&Widget::get_hilighted),&hilighted) && hilighted;
 }
 
 void Indigo::GUI::Widget::get_hilighted(bool* hilighted)
@@ -380,10 +390,23 @@ void Indigo::GUI::Widget::get_hilighted(bool* hilighted)
 
 bool Indigo::GUI::Widget::hilight(bool hilight)
 {
-	return render_call(OOBase::make_delegate(this,&Widget::set_hilight),&hilight) && hilight;
+	return m_render_widget && render_call(OOBase::make_delegate(this,&Widget::set_hilight),&hilight) && hilight;
 }
 
 void Indigo::GUI::Widget::set_hilight(bool* hilighted)
 {
 	*hilighted = m_render_widget->hilight(*hilighted);
+}
+
+bool Indigo::GUI::Widget::style(const OOBase::SharedPtr<Style>& s)
+{
+	if (!s)
+		LOG_ERROR_RETURN(("Widget::apply_style with NULL style"),false);
+
+	return m_render_widget && s->m_render_style && render_call(OOBase::make_delegate(this,&Widget::set_style),&s->m_render_style);
+}
+
+void Indigo::GUI::Widget::set_style(OOBase::SharedPtr<Render::GUI::Style>* style)
+{
+	m_render_widget->m_style = *style;
 }

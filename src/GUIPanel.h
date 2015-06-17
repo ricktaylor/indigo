@@ -24,7 +24,6 @@
 
 #include "GUIWidget.h"
 #include "GUISizer.h"
-#include "Image.h"
 #include "NinePatch.h"
 
 namespace Indigo
@@ -43,13 +42,9 @@ namespace Indigo
 				friend class Indigo::GUI::Panel;
 
 			public:
+				Panel();
+
 				void layout();
-
-				const glm::u16vec4& borders() const;
-				void borders(const glm::u16vec4& b);
-
-				const OOBase::SharedPtr<OOGL::Texture>& texture() const;
-				bool texture(const OOBase::SharedPtr<OOGL::Texture>& tex, const glm::u16vec2& tex_size);
 
 				virtual glm::u16vec2 size(const glm::u16vec2& sz);
 
@@ -68,13 +63,11 @@ namespace Indigo
 
 			private:
 				OOBase::SharedPtr<Sizer> m_sizer;
+				unsigned int m_style_flags;
 				NinePatch m_background;
-				OOBase::SharedPtr<OOGL::Texture> m_texture;
-				glm::u16vec2 m_tex_size;
-				glm::u16vec4 m_borders;
 				OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator> m_children;
 
-				void layout_background(const glm::u16vec2& sz);
+				bool set_style_flags(unsigned int flags, bool refresh);
 			};
 		}
 	}
@@ -84,30 +77,34 @@ namespace Indigo
 		class Panel : public Widget
 		{
 		public:
-			bool create(Widget* parent, const glm::u16vec2& min_size = glm::u16vec2(-1), const glm::i16vec2& pos = glm::i16vec2(0));
+			enum PanelStyleFlags
+			{
+				no_border = 0,
+				show_border = 1,
+				colour_border = 2
+			};
+
+			bool create(Widget* parent, unsigned int style_flags = show_border, const glm::u16vec2& min_size = glm::u16vec2(-1), const glm::i16vec2& pos = glm::i16vec2(0));
+			bool create(Widget* parent, const OOBase::SharedPtr<Style>& style, unsigned int style_flags = show_border, const glm::u16vec2& min_size = glm::u16vec2(-1), const glm::i16vec2& pos = glm::i16vec2(0));
 
 			const OOBase::SharedPtr<Sizer>& sizer() const;
 			bool sizer(const OOBase::SharedPtr<Sizer>& s);
 
+			unsigned int style_flags() const;
+			bool style_flags(unsigned int flags);
+
 			bool fit();
 			bool layout();
 
-			const OOBase::SharedPtr<Indigo::Image>& background() const;
-			bool background(const OOBase::SharedPtr<Indigo::Image>& image);
-			bool background(const OOGL::ResourceBundle& resource, const char* name);
-
-			glm::u16vec4 borders() const;
-			bool borders(OOBase::uint16_t left, OOBase::uint16_t top, OOBase::uint16_t right, OOBase::uint16_t bottom);
-
 		private:
 			OOBase::SharedPtr<Sizer> m_sizer;
-			OOBase::SharedPtr<Indigo::Image> m_background;
 
-			void do_sizer(Sizer* s, bool* ret_val);
+			bool common_create(unsigned int style_flags);
+
 			OOBase::SharedPtr<Render::GUI::Widget> create_render_widget();
-			void do_background(Image* image, bool* ret_val);
-			void do_set_borders(glm::u16vec4* borders, bool* ret_val);
-			void do_get_borders(glm::u16vec4* borders);
+
+			void do_sizer(bool* ret_val, Sizer* s);
+			void set_style_flags(bool* ret_val, unsigned int flags);
 		};
 	}
 }

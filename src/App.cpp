@@ -26,11 +26,6 @@
 #include "GUILabel.h"
 #include "GUIGridSizer.h"
 
-namespace Indigo
-{
-	OOGL::ResourceBundle& static_resources();
-}
-
 bool showSplash();
 
 Indigo::Application::Application()
@@ -69,20 +64,10 @@ bool Indigo::Application::create_mainwnd()
 	if (!sizer)
 		LOG_ERROR_RETURN(("Failed to create sizer: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
-	if (!sizer->create(0,0) ||
-			!m_start_menu->sizer(sizer) ||
-			!m_start_menu->background(static_resources(),"menu_border.png") ||
-			!m_start_menu->borders(9,9,9,9))
+	if (!sizer->create(0,0) || !m_start_menu->sizer(sizer))
 	{
 		return false;
 	}
-
-	OOBase::SharedPtr<Font> font = OOBase::allocate_shared<Font>(m_main_wnd.window());
-	if (!font)
-		LOG_ERROR_RETURN(("Failed to create font: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
-
-	if (!font->load(static_resources(),"Titillium-Regular.fnt"))
-		return false;
 
 	GUI::Sizer::ItemLayout layout = {0};
 	layout.m_flags = GUI::Sizer::ItemLayout::align_centre;
@@ -105,8 +90,7 @@ bool Indigo::Application::create_mainwnd()
 		OOBase::String str;
 		str.assign(items[i]);
 
-		if (!label->create(m_start_menu.get(),str,font) ||
-			!label->colour(glm::u8vec4(192,224,225,255)) ||
+		if (!label->create(m_start_menu.get(),str) ||
 			!label->visible(true) ||
 			!sizer->add_widget(label,0,i,&layout))
 		{
