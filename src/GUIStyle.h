@@ -96,7 +96,6 @@ namespace Indigo
 			const glm::u8vec4& background_colour() const { return m_background_colour; }
 			bool background_colour(const glm::u8vec4& col);
 
-
 		private:
 			OOBase::SharedPtr<OOGL::Window> m_wnd;
 			OOBase::SharedPtr<Render::GUI::Style> m_render_style;

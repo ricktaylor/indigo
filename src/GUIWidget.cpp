@@ -242,6 +242,11 @@ bool Indigo::Render::GUI::Widget::hilight(bool hilighted)
 	return true;
 }
 
+void Indigo::Render::GUI::Widget::style(const OOBase::SharedPtr<Render::GUI::Style>& style)
+{
+	m_style = style;
+}
+
 Indigo::GUI::Widget::Widget()
 {
 }
@@ -408,5 +413,5 @@ bool Indigo::GUI::Widget::style(const OOBase::SharedPtr<Style>& s)
 
 void Indigo::GUI::Widget::set_style(OOBase::SharedPtr<Render::GUI::Style>* style)
 {
-	m_render_widget->m_style = *style;
+	m_render_widget->style(*style);
 }

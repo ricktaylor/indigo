@@ -48,7 +48,6 @@ namespace Indigo
 
 				virtual glm::u16vec2 size(const glm::u16vec2& sz);
 
-				virtual glm::u16vec2 min_size(const glm::u16vec2& sz);
 
 				virtual glm::u16vec2 client_size() const;
 				virtual glm::u16vec2 client_size(const glm::u16vec2& sz);
@@ -61,12 +60,15 @@ namespace Indigo
 
 				virtual void draw(OOGL::State& glState, const glm::mat4& mvp);
 
+				virtual void style(const OOBase::SharedPtr<Style>& s);
+
 			private:
 				OOBase::SharedPtr<Sizer> m_sizer;
 				unsigned int m_style_flags;
-				NinePatch m_background;
+				OOBase::SharedPtr<NinePatch> m_background;
 				OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator> m_children;
 
+				bool refresh_background();
 				bool set_style_flags(unsigned int flags, bool refresh);
 			};
 		}
@@ -103,6 +105,7 @@ namespace Indigo
 
 			OOBase::SharedPtr<Render::GUI::Widget> create_render_widget();
 
+			void do_create(bool* ret_val, unsigned int flags);
 			void do_sizer(bool* ret_val, Sizer* s);
 			void set_style_flags(bool* ret_val, unsigned int flags);
 		};

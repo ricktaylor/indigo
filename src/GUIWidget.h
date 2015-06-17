@@ -77,7 +77,6 @@ namespace Indigo
 				Widget();
 				virtual ~Widget();
 
-				OOBase::WeakPtr<Widget> m_parent;
 
 				virtual bool add_child(const OOBase::SharedPtr<Widget>& child) { return false; }
 				virtual void remove_child(const OOBase::SharedPtr<Widget>& child) {}
@@ -92,8 +91,10 @@ namespace Indigo
 				virtual void draw(OOGL::State& glState, const glm::mat4& mvp) = 0;
 
 				const OOBase::SharedPtr<Style>& style() const { return m_style; }
+				virtual void style(const OOBase::SharedPtr<Style>& s);
 
 			private:
+				OOBase::WeakPtr<Widget> m_parent;
 				bool m_visible;
 				bool m_enabled;
 				bool m_focused;

@@ -39,7 +39,7 @@ glm::u16vec2 Indigo::Render::GUI::Panel::ideal_size() const
 	if (m_sizer)
 	{
 		glm::u16vec2 sz2 = m_sizer->ideal_size();
-		glm::u16vec4 borders = style()->borders();
+		const glm::u16vec4& borders = Widget::style()->borders();
 		sz2.x += borders.x + borders.z;
 		sz2.y += borders.y + borders.w;
 
@@ -69,12 +69,15 @@ void Indigo::Render::GUI::Panel::draw(OOGL::State& glState, const glm::mat4& mvp
 
 	if (m_style_flags & Indigo::GUI::Panel::show_border)
 	{
-		if (m_style_flags & Indigo::GUI::Panel::colour_border)
-			m_background.draw(glState,style()->background_colour(),style()->background_image(),child_mvp);
-		else
-			m_background.draw(glState,glm::vec4(1.f),style()->background_image(),child_mvp);
+		if (m_background && m_background->valid())
+		{
+			if (m_style_flags & Indigo::GUI::Panel::colour_border)
+				m_background->draw(glState,Widget::style()->background_colour(),Widget::style()->background_image(),child_mvp);
+			else
+				m_background->draw(glState,glm::vec4(1.f),Widget::style()->background_image(),child_mvp);
+		}
 
-		glm::u16vec4 borders = style()->borders();
+		const glm::u16vec4& borders = Widget::style()->borders();
 		if (borders.x || borders.w)
 			child_mvp = glm::translate(child_mvp,glm::vec3(borders.x,borders.w,0));
 	}
@@ -90,88 +93,58 @@ glm::u16vec2 Indigo::Render::GUI::Panel::size(const glm::u16vec2& sz)
 {
 	glm::u16vec2 old_sz = Widget::size();
 	glm::u16vec2 new_sz = Widget::size(sz);
-	if (old_sz != new_sz && (m_style_flags & Indigo::GUI::Panel::show_border))
-	{
-		window()->make_current();
-
-		m_background.layout(new_sz,style()->borders(),style()->background_image_size());
-	}
+	if (old_sz != new_sz)
+		refresh_background();
 
 	return new_sz;
 }
 
-bool Indigo::Render::GUI::Panel::set_style_flags(unsigned int flags, bool refresh)
+void Indigo::Render::GUI::Panel::style(const OOBase::SharedPtr<Style>& new_style)
 {
-	m_style_flags = flags;
+	const OOBase::SharedPtr<Style>& old_style = Widget::style();
+	bool refresh = false;
+	if (!new_style || !old_style)
+		refresh = true;
+	else if (new_style->borders() != old_style->borders() || new_style->background_image_size() != old_style->background_image_size())
+		refresh = true;
+
+	Widget::style(new_style);
+
 	if (refresh)
-	{
-		if (m_style_flags & Indigo::GUI::Panel::show_border)
-		{
-			window()->make_current();
-
-			m_background.layout(Widget::size(),style()->borders(),style()->background_image_size());
-		}
-	}
-
-	return true;
+		refresh_background();
 }
 
-/*void Indigo::Render::GUI::Panel::borders(const glm::u16vec4& b)
+bool Indigo::Render::GUI::Panel::set_style_flags(unsigned int flags, bool refresh)
 {
-	if (m_borders != b)
-	{
-		glm::u16vec2 sz(Widget::min_size());
-		sz.x -= m_borders.x + m_borders.z;
-		sz.y -= m_borders.y + m_borders.w;
+	if (m_style_flags == flags)
+		return true;
 
-		m_borders = b;
+	m_style_flags = flags;
+	return !refresh || refresh_background();
+}
 
-		min_size(sz);
-
-		if (m_style_flags & Indigo::GUI::Panel::show_border)
-		{
-			window()->make_current();
-			m_background.layout(Widget::size(),style()->borders(),style()->background_image_size());
-		}
-	}
-}*/
-
-
-/*bool Indigo::Render::GUI::Panel::texture(const OOBase::SharedPtr<OOGL::Texture>& tex, const glm::u16vec2& tex_size)
+bool Indigo::Render::GUI::Panel::refresh_background()
 {
-	m_texture = tex;
-	if (!m_texture || !m_texture->valid())
-		return false;
-
-	if (tex_size != m_tex_size)
+	if (m_style_flags & Indigo::GUI::Panel::show_border)
 	{
-		m_tex_size = tex_size;
+		window()->make_current();
 
-		if (m_style_flags & Indigo::GUI::Panel::show_border)
+		const OOBase::SharedPtr<Style>& style = Widget::style();
+		if (!m_background)
 		{
-			window()->make_current();
-			m_background.layout(Widget::size(),style()->borders(),style()->background_image_size());
+			m_background = OOBase::allocate_shared<NinePatch,OOBase::ThreadLocalAllocator>(Widget::size(),style->borders(),style->background_image_size());
+			if (!m_background)
+				LOG_ERROR_RETURN(("Failed to allocate NinePatch: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
+		else
+			m_background->layout(Widget::size(),style->borders(),style->background_image_size());
 	}
 	return true;
-}*/
-
-glm::u16vec2 Indigo::Render::GUI::Panel::min_size(const glm::u16vec2& sz)
-{
-	glm::u16vec4 borders = style()->borders();
-	glm::u16vec2 new_sz(sz);
-	if (new_sz.x != glm::u16vec2::value_type(-1) && new_sz.x < borders.x + borders.z)
-		new_sz.x = borders.x + borders.z;
-
-	if (new_sz.y != glm::u16vec2::value_type(-1) && new_sz.y < borders.y + borders.w)
-		new_sz.y = borders.y + borders.w;
-
-	return Widget::min_size(new_sz);
 }
 
 glm::u16vec2 Indigo::Render::GUI::Panel::client_size() const
 {
-	glm::u16vec4 borders = style()->borders();
+	glm::u16vec4 borders = Widget::style()->borders();
 	glm::u16vec2 client_sz(Widget::size());
 	if (client_sz.x > borders.x + borders.z)
 		client_sz.x -= borders.x + borders.z;
@@ -188,7 +161,7 @@ glm::u16vec2 Indigo::Render::GUI::Panel::client_size() const
 
 glm::u16vec2 Indigo::Render::GUI::Panel::client_size(const glm::u16vec2& sz)
 {
-	glm::u16vec4 borders = style()->borders();
+	glm::u16vec4 borders = Widget::style()->borders();
 	glm::u16vec2 client_sz(sz.x + borders.x + borders.z, sz.y + borders.y + borders.w);
 	client_sz = size(client_sz);
 
@@ -245,14 +218,14 @@ bool Indigo::GUI::Panel::create(Widget* parent, const OOBase::SharedPtr<Style>& 
 bool Indigo::GUI::Panel::common_create(unsigned int flags)
 {
 	bool ret = false;
-	if (flags)
-	{
-		if (!render_call(OOBase::make_delegate(this,&Panel::set_style_flags),&ret,flags) || !ret)
-			return false;
-	}
+	return render_call(OOBase::make_delegate(this,&Panel::do_create),&ret,flags) && ret;
+}
 
-	ret = false;
-	return !m_sizer || (render_call(OOBase::make_delegate(this,&Panel::do_sizer),&ret,m_sizer.get()) && ret);
+void Indigo::GUI::Panel::do_create(bool* ret_val, unsigned int flags)
+{
+	*ret_val = render_widget<Render::GUI::Panel>()->set_style_flags(flags,false);
+	if (*ret_val && m_sizer)
+		do_sizer(ret_val,m_sizer.get());
 }
 
 const OOBase::SharedPtr<Indigo::GUI::Sizer>& Indigo::GUI::Panel::sizer() const

@@ -33,18 +33,52 @@ namespace
 		bool set_text(const OOBase::String* text);
 
 	private:
+		OOBase::String m_string;
 		OOBase::SharedPtr<Indigo::Render::Text> m_text;
 
 		void draw(OOGL::State& glState, const glm::mat4& mvp);
 
 		glm::u16vec2 ideal_size() const;
 		glm::u16vec2 text_size() const;
+
+		void style(const OOBase::SharedPtr<Indigo::Render::GUI::Style>& s);
 	};
 }
 
 Label::Label()
 {
+}
 
+void Label::style(const OOBase::SharedPtr<Indigo::Render::GUI::Style>& new_style)
+{
+	const OOBase::SharedPtr<Indigo::Render::GUI::Style>& old_style = Widget::style();
+	bool refresh = false;
+	if (!old_style || !new_style)
+		refresh = true;
+	else if (old_style->font() != new_style->font())
+		refresh = true;
+
+	Widget::style(new_style);
+
+	if (refresh)
+	{
+		OOBase::SharedPtr<Indigo::Render::Text> render_text;
+
+		if (!m_string.empty())
+		{
+			// Font change, reallocate text
+			OOBase::SharedPtr<Indigo::Render::Font> render_font = new_style->font();
+			if (render_font)
+			{
+				window()->make_current();
+
+				render_text = OOBase::allocate_shared<Indigo::Render::Text,OOBase::ThreadLocalAllocator>(render_font,m_string.c_str(),m_string.length());
+				if (!render_text)
+					LOG_ERROR(("Failed to allocate Text: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
+			}
+		}
+		render_text.swap(m_text);
+	}
 }
 
 glm::u16vec2 Label::ideal_size() const
@@ -82,15 +116,15 @@ bool Label::set_text(const OOBase::String* text)
 		window()->make_current();
 
 		// Font change, reallocate text
-		OOBase::SharedPtr<Indigo::Render::Font> render_font = style()->font();
-		if (!render_font)
-			LOG_ERROR_RETURN(("Label font not loaded"),false);
+		OOBase::SharedPtr<Indigo::Render::Font> render_font = Widget::style()->font();
+		if (render_font)
+		{
+			OOBase::SharedPtr<Indigo::Render::Text> render_text = OOBase::allocate_shared<Indigo::Render::Text,OOBase::ThreadLocalAllocator>(render_font,text->c_str(),text->length());
+			if (!render_text)
+				LOG_ERROR_RETURN(("Failed to allocate Text: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
-		OOBase::SharedPtr<Indigo::Render::Text> render_text = OOBase::allocate_shared<Indigo::Render::Text,OOBase::ThreadLocalAllocator>(render_font,text->c_str(),text->length());
-		if (!render_text)
-			LOG_ERROR_RETURN(("Failed to allocate Text: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
-
-		render_text.swap(m_text);
+			render_text.swap(m_text);
+		}
 	}
 	else
 	{
@@ -100,6 +134,8 @@ bool Label::set_text(const OOBase::String* text)
 		if (!m_text->text(text->c_str(),text->length()))
 			return false;
 	}
+
+	m_string = *text;
 	return true;
 }
 
@@ -113,7 +149,7 @@ void Label::draw(OOGL::State& glState, const glm::mat4& mvp)
 		glm::mat4 model = glm::translate(glm::mat4(1),glm::vec3(p.x,p.y,0.f));
 		model = glm::scale(model,glm::vec3(sz.x/m_text->length(),sz.y,0.f));
 
-		m_text->draw(glState,mvp * model,style()->foreground_colour());
+		m_text->draw(glState,mvp * model,Widget::style()->foreground_colour());
 	}
 }
 
