@@ -39,7 +39,7 @@ namespace Indigo
 		public:
 			MainWindow(Indigo::MainWindow* owner);
 
-			bool add_layer(const OOBase::SharedPtr<Layer>& layer);
+			OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>& layers() { return m_layers; }
 			
 			glm::u16vec2 size() const;
 

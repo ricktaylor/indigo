@@ -78,11 +78,6 @@ const OOBase::SharedPtr<OOGL::Window>& Indigo::Render::MainWindow::window() cons
 	return m_wnd;
 }
 
-bool Indigo::Render::MainWindow::add_layer(const OOBase::SharedPtr<Layer>& layer)
-{
-	return m_layers.push_back(layer);
-}
-
 void Indigo::Render::MainWindow::on_close(const OOGL::Window& win)
 {
 	raise_event(OOBase::make_delegate(m_owner,&Indigo::MainWindow::on_close));
@@ -142,7 +137,7 @@ bool Indigo::MainWindow::create(Application* app)
 		return false;
 	}
 
-	if (!m_top_layer.create(m_wnd,style))
+	if (!m_top_layer.create(m_wnd,style,0))
 		return false;
 
 	OOBase::SharedPtr<GUI::GridSizer> sizer = OOBase::allocate_shared<GUI::GridSizer>();
