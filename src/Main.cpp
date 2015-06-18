@@ -80,13 +80,9 @@ static int exit_failure(const char* fmt, ...)
 	return EXIT_FAILURE;
 }
 
-static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Table<OOBase::String,OOBase::String>& config_args)
+static bool load_config(OOBase::CmdArgs::options_t& options)
 {
 	int err = 0;
-
-	// Copy command line args
-	if (!config_args.insert(cmd_args.begin(),cmd_args.end()))
-		LOG_ERROR_RETURN(("Failed to copy command args: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 #if defined(_WIN32)
 	// Read from WIN32 registry
@@ -97,7 +93,7 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 
 	// Determine conf file
 	OOBase::String strFile;
-	if (!config_args.find("config-file",strFile))
+	if (!options.find("config-file",strFile))
 	{
 #if defined(HAVE_UNISTD_H)
 		if (access(".indigo.conf",F_OK) == 0)
@@ -141,7 +137,7 @@ static bool load_config(const OOBase::CmdArgs::results_t& cmd_args, OOBase::Tabl
 		OOBase::Logger::log(OOBase::Logger::Information,"Using configuration file: '%s'",rpath);
 
 		OOBase::ConfigFile::error_pos_t error = {0};
-		err = OOBase::ConfigFile::load(strFile.c_str(),config_args,&error);
+		err = OOBase::ConfigFile::load(strFile.c_str(),options,&error);
 		if (err == EINVAL)
 			LOG_ERROR_RETURN(("Failed read configuration file %s: Syntax error at line %lu, column %lu",rpath,(unsigned long)error.line,(unsigned long)error.col),false);
 		else if (err != ENOENT)
@@ -183,27 +179,28 @@ int main(int argc, const char* argv[])
 #endif
 
 	// Parse command line
-	OOBase::CmdArgs::results_t args;
+	OOBase::CmdArgs::options_t options;
+	OOBase::CmdArgs::arguments_t args;
 #if defined(_WIN32)
-	int err = cmd_args.parse(args);
+	int err = cmd_args.parse(options,args);
 #else
-	int err = cmd_args.parse(argc,argv,args);
+	int err = cmd_args.parse(argc,argv,options,args);
 #endif
 	if (err	!= 0)
 	{
 		OOBase::String strErr;
-		if (args.find("missing",strErr))
+		if (options.find("missing",strErr))
 			return exit_failure("Missing value for option %s\n",strErr.c_str());
-		else if (args.find("unknown",strErr))
+		else if (options.find("unknown",strErr))
 			return exit_failure("Unknown option %s\n",strErr.c_str());
 		else
 			return exit_failure("Failed to parse command line: %s\n",OOBase::system_error_text(err));
 	}
 
-	if (args.exists("debug"))
+	if (options.exists("debug"))
 		s_is_debug = true;
 
-	if (args.exists("help"))
+	if (options.exists("help"))
 		return help();
 
 	// Start the logger
@@ -240,10 +237,9 @@ int main(int argc, const char* argv[])
 #endif
 
 	// Load up our global configuration arguments
-	OOBase::Table<OOBase::String,OOBase::String> config_args;
-	if (!load_config(args,config_args))
+	if (!load_config(options))
 		return EXIT_FAILURE;
 
 	// Start our two main threads
-	return Indigo::start_render_thread(&Indigo::Application::run,config_args) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return Indigo::start_render_thread(&Indigo::Application::run,options,args) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

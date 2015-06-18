@@ -32,7 +32,7 @@ Indigo::Application::Application()
 {
 }
 
-bool Indigo::Application::start(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
+bool Indigo::Application::start(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
 {
 	//if (!showSplash())
 	//	return false;
@@ -115,10 +115,10 @@ bool Indigo::Application::show_menu()
 	return m_main_wnd.top_layer().visible(true);
 }
 
-bool Indigo::Application::run(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
+bool Indigo::Application::run(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
 {
 	Application app;
-	if (!app.start(config_args))
+	if (!app.start(options,args))
 		return false;
 
 	if (!Indigo::handle_events())

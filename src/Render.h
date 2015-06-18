@@ -27,7 +27,7 @@
 
 namespace Indigo
 {
-	bool start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args);
+	bool start_render_thread(bool (*logic_thread)(const OOBase::CmdArgs::options_t&,const OOBase::CmdArgs::arguments_t&), const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
 
 	bool render_call(bool (*fn)(void*), void* param);
 

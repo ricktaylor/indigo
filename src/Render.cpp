@@ -143,8 +143,9 @@ namespace
 	struct thread_info
 	{
 		OOBase::Event* m_started;
-		const OOBase::Table<OOBase::String,OOBase::String>* m_config;
-		bool (*m_fn)(const OOBase::Table<OOBase::String,OOBase::String>& args);
+		const OOBase::CmdArgs::options_t* m_options;
+		const OOBase::CmdArgs::arguments_t* m_args;
+		bool (*m_fn)(const OOBase::CmdArgs::options_t&,const OOBase::CmdArgs::arguments_t&);
 	};
 
 	struct render_call_info
@@ -165,7 +166,7 @@ static void on_glfw_error(int code, const char* message)
 	OOBase::Logger::log(OOBase::Logger::Error,"GLFW error %d: %s",code,message);
 }
 
-static bool draw_thread(const OOBase::Table<OOBase::String,OOBase::String>& config_args)
+static bool draw_thread(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
 {
 	OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator> vecWindows;
 	s_vecWindows = &vecWindows;
@@ -254,7 +255,7 @@ static int logic_thread_start(void* param)
 	ti.m_started = NULL;
 
 	// Run the logic loop
-	int err = (*ti.m_fn)(*ti.m_config) ? EXIT_SUCCESS : EXIT_FAILURE;
+	int err = (*ti.m_fn)(*ti.m_options,*ti.m_args) ? EXIT_SUCCESS : EXIT_FAILURE;
 
 	// Tell the render thread we have finished
 	if (render_queue.enqueue(NULL))
@@ -263,7 +264,7 @@ static int logic_thread_start(void* param)
 	return err;
 }
 
-bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase::String,OOBase::String>& args), const OOBase::Table<OOBase::String,OOBase::String>& config_args)
+bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::CmdArgs::options_t&,const OOBase::CmdArgs::arguments_t&), const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
 {
 	OOBase::Event started(false,false);
 
@@ -273,7 +274,8 @@ bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase
 
 	thread_info ti;
 	ti.m_started = &started;
-	ti.m_config = &config_args;
+	ti.m_options = &options;
+	ti.m_args = &args;
 	ti.m_fn = logic_thread;
 
 	// Force creation of event queue here
@@ -288,7 +290,7 @@ bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::Table<OOBase
 	started.wait();
 
 	// Now run the draw_thread (it must be the main thread)
-	bool res = draw_thread(config_args);
+	bool res = draw_thread(options,args);
 	if (res)
 		s_event_queue->enqueue(NULL,reinterpret_cast<void*>(1));
 

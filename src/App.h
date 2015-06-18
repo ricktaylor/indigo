@@ -29,7 +29,7 @@ namespace Indigo
 	class Application
 	{
 	public:
-		static bool run(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
+		static bool run(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
 
 		void on_main_wnd_close();
 
@@ -39,7 +39,7 @@ namespace Indigo
 
 		Application();
 
-		bool start(const OOBase::Table<OOBase::String,OOBase::String>& config_args);
+		bool start(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
 		bool create_mainwnd();
 
 		bool show_menu();
