@@ -25,17 +25,42 @@
 #include "Font.h"
 #include "GUILabel.h"
 #include "GUIGridSizer.h"
+#include "LuaResource.h"
+
+
+#include <setjmp.h>
+
+namespace
+{
+	jmp_buf panic_jmp_buf;
+
+	int at_panic(lua_State *L)
+	{
+		LOG_ERROR(("lua_panic"));
+		longjmp(panic_jmp_buf,1);
+		return 0;
+	}
+}
 
 bool showSplash();
 
-Indigo::Application::Application()
+Indigo::Application::Application() : m_lua_state(NULL)
 {
+}
+
+Indigo::Application::~Application()
+{
+	if (m_lua_state)
+		lua_close(m_lua_state);
 }
 
 bool Indigo::Application::start(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
 {
 	//if (!showSplash())
 	//	return false;
+
+	if (!create_mainwnd())
+		return false;
 
 	/*OOBase::String strZip;
 	if (!config_args.find("$1",strZip))
@@ -45,7 +70,38 @@ bool Indigo::Application::start(const OOBase::CmdArgs::options_t& options, const
 	if (!zip.open(strZip.c_str()))
 		return false;*/
 
-	return create_mainwnd() && show_menu();
+	if (!start_lua(options,args))
+		return false;
+
+	return show_menu();
+}
+
+bool Indigo::Application::start_lua(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
+{
+	m_lua_state = m_lua_allocator.lua_newstate();
+	if (!m_lua_state)
+		LOG_ERROR_RETURN(("Failed to create Lua state: %s", OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+	bool ret = true;
+	Lua::ResourceLoader loader(static_resources(),"main.lua");
+
+	lua_CFunction old_panic = lua_atpanic(m_lua_state,&at_panic);
+	if (!setjmp(panic_jmp_buf))
+	{
+		luaL_openlibs(m_lua_state);
+
+		if (loader.lua_load(m_lua_state) != LUA_OK)
+		{
+			LOG_ERROR(("Failed to load main.lua"));
+			ret = false;
+		}
+	}
+	else
+		ret = false;
+
+	lua_atpanic(m_lua_state,old_panic);
+
+	return ret;
 }
 
 bool Indigo::Application::create_mainwnd()

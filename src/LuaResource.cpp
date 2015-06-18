@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2014 Rick Taylor
+// Copyright (C) 2015 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,41 +19,36 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_APP_H_INCLUDED
-#define INDIGO_APP_H_INCLUDED
+#include "LuaResource.h"
 
-#include "MainWindow.h"
-#include "LuaAllocator.h"
-
-namespace Indigo
+Indigo::Lua::ResourceLoader::ResourceLoader(OOGL::ResourceBundle& res, const char* name) :
+		m_res(res),
+		m_name(name),
+		m_offset(0)
 {
-	class Application
-	{
-	public:
-		static bool run(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
-
-		void on_main_wnd_close();
-
-	private:
-		MainWindow m_main_wnd;
-		Lua::Allocator m_lua_allocator;
-		lua_State* m_lua_state;
-
-
-		OOBase::SharedPtr<GUI::Panel> m_start_menu;
-
-		Application();
-		~Application();
-
-		bool start(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
-		bool start_lua(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
-
-		bool create_mainwnd();
-
-		bool show_menu();
-	};
-
-	OOGL::ResourceBundle& static_resources();
 }
 
-#endif // INDIGO_APP_H_INCLUDED
+int Indigo::Lua::ResourceLoader::lua_load(lua_State* L, const char* mode)
+{
+	return ::lua_load(L,&reader,this,m_name,mode);
+}
+
+const char* Indigo::Lua::ResourceLoader::reader(lua_State* L, void* data, size_t* size)
+{
+	return static_cast<ResourceLoader*>(data)->read(L,*size);
+}
+
+const char* Indigo::Lua::ResourceLoader::read(lua_State* L, size_t& size)
+{
+	const char* ret = NULL;
+	size_t len = m_res.size(m_name);
+	if (len)
+	{
+		size = len - m_offset;
+		if (size)
+			ret = static_cast<const char*>(m_res.load(m_name,m_offset,len - m_offset));
+
+		m_offset += size;
+	}
+	return ret;
+}

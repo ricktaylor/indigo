@@ -55,6 +55,13 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+extern "C"
+{
+	#include "../3rdparty/lua/src/lua.h"
+	#include "../3rdparty/lua/src/lauxlib.h"
+	#include "../3rdparty/lua/src/lualib.h"
+}
+
 namespace Indigo
 {
 	bool is_debug();

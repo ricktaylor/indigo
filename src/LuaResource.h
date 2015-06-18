@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2014 Rick Taylor
+// Copyright (C) 2015 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,41 +19,33 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_APP_H_INCLUDED
-#define INDIGO_APP_H_INCLUDED
+#ifndef INDIGO_LUARESOURCE_H_INCLUDED
+#define INDIGO_LUARESOURCE_H_INCLUDED
 
-#include "MainWindow.h"
-#include "LuaAllocator.h"
+#include "Common.h"
+
+#include "../lib/Resource.h"
 
 namespace Indigo
 {
-	class Application
+	namespace Lua
 	{
-	public:
-		static bool run(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
+		class ResourceLoader
+		{
+		public:
+			ResourceLoader(OOGL::ResourceBundle& res, const char* name);
 
-		void on_main_wnd_close();
+			int lua_load(lua_State* L, const char* mode = NULL);
 
-	private:
-		MainWindow m_main_wnd;
-		Lua::Allocator m_lua_allocator;
-		lua_State* m_lua_state;
+		private:
+			OOGL::ResourceBundle& m_res;
+			const char* m_name;
+			size_t m_offset;
 
-
-		OOBase::SharedPtr<GUI::Panel> m_start_menu;
-
-		Application();
-		~Application();
-
-		bool start(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
-		bool start_lua(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
-
-		bool create_mainwnd();
-
-		bool show_menu();
-	};
-
-	OOGL::ResourceBundle& static_resources();
+			static const char* reader(lua_State* L, void* data, size_t* size);
+			const char* read(lua_State* L, size_t& size);
+		};
+	}
 }
 
-#endif // INDIGO_APP_H_INCLUDED
+#endif // INDIGO_LUARESOURCE_H_INCLUDED

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2014 Rick Taylor
+// Copyright (C) 2015 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,41 +19,21 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_APP_H_INCLUDED
-#define INDIGO_APP_H_INCLUDED
-
-#include "MainWindow.h"
 #include "LuaAllocator.h"
 
-namespace Indigo
+lua_State* Indigo::Lua::Allocator::lua_newstate()
 {
-	class Application
-	{
-	public:
-		static bool run(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
-
-		void on_main_wnd_close();
-
-	private:
-		MainWindow m_main_wnd;
-		Lua::Allocator m_lua_allocator;
-		lua_State* m_lua_state;
-
-
-		OOBase::SharedPtr<GUI::Panel> m_start_menu;
-
-		Application();
-		~Application();
-
-		bool start(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
-		bool start_lua(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
-
-		bool create_mainwnd();
-
-		bool show_menu();
-	};
-
-	OOGL::ResourceBundle& static_resources();
+	return ::lua_newstate(&alloc,this);
 }
 
-#endif // INDIGO_APP_H_INCLUDED
+void* Indigo::Lua::Allocator::alloc(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+	void* ret = NULL;
+	Allocator* pThis = static_cast<Allocator*>(ud);
+	if (!nsize)
+		pThis->m_allocator.free(ptr);
+	else
+		ret = pThis->m_allocator.reallocate(ptr,nsize,16);
+	return ret;
+}
+

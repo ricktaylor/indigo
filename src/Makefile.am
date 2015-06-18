@@ -31,6 +31,9 @@ bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 %.frag.h: ../resources/%.frag bin2c
 	$(AM_V_GEN)./bin2c "$<" "$@" "$*_frag"
 	
+%.lua.h: ../resources/%.lua bin2c
+	$(AM_V_GEN)./bin2c "$<" "$@" "$*_lua"
+	
 BUILT_SOURCES = \
 	Font_8bit.vert.h \
 	Font_8bit.frag.h \
@@ -38,7 +41,8 @@ BUILT_SOURCES = \
 	NinePatch.frag.h \
 	Titillium-Regular_0.png.h \
 	Titillium-Regular.fnt.h \
-	menu_border.png.h
+	menu_border.png.h \
+	main.lua.h
 	
 indigo_SOURCES = \
 	../lib/Window.cpp \
@@ -63,6 +67,8 @@ indigo_SOURCES = \
 	GUILabel.cpp \
 	GUISizer.cpp \
 	GUIGridSizer.cpp \
+	LuaAllocator.cpp \
+	LuaResource.cpp \
 	Image.cpp \
 	NinePatch.cpp \
 	Font.cpp \

@@ -60,6 +60,7 @@ namespace
 		{ "NinePatch.frag", IDR_NINEPATCH_FS, RT_RCDATA, NULL, NULL, 0 },
 		{ "Font_8bit.vert", IDR_FONT_8BIT_VS, RT_RCDATA, NULL, NULL, 0 },
 		{ "Font_8bit.frag", IDR_FONT_8BIT_FS, RT_RCDATA, NULL, NULL, 0 },
+		{ "main.lua", IDR_MAIN_LUA, RT_RCDATA, NULL, NULL, 0 },
 	};
 
 	const RES* find_resource(const char* name)
@@ -117,6 +118,7 @@ namespace
 	#include "NinePatch.frag.h"
 	#include "Font_8bit.vert.h"
 	#include "Font_8bit.frag.h"
+	#include "main.lua.h"
 
 	struct RES
 	{
@@ -132,7 +134,8 @@ namespace
 		{ "NinePatch.vert", s_NinePatch_vert, sizeof(s_NinePatch_vert) },
 		{ "NinePatch.frag", s_NinePatch_frag, sizeof(s_NinePatch_frag) },
 		{ "Font_8bit.vert", s_Font_8bit_vert, sizeof(s_Font_8bit_vert) },
-		{ "Font_8bit.frag", s_Font_8bit_frag, sizeof(s_Font_8bit_frag) }
+		{ "Font_8bit.frag", s_Font_8bit_frag, sizeof(s_Font_8bit_frag) },
+		{ "main.lua", s_main_lua, sizeof(s_main_lua) }
 	};
 
 	const RES* find_resource(const char* name)
