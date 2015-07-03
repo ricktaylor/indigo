@@ -1,12 +1,12 @@
 @SET_MAKE@
 
-# Lua 5.3.0 automake
+# Lua 5.3.1 automake
 noinst_LTLIBRARIES = liblua.la
 
 liblua_la_CPPFLAGS = -DLUA_USE_LINUX
 liblua_la_CFLAGS = $(PTHREAD_CFLAGS) $(AM_CFLAGS)
 liblua_la_LDFLAGS = $(PTHREAD_LIBS)
-liblua_la_LIBADD = -lrt -lreadline -ldl -lm
+liblua_la_LIBADD = -lrt -ldl -lm
 
 liblua_la_SOURCES = \
 	lua/src/lua.c \

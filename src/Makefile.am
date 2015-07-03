@@ -42,7 +42,7 @@ BUILT_SOURCES = \
 	Titillium-Regular_0.png.h \
 	Titillium-Regular.fnt.h \
 	menu_border.png.h \
-	main.lua.h
+	init.lua.h
 	
 indigo_SOURCES = \
 	../lib/Window.cpp \

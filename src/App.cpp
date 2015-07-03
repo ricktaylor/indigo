@@ -27,7 +27,6 @@
 #include "GUIGridSizer.h"
 #include "LuaResource.h"
 
-
 #include <setjmp.h>
 
 namespace
@@ -36,7 +35,7 @@ namespace
 
 	int at_panic(lua_State *L)
 	{
-		LOG_ERROR(("lua_panic"));
+		LOG_ERROR(("Lua error: %s",lua_tostring(L,-1)));
 		longjmp(panic_jmp_buf,1);
 		return 0;
 	}
@@ -73,7 +72,9 @@ bool Indigo::Application::start(const OOBase::CmdArgs::options_t& options, const
 	if (!start_lua(options,args))
 		return false;
 
-	return show_menu();
+	//return show_menu();
+
+	return true;
 }
 
 bool Indigo::Application::start_lua(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
@@ -83,16 +84,20 @@ bool Indigo::Application::start_lua(const OOBase::CmdArgs::options_t& options, c
 		LOG_ERROR_RETURN(("Failed to create Lua state: %s", OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 	bool ret = true;
-	Lua::ResourceLoader loader(static_resources(),"main.lua");
+	Lua::ResourceLoader loader(static_resources(),"init.lua");
 
 	lua_CFunction old_panic = lua_atpanic(m_lua_state,&at_panic);
 	if (!setjmp(panic_jmp_buf))
 	{
 		luaL_openlibs(m_lua_state);
 
-		if (loader.lua_load(m_lua_state) != LUA_OK)
+		int r = loader.lua_load(m_lua_state);
+		if (r == LUA_OK)
+			r = lua_pcall(m_lua_state,0,LUA_MULTRET,0);
+
+		if (r != LUA_OK)
 		{
-			LOG_ERROR(("Failed to load main.lua"));
+			LOG_ERROR(("Failed to load init.lua"));
 			ret = false;
 		}
 	}
