@@ -72,9 +72,9 @@ bool Indigo::Application::start(const OOBase::CmdArgs::options_t& options, const
 	if (!start_lua(options,args))
 		return false;
 
-	//return show_menu();
+	show_menu();
 
-	return true;
+	return  m_main_wnd.show();
 }
 
 bool Indigo::Application::start_lua(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
@@ -168,7 +168,7 @@ bool Indigo::Application::create_mainwnd()
 			!m_main_wnd.top_layer().layout())
 		return false;
 
-	return m_main_wnd.show();
+	return true;
 }
 
 bool Indigo::Application::show_menu()

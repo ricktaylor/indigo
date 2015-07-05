@@ -86,7 +86,7 @@ static bool load_config(OOBase::CmdArgs::options_t& options)
 
 #if defined(_WIN32)
 	// Read from WIN32 registry
-	err = OOBase::ConfigFile::load_registry(HKEY_LOCAL_MACHINE,"Software\\Indigo",config_args);
+	err = OOBase::ConfigFile::load_registry(HKEY_LOCAL_MACHINE,"Software\\Indigo",options);
 	if (err && err != ERROR_FILE_NOT_FOUND)
 		LOG_ERROR_RETURN(("Failed read system registry: %s",OOBase::system_error_text(err)),false);
 #endif
@@ -209,7 +209,7 @@ int main(int argc, const char* argv[])
 	if (s_is_debug)
 	{
 		OOBase::Logger::connect_debug_log();
-		if (args.exists("console") && AllocConsole())
+		if (options.exists("console") && AllocConsole())
 		{
 			OOBase::Logger::connect_stderr_log();
 			OOBase::Logger::connect_stdout_log();
