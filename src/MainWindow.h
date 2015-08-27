@@ -64,6 +64,13 @@ namespace Indigo
 		friend class Render::MainWindow;
 		
 	public:
+		static int luaopen(lua_State *L);
+
+	private:
+		static int finalize(lua_State* L);
+		static int load(lua_State* L);
+		static int close(lua_State* L);
+
 		MainWindow();
 		~MainWindow();
 
@@ -86,6 +93,8 @@ namespace Indigo
 		void do_destroy();
 		void on_close();
 	};
+
+
 }
 
 #endif // INDIGO_MAINWINDOW_H_INCLUDED

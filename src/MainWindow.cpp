@@ -31,6 +31,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#define WINDOW_TYPE_NAME "Indigo::Window"
+
 Indigo::Render::MainWindow::MainWindow(Indigo::MainWindow* owner) : m_owner(owner)
 {
 }
@@ -205,4 +207,59 @@ void Indigo::MainWindow::do_show()
 const OOBase::SharedPtr<OOGL::Window>& Indigo::MainWindow::window() const
 {
 	return m_wnd->window();
+}
+
+int Indigo::MainWindow::load(lua_State* L)
+{
+	void* p = lua_newuserdata(L,sizeof(MainWindow));
+	if (p)
+	{
+		MainWindow* wnd = ::new (p) MainWindow();
+		luaL_setmetatable(L,WINDOW_TYPE_NAME);
+
+		bool ret = false;
+		if (!render_call(OOBase::make_delegate(wnd,&MainWindow::do_create),&ret) || !ret)
+		{
+			lua_pushnil(L);
+			return 1;
+		}
+
+
+	}
+	return 1;
+}
+
+int Indigo::MainWindow::finalize(lua_State* L)
+{
+	MainWindow* wnd = static_cast<MainWindow*>(luaL_testudata(L,1,WINDOW_TYPE_NAME));
+	if (wnd)
+		wnd->~MainWindow();
+	return 0;
+}
+
+int Indigo::MainWindow::luaopen(lua_State* L)
+{
+	static const luaL_Reg window_statics[] =
+	{
+		{"load", &MainWindow::load},
+		{ NULL, NULL }
+	};
+
+	static const luaL_Reg window_members[] =
+	{
+		{"__gc", &MainWindow::finalize},
+		{"close", &MainWindow::close},
+		{ NULL, NULL }
+	};
+
+	luaL_newlib(L,window_statics);
+
+	// Set up WINDOW_TYPE_NAME metatable
+	luaL_newmetatable(L, WINDOW_TYPE_NAME);
+	lua_pushvalue(L, -1);  /* push metatable */
+	lua_setfield(L, -2, "__index");  /* metatable.__index = metatable */
+	luaL_setfuncs(L, window_members, 0);  /* add methods to new metatable */
+	lua_pop(L, 1);  /* pop new metatable */
+
+	return 1;
 }

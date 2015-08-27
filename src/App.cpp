@@ -43,7 +43,7 @@ namespace
 
 bool showSplash();
 
-Indigo::Application::Application() : m_lua_state(NULL)
+/*Indigo::Application::Application() : m_lua_state(NULL)
 {
 }
 
@@ -61,7 +61,7 @@ bool Indigo::Application::start(const OOBase::CmdArgs::options_t& options, const
 	if (!create_mainwnd())
 		return false;
 
-	/*OOBase::String strZip;
+*/	/*OOBase::String strZip;
 	if (!config_args.find("$1",strZip))
 		LOG_ERROR_RETURN(("No zip file"),false);
 
@@ -69,7 +69,7 @@ bool Indigo::Application::start(const OOBase::CmdArgs::options_t& options, const
 	if (!zip.open(strZip.c_str()))
 		return false;*/
 
-	if (!start_lua(options,args))
+/*	if (!start_lua(options,args))
 		return false;
 
 	show_menu();
@@ -193,4 +193,65 @@ void Indigo::Application::on_main_wnd_close()
 {
 	OOBase::Logger::log(OOBase::Logger::Information,"Quit");
 	quit_loop();
+}
+*/
+
+
+
+
+namespace
+{
+	const luaL_Reg indigolibs[] =
+	{
+		{"window", &Indigo::MainWindow::luaopen},
+		{ NULL, NULL }
+	};
+}
+
+bool Indigo::Application::alt_run(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
+{
+	Lua::Allocator lua_allocator;
+	lua_State* lua_state = lua_allocator.lua_newstate();
+	if (!lua_state)
+		LOG_ERROR_RETURN(("Failed to create Lua state: %s", OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+	bool ret = true;
+	Lua::ResourceLoader loader(static_resources(),"init.lua");
+
+	lua_CFunction old_panic = lua_atpanic(lua_state,&at_panic);
+	if (!setjmp(panic_jmp_buf))
+	{
+		luaL_openlibs(lua_state);
+
+		/* "require" functions from 'indigolibs' and set results to global table */
+		for (const luaL_Reg *lib = indigolibs; lib->func; lib++)
+		{
+			luaL_requiref(lua_state, lib->name, lib->func, 1);
+			lua_pop(lua_state, 1); /* remove lib */
+		}
+
+		int r = loader.lua_load(lua_state);
+		if (r == LUA_OK)
+			r = lua_pcall(lua_state,0,LUA_MULTRET,0);
+
+		if (r != LUA_OK)
+		{
+			LOG_ERROR(("Failed to load init.lua"));
+			ret = false;
+		}
+		else
+		{
+			// Wait for quit
+			ret = Indigo::handle_events();
+		}
+	}
+	else
+		ret = false;
+
+	lua_atpanic(lua_state,old_panic);
+
+	lua_close(lua_state);
+	lua_state = NULL;
+
+	return ret;
 }

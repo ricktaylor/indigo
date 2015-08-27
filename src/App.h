@@ -32,6 +32,8 @@ namespace Indigo
 	public:
 		static bool run(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
 
+		static bool alt_run(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
+
 		void on_main_wnd_close();
 
 	private:

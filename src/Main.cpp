@@ -241,5 +241,5 @@ int main(int argc, const char* argv[])
 		return EXIT_FAILURE;
 
 	// Start our two main threads
-	return Indigo::start_render_thread(&Indigo::Application::run,options,args) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return Indigo::start_render_thread(&Indigo::Application::alt_run,options,args) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
