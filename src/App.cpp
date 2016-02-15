@@ -19,15 +19,49 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "Common.h"
 #include "App.h"
-#include "Render.h"
-#include "ZipResource.h"
+#include "Thread.h"
+#include "UILayer.h"
+
+void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args)
+{
+	m_options = options;
+	m_args = args;
+	m_wnd = wnd;
+}
+
+void Indigo::Application::stop()
+{
+
+	thread_pipe()->close();
+}
+
+void Indigo::Application::on_close()
+{
+	m_wnd.reset();
+}
+
+
+/*#include "ZipResource.h"
 #include "Font.h"
 #include "GUILabel.h"
 #include "GUIGridSizer.h"
+#include "LuaAllocator.h"
 #include "LuaResource.h"
+#include "Pipe.h"
 
 #include <setjmp.h>
+
+namespace Indigo
+{
+	namespace Application
+	{
+		bool run(const OOBase::SharedPtr<Pipe>& ptrPipe, void* ctx);
+	}
+
+	OOGL::ResourceBundle& static_resources();
+}
 
 namespace
 {
@@ -39,11 +73,32 @@ namespace
 		longjmp(panic_jmp_buf,1);
 		return 0;
 	}
+
+	class Application
+	{
+	public:
+		static bool run(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
+
+		void on_main_wnd_close();
+
+	private:
+		void* m_wnd;
+		Indigo::Lua::Allocator m_lua_allocator;
+		lua_State* m_lua_state;
+
+		Application();
+		~Application();
+
+		bool start(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
+		bool start_lua(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
+
+		bool create_mainwnd();
+
+		bool show_menu();
+	};
 }
 
-bool showSplash();
-
-/*Indigo::Application::Application() : m_lua_state(NULL)
+Indigo::Application::Application() : m_lua_state(NULL)
 {
 }
 
@@ -194,21 +249,18 @@ void Indigo::Application::on_main_wnd_close()
 	OOBase::Logger::log(OOBase::Logger::Information,"Quit");
 	quit_loop();
 }
-*/
-
-
 
 
 namespace
 {
 	const luaL_Reg indigolibs[] =
 	{
-		{"window", &Indigo::MainWindow::luaopen},
+//		{"window", &Indigo::Window::luaopen},
 		{ NULL, NULL }
 	};
 }
 
-bool Indigo::Application::alt_run(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
+bool Indigo::Application::run(const OOBase::SharedPtr<Pipe>& ptrPipe, void* ctx)
 {
 	Lua::Allocator lua_allocator;
 	lua_State* lua_state = lua_allocator.lua_newstate();
@@ -223,11 +275,11 @@ bool Indigo::Application::alt_run(const OOBase::CmdArgs::options_t& options, con
 	{
 		luaL_openlibs(lua_state);
 
-		/* "require" functions from 'indigolibs' and set results to global table */
+		// "require" functions from 'indigolibs' and set results to global table
 		for (const luaL_Reg *lib = indigolibs; lib->func; lib++)
 		{
 			luaL_requiref(lua_state, lib->name, lib->func, 1);
-			lua_pop(lua_state, 1); /* remove lib */
+			lua_pop(lua_state, 1); // remove lib
 		}
 
 		int r = loader.lua_load(lua_state);
@@ -242,7 +294,7 @@ bool Indigo::Application::alt_run(const OOBase::CmdArgs::options_t& options, con
 		else
 		{
 			// Wait for quit
-			ret = Indigo::handle_events();
+			ret = ptrPipe->poll();
 		}
 	}
 	else
@@ -255,3 +307,5 @@ bool Indigo::Application::alt_run(const OOBase::CmdArgs::options_t& options, con
 
 	return ret;
 }
+
+*/

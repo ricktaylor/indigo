@@ -19,7 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "GUIWidget.h"
+#include "../old/GUIWidget.h"
+
 #include "Render.h"
 
 Indigo::Render::GUI::Widget::Widget() : m_visible(false), m_enabled(true), m_focused(false), m_hilighted(false), m_max_size(-1)

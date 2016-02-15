@@ -41,6 +41,8 @@
 #include <OOBase/Delegate.h>
 #include <OOBase/File.h>
 #include <OOBase/HashTable.h>
+#include <OOBase/Singleton.h>
+#include <OOBase/TLSSingleton.h>
 
 #if defined(_MSC_VER)
 	//#include "Config_msvc.h"
@@ -55,12 +57,12 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-extern "C"
+/*extern "C"
 {
 	#include "../3rdparty/lua/src/lua.h"
 	#include "../3rdparty/lua/src/lauxlib.h"
 	#include "../3rdparty/lua/src/lualib.h"
-}
+}*/
 
 namespace Indigo
 {

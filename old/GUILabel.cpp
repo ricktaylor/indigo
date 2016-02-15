@@ -19,7 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "GUILabel.h"
+#include "../old/GUILabel.h"
+
 #include "Render.h"
 #include "Font.h"
 #include "NinePatch.h"

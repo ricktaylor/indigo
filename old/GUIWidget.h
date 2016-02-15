@@ -22,7 +22,7 @@
 #ifndef INDIGO_GUIWIDGET_H_INCLUDED
 #define INDIGO_GUIWIDGET_H_INCLUDED
 
-#include "GUIStyle.h"
+#include "../old/GUIStyle.h"
 
 namespace Indigo
 {

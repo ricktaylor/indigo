@@ -22,7 +22,7 @@
 #ifndef INDIGO_GUIGRIDSIZER_H_INCLUDED
 #define INDIGO_GUIGRIDSIZER_H_INCLUDED
 
-#include "GUISizer.h"
+#include "../old/GUISizer.h"
 
 namespace Indigo
 {

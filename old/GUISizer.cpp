@@ -19,8 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "GUISizer.h"
-#include "GUIPanel.h"
+#include "../old/GUISizer.h"
+
+#include "../old/GUIPanel.h"
 #include "Render.h"
 
 Indigo::Render::GUI::Sizer::Sizer()

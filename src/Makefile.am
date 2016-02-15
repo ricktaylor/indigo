@@ -54,30 +54,36 @@ indigo_SOURCES = \
 	../lib/BufferObject.cpp \
 	../lib/VertexArrayObject.cpp \
 	../lib/Image.cpp \
+	Pipe.cpp \
+	Thread.cpp \
 	StaticResources.cpp \
 	ZipResource.cpp \
 	Render.cpp \
-	App.cpp \
 	Main.cpp \
-	MainWindow.cpp \
-	GUIStyle.cpp \
-	GUIWidget.cpp \
-	GUIPanel.cpp \
-	GUILayer.cpp \
-	GUILabel.cpp \
-	GUISizer.cpp \
-	GUIGridSizer.cpp \
-	LuaAllocator.cpp \
-	LuaResource.cpp \
-	Image.cpp \
-	NinePatch.cpp \
-	Font.cpp \
-	Splash.cpp
+	Window.cpp \
+	UILayer.cpp \
+	App.cpp \
+	NinePatch.cpp
+	
+	
+#	Font.cpp
+#	Image.cpp \
+#	GUIStyle.cpp \
+#	GUIWidget.cpp \
+#	GUIPanel.cpp \
+#	GUILayer.cpp \
+#	GUILabel.cpp \
+#	GUISizer.cpp \
+#	GUIGridSizer.cpp \
+#	LuaAllocator.cpp \
+#	LuaResource.cpp \
+#	Splash.cpp
 		
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \
-	@top_builddir@/3rdparty/liblua.la \
 	@top_builddir@/3rdparty/glfw/src/libglfw3.a
+	
+#	@top_builddir@/3rdparty/liblua.la 
 	
 indigo_LDADD += -lGL
 

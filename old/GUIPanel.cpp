@@ -19,7 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "GUIPanel.h"
+#include "../old/GUIPanel.h"
+
 #include "Render.h"
 
 Indigo::Render::GUI::Panel::Panel() : m_style_flags(0)

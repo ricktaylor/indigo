@@ -19,146 +19,33 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "Common.h"
 #include "Render.h"
-#include "../lib/State.h"
-#include "../lib/StateFns.h"
+#include "Window.h"
+#include "App.h"
+#include "Thread.h"
 
 #include <stdlib.h>
 
+namespace Indigo
+{
+	bool run_render_loop(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
+
+	void render_init(Pipe* const pipe);
+}
+
 namespace
 {
-	class Queue
-	{
-	public:
-		typedef bool (*callback_t)(void* p);
+	typedef OOBase::TLSSingleton<OOBase::SharedPtr<Indigo::Pipe> > RENDER_PIPE;
+}
 
-		bool enqueue(callback_t callback, void* param = NULL)
-		{
-			OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
+const OOBase::SharedPtr<Indigo::Pipe>& Indigo::render_pipe()
+{
+	OOBase::SharedPtr<Indigo::Pipe>& pipe = RENDER_PIPE::instance();
+	if (!pipe)
+		pipe = thread_pipe()->open("render");
 
-			if (!m_queue.push(Item(callback,param)))
-				LOG_ERROR_RETURN(("Failed to enqueue command: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
-
-			m_cond.signal();
-			return true;
-		}
-
-		void swap(Queue& rhs)
-		{
-			OOBase::swap(m_lock,rhs.m_lock);
-			OOBase::swap(m_cond,rhs.m_cond);
-			OOBase::swap(m_queue,rhs.m_queue);
-		}
-
-	protected:
-		OOBase::Condition::Mutex m_lock;
-		OOBase::Condition        m_cond;
-
-		struct Item
-		{
-			Item() : m_callback(NULL), m_param(NULL)
-			{}
-
-			Item(callback_t c, void* p) : m_callback(c), m_param(p)
-			{}
-
-			callback_t m_callback;
-			void*      m_param;
-		};
-
-		OOBase::Queue<Item,OOBase::ThreadLocalAllocator> m_queue;
-	};
-
-	class EventQueue : public Queue
-	{
-	public:
-		bool dequeue()
-		{
-			OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
-			for (;;)
-			{
-				while (m_queue.empty())
-					m_cond.wait(m_lock);
-
-				for (Item item;m_queue.pop(&item);)
-				{
-					guard.release();
-
-					// NULL callback means response
-					if (!item.m_callback)
-						return item.m_param == reinterpret_cast<void*>(1);
-
-					if (!(*item.m_callback)(item.m_param))
-						break;
-
-					guard.acquire();
-				}
-			}
-			return false;
-		}
-	};
-
-	class RenderQueue : public Queue
-	{
-	public:
-		bool dequeue(bool& stop, const OOBase::Timeout& timeout = OOBase::Timeout())
-		{
-			do
-			{
-				OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock);
-				while (m_queue.empty())
-				{
-					if (!m_cond.wait(m_lock,timeout))
-						return true;
-				}
-
-				// Get next buffer
-				for (Item item;m_queue.pop(&item);)
-				{
-					guard.release();
-
-					if (!item.m_callback)
-						stop = true;
-					else if (!(*item.m_callback)(item.m_param))
-						return false;
-
-					if (!guard.acquire(timeout))
-						return true;
-				}
-			}
-			while (!stop);
-
-			return true;
-		}
-	};
-
-#if !defined(NDEBUG)
-	static const OOBase::Thread* s_render_thread = NULL;
-#endif
-
-	static EventQueue* s_event_queue = NULL;
-	static RenderQueue* s_render_queue = NULL;
-	static OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>* s_vecWindows;
-
-	struct thread_info
-	{
-		OOBase::Event* m_started;
-		const OOBase::CmdArgs::options_t* m_options;
-		const OOBase::CmdArgs::arguments_t* m_args;
-		bool (*m_fn)(const OOBase::CmdArgs::options_t&,const OOBase::CmdArgs::arguments_t&);
-	};
-
-	struct render_call_info
-	{
-		Queue::callback_t m_fn;
-		void* m_param;
-	};
-
-	struct raise_event_thunk
-	{
-		void (*m_fn)(OOBase::CDRStream& stream);
-		OOBase::Buffer* m_buffer;
-	};
+	return pipe;
 }
 
 static void on_glfw_error(int code, const char* message)
@@ -166,10 +53,35 @@ static void on_glfw_error(int code, const char* message)
 	OOBase::Logger::log(OOBase::Logger::Error,"GLFW error %d: %s",code,message);
 }
 
-static bool draw_thread(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
+static OOBase::SharedPtr<Indigo::Pipe> start_logic_thread(Indigo::Pipe& pipe, OOBase::WeakPtr<OOGL::Window>& main_wnd, const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
 {
-	OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator> vecWindows;
-	s_vecWindows = &vecWindows;
+	OOBase::SharedPtr<Indigo::Pipe> logic_pipe;
+
+	// Create the frame window
+	OOBase::SharedPtr<Indigo::Window> wnd = OOBase::allocate_shared<Indigo::Window>();
+	if (!wnd)
+		LOG_ERROR(("Failed to create window: %s",OOBase::system_error_text()));
+	else
+	{
+		main_wnd = wnd->create();
+		if (main_wnd)
+		{
+			logic_pipe = Indigo::start_thread("logic");
+			if (logic_pipe)
+				logic_pipe->call(OOBase::make_delegate(Indigo::App::instance_ptr(),&Indigo::Application::start),wnd,&options,&args);
+		}
+	}
+
+	return logic_pipe;
+}
+
+bool Indigo::run_render_loop(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
+{
+	static const float sixty_fps = (1.f / 60) * 1000000;
+
+	// Create render comms pipe
+	Indigo::Pipe pipe("render");
+	render_init(&pipe);
 
 	// Not sure if we need to set this first...
 	glfwSetErrorCallback(&on_glfw_error);
@@ -180,198 +92,54 @@ static bool draw_thread(const OOBase::CmdArgs::options_t& options, const OOBase:
 	// Set defaults
 	glfwDefaultWindowHints();
 
-//	if (!Indigo::is_debug())
-//		glfwSwapInterval(1);
+	if (!Indigo::is_debug())
+		glfwSwapInterval(1);
 
-	// Loop blocking until we have windows
-	bool res = true;
-	bool stop = false;
-	OOBase::Clock draw_clock;
-	float draw_rate = 15000.f;
-	const float sixty_fps = (1.f / 60) * 1000000;
-	OOBase::Timeout wait;
-	while (res && !stop)
+	// Start the logic thread
+	OOBase::WeakPtr<OOGL::Window> main_wnd;
+	OOBase::SharedPtr<Indigo::Pipe> logic_pipe = start_logic_thread(pipe,main_wnd,options,args);
+	if (logic_pipe)
 	{
-		draw_clock.reset();
-
-		// Draw all windows
-		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
+		for (float draw_rate = 15000.f;;)
 		{
-			if (i->expired())
-				i = vecWindows.erase(i);
-			else
+			OOBase::Clock draw_clock;
+			OOBase::SharedPtr<OOGL::Window> wnd(main_wnd.lock());
+			if (!wnd)
+				break;
+
+			// Update animations
+
+
+			// Draw window
+			wnd->draw();
+
+			// Swap window (this collects events)
+			wnd->swap();
+
+			// Accumulate average draw rate
+			draw_rate = ((draw_rate*3) + draw_clock.microseconds()) / 4.f;
+			if (draw_rate > 15000.f)
+				draw_rate = 15000.f;
+
+			for (OOBase::Timeout wait(0,static_cast<unsigned int>(sixty_fps - draw_rate));!wait.has_expired();)
 			{
-				i->lock()->draw();
-				++i;
+				// Poll for UI events
+				glfwPollEvents();
+
+				// Drain render commands
+				pipe.drain();
 			}
 		}
 
-		// Update animations
-
-
-		// Accumulate average draw rate
-		draw_rate = ((draw_rate*3) + draw_clock.microseconds()) / 4.f;
-		if (draw_rate > 15000.f)
-			draw_rate = 15000.f;
-
-		wait.reset(0,static_cast<unsigned int>(sixty_fps - draw_rate));
-
-		// Get render commands
-		res = s_render_queue->dequeue(stop,wait);
-
-		// Poll for UI events
-		do
-		{
-			glfwPollEvents();
-		}
-		while (!wait.has_expired());
-
-		// Swap all windows (this collects events)
-		for (OOBase::Vector<OOBase::WeakPtr<OOGL::Window>,OOBase::ThreadLocalAllocator>::iterator i=vecWindows.begin();i;)
-		{
-			if (i->expired())
-				i = vecWindows.erase(i);
-			else
-			{
-				i->lock()->swap();
-				++i;
-			}
-		}
+		logic_pipe->call(OOBase::make_delegate(Indigo::App::instance_ptr(),&Indigo::Application::stop));
 	}
 
 	glfwTerminate();
 
-	return res;
-}
-
-static int logic_thread_start(void* param)
-{
-	RenderQueue render_queue;
-	s_render_queue = &render_queue;
-
-	// Signal we have started
-	thread_info ti = *reinterpret_cast<thread_info*>(param);
-	ti.m_started->set();
-	ti.m_started = NULL;
-
-	// Run the logic loop
-	int err = (*ti.m_fn)(*ti.m_options,*ti.m_args) ? EXIT_SUCCESS : EXIT_FAILURE;
-
-	// Tell the render thread we have finished
-	if (render_queue.enqueue(NULL))
-		s_event_queue->dequeue();
-
-	return err;
-}
-
-bool Indigo::start_render_thread(bool (*logic_thread)(const OOBase::CmdArgs::options_t&,const OOBase::CmdArgs::arguments_t&), const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
-{
-	OOBase::Event started(false,false);
-
-#if !defined(NDEBUG)
-	s_render_thread = OOBase::Thread::self();
-#endif
-
-	thread_info ti;
-	ti.m_started = &started;
-	ti.m_options = &options;
-	ti.m_args = &args;
-	ti.m_fn = logic_thread;
-
-	// Force creation of event queue here
-	EventQueue event_queue;
-	s_event_queue = &event_queue;
-
-	int err = 0;
-	OOBase::SharedPtr<OOBase::Thread> logic = OOBase::Thread::run(&logic_thread_start,&ti,err);
-	if (!logic)
-		LOG_ERROR_RETURN(("Failed to start thread: %s",OOBase::system_error_text(err)),false);
-
-	started.wait();
-
-	// Now run the draw_thread (it must be the main thread)
-	bool res = draw_thread(options,args);
-	if (res)
-		s_event_queue->enqueue(NULL,reinterpret_cast<void*>(1));
-
-	logic->join();
-
-	return res;
-}
-
-static bool make_render_call(void* param)
-{
-	struct render_call_info* rci = static_cast<struct render_call_info*>(param);
-
-	void* ret = (*rci->m_fn)(rci->m_param) ? reinterpret_cast<void*>(1) : static_cast<void*>(0);
-
-	return s_event_queue->enqueue(NULL,ret);
-}
-
-bool Indigo::render_call(bool (*fn)(void*), void* param)
-{
-#if !defined(NDEBUG)
-	assert(s_render_thread != OOBase::Thread::self());
-#endif
-
-	struct render_call_info rci;
-	rci.m_fn = fn;
-	rci.m_param = param;
-
-	if (!s_render_queue->enqueue(&make_render_call,&rci))
-		return false;
-
-	return s_event_queue->dequeue();
-}
-
-static bool raise_raw_event(bool (*fn)(void*), void* param)
-{
-	return s_event_queue->enqueue(fn,param);
-}
-
-static bool raise_event_cleanup(void* param)
-{
-	struct raise_event_thunk* ret = static_cast<struct raise_event_thunk*>(param);
-
-	ret->m_buffer->release();
-	OOBase::ThreadLocalAllocator::delete_free(ret);
-
 	return true;
 }
 
-static bool raise_event_i(void* param)
-{
-	struct raise_event_thunk* ret = static_cast<struct raise_event_thunk*>(param);
-
-	ret->m_buffer->addref();
-	OOBase::CDRStream stream(ret->m_buffer);
-	(*ret->m_fn)(stream);
-
-	return s_render_queue->enqueue(&raise_event_cleanup,ret);
-}
-
-bool Indigo::raise_event(void (*fn)(OOBase::CDRStream&), OOBase::CDRStream& stream)
-{
-#if !defined(NDEBUG)
-	assert(s_render_thread == OOBase::Thread::self());
-#endif
-
-	struct raise_event_thunk* ret = NULL;
-	OOBase::ThreadLocalAllocator::allocate_new(ret);
-	if (!ret)
-		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
-
-	ret->m_fn = fn;
-	ret->m_buffer = stream.buffer().addref();
-
-	if (!raise_raw_event(&raise_event_i,ret))
-	{
-		ret->m_buffer->release();
-		OOBase::ThreadLocalAllocator::free(ret);
-		return false;
-	}
-	return true;
-}
+/*
 
 bool Indigo::handle_events()
 {
@@ -392,3 +160,4 @@ bool Indigo::monitor_window(const OOBase::WeakPtr<OOGL::Window>& win)
 {
 	return s_vecWindows->push_back(win);
 }
+*/

@@ -19,7 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "GUIStyle.h"
+#include "../old/GUIStyle.h"
+
 #include "Render.h"
 
 Indigo::Render::GUI::Style::Style() : m_foreground_colour(1.f), m_border_colour(1.f), m_borders(0)

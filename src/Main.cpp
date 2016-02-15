@@ -19,8 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "App.h"
-#include "Render.h"
+#include "Common.h"
 
 #include <stdlib.h>
 #include <limits.h>
@@ -37,6 +36,11 @@
 #include <OOBase/Morton.h>
 
 static bool s_is_debug = false;
+
+namespace Indigo
+{
+	bool run_render_loop(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
+}
 
 bool Indigo::is_debug()
 {
@@ -241,5 +245,5 @@ int main(int argc, const char* argv[])
 		return EXIT_FAILURE;
 
 	// Start our two main threads
-	return Indigo::start_render_thread(&Indigo::Application::alt_run,options,args) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return Indigo::run_render_loop(options,args) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

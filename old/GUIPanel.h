@@ -22,8 +22,8 @@
 #ifndef INDIGO_GUIPANEL_H_INCLUDED
 #define INDIGO_GUIPANEL_H_INCLUDED
 
-#include "GUIWidget.h"
-#include "GUISizer.h"
+#include "../old/GUISizer.h"
+#include "../old/GUIWidget.h"
 #include "NinePatch.h"
 
 namespace Indigo

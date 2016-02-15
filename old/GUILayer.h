@@ -19,21 +19,30 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "LuaAllocator.h"
+#ifndef INDIGO_GUILAYER_H_INCLUDED
+#define INDIGO_GUILAYER_H_INCLUDED
 
-lua_State* Indigo::Lua::Allocator::lua_newstate()
+#include "../old/GUIPanel.h"
+
+namespace Indigo
 {
-	return ::lua_newstate(&alloc,this);
+	namespace Render
+	{
+		class Window;
+	}
+
+	namespace GUI
+	{
+		class Layer : public Panel
+		{
+		public:
+			bool create(OOBase::SharedPtr<Render::Window>& wnd, const OOBase::SharedPtr<Style>& style, size_t zorder);
+
+		private:
+			void do_create(bool* ret_val, OOBase::SharedPtr<Render::Window>* wnd, size_t zorder);
+			OOBase::SharedPtr<Render::GUI::Widget> create_render_widget();
+		};
+	}
 }
 
-void* Indigo::Lua::Allocator::alloc(void *ud, void *ptr, size_t osize, size_t nsize)
-{
-	void* ret = NULL;
-	Allocator* pThis = static_cast<Allocator*>(ud);
-	if (!nsize)
-		pThis->m_allocator.free(ptr);
-	else
-		ret = pThis->m_allocator.reallocate(ptr,nsize,16);
-	return ret;
-}
-
+#endif // INDIGO_GUILAYER_H_INCLUDED

@@ -19,8 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "GUIGridSizer.h"
-#include "GUIPanel.h"
+#include "../old/GUIGridSizer.h"
+
+#include "../old/GUIPanel.h"
 #include "Render.h"
 
 namespace

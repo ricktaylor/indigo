@@ -58,6 +58,10 @@ OOGL::Window::Window(int width, int height, const char* title, unsigned int styl
 				glfwSetWindowFocusCallback(m_glfw_window,&cb_on_focus);
 				glfwSetWindowIconifyCallback(m_glfw_window,&cb_on_iconify);
 				glfwSetWindowRefreshCallback(m_glfw_window,&cb_on_refresh);
+				glfwSetMouseButtonCallback(m_glfw_window,&cb_on_mouse_btn);
+				glfwSetCursorPosCallback(m_glfw_window,&cb_on_cursor_pos);
+				glfwSetCursorEnterCallback(m_glfw_window,&cb_on_cursor_enter);
+				glfwSetScrollCallback(m_glfw_window,&cb_on_mouse_wheel);
 				glfwSetCharModsCallback(m_glfw_window,&cb_on_character);
 				glfwSetKeyCallback(m_glfw_window,&cb_on_key);
 			}
@@ -117,36 +121,21 @@ void OOGL::Window::cb_on_move(GLFWwindow* window, int left, int top)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_moved)
-	{
-		// Make this context current
-		glfwMakeContextCurrent(pThis->m_glfw_window);
-
-		pThis->m_on_moved.invoke(*pThis,glm::u16vec2(left,top));
-	}
+		pThis->m_on_moved.invoke(*pThis,glm::ivec2(left,top));
 }
 
 void OOGL::Window::cb_on_size(GLFWwindow* window, int width, int height)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_sized)
-	{
-		// Make this context current
-		glfwMakeContextCurrent(pThis->m_glfw_window);
-
-		pThis->m_on_sized.invoke(*pThis,glm::u16vec2(width,height));
-	}
+		pThis->m_on_sized.invoke(*pThis,glm::uvec2(width,height));
 }
 
 void OOGL::Window::cb_on_close(GLFWwindow* window)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_close)
-	{
-		// Make this context current
-		glfwMakeContextCurrent(pThis->m_glfw_window);
-
 		pThis->m_on_close.invoke(*pThis);
-	}
 }
 
 void OOGL::Window::cb_on_focus(GLFWwindow* window, int focused)
@@ -173,12 +162,7 @@ void OOGL::Window::cb_on_character(GLFWwindow* window, unsigned int codepoint, i
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_character)
-	{
-		// Make this context current
-		glfwMakeContextCurrent(pThis->m_glfw_window);
-
 		pThis->m_on_character.invoke(*pThis,codepoint,mods);
-	}
 }
 
 void OOGL::Window::cb_on_key(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -186,12 +170,29 @@ void OOGL::Window::cb_on_key(GLFWwindow* window, int key, int scancode, int acti
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_keystroke)
 	{
-		// Make this context current
-		glfwMakeContextCurrent(pThis->m_glfw_window);
-
 		key_stroke_t keystroke = {key, scancode, action, mods};
 		pThis->m_on_keystroke.invoke(*pThis,keystroke);
 	}
+}
+
+void OOGL::Window::cb_on_mouse_wheel(GLFWwindow* window, double xoffset, double yoffset)
+{
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
+}
+
+void OOGL::Window::cb_on_cursor_enter(GLFWwindow* window, int entered)
+{
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
+}
+
+void OOGL::Window::cb_on_cursor_pos(GLFWwindow* window, double xpos, double ypos)
+{
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
+}
+
+void OOGL::Window::cb_on_mouse_btn(GLFWwindow* window, int button, int action, int mods)
+{
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 }
 
 bool OOGL::Window::valid() const
@@ -305,16 +306,16 @@ OOBase::Delegate2<void,const OOGL::Window&,OOGL::State&,OOBase::ThreadLocalAlloc
 	return prev;
 }
 
-OOBase::Delegate2<void,const OOGL::Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_sized(const OOBase::Delegate2<void,const Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator>& delegate)
+OOBase::Delegate2<void,const OOGL::Window&,const glm::uvec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_sized(const OOBase::Delegate2<void,const Window&,const glm::uvec2&,OOBase::ThreadLocalAllocator>& delegate)
 {
-	OOBase::Delegate2<void,const Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator> prev = m_on_sized;
+	OOBase::Delegate2<void,const Window&,const glm::uvec2&,OOBase::ThreadLocalAllocator> prev = m_on_sized;
 	m_on_sized = delegate;
 	return prev;
 }
 
-OOBase::Delegate2<void,const OOGL::Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_moved(const OOBase::Delegate2<void,const Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator>& delegate)
+OOBase::Delegate2<void,const OOGL::Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> OOGL::Window::on_moved(const OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator>& delegate)
 {
-	OOBase::Delegate2<void,const Window&,const glm::u16vec2&,OOBase::ThreadLocalAllocator> prev = m_on_moved;
+	OOBase::Delegate2<void,const Window&,const glm::ivec2&,OOBase::ThreadLocalAllocator> prev = m_on_moved;
 	m_on_moved = delegate;
 	return prev;
 }

@@ -19,7 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "MainWindow.h"
+#include "Window.h"
 #include "Render.h"
 
 namespace 
@@ -27,10 +27,10 @@ namespace
 	class Layer : public Indigo::Render::GUI::Panel, public Indigo::Render::Layer
 	{
 	public:
-		bool create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd, size_t zorder);
+		bool create(const OOBase::SharedPtr<Indigo::Render::Window>& wnd, size_t zorder);
 
 	private:
-		OOBase::SharedPtr<Indigo::Render::MainWindow> m_wnd;
+		OOBase::SharedPtr<Indigo::Render::Window> m_wnd;
 
 		glm::u16vec2 ideal_size() const;
 		const OOBase::SharedPtr<OOGL::Window>& window() const;
@@ -40,7 +40,7 @@ namespace
 	};
 }
 
-bool Layer::create(const OOBase::SharedPtr<Indigo::Render::MainWindow>& wnd, size_t zorder)
+bool Layer::create(const OOBase::SharedPtr<Indigo::Render::Window>& wnd, size_t zorder)
 {
 	if (!wnd->layers().insert(OOBase::static_pointer_cast<Layer>(shared_from_this()),zorder))
 		return false;
@@ -89,7 +89,7 @@ OOBase::SharedPtr<Indigo::Render::GUI::Widget> Indigo::GUI::Layer::create_render
 	return layer;
 }
 
-bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd, const OOBase::SharedPtr<Style>& style, size_t zorder)
+bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::Window>& wnd, const OOBase::SharedPtr<Style>& style, size_t zorder)
 {
 	if (!Panel::create(NULL,style,Panel::no_border))
 		return false;
@@ -104,7 +104,7 @@ bool Indigo::GUI::Layer::create(OOBase::SharedPtr<Render::MainWindow>& wnd, cons
 	return true;
 }
 
-void Indigo::GUI::Layer::do_create(bool* ret_val, OOBase::SharedPtr<Render::MainWindow>* wnd, size_t zorder)
+void Indigo::GUI::Layer::do_create(bool* ret_val, OOBase::SharedPtr<Render::Window>* wnd, size_t zorder)
 {
 	*ret_val = render_widget< ::Layer>()->create(*wnd,zorder);
 }

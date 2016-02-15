@@ -19,30 +19,36 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_GUILAYER_H_INCLUDED
-#define INDIGO_GUILAYER_H_INCLUDED
+#include "../old/LuaResource.h"
 
-#include "GUIPanel.h"
-
-namespace Indigo
+Indigo::Lua::ResourceLoader::ResourceLoader(OOGL::ResourceBundle& res, const char* name) :
+		m_res(res),
+		m_name(name),
+		m_offset(0)
 {
-	namespace Render
-	{
-		class MainWindow;
-	}
-
-	namespace GUI
-	{
-		class Layer : public Panel
-		{
-		public:
-			bool create(OOBase::SharedPtr<Render::MainWindow>& wnd, const OOBase::SharedPtr<Style>& style, size_t zorder);
-
-		private:
-			void do_create(bool* ret_val, OOBase::SharedPtr<Render::MainWindow>* wnd, size_t zorder);
-			OOBase::SharedPtr<Render::GUI::Widget> create_render_widget();
-		};
-	}
 }
 
-#endif // INDIGO_GUILAYER_H_INCLUDED
+int Indigo::Lua::ResourceLoader::lua_load(lua_State* L, const char* mode)
+{
+	return ::lua_load(L,&reader,this,m_name,mode);
+}
+
+const char* Indigo::Lua::ResourceLoader::reader(lua_State* L, void* data, size_t* size)
+{
+	return static_cast<ResourceLoader*>(data)->read(L,*size);
+}
+
+const char* Indigo::Lua::ResourceLoader::read(lua_State* L, size_t& size)
+{
+	const char* ret = NULL;
+	size_t len = m_res.size(m_name);
+	if (len)
+	{
+		size = len - m_offset;
+		if (size)
+			ret = static_cast<const char*>(m_res.load(m_name,m_offset,len - m_offset));
+
+		m_offset += size;
+	}
+	return ret;
+}
