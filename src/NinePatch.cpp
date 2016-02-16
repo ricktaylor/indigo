@@ -24,6 +24,7 @@
 #include "../lib/VertexArrayObject.h"
 #include "../lib/BufferObject.h"
 #include "../lib/Shader.h"
+#include "../lib/Resource.h"
 
 #include <OOBase/TLSSingleton.h>
 
@@ -89,11 +90,12 @@ bool NinePatchFactory::create_program()
 	{
 		OOBase::SharedPtr<OOGL::Shader> shaders[2];
 		shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
-		if (!shaders[0]->compile(Indigo::static_resources(),"NinePatch.vert"))
+
+		if (!shaders[0]->compile(static_cast<const GLchar*>(Indigo::static_resources().load("NinePatch.vert")),static_cast<GLint>(Indigo::static_resources().size("NinePatch.vert"))))
 			LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
 		
 		shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
-		if (!shaders[1]->compile(Indigo::static_resources(),"NinePatch.frag"))
+		if (!shaders[1]->compile(static_cast<const GLchar*>(Indigo::static_resources().load("NinePatch.frag")),static_cast<GLint>(Indigo::static_resources().size("NinePatch.frag"))))
 			LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()),false);
 		
 		OOBase::SharedPtr<OOGL::Program> program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();

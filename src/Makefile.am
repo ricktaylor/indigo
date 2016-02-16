@@ -62,12 +62,12 @@ indigo_SOURCES = \
 	Main.cpp \
 	Window.cpp \
 	UILayer.cpp \
+	Font.cpp \
+	Image.cpp \
 	App.cpp \
 	NinePatch.cpp
 	
 	
-#	Font.cpp
-#	Image.cpp \
 #	GUIStyle.cpp \
 #	GUIWidget.cpp \
 #	GUIPanel.cpp \

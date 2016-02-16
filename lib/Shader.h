@@ -29,8 +29,6 @@
 
 namespace OOGL
 {
-	class ResourceBundle;
-
 	class Shader : public OOBase::NonCopyable
 	{
 		friend class Program;
@@ -41,7 +39,6 @@ namespace OOGL
 
 		bool valid() const;
 
-		bool compile(const ResourceBundle& bundle, const char* name);
 		bool compile(const char* sz, GLint len = 0);
 		bool compile(const char *const *strings, GLsizei count);
 		bool compile(const char *const *strings, const GLint* lengths, GLsizei count);

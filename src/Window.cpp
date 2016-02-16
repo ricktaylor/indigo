@@ -63,19 +63,19 @@ OOBase::WeakPtr<OOGL::Window> Indigo::Render::Window::create_window()
 
 void Indigo::Render::Window::on_close(const OOGL::Window& win)
 {
-	render_pipe()->post(OOBase::make_delegate(Indigo::App::instance_ptr(),&Indigo::Application::on_close));
+	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_close));
 }
 
 void Indigo::Render::Window::on_move(const OOGL::Window& win, const glm::ivec2& pos)
 {
-	render_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_move),pos);
+	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_move),pos);
 }
 
 void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& sz)
 {
 	//glViewport(0, 0, sz.x, sz.y);
 
-	render_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_size),sz);
+	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_size),sz);
 }
 
 void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glState)
@@ -108,6 +108,11 @@ Indigo::Window::Window()
 {
 }
 
+Indigo::Window::~Window()
+{
+	render_pipe()->call(OOBase::make_delegate(this,&Window::on_destroy));
+}
+
 OOBase::WeakPtr<OOGL::Window> Indigo::Window::create()
 {
 	m_render_wnd = OOBase::allocate_shared<Indigo::Render::Window,OOBase::ThreadLocalAllocator>(this);
@@ -115,6 +120,16 @@ OOBase::WeakPtr<OOGL::Window> Indigo::Window::create()
 		LOG_ERROR_RETURN(("Failed to create window: %s",OOBase::system_error_text()),OOBase::WeakPtr<OOGL::Window>());
 
 	return m_render_wnd->create_window();
+}
+
+void Indigo::Window::on_destroy()
+{
+	m_render_wnd.reset();
+}
+
+bool Indigo::Window::visible(bool show)
+{
+	return render_pipe()->post(OOBase::make_delegate(m_render_wnd->m_wnd.get(),&OOGL::Window::visible),show);
 }
 
 bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, unsigned int zorder)
@@ -131,6 +146,22 @@ bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, unsigned i
 bool Indigo::Window::remove_layer(unsigned int zorder)
 {
 	return m_layers.remove(zorder);
+}
+
+unsigned int Indigo::Window::top_layer() const
+{
+	OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i = m_layers.back();
+	return (i == m_layers.end() ? 0 : i->first);
+}
+
+void Indigo::Window::on_close()
+{
+	bool handled = false;
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i!=m_layers.begin();--i)
+		handled = i->second->on_quit();
+
+	if (!handled)
+		APP::instance().m_wnd.reset();
 }
 
 void Indigo::Window::on_move(glm::ivec2 pos)

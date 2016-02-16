@@ -27,6 +27,7 @@
 namespace Indigo
 {
 	const OOBase::SharedPtr<Pipe>& render_pipe();
+	const OOBase::SharedPtr<Pipe>& logic_pipe();
 }
 
 #endif // INDIGO_RENDER_H_INCLUDED

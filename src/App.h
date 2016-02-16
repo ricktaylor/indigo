@@ -35,11 +35,9 @@ namespace Indigo
 
 		void start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args);
 		void stop();
-
-		void on_close();
 	};
 
-	typedef OOBase::Singleton<Application> App;
+	typedef OOBase::Singleton<Application> APP;
 }
 
 #endif // INDIGO_APP_H_INCLUDED

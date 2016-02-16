@@ -253,11 +253,11 @@ bool FontProgram::load_8bit_shader()
 {
 	OOBase::SharedPtr<OOGL::Shader> shaders[2];
 	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
-	if (!shaders[0]->compile(Indigo::static_resources(),"Font_8bit.vert"))
+	if (!shaders[0]->compile(static_cast<const GLchar*>(Indigo::static_resources().load("Font_8bit.vert")),static_cast<GLint>(Indigo::static_resources().size("Font_8bit.vert"))))
 		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
 	
 	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
-	if (!shaders[1]->compile(Indigo::static_resources(),"Font_8bit.frag"))
+	if (!shaders[1]->compile(static_cast<const GLchar*>(Indigo::static_resources().load("Font_8bit.frag")),static_cast<GLint>(Indigo::static_resources().size("Font_8bit.frag"))))
 		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()),false);
 	
 	OOBase::SharedPtr<OOGL::Program> program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
@@ -708,7 +708,7 @@ bool Indigo::Font::load(const OOGL::ResourceBundle& resource, const char* name)
 		return false;
 
 	bool ret = false;
-	return render_call(OOBase::make_delegate(this,&Indigo::Font::do_load),&ret,&resource,name) && ret;
+	return render_pipe()->call(OOBase::make_delegate(this,&Indigo::Font::do_load),&ret,&resource,name) && ret;
 }
 
 void Indigo::Font::do_load(bool* ret_val, const OOGL::ResourceBundle* resource, const char* name)
@@ -732,7 +732,7 @@ void Indigo::Font::do_load(bool* ret_val, const OOGL::ResourceBundle* resource, 
 
 bool Indigo::Font::destroy()
 {
-	return !m_font || render_call(OOBase::make_delegate(this,&Indigo::Font::do_destroy));
+	return !m_font || render_pipe()->call(OOBase::make_delegate(this,&Indigo::Font::do_destroy));
 }
 
 void Indigo::Font::do_destroy()

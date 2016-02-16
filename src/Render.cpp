@@ -36,7 +36,15 @@ namespace Indigo
 
 namespace
 {
-	typedef OOBase::TLSSingleton<OOBase::SharedPtr<Indigo::Pipe> > RENDER_PIPE;
+	struct RenderModule
+	{};
+
+	typedef OOBase::TLSSingleton<OOBase::SharedPtr<Indigo::Pipe>,RenderModule> RENDER_PIPE;
+
+	struct LogicModule
+	{};
+
+	typedef OOBase::TLSSingleton<OOBase::SharedPtr<Indigo::Pipe>,LogicModule> LOGIC_PIPE;
 }
 
 const OOBase::SharedPtr<Indigo::Pipe>& Indigo::render_pipe()
@@ -44,6 +52,15 @@ const OOBase::SharedPtr<Indigo::Pipe>& Indigo::render_pipe()
 	OOBase::SharedPtr<Indigo::Pipe>& pipe = RENDER_PIPE::instance();
 	if (!pipe)
 		pipe = thread_pipe()->open("render");
+
+	return pipe;
+}
+
+const OOBase::SharedPtr<Indigo::Pipe>& Indigo::logic_pipe()
+{
+	OOBase::SharedPtr<Indigo::Pipe>& pipe = LOGIC_PIPE::instance();
+	if (!pipe)
+		pipe = thread_pipe()->open("logic");
 
 	return pipe;
 }
@@ -68,7 +85,7 @@ static OOBase::SharedPtr<Indigo::Pipe> start_logic_thread(Indigo::Pipe& pipe, OO
 		{
 			logic_pipe = Indigo::start_thread("logic");
 			if (logic_pipe)
-				logic_pipe->call(OOBase::make_delegate(Indigo::App::instance_ptr(),&Indigo::Application::start),wnd,&options,&args);
+				logic_pipe->post(OOBase::make_delegate(Indigo::APP::instance_ptr(),&Indigo::Application::start),wnd,&options,&args);
 		}
 	}
 
@@ -77,7 +94,7 @@ static OOBase::SharedPtr<Indigo::Pipe> start_logic_thread(Indigo::Pipe& pipe, OO
 
 bool Indigo::run_render_loop(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
 {
-	static const float sixty_fps = (1.f / 60) * 1000000;
+	static const float monitor_refresh = 1000000.f / 60;
 
 	// Create render comms pipe
 	Indigo::Pipe pipe("render");
@@ -92,72 +109,55 @@ bool Indigo::run_render_loop(const OOBase::CmdArgs::options_t& options, const OO
 	// Set defaults
 	glfwDefaultWindowHints();
 
-	if (!Indigo::is_debug())
-		glfwSwapInterval(1);
-
 	// Start the logic thread
 	OOBase::WeakPtr<OOGL::Window> main_wnd;
 	OOBase::SharedPtr<Indigo::Pipe> logic_pipe = start_logic_thread(pipe,main_wnd,options,args);
 	if (logic_pipe)
 	{
-		for (float draw_rate = 15000.f;;)
+		for (;;)
 		{
 			OOBase::Clock draw_clock;
+
 			OOBase::SharedPtr<OOGL::Window> wnd(main_wnd.lock());
 			if (!wnd)
 				break;
 
-			// Update animations
-
-
-			// Draw window
-			wnd->draw();
-
-			// Swap window (this collects events)
-			wnd->swap();
-
-			// Accumulate average draw rate
-			draw_rate = ((draw_rate*3) + draw_clock.microseconds()) / 4.f;
-			if (draw_rate > 15000.f)
-				draw_rate = 15000.f;
-
-			for (OOBase::Timeout wait(0,static_cast<unsigned int>(sixty_fps - draw_rate));!wait.has_expired();)
+			if (wnd->visible() && !wnd->iconified())
 			{
-				// Poll for UI events
-				glfwPollEvents();
+				// Update animations
 
-				// Drain render commands
-				pipe.drain();
+
+				// Draw window
+				wnd->draw();
+
+				// Swap window
+				wnd->swap();
+			}
+
+			// Poll for UI events
+			glfwPollEvents();
+
+			// Drain render commands
+			pipe.drain();
+
+			// If we have cycles spare, wait a bit
+			if (draw_clock.microseconds() < monitor_refresh - 5000)
+			{
+				OOBase::Timeout wait(0,static_cast<unsigned int>(monitor_refresh - draw_clock.microseconds()));
+				while (!wait.has_expired())
+				{
+					glfwPollEvents();
+
+					if (!wait.has_expired())
+						pipe.poll(OOBase::Timeout(0,1000));
+				}
 			}
 		}
 
-		logic_pipe->call(OOBase::make_delegate(Indigo::App::instance_ptr(),&Indigo::Application::stop));
+		logic_pipe->call(OOBase::make_delegate(Indigo::APP::instance_ptr(),&Indigo::Application::stop));
 	}
 
 	glfwTerminate();
 
 	return true;
 }
-
-/*
-
-bool Indigo::handle_events()
-{
-	return s_event_queue->dequeue();
-}
-
-static bool do_quit_loop(void* p)
-{
-	return s_event_queue->enqueue(NULL,p);
-}
-
-bool Indigo::quit_loop()
-{
-	return render_call(&do_quit_loop,reinterpret_cast<void*>(1));
-}
-
-bool Indigo::monitor_window(const OOBase::WeakPtr<OOGL::Window>& win)
-{
-	return s_vecWindows->push_back(win);
-}
-*/

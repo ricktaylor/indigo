@@ -43,11 +43,6 @@ bool OOGL::Shader::valid() const
 	return m_id != 0;
 }
 
-bool OOGL::Shader::compile(const ResourceBundle& bundle, const char* name)
-{
-	return compile(static_cast<const GLchar*>(bundle.load(name)),static_cast<GLint>(bundle.size(name)));
-}
-
 bool OOGL::Shader::compile(const GLchar* sz, GLint len)
 {
 	if (len)

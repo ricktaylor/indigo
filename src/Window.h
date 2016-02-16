@@ -68,6 +68,7 @@ namespace Indigo
 
 		virtual OOBase::SharedPtr<Render::Layer> create_render_layer() = 0;
 
+		virtual bool on_quit() { return false; }
 		virtual void on_move(const glm::ivec2& sz) {}
 		virtual void on_size(const glm::uvec2& sz) {}
 
@@ -105,14 +106,18 @@ namespace Indigo
 		};
 	}
 
-	class Window : public OOBase::EnableSharedFromThis<Window>, public OOBase::NonCopyable
+	class Window : public OOBase::NonCopyable
 	{
 		friend class Render::Window;
 		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 		
 	public:
 		Window();
+		~Window();
+
 		OOBase::WeakPtr<OOGL::Window> create();
+
+		bool visible(bool show);
 
 		bool add_layer(const OOBase::SharedPtr<Layer>& layer, unsigned int zorder);
 		bool remove_layer(unsigned int zorder);
@@ -126,10 +131,14 @@ namespace Indigo
 			return OOBase::static_pointer_cast<Layer>(i->second);
 		}
 
+		unsigned int top_layer() const;
+
 	private:
 		OOBase::SharedPtr<Indigo::Render::Window> m_render_wnd;
 		OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_layers;
 
+		void on_destroy();
+		void on_close();
 		void on_move(glm::ivec2 pos);
 		void on_size(glm::uvec2 sz);
 	};

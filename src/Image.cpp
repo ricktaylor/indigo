@@ -33,7 +33,7 @@ bool Indigo::Image::load(const OOGL::ResourceBundle& resource, const char* name)
 		return false;
 
 	bool ret = false;
-	return render_call(OOBase::make_delegate(this,&Indigo::Image::do_load),&ret,&resource,name) && ret;
+	return render_pipe()->call(OOBase::make_delegate(this,&Indigo::Image::do_load),&ret,&resource,name) && ret;
 }
 
 void Indigo::Image::do_load(bool* ret_val, const OOGL::ResourceBundle* resource, const char* name)
@@ -53,7 +53,7 @@ void Indigo::Image::do_load(bool* ret_val, const OOGL::ResourceBundle* resource,
 
 bool Indigo::Image::destroy()
 {
-	return !m_image || render_call(OOBase::make_delegate(this,&Indigo::Image::do_destroy));
+	return !m_image || render_pipe()->call(OOBase::make_delegate(this,&Indigo::Image::do_destroy));
 }
 
 void Indigo::Image::do_destroy()
@@ -64,7 +64,7 @@ void Indigo::Image::do_destroy()
 glm::uvec2 Indigo::Image::size() const
 {
 	glm::uvec2 sz(0);
-	render_call(OOBase::make_delegate(const_cast<Image*>(this),&Image::get_size),&sz);
+	render_pipe()->call(OOBase::make_delegate(const_cast<Image*>(this),&Image::get_size),&sz);
 	return sz;
 }
 
@@ -77,7 +77,7 @@ void Indigo::Image::get_size(glm::uvec2* sz)
 unsigned int Indigo::Image::components() const
 {
 	unsigned int comps = 0;
-	render_call(OOBase::make_delegate(const_cast<Image*>(this),&Image::get_components),&comps);
+	render_pipe()->call(OOBase::make_delegate(const_cast<Image*>(this),&Image::get_components),&comps);
 	return comps;
 }
 
