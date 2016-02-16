@@ -24,9 +24,6 @@
     <ClInclude Include="Render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MainWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -34,15 +31,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Layer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GUILayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GUIWidget.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GUIPanel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NinePatch.h">
@@ -54,30 +42,21 @@
     <ClInclude Include="Font.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GUILabel.h">
+    <ClInclude Include="Pipe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LuaAllocator.h">
+    <ClInclude Include="Thread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LuaResource.h">
+    <ClInclude Include="UILayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GUIGridSizer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GUISizer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GUIStyle.h">
+    <ClInclude Include="Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Splash.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render.cpp">
@@ -86,22 +65,10 @@
     <ClCompile Include="StaticResources.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MainWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ZipResource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUILayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUIWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUIPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NinePatch.cpp">
@@ -113,22 +80,16 @@
     <ClCompile Include="Font.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GUILabel.cpp">
+    <ClCompile Include="Pipe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LuaAllocator.cpp">
+    <ClCompile Include="Thread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LuaResource.cpp">
+    <ClCompile Include="UILayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GUIGridSizer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUISizer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUIStyle.cpp">
+    <ClCompile Include="Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

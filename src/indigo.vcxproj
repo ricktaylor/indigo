@@ -23,41 +23,28 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="Font.h" />
-    <ClInclude Include="GUIGridSizer.h" />
-    <ClInclude Include="GUILabel.h" />
-    <ClInclude Include="GUILayer.h" />
-    <ClInclude Include="GUIPanel.h" />
-    <ClInclude Include="GUISizer.h" />
-    <ClInclude Include="GUIStyle.h" />
-    <ClInclude Include="GUIWidget.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Layer.h" />
-    <ClInclude Include="LuaAllocator.h" />
-    <ClInclude Include="LuaResource.h" />
-    <ClInclude Include="MainWindow.h" />
     <ClInclude Include="NinePatch.h" />
+    <ClInclude Include="Pipe.h" />
     <ClInclude Include="Render.h" />
+    <ClInclude Include="Thread.h" />
+    <ClInclude Include="UILayer.h" />
+    <ClInclude Include="Window.h" />
     <ClInclude Include="ZipResource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Font.cpp" />
-    <ClCompile Include="GUIGridSizer.cpp" />
-    <ClCompile Include="GUILabel.cpp" />
-    <ClCompile Include="GUILayer.cpp" />
-    <ClCompile Include="GUIPanel.cpp" />
-    <ClCompile Include="GUISizer.cpp" />
-    <ClCompile Include="GUIStyle.cpp" />
-    <ClCompile Include="GUIWidget.cpp" />
     <ClCompile Include="Image.cpp" />
-    <ClCompile Include="LuaAllocator.cpp" />
-    <ClCompile Include="LuaResource.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="NinePatch.cpp" />
+    <ClCompile Include="Pipe.cpp" />
     <ClCompile Include="Render.cpp" />
-    <ClCompile Include="Splash.cpp" />
     <ClCompile Include="StaticResources.cpp" />
+    <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="UILayer.cpp" />
+    <ClCompile Include="Window.cpp" />
     <ClCompile Include="ZipResource.cpp" />
   </ItemGroup>
   <ItemGroup>

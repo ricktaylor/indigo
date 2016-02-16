@@ -33,9 +33,7 @@ namespace Indigo
 	{
 		class UIDrawable : public OOBase::NonCopyable
 		{
-			friend class UIGroup;
-
-		protected:
+		public:
 			virtual void on_draw(OOGL::State& glState) = 0;
 		};
 

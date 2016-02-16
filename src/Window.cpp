@@ -110,6 +110,8 @@ Indigo::Window::Window()
 
 Indigo::Window::~Window()
 {
+	m_layers.clear();
+
 	render_pipe()->call(OOBase::make_delegate(this,&Window::on_destroy));
 }
 
