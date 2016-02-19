@@ -41,8 +41,7 @@ BUILT_SOURCES = \
 	NinePatch.frag.h \
 	Titillium-Regular_0.png.h \
 	Titillium-Regular.fnt.h \
-	menu_border.png.h \
-	init.lua.h
+	menu_border.png.h
 	
 indigo_SOURCES = \
 	../lib/Window.cpp \
@@ -53,7 +52,6 @@ indigo_SOURCES = \
 	../lib/Texture.cpp \
 	../lib/BufferObject.cpp \
 	../lib/VertexArrayObject.cpp \
-	../lib/Image.cpp \
 	Pipe.cpp \
 	Thread.cpp \
 	StaticResources.cpp \
@@ -62,11 +60,12 @@ indigo_SOURCES = \
 	Main.cpp \
 	Window.cpp \
 	UILayer.cpp \
+	Font.cpp \
 	App.cpp \
-	NinePatch.cpp
+	NinePatch.cpp \
+	Image.cpp
 	
-# Font2.cpp \
-	Image.cpp \
+# 	Image.cpp \
 #	GUIStyle.cpp \
 #	GUIWidget.cpp \
 #	GUIPanel.cpp \

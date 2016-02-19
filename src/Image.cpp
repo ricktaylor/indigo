@@ -19,24 +19,23 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Image.h"
-#include "Resource.h"
+#include "../src/Image.h"
 
 #include <OOBase/Logger.h>
 
 static void* wrap_malloc(size_t sz)
 {
-	return OOBase::CrtAllocator::allocate(sz);
+	return OOBase::ThreadLocalAllocator::allocate(sz);
 }
 
 static void* wrap_realloc(void* p, size_t sz)
 {
-	return OOBase::CrtAllocator::reallocate(p,sz);
+	return OOBase::ThreadLocalAllocator::reallocate(p,sz);
 }
 
 static void wrap_free(void* p)
 {
-	OOBase::CrtAllocator::free(p);
+	OOBase::ThreadLocalAllocator::free(p);
 }
 
 extern "C"
@@ -49,7 +48,7 @@ extern "C"
 	#include "../3rdparty/stb/stb_image.h"
 }
 
-OOGL::Image::Image() :
+Indigo::Image::Image() :
 		m_width(0),
 		m_height(0),
 		m_components(0),
@@ -57,18 +56,17 @@ OOGL::Image::Image() :
 {
 }
 
-OOGL::Image::~Image()
+Indigo::Image::~Image()
 {
-	if (m_pixels)
-		stbi_image_free(m_pixels);
+	free_pixels();
 }
 
-bool OOGL::Image::valid() const
+bool Indigo::Image::valid() const
 {
 	return m_pixels != NULL;
 }
 
-bool OOGL::Image::load(const ResourceBundle& resource, const char* name, int components)
+bool Indigo::Image::load(const ResourceBundle& resource, const char* name, int components)
 {
 	const unsigned char* buffer = static_cast<const unsigned char*>(resource.load(name));
 	if (!buffer)
@@ -77,7 +75,7 @@ bool OOGL::Image::load(const ResourceBundle& resource, const char* name, int com
 	return load(buffer,static_cast<int>(resource.size(name)),components);
 }
 
-bool OOGL::Image::load(const unsigned char* buffer, int len, int components)
+bool Indigo::Image::load(const unsigned char* buffer, int len, int components)
 {
 	if (m_pixels)
 	{
@@ -104,9 +102,9 @@ bool OOGL::Image::load(const unsigned char* buffer, int len, int components)
 	return (p != NULL);
 }
 
-OOBase::SharedPtr<OOGL::Texture> OOGL::Image::make_texture(GLenum internalFormat) const
+OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalFormat) const
 {
-	OOBase::SharedPtr<Texture> tex;
+	OOBase::SharedPtr<OOGL::Texture> tex;
 	if (!m_pixels)
 		LOG_WARNING(("Invalid image for make_texture\n"));
 	else
@@ -135,7 +133,16 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::Image::make_texture(GLenum internalFormat
 			return tex;
 		}
 
-		tex = OOBase::allocate_shared<Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,0,internalFormat,m_width,m_height,format,GL_UNSIGNED_BYTE,m_pixels);
+		tex = OOBase::allocate_shared<OOGL::Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,0,internalFormat,m_width,m_height,format,GL_UNSIGNED_BYTE,m_pixels);
 	}
 	return tex;
+}
+
+void Indigo::Image::free_pixels()
+{
+	if (m_pixels)
+	{
+		stbi_image_free(m_pixels);
+		m_pixels = NULL;
+	}
 }

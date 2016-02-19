@@ -1,53 +1,64 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2015 Rick Taylor
+// Copyright (C) 2014 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
-// Indigo is free software: you can redistribute it and/or modify
+// OOGL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Indigo is distributed in the hope that it will be useful,
+// OOGL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Indigo.  If not, see <http://www.gnu.org/licenses/>.
+// along with OOGL.  If not, see <http://www.gnu.org/licenses/>.
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
 #ifndef INDIGO_IMAGE_H_INCLUDED
 #define INDIGO_IMAGE_H_INCLUDED
 
-#include "Common.h"
-
-#include "../lib/Image.h"
+#include "../lib/Texture.h"
+#include "Resource.h"
 
 namespace Indigo
 {
+	class ResourceBundle;
+
 	class Image : public OOBase::NonCopyable
 	{
 	public:
-		~Image();
+		Image();
+		virtual ~Image();
 
-		bool load(const OOGL::ResourceBundle& resource, const char* name);
-		bool destroy();
+		bool valid() const;
 
-		glm::uvec2 size() const;
-		unsigned int components() const;
+		bool load(const ResourceBundle& resource, const char* name, int components = 0);
+		virtual bool load(const unsigned char* buffer, int len, int components = 0);
 
-		const OOBase::SharedPtr<OOGL::Image>& render_image() const;
+		glm::uvec2 size() const
+		{
+			return glm::uvec2(m_width,m_height);
+		}
 
-	private:
-		OOBase::SharedPtr<OOGL::Image> m_image;
+		unsigned int components() const
+		{
+			return m_components;
+		}
 
-		void do_load(bool* ret_val, const OOGL::ResourceBundle* resource, const char* name);
-		void do_destroy();
-		void get_size(glm::uvec2* sz);
-		void get_components(unsigned int* comp);
+		OOBase::SharedPtr<OOGL::Texture> make_texture(GLenum internalFormat) const;
+		
+	protected:
+		int   m_width;
+		int   m_height;
+		int   m_components;
+		void* m_pixels;
+
+		void free_pixels();
 	};
 }
 

@@ -24,7 +24,7 @@
 
 #include "Common.h"
 
-#include "../lib/Resource.h"
+#include "Resource.h"
 
 namespace Indigo
 {
@@ -33,7 +33,7 @@ namespace Indigo
 		class ZipFile;
 	}
 
-	class ZipResource : public OOGL::ResourceBundle
+	class ZipResource : public ResourceBundle
 	{
 	public:
 		ZipResource();

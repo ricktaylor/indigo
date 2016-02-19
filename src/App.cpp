@@ -24,8 +24,17 @@
 #include "Thread.h"
 #include "UILayer.h"
 
+#include "Image.h"
+#include "NinePatch.h"
+
 static void splash()
 {
+
+	Indigo::NinePatch n;
+	n.Image::load(Indigo::static_resources(),"menu_border.png");
+
+
+
 	OOBase::SharedPtr<Indigo::UILayer> layer = OOBase::allocate_shared<Indigo::UILayer,OOBase::ThreadLocalAllocator>();
 
 	Indigo::APP::instance().m_wnd->add_layer(layer,100);

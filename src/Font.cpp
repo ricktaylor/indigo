@@ -19,20 +19,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../old/Font.h"
+#include "Font.h"
 
 #include "Render.h"
 
 #include "../lib/Shader.h"
 #include "../lib/StateFns.h"
-#include "../lib/Image.h"
-
 #include <OOBase/TLSSingleton.h>
-
-namespace Indigo
-{
-	OOGL::ResourceBundle& static_resources();
-}
+#include "Image.h"
 
 namespace
 {
@@ -256,23 +250,23 @@ bool FontProgram::load_8bit_shader()
 	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
 	if (!shaders[0]->compile(static_cast<const GLchar*>(Indigo::static_resources().load("Font_8bit.vert")),static_cast<GLint>(Indigo::static_resources().size("Font_8bit.vert"))))
 		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
-	
+
 	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
 	if (!shaders[1]->compile(static_cast<const GLchar*>(Indigo::static_resources().load("Font_8bit.frag")),static_cast<GLint>(Indigo::static_resources().size("Font_8bit.frag"))))
 		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()),false);
-	
+
 	OOBase::SharedPtr<OOGL::Program> program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
 	if (!program)
 		LOG_ERROR_RETURN(("Failed to allocate shader program: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 	if (!program->link(shaders,2))
 		LOG_ERROR_RETURN(("Failed to link shaders: %s",program->info_log().c_str()),false);
-	
+
 	m_ptr_ch1_8_Program = program;
 	return true;
 }
 
-Indigo::Render::Font::Font() : m_line_height(0.f), m_packing(0), m_allocated(0)
+Indigo::Render::Font::Font(Indigo::Font* const owner) : m_owner(owner), m_allocated(0)
 {
 }
 
@@ -280,165 +274,8 @@ Indigo::Render::Font::~Font()
 {
 }
 
-bool Indigo::Render::Font::load(const OOGL::ResourceBundle& resource, const char* name)
+bool Indigo::Render::Font::load()
 {
-	if (!resource.exists(name))
-		LOG_ERROR_RETURN(("Failed to find resource %s",name),false);
-
-	const unsigned char* data = static_cast<const unsigned char*>(resource.load(name));
-	size_t len = resource.size(name);
-
-	// BMF\0x3
-	if (data[0] != 66 || data[1] != 77 || data[2] != 70 || data[3] != 3)
-		LOG_ERROR_RETURN(("Failed to load font data: Format not recognised"),false);
-
-	const unsigned char* end = data + len;
-	float tex_width, tex_height;
-	unsigned int pages;
-	OOBase::Vector<const char*,OOBase::ThreadLocalAllocator> vecPages;
-
-	bool ok = true;
-	for (data += 4;ok && data < end;)
-	{
-		unsigned int type = *data++;
-		len = read_uint32(data);
-
-		switch (type)
-		{
-		case 1:
-			{
-				OOBase::int16_t size = read_int16(data);
-				if (size >= 0)
-					OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %dpx",data + 12,size);
-				else
-					OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %dpt",data + 12,-size);
-				data += len - 2;
-			}
-			break;
-
-		case 2:
-			assert(len == 15);
-			m_line_height = read_uint16(data);
-			data += 2;
-			tex_width = read_uint16(data);
-			tex_height = read_uint16(data);
-			pages = read_uint16(data);
-			if (*data++ == 1)
-			{
-				// TODO: Packed data
-				data += 4;
-			}
-			else
-			{
-				m_packing = read_uint32(data);
-				if (m_packing == 0x04040400)
-					ok = (!!OOGL::ContextSingleton<FontProgram>::instance().program(m_packing));
-				else
-				{
-					// TODO: Funky packing
-				}
-			}
-			if (!pages)
-			{
-				LOG_ERROR(("No textures in font!"));
-				ok = false;
-			}
-			break;
-
-		case 3:
-			if (pages == 1)
-			{
-				OOGL::Image img;
-				if ((ok = img.load(resource,reinterpret_cast<const char*>(data))))
-					ok = (m_ptrTexture = img.make_texture(GL_R8));
-
-				data += len;
-			}
-			else
-			{
-				if (!OOGL::StateFns::get_current()->check_glTextureArray())
-				{
-					LOG_ERROR(("Multiple textures in font, no texture array support"));
-					ok = false;
-				}
-				for (unsigned int p=0;ok && p<pages;++p)
-				{
-					OOGL::Image img;
-					if ((ok = img.load(resource,reinterpret_cast<const char*>(data))))
-					{
-						// TODO: Load into array texture
-					}
-
-					data += len/pages;
-				}
-			}
-			break;
-
-		case 4:
-			for (size_t c = 0;ok && c < len / 20; ++c)
-			{
-				unsigned int ushort_max = 0xFFFF;
-				struct char_info ci;
-				OOBase::uint32_t id = read_uint32(data);
-				OOBase::uint32_t u = read_uint16(data);
-				OOBase::uint32_t v = read_uint16(data);
-				float width = read_uint16(data);
-				float height = read_uint16(data);
-				OOBase::int32_t x = read_int16(data);
-				OOBase::int32_t y = read_int16(data);
-				ci.u0 = static_cast<OOBase::uint16_t>(u / tex_width * ushort_max);
-				ci.v0 = static_cast<OOBase::uint16_t>(v / tex_height * ushort_max);
-				ci.u1 = static_cast<OOBase::uint16_t>((u + width) / tex_width * ushort_max);
-				ci.v1 = static_cast<OOBase::uint16_t>((v + height) / tex_height * ushort_max);
-				ci.left = x / m_line_height;
-				ci.top = 1.0f - (y / m_line_height);
-				ci.right = (x + width) / m_line_height;
-				ci.bottom = 1.0f - ((y + height) / m_line_height);
-
-				ci.xadvance = read_int16(data) / m_line_height;
-				ci.page = *data++;
-				ci.channel = *data++;
-
-				if (!(ok = m_mapCharInfo.insert(id,ci)))
-					LOG_ERROR(("Failed to add character to table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
-			}
-			break;
-
-		case 5:
-			for (size_t c = 0;ok && c < len / 10; ++c)
-			{
-				OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> ch;
-				ch.first = read_uint32(data);
-				ch.second = read_uint32(data);
-				float offset = read_int16(data) / m_line_height;
-				if (!(ok = m_mapKerning.insert(ch,offset)))
-					LOG_ERROR(("Failed to add character to kerning table: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
-			}
-			break;
-
-		default:
-			LOG_WARNING(("Unknown block type found in file: %u",type));
-			data += len;
-			ok = false;
-			break;
-		}
-	}
-
-	if (!ok)
-		return false;
-
-	// Set up texture
-	if (m_ptrTexture)
-	{
-		m_ptrTexture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		m_ptrTexture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-		m_ptrTexture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-		m_ptrTexture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-	}
-
-	if (data != end)
-		LOG_WARNING(("Extra bytes at end of font data"));
-
 	return true;
 }
 
@@ -446,13 +283,13 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 {
 	text.m_glyph_len = 0;
 	text.m_glyph_start = 0;
-	
+
 	OOBase::Vector<OOBase::uint32_t,OOBase::ThreadLocalAllocator> glyphs;
 	GLsizei len = utf8_to_glyphs(sz,s_len,glyphs);
 	if (!len)
 		return true;
 
-	bool found = false;	
+	bool found = false;
 	for (free_list_t::iterator i=m_listFree.begin(); i; ++i)
 	{
 		if (i->second == len)
@@ -471,7 +308,7 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 			break;
 		}
 	}
-	
+
 	if (!found)
 	{
 		GLsizei new_size = 8;
@@ -498,7 +335,7 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		else
 			last = m_listFree.insert(m_allocated,new_size - m_allocated);
 		m_allocated = new_size;
-		
+
 		if (!m_ptrVAO)
 		{
 			m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
@@ -506,7 +343,7 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 				LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 
-		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_packing);
+		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_owner->m_packing);
 		if (!ptrProgram)
 			return false;
 
@@ -550,15 +387,15 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		{
 			if (prev_glyph != OOBase::uint32_t(-1))
 			{
-				kern_map_t::iterator k = m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(prev_glyph,glyph));
+				Indigo::Font::kern_map_t::iterator k = m_owner->m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(prev_glyph,glyph));
 				if (k)
 					text.m_length += k->second;
 			}
 			prev_glyph = glyph;
 
-			char_map_t::iterator i = m_mapCharInfo.find(glyph);
+			Indigo::Font::char_map_t::iterator i = m_owner->m_mapCharInfo.find(glyph);
 			if (!i)
-				i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>('?'));
+				i = m_owner->m_mapCharInfo.find(static_cast<OOBase::uint8_t>('?'));
 
 			a[0].x = text.m_length + i->second.left;
 			a[0].y = i->second.top;
@@ -577,7 +414,7 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 			a[2].v = a[0].v;
 			a[3].u = a[2].u;
 			a[3].v = a[1].v;
-				
+
 			e[0] = idx + 0;
 			e[1] = idx + 1;
 			e[2] = idx + 2;
@@ -596,7 +433,7 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 			prev_glyph = OOBase::uint32_t(-1);
 		}
 	}
-	
+
 	return true;
 }
 
@@ -624,17 +461,19 @@ void Indigo::Render::Font::free_text(Text& text)
 
 void Indigo::Render::Font::draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei len)
 {
-	if (len && m_packing)
+	if (len)
 	{
-		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_packing);
-	
-		state.use(ptrProgram);
-		state.bind(0,m_ptrTexture);
+		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_owner->m_packing);
+		if (ptrProgram)
+		{
+			state.use(ptrProgram);
+			state.bind(0,m_ptrTexture);
 
-		ptrProgram->uniform("in_Colour",colour);
-		ptrProgram->uniform("MVP",mvp);
+			ptrProgram->uniform("in_Colour",colour);
+			ptrProgram->uniform("MVP",mvp);
 
-		m_ptrVAO->draw_elements(GL_TRIANGLES,elements_per_glyph * len,GL_UNSIGNED_INT,start * elements_per_glyph * sizeof(GLuint));
+			m_ptrVAO->draw_elements(GL_TRIANGLES,elements_per_glyph * len,GL_UNSIGNED_INT,start * elements_per_glyph * sizeof(GLuint));
+		}
 	}
 }
 
@@ -659,13 +498,13 @@ bool Indigo::Render::Text::text(const char* sz, size_t len)
 
 	bool ret = true;
 	m_font->free_text(*this);
-	
+
 	m_glyph_start = 0;
 	m_glyph_len = 0;
 
 	if (len)
 		ret = m_font->alloc_text(*this,sz,len);
-			
+
 	return ret;
 }
 
@@ -693,9 +532,8 @@ void Indigo::Render::Text::draw(OOGL::State& state, const glm::mat4& mvp, const 
 	m_font->draw(state,mvp,colour,m_glyph_start + start,length);
 }
 
-Indigo::Font::Font(const OOBase::SharedPtr<OOGL::Window>& wnd) : m_wnd(wnd)
+Indigo::Font::Font() : m_line_height(0.f), m_packing(0)
 {
-	assert(wnd && wnd->valid());
 }
 
 Indigo::Font::~Font()
@@ -703,32 +541,183 @@ Indigo::Font::~Font()
 	destroy();
 }
 
-bool Indigo::Font::load(const OOGL::ResourceBundle& resource, const char* name)
+bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 {
 	if (m_font)
+		LOG_ERROR_RETURN(("Font already loaded"),false);
+
+	if (!resource.exists(name))
+		LOG_ERROR_RETURN(("Failed to find resource %s",name),false);
+
+	const unsigned char* data = static_cast<const unsigned char*>(resource.load(name));
+	size_t len = resource.size(name);
+
+	// BMF\0x3
+	if (data[0] != 66 || data[1] != 77 || data[2] != 70 || data[3] != 3)
+		LOG_ERROR_RETURN(("Failed to load font data: Format not recognised"),false);
+
+	const unsigned char* end = data + len;
+	float tex_width, tex_height;
+	unsigned int pages;
+	//OOBase::Vector<const char*,OOBase::ThreadLocalAllocator> vecPages;
+
+	bool ok = true;
+	for (data += 4;ok && data < end;)
+	{
+		unsigned int type = *data++;
+		len = read_uint32(data);
+
+		switch (type)
+		{
+		case 1:
+			{
+				OOBase::int16_t size = read_int16(data);
+				if (size >= 0)
+					OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %dpx",data + 12,size);
+				else
+					OOBase::Logger::log(OOBase::Logger::Information,"Loading font: %s %dpt",data + 12,-size);
+				data += len - 2;
+			}
+			break;
+
+		case 2:
+			assert(len == 15);
+			m_line_height = read_uint16(data);
+			data += 2;
+			tex_width = read_uint16(data);
+			tex_height = read_uint16(data);
+			pages = read_uint16(data);
+			if (*data++ == 1)
+			{
+				// TODO: Packed data
+				data += 4;
+			}
+			else
+			{
+				m_packing = read_uint32(data);
+				/*if (m_packing == 0x04040400)
+					ok = (!!OOGL::ContextSingleton<FontProgram>::instance().program(m_packing));
+				else
+				{
+					// TODO: Funky packing
+				}*/
+			}
+			if (!pages)
+			{
+				LOG_ERROR(("No textures in font!"));
+				ok = false;
+			}
+			break;
+
+		case 3:
+			if (pages == 1)
+			{
+				//OOGL::Image img;
+				//if ((ok = img.load(resource,reinterpret_cast<const char*>(data))))
+				//	ok = (m_ptrTexture = img.make_texture(GL_R8));
+
+				data += len;
+			}
+			else
+			{
+				/*if (!OOGL::StateFns::get_current()->check_glTextureArray())
+				{
+					LOG_ERROR(("Multiple textures in font, no texture array support"));
+					ok = false;
+				}*/
+				for (unsigned int p=0;ok && p<pages;++p)
+				{
+					//OOGL::Image img;
+					//if ((ok = img.load(resource,reinterpret_cast<const char*>(data))))
+					{
+						// TODO: Load into array texture
+					}
+
+					data += len/pages;
+				}
+			}
+			break;
+
+		case 4:
+			for (size_t c = 0;ok && c < len / 20; ++c)
+			{
+				unsigned int ushort_max = 0xFFFF;
+				struct char_info ci;
+				OOBase::uint32_t id = read_uint32(data);
+				OOBase::uint32_t u = read_uint16(data);
+				OOBase::uint32_t v = read_uint16(data);
+				float width = read_uint16(data);
+				float height = read_uint16(data);
+				OOBase::int32_t x = read_int16(data);
+				OOBase::int32_t y = read_int16(data);
+				ci.u0 = static_cast<OOBase::uint16_t>(u / tex_width * ushort_max);
+				ci.v0 = static_cast<OOBase::uint16_t>(v / tex_height * ushort_max);
+				ci.u1 = static_cast<OOBase::uint16_t>((u + width) / tex_width * ushort_max);
+				ci.v1 = static_cast<OOBase::uint16_t>((v + height) / tex_height * ushort_max);
+				ci.left = x / m_line_height;
+				ci.top = 1.0f - (y / m_line_height);
+				ci.right = (x + width) / m_line_height;
+				ci.bottom = 1.0f - ((y + height) / m_line_height);
+
+				ci.xadvance = read_int16(data) / m_line_height;
+				ci.page = *data++;
+				ci.channel = *data++;
+
+				if (!(ok = m_mapCharInfo.insert(id,ci)))
+					LOG_ERROR(("Failed to add character to table: %s",OOBase::system_error_text()));
+			}
+			break;
+
+		case 5:
+			for (size_t c = 0;ok && c < len / 10; ++c)
+			{
+				OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> ch;
+				ch.first = read_uint32(data);
+				ch.second = read_uint32(data);
+				float offset = read_int16(data) / m_line_height;
+				if (!(ok = m_mapKerning.insert(ch,offset)))
+					LOG_ERROR(("Failed to add character to kerning table: %s",OOBase::system_error_text()));
+			}
+			break;
+
+		default:
+			LOG_WARNING(("Unknown block type found in file: %u",type));
+			data += len;
+			ok = false;
+			break;
+		}
+	}
+
+	if (!ok)
 		return false;
 
+	// Set up texture
+	/*if (m_ptrTexture)
+	{
+		m_ptrTexture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+		m_ptrTexture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+		m_ptrTexture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+		m_ptrTexture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	}*/
+
+	if (data != end)
+		LOG_WARNING(("Extra bytes at end of font data"));
+
 	bool ret = false;
-	return render_pipe()->call(OOBase::make_delegate(this,&Indigo::Font::do_load),&ret,&resource,name) && ret;
+	return render_pipe()->call(OOBase::make_delegate(this,&Indigo::Font::do_load),&ret) && ret;
 }
 
-void Indigo::Font::do_load(bool* ret_val, const OOGL::ResourceBundle* resource, const char* name)
+void Indigo::Font::do_load(bool* ret_val)
 {
-	OOBase::SharedPtr<Indigo::Render::Font> font = OOBase::allocate_shared<Indigo::Render::Font>();
+	*ret_val = false;
+	OOBase::SharedPtr<Indigo::Render::Font> font = OOBase::allocate_shared<Indigo::Render::Font,OOBase::ThreadLocalAllocator>(this);
 	if (!font)
+		LOG_ERROR(("Failed to allocate render font: %s",OOBase::system_error_text()));
+	else if (font->load())
 	{
-		LOG_ERROR(("Failed to allocate render font: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)));
-		*ret_val = false;
+		m_font = font;
+		*ret_val = true;
 	}
-	else
-	{
-		m_wnd->make_current();
-
-		*ret_val = font->load(*resource,name);
-	}
-
-	if (*ret_val)
-		font.swap(m_font);
 }
 
 bool Indigo::Font::destroy()
@@ -738,7 +727,6 @@ bool Indigo::Font::destroy()
 
 void Indigo::Font::do_destroy()
 {
-	m_wnd->make_current();
 	m_font.reset();
 }
 

@@ -21,8 +21,6 @@
 
 #include "Shader.h"
 #include "StateFns.h"
-#include "Resource.h"
-
 #include <OOBase/StackAllocator.h>
 #include <OOBase/Logger.h>
 

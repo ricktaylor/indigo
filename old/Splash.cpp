@@ -23,9 +23,8 @@
 #include "../lib/BufferObject.h"
 #include "../lib/VertexArrayObject.h"
 #include "../lib/Shader.h"
-#include "../lib/Resource.h"
-
 #include <glm/gtc/matrix_transform.hpp>
+#include "../src/Resource.h"
 #include "Font.h"
 
 namespace Indigo

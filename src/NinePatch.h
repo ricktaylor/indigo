@@ -22,32 +22,67 @@
 #ifndef INDIGO_NINEPATCH_H_INCLUDED
 #define INDIGO_NINEPATCH_H_INCLUDED
 
-#include "Common.h"
-
-#include "../lib/State.h"
-#include "../lib/Image.h"
+#include "UILayer.h"
+#include "Image.h"
 
 namespace Indigo
 {
 	namespace Render
 	{
-		class NinePatch : public OOBase::NonCopyable
+		class NinePatch;
+	}
+
+	class NinePatch : public Image
+	{
+		friend class Render::NinePatch;
+
+	public:
+		NinePatch();
+
+		virtual bool load(const unsigned char* buffer, int len, int components = 0);
+
+		const glm::u16vec4& margins() const
+		{
+			return m_margins;
+		}
+
+	private:
+		bool pixel_cmp(int x, int y, bool black);
+		bool scan_line(int line, glm::u16vec2& span);
+		bool scan_column(int column, glm::u16vec2& span);
+		bool get_bounds();
+
+		glm::u16vec4 m_margins;
+
+		struct PatchInfo
+		{
+			glm::u16vec4 m_borders;
+			glm::u16vec2 m_tex_size;
+			OOBase::SharedPtr<OOGL::Texture> m_texture;
+		};
+		OOBase::SharedPtr<Indigo::NinePatch::PatchInfo> m_info;
+	};
+
+	namespace Render
+	{
+		class NinePatch : public UIDrawable
 		{
 		public:
-			NinePatch();
-			NinePatch(const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size);
-			~NinePatch();
+			NinePatch(const glm::u16vec2& size, const OOBase::SharedPtr<Indigo::NinePatch::PatchInfo>& info);
+			virtual ~NinePatch();
 
 			bool valid() const;
 
-			void layout(const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size);
-
-			void draw(OOGL::State& state, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp) const;
+			void layout(const glm::u16vec2& size);
 
 		private:
 			GLsizei    m_patch;
 			GLsizeiptr m_firsts[3];
 			GLsizei    m_counts[3];
+
+			OOBase::SharedPtr<Indigo::NinePatch::PatchInfo> m_info;
+
+			void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};
 	}
 }

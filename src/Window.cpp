@@ -88,10 +88,10 @@ void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glSta
 		i->second->on_draw(glState);
 }
 
-void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, unsigned int zorder, bool* ret)
+void Indigo::Render::Window::add_render_layer(Indigo::Layer* const layer, unsigned int zorder, bool* ret)
 {
 	*ret = false;
-	layer->m_render_layer = layer->create_render_layer();
+	layer->m_render_layer = layer->create_render_layer(this);
 	if (layer->m_render_layer)
 	{
 		if (m_layers.insert(zorder,layer->m_render_layer) == m_layers.end())

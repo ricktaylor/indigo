@@ -34,7 +34,7 @@ namespace Indigo
 		class UIDrawable : public OOBase::NonCopyable
 		{
 		public:
-			virtual void on_draw(OOGL::State& glState) = 0;
+			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
 		};
 
 		class UIGroup : public UIDrawable
@@ -46,7 +46,7 @@ namespace Indigo
 			UIGroup()
 			{}
 
-			virtual void on_draw(OOGL::State& glState);
+			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 
 		private:
 			OOBase::Table<unsigned int,OOBase::SharedPtr<UIDrawable>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_children;
@@ -111,7 +111,7 @@ namespace Indigo
 	public:
 
 	protected:
-		OOBase::SharedPtr<Render::Layer> create_render_layer();
+		OOBase::SharedPtr<Render::Layer> create_render_layer(Indigo::Render::Window* const window);
 	};
 }
 

@@ -27,19 +27,32 @@ namespace
 	class UILayer : public Indigo::Render::UIGroup, public Indigo::Render::Layer
 	{
 	public:
-		void on_draw(OOGL::State& glState);
+		UILayer(Indigo::Render::Window* const window) : Indigo::Render::Layer(window)
+		{}
+
+		void on_draw(OOGL::State& glState) const;
+
+		void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 	};
 }
 
-void ::UILayer::on_draw(OOGL::State& glState)
+void ::UILayer::on_draw(OOGL::State& glState) const
 {
-	Indigo::Render::UIGroup::on_draw(glState);
+	glm::vec2 sz = m_window->window()->size();
+	glm::mat4 proj = glm::ortho(0.f,sz.x,0.f,sz.y);
+
+	Indigo::Render::UIGroup::on_draw(glState,proj);
 }
 
-void Indigo::Render::UIGroup::on_draw(OOGL::State& glState)
+void ::UILayer::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIDrawable>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i!=m_children.end();++i)
-		i->second->on_draw(glState);
+	Indigo::Render::UIGroup::on_draw(glState,mvp);
+}
+
+void Indigo::Render::UIGroup::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
+{
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIDrawable>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i!=m_children.end();++i)
+		i->second->on_draw(glState,mvp);
 }
 
 void Indigo::Render::UIGroup::add_widget_group(UIWidget* widget, unsigned int zorder, bool* ret)
@@ -79,9 +92,9 @@ bool Indigo::UIGroup::remove_widget(unsigned int zorder)
 	return m_children.remove(zorder);
 }
 
-OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer()
+OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(Indigo::Render::Window* const window)
 {
-	OOBase::SharedPtr< ::UILayer> group = OOBase::allocate_shared< ::UILayer,OOBase::ThreadLocalAllocator>();
+	OOBase::SharedPtr< ::UILayer> group = OOBase::allocate_shared< ::UILayer,OOBase::ThreadLocalAllocator>(window);
 	if (!group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
 	else

@@ -21,13 +21,12 @@
 
 #include "Common.h"
 
-#include "../lib/Resource.h"
-
 #include <OOBase/Singleton.h>
+#include "Resource.h"
 
 namespace
 {
-	class StaticResources : public OOGL::ResourceBundle
+	class StaticResources : public Indigo::ResourceBundle
 	{
 	public:
 		const void* load(const char* name, size_t start, size_t length) const;
@@ -177,7 +176,7 @@ bool StaticResources::exists(const char* name) const
 
 namespace Indigo
 {
-	OOGL::ResourceBundle& static_resources()
+	ResourceBundle& static_resources()
 	{
 		return OOBase::Singleton<StaticResources>::instance();
 	}

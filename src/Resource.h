@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2014 Rick Taylor
+// Copyright (C) 2015 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,49 +19,30 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef OOGL_IMAGE_H_INCLUDED
-#define OOGL_IMAGE_H_INCLUDED
+#ifndef OOGL_RESOURCE_H_INCLUDED
+#define OOGL_RESOURCE_H_INCLUDED
 
-#include "Texture.h"
+#include "../lib/OOGL.h"
 
-namespace OOGL
+namespace Indigo
 {
-	class ResourceBundle;
-
-	class Image : public OOBase::NonCopyable
+	class ResourceBundle
 	{
 	public:
-		Image();
-		~Image();
+		virtual ~ResourceBundle()
+		{}
 
-		bool valid() const;
-
-		bool load(const ResourceBundle& resource, const char* name, int components = 0);
-		bool load(const unsigned char* buffer, int len, int components = 0);
-
-		glm::uvec2 size() const
+		const void* load(const char* name, size_t length = size_t(-1)) const
 		{
-			return glm::uvec2(m_width,m_height);
+			return load(name,0,length);
 		}
 
-		unsigned int components() const
-		{
-			return m_components;
-		}
-
-		const void* pixels() const
-		{
-			return m_pixels;
-		}
-
-		OOBase::SharedPtr<Texture> make_texture(GLenum internalFormat) const;
-		
-	private:
-		int   m_width;
-		int   m_height;
-		int   m_components;
-		void* m_pixels;
+		virtual const void* load(const char* name, size_t start, size_t length = size_t(-1)) const = 0;
+		virtual OOBase::uint64_t size(const char* name) const = 0;
+		virtual bool exists(const char* name) const = 0;
 	};
+
+	ResourceBundle& static_resources();
 }
 
-#endif // OOGL_IMAGE_H_INCLUDED
+#endif // OOGL_RESOURCE_H_INCLUDED

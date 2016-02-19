@@ -24,14 +24,10 @@
 #include "../lib/VertexArrayObject.h"
 #include "../lib/BufferObject.h"
 #include "../lib/Shader.h"
-#include "../lib/Resource.h"
+
+#include "Resource.h"
 
 #include <OOBase/TLSSingleton.h>
-
-namespace Indigo
-{
-	OOGL::ResourceBundle& static_resources();
-}
 
 namespace
 {
@@ -45,7 +41,7 @@ namespace
 		void free_patch(GLsizei p);
 		void layout_patch(GLsizei patch, const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size);
 
-		void draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount);
+		void draw(OOGL::State& state, const glm::mat4& mvp, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount);
 
 	private:
 		typedef OOBase::Table<GLsizei,GLsizei,OOBase::Less<GLsizei>,OOBase::ThreadLocalAllocator> free_list_t;
@@ -214,10 +210,10 @@ void NinePatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, con
 	a[3].x = size.x;
 	a[2].x = a[3].x - borders.z;
 
-	a[0].u = 0;
-	a[1].u = static_cast<GLushort>(static_cast<float>(borders.x) / tex_size.x * ushort_max);
-	a[2].u = static_cast<GLushort>(static_cast<float>(tex_size.x - borders.z) / tex_size.x * ushort_max);
-	a[3].u = ushort_max;
+	a[0].u = static_cast<GLushort>(1.0f / tex_size.x * ushort_max);
+	a[1].u = static_cast<GLushort>(static_cast<float>(borders.x + 1) / tex_size.x * ushort_max);
+	a[2].u = static_cast<GLushort>(static_cast<float>(tex_size.x - 1 - borders.z) / tex_size.x * ushort_max);
+	a[3].u = static_cast<GLushort>(static_cast<float>(tex_size.x - 1) / tex_size.x * ushort_max);
 
 	for (size_t i=0;i<4;++i)
 	{
@@ -230,10 +226,10 @@ void NinePatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, con
 
 		a[i+12].u = a[i+8].u = a[i+4].u = a[i].u;
 
-		a[i].v = 0;
-		a[i+4].v = static_cast<GLushort>(static_cast<float>(borders.w) / tex_size.y * ushort_max);
-		a[i+8].v = static_cast<GLushort>(static_cast<float>(tex_size.y - borders.y) / tex_size.y * ushort_max);
-		a[i+12].v = ushort_max;
+		a[i].v = static_cast<GLushort>(1.0f / tex_size.y * ushort_max);
+		a[i+4].v = static_cast<GLushort>(static_cast<float>(borders.w + 1) / tex_size.y * ushort_max);
+		a[i+8].v = static_cast<GLushort>(static_cast<float>(tex_size.y - 1 - borders.y) / tex_size.y * ushort_max);
+		a[i+12].v = static_cast<GLushort>(static_cast<float>(tex_size.y - 1) / tex_size.y * ushort_max);
 	}
 }
 
@@ -259,27 +255,23 @@ void NinePatchFactory::free_patch(GLsizei p)
 	}
 }
 
-void NinePatchFactory::draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount)
+void NinePatchFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount)
 {
 	if (m_ptrProgram)
 	{
-		state.use(m_ptrProgram);
+		glState.use(m_ptrProgram);
 
-		m_ptrProgram->uniform("in_Colour",colour);
 		m_ptrProgram->uniform("MVP",mvp);
 
 		m_ptrVAO->multi_draw_elements(GL_TRIANGLE_STRIP,counts,GL_UNSIGNED_INT,firsts,drawcount);
 	}
 }
 
-Indigo::Render::NinePatch::NinePatch() : m_patch(-1)
+Indigo::Render::NinePatch::NinePatch(const glm::u16vec2& size, const OOBase::SharedPtr<Indigo::NinePatch::PatchInfo>& info) :
+		m_patch(-1),
+		m_info(info)
 {
-	memset(m_counts,0,sizeof(m_counts));
-}
-
-Indigo::Render::NinePatch::NinePatch(const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size) : m_patch(-1)
-{
-	layout(size,borders,tex_size);
+	layout(size);
 }
 
 Indigo::Render::NinePatch::~NinePatch()
@@ -293,14 +285,14 @@ bool Indigo::Render::NinePatch::valid() const
 	return m_patch != GLsizei(-1);
 }
 
-void Indigo::Render::NinePatch::layout(const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size)
+void Indigo::Render::NinePatch::layout(const glm::u16vec2& size)
 {
-	if (size.x && size.y && tex_size.x && tex_size.y)
+	if (size.x && size.y && m_info->m_tex_size.x && m_info->m_tex_size.y)
 	{
 		if (m_patch == GLsizei(-1))
-			m_patch = NinePatchFactory_t::instance().alloc_patch(size,borders,tex_size);
+			m_patch = NinePatchFactory_t::instance().alloc_patch(size,m_info->m_borders,m_info->m_tex_size);
 		else
-			NinePatchFactory_t::instance().layout_patch(m_patch,size,borders,tex_size);
+			NinePatchFactory_t::instance().layout_patch(m_patch,size,m_info->m_borders,m_info->m_tex_size);
 	}
 	else if (m_patch != GLsizei(-1))
 	{
@@ -316,9 +308,9 @@ void Indigo::Render::NinePatch::layout(const glm::u16vec2& size, const glm::u16v
 		m_firsts[0] = 0;
 		m_counts[0] = 0;
 
-		if (borders.y)
+		if (m_info->m_borders.y)
 		{
-			if (!borders.x)
+			if (!m_info->m_borders.x)
 			{
 				m_firsts[0] = 2;
 				m_counts[0] = 6;
@@ -326,7 +318,7 @@ void Indigo::Render::NinePatch::layout(const glm::u16vec2& size, const glm::u16v
 			else
 				m_counts[0] = 8;
 
-			if (!borders.z)
+			if (!m_info->m_borders.z)
 				m_counts[0] -= 2;
 
 			m_firsts[0] = (patch + m_firsts[0]) * sizeof(GLuint);
@@ -334,21 +326,21 @@ void Indigo::Render::NinePatch::layout(const glm::u16vec2& size, const glm::u16v
 
 		m_firsts[1] = 8;
 		m_counts[1] = 8;
-		if (!borders.x)
+		if (!m_info->m_borders.x)
 		{
 			m_firsts[1] = 10;
 			m_counts[1] = 6;
 		}
-		if (!borders.z)
+		if (!m_info->m_borders.z)
 			m_counts[1] -= 2;
 
 		m_firsts[1] = (patch + m_firsts[1]) * sizeof(GLuint);
 
 		m_firsts[2] = 16;
 		m_counts[2] = 0;
-		if (borders.w)
+		if (m_info->m_borders.w)
 		{
-			if (!borders.x)
+			if (!m_info->m_borders.x)
 			{
 				m_firsts[2] = 18;
 				m_counts[2] = 6;
@@ -356,7 +348,7 @@ void Indigo::Render::NinePatch::layout(const glm::u16vec2& size, const glm::u16v
 			else
 				m_counts[2] = 8;
 
-			if (!borders.z)
+			if (!m_info->m_borders.z)
 				m_counts[2] -= 2;
 
 			m_firsts[2] = (patch + m_firsts[2]) * sizeof(GLuint);
@@ -364,25 +356,140 @@ void Indigo::Render::NinePatch::layout(const glm::u16vec2& size, const glm::u16v
 	}
 }
 
-void Indigo::Render::NinePatch::draw(OOGL::State& state, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp) const
+void Indigo::Render::NinePatch::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	if (m_patch != GLsizei(-1))
+	if (m_patch != GLsizei(-1) && m_info->m_texture)
 	{
-		state.bind(0,texture);
+		glState.bind(0,m_info->m_texture);
 
 		if (m_counts[0])
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(state,mvp,colour,m_firsts,m_counts,3);
+				NinePatchFactory_t::instance().draw(glState,mvp,m_firsts,m_counts,3);
 			else
-				NinePatchFactory_t::instance().draw(state,mvp,colour,m_firsts,m_counts,2);
+				NinePatchFactory_t::instance().draw(glState,mvp,m_firsts,m_counts,2);
 		}
 		else
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(state,mvp,colour,&m_firsts[1],&m_counts[1],2);
+				NinePatchFactory_t::instance().draw(glState,mvp,&m_firsts[1],&m_counts[1],2);
 			else
-				NinePatchFactory_t::instance().draw(state,mvp,colour,&m_firsts[1],&m_counts[1],1);
+				NinePatchFactory_t::instance().draw(glState,mvp,&m_firsts[1],&m_counts[1],1);
 		}
 	}
+}
+
+Indigo::NinePatch::NinePatch() : Image()
+{
+}
+
+bool Indigo::NinePatch::load(const unsigned char* buffer, int len, int components)
+{
+	if (!Image::load(buffer,len,components))
+		return false;
+
+	bool ret = false;
+	if (m_width < 2 || m_height < 2)
+		LOG_ERROR(("Image too small for a 9-patch!"));
+	else
+	{
+		m_info = OOBase::allocate_shared<Indigo::NinePatch::PatchInfo>();
+		if (!m_info)
+			LOG_ERROR(("Failed to allocate 9-patch info block: %s",OOBase::system_error_text()));
+		else
+			ret = get_bounds();
+	}
+
+	if (!ret)
+		free_pixels();
+
+	return ret;
+}
+
+bool Indigo::NinePatch::pixel_cmp(int x, int y, bool black)
+{
+	static const char black_rgba[4] = { 0, 0, 0, char(0xFF) };
+	int comp_bits = 0;
+
+	const char* p = static_cast<char*>(m_pixels) + ((y * m_width) + x) * m_components;
+
+	for (int c=0;c<m_components;++c)
+	{
+		if (p[c] == black_rgba[c])
+			comp_bits |= (1 << c);
+	}
+
+	return (black == (comp_bits == ((1 << m_components)-1)));
+}
+
+bool Indigo::NinePatch::scan_line(int line, glm::u16vec2& span)
+{
+	for (span.x = 0;span.x < m_width && pixel_cmp(span.x,line,false);++span.x)
+		;
+
+	if (span.x == 0)
+		return false;
+
+	for (span.y = span.x;span.y < m_width && pixel_cmp(span.y,line,true);++span.y)
+		;
+
+	if (span.x == span.y || span.y == m_width)
+		return false;
+
+	int eol = span.y;
+	for (;eol < m_width && pixel_cmp(eol,line,false);++eol)
+		;
+
+	return (eol == m_width);
+}
+
+bool Indigo::NinePatch::scan_column(int column, glm::u16vec2& span)
+{
+	for (span.x = 0;span.x < m_height && pixel_cmp(column,span.x,false);++span.x)
+		;
+
+	if (span.x == 0)
+		return false;
+
+	for (span.y = span.x;span.y < m_height && pixel_cmp(column,span.y,true);++span.y)
+		;
+
+	if (span.x == span.y || span.y == m_height)
+		return false;
+
+	int eoc = span.y;
+	for (;eoc < m_height && pixel_cmp(column,eoc,false);++eoc)
+		;
+
+	return (eoc == m_height);
+}
+
+bool Indigo::NinePatch::get_bounds()
+{
+	glm::u16vec2 span;
+	if (!scan_line(0,span))
+		LOG_ERROR_RETURN(("Bad top row in 9-patch!"),false);
+
+	m_info->m_borders.x = span.x;
+	m_info->m_borders.z = span.y;
+
+	if (!scan_column(0,span))
+		LOG_ERROR_RETURN(("Bad left column in 9-patch!"),false);
+
+	m_info->m_borders.y = span.x;
+	m_info->m_borders.w = span.y;
+
+	if (!scan_line(m_height-1,span))
+		LOG_ERROR_RETURN(("Bad bottom row in 9-patch!"),false);
+
+	m_margins.x = span.x;
+	m_margins.z = span.y;
+
+	if (!scan_line(m_width-1,span))
+		LOG_ERROR_RETURN(("Bad right column in 9-patch!"),false);
+
+	m_margins.y = span.x;
+	m_margins.w = span.y;
+
+	return true;
 }

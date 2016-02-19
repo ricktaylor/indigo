@@ -30,7 +30,6 @@ IDR_NINEPATCH_FS        RCDATA                  "NinePatch.frag"
 IDR_NINEPATCH_VS        RCDATA                  "NinePatch.vert"
 IDR_FONT_8BIT_VS        RCDATA                  "Font_8bit.vert"
 IDR_FONT_8BIT_FS        RCDATA                  "Font_8bit.frag"
-IDR_INIT_LUA            RCDATA                  "init.lua"
 
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////

@@ -22,9 +22,9 @@
 #ifndef INDIGO_LUARESOURCE_H_INCLUDED
 #define INDIGO_LUARESOURCE_H_INCLUDED
 
+#include "../src/Resource.h"
 #include "Common.h"
 
-#include "../lib/Resource.h"
 
 namespace Indigo
 {
