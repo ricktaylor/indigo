@@ -19,7 +19,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Font.h"
 #include "Render.h"
 #include "../lib/BufferObject.h"
 #include "../lib/VertexArrayObject.h"
@@ -27,6 +26,7 @@
 #include "../lib/Resource.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include "Font.h"
 
 namespace Indigo
 {

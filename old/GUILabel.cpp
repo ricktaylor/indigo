@@ -21,8 +21,8 @@
 
 #include "../old/GUILabel.h"
 
-#include "Render.h"
 #include "Font.h"
+#include "Render.h"
 #include "NinePatch.h"
 
 namespace

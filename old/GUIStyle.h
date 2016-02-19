@@ -22,10 +22,9 @@
 #ifndef INDIGO_GUISTYLE_H_INCLUDED
 #define INDIGO_GUISTYLE_H_INCLUDED
 
+#include "../lib/Window.h"
 #include "Font.h"
 #include "Image.h"
-
-#include "../lib/Window.h"
 
 namespace Indigo
 {
