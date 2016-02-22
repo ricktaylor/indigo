@@ -58,7 +58,7 @@ Indigo::Image::Image() :
 
 Indigo::Image::~Image()
 {
-	free_pixels();
+	unload();
 }
 
 bool Indigo::Image::valid() const
@@ -102,6 +102,15 @@ bool Indigo::Image::load(const unsigned char* buffer, int len, int components)
 	return (p != NULL);
 }
 
+void Indigo::Image::unload()
+{
+	if (m_pixels)
+	{
+		stbi_image_free(m_pixels);
+		m_pixels = NULL;
+	}
+}
+
 OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalFormat) const
 {
 	OOBase::SharedPtr<OOGL::Texture> tex;
@@ -136,13 +145,4 @@ OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalForm
 		tex = OOBase::allocate_shared<OOGL::Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,0,internalFormat,m_width,m_height,format,GL_UNSIGNED_BYTE,m_pixels);
 	}
 	return tex;
-}
-
-void Indigo::Image::free_pixels()
-{
-	if (m_pixels)
-	{
-		stbi_image_free(m_pixels);
-		m_pixels = NULL;
-	}
 }

@@ -401,7 +401,7 @@ bool Indigo::NinePatch::load(const unsigned char* buffer, int len, int component
 	}
 
 	if (!ret)
-		free_pixels();
+		unload();
 
 	return ret;
 }
