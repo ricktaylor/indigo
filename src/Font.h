@@ -33,6 +33,7 @@
 namespace Indigo
 {
 	class Font;
+	class Image;
 
 	namespace Render
 	{
@@ -58,7 +59,7 @@ namespace Indigo
 			OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices;
 			OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements;
 
-			bool load();
+			bool load(const OOBase::Vector<OOBase::SharedPtr<Indigo::Image>,OOBase::ThreadLocalAllocator>* vecPages);
 
 			bool alloc_text(Text& text, const char* sz, size_t len);
 			void free_text(Text& text);
@@ -129,7 +130,7 @@ namespace Indigo
 		typedef OOBase::HashTable<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>,float,OOBase::ThreadLocalAllocator> kern_map_t;
 		kern_map_t m_mapKerning;
 
-		void do_load(bool* ret_val);
+		void do_load(OOBase::Vector<OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator>* vecPages, bool* ret_val);
 		void do_destroy();
 	};
 }

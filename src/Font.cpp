@@ -274,8 +274,28 @@ Indigo::Render::Font::~Font()
 {
 }
 
-bool Indigo::Render::Font::load()
+bool Indigo::Render::Font::load(const OOBase::Vector<OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator>* vecPages)
 {
+	if (vecPages->size() > 1)
+	{
+		if (!OOGL::StateFns::get_current()->check_glTextureArray())
+			LOG_ERROR_RETURN(("Multiple textures in font, no texture array support"),false);
+
+		LOG_WARNING(("Multiple layer font texture not supported as yet!"));
+		return false;
+	}
+	else
+	{
+		m_ptrTexture = vecPages->at(0)->get()->make_texture(GL_R8);
+		if (!m_ptrTexture)
+			LOG_ERROR_RETURN(("Failed to load font texture"),false);
+	}
+
+	m_ptrTexture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	m_ptrTexture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	m_ptrTexture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	m_ptrTexture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+
 	return true;
 }
 
@@ -559,7 +579,7 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 	const unsigned char* end = data + len;
 	float tex_width, tex_height;
 	unsigned int pages;
-	//OOBase::Vector<const char*,OOBase::ThreadLocalAllocator> vecPages;
+	OOBase::Vector<OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator> vecPages;
 
 	bool ok = true;
 	for (data += 4;ok && data < end;)
@@ -610,31 +630,18 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 			break;
 
 		case 3:
-			if (pages == 1)
+			for (unsigned int p=0;ok && p<pages;++p)
 			{
-				//OOGL::Image img;
-				//if ((ok = img.load(resource,reinterpret_cast<const char*>(data))))
-				//	ok = (m_ptrTexture = img.make_texture(GL_R8));
-
-				data += len;
-			}
-			else
-			{
-				/*if (!OOGL::StateFns::get_current()->check_glTextureArray())
+				OOBase::SharedPtr<Image> ptrImage = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
+				if (!ptrImage)
 				{
-					LOG_ERROR(("Multiple textures in font, no texture array support"));
+					LOG_ERROR(("Failed to allocate image"));
 					ok = false;
-				}*/
-				for (unsigned int p=0;ok && p<pages;++p)
-				{
-					//OOGL::Image img;
-					//if ((ok = img.load(resource,reinterpret_cast<const char*>(data))))
-					{
-						// TODO: Load into array texture
-					}
-
-					data += len/pages;
 				}
+				else if ((ok = ptrImage->load(resource,reinterpret_cast<const char*>(data))))
+					ok = (vecPages.push_back(ptrImage));
+
+				data += len/pages;
 			}
 			break;
 
@@ -691,29 +698,20 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 	if (!ok)
 		return false;
 
-	// Set up texture
-	/*if (m_ptrTexture)
-	{
-		m_ptrTexture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		m_ptrTexture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-		m_ptrTexture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-		m_ptrTexture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-	}*/
-
 	if (data != end)
 		LOG_WARNING(("Extra bytes at end of font data"));
 
 	bool ret = false;
-	return render_pipe()->call(OOBase::make_delegate(this,&Indigo::Font::do_load),&ret) && ret;
+	return render_pipe()->call(OOBase::make_delegate(this,&Indigo::Font::do_load),&vecPages,&ret) && ret;
 }
 
-void Indigo::Font::do_load(bool* ret_val)
+void Indigo::Font::do_load(OOBase::Vector<OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator>* vecPages, bool* ret_val)
 {
 	*ret_val = false;
 	OOBase::SharedPtr<Indigo::Render::Font> font = OOBase::allocate_shared<Indigo::Render::Font,OOBase::ThreadLocalAllocator>(this);
 	if (!font)
 		LOG_ERROR(("Failed to allocate render font: %s",OOBase::system_error_text()));
-	else if (font->load())
+	else if (font->load(vecPages))
 	{
 		m_font = font;
 		*ret_val = true;
