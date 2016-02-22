@@ -92,7 +92,7 @@ namespace Indigo
 		class UIText : public Text, public UIDrawable
 		{
 		public:
-			UIText(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = -1, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), bool visible = false, const glm::i16vec2& position = glm::i16vec2(0,0), const glm::u16vec2& size = glm::u16vec2(0,0));
+			UIText(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = -1, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), bool visible = false, const glm::i16vec2& position = glm::i16vec2(0,0));
 
 			void colour(const glm::vec4& colour);
 

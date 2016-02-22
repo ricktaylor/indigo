@@ -36,29 +36,23 @@ namespace Indigo
 			friend class UIGroup;
 
 		public:
-			UIDrawable(bool visible = false, const glm::i16vec2& position = glm::i16vec2(0,0), const glm::u16vec2& size = glm::u16vec2(0,0));
+			UIDrawable(bool visible = false, const glm::ivec2& position = glm::ivec2(0,0));
 
 			void visible(bool show = true);
-			void position(const glm::i16vec2& pos);
-			void size(const glm::u16vec2& sz);
+			void position(const glm::ivec2& pos);
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
 
 		protected:
 			bool m_visible;
-			glm::i16vec2 m_position;
-			glm::u16vec2 m_size;
+			glm::ivec2 m_position;
 		};
 
 		class UIGroup : public UIDrawable
 		{
 			friend class Indigo::UIGroup;
-			friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 
-		protected:
-			UIGroup()
-			{}
-
+		public:
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 
 		private:
@@ -75,32 +69,73 @@ namespace Indigo
 		friend class Render::UIGroup;
 
 	public:
+		virtual ~UIWidget()
+		{}
+
 		virtual bool valid()
 		{
 			return m_render_group;
 		}
 
+		bool visible() const { return m_visible; }
+		bool visible(bool show = true);
+
+		bool enabled() const { return m_enabled; }
+		bool enable(bool enabled = true);
+
+		bool focused() const { return m_focused && enabled(); }
+		bool focus(bool focused = true);
+
+		bool hilighted() const { return m_hilighted && enabled(); }
+		bool hilight(bool hilighted = true);
+
+		const glm::ivec2& position() const { return m_position; }
+		void position(const glm::ivec2& pos) { m_position = pos; }
+
+		const glm::uvec2& size() const { return m_size; }
+		virtual glm::uvec2 size(const glm::uvec2& sz);
+
+		glm::uvec2 min_size() const;
+		virtual glm::uvec2 min_size(const glm::uvec2& sz);
+
+		glm::uvec2 max_size() const { return m_max_size; }
+		glm::uvec2 max_size(const glm::uvec2& sz);
+
+		virtual glm::uvec2 ideal_size() const;
+
 	protected:
-		UIWidget()
-		{}
+		UIWidget(const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(-1));
 
-		const OOBase::SharedPtr<Indigo::Render::UIGroup>& render_group()
+		template <typename T>
+		OOBase::SharedPtr<T> render_group() const
 		{
-			return m_render_group;
+			return OOBase::static_pointer_cast<T>(m_render_group);
 		}
 
-		virtual bool on_render_create(Indigo::Render::UIGroup* group)
-		{
-			return true;
-		}
+		virtual bool on_render_create(Indigo::Render::UIGroup* const group) { return true; }
+		virtual bool can_show(bool show) { return true; }
+		virtual bool can_enable(bool enabled) { return false; }
+		virtual bool can_focus(bool focused) { return false; }
+		virtual bool can_hilight(bool hilighted) { return false; }
 
 	private:
 		OOBase::SharedPtr<Indigo::Render::UIGroup> m_render_group;
+		bool m_visible;
+		bool m_enabled;
+		bool m_focused;
+		bool m_hilighted;
+		glm::ivec2 m_position;
+		glm::uvec2 m_min_size;
+		glm::uvec2 m_max_size;
+		glm::uvec2 m_size;
 	};
 
 	class UIGroup : public UIWidget
 	{
 	public:
+		UIGroup(const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(-1)) : UIWidget(position,size)
+		{}
+
 		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder);
 		bool remove_widget(unsigned int zorder);
 
@@ -119,12 +154,10 @@ namespace Indigo
 
 	class UILayer : public UIGroup, public Layer
 	{
-		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
-
-	public:
-
 	protected:
 		OOBase::SharedPtr<Render::Layer> create_render_layer(Indigo::Render::Window* const window);
+
+		void on_size(const glm::uvec2& sz);
 	};
 }
 

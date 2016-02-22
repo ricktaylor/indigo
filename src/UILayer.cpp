@@ -27,32 +27,20 @@ namespace
 	class UILayer : public Indigo::Render::UIGroup, public Indigo::Render::Layer
 	{
 	public:
-		UILayer(Indigo::Render::Window* const window) : Indigo::Render::Layer(window)
-		{}
+		UILayer(Indigo::Render::Window* const window);
 
 		void on_draw(OOGL::State& glState) const;
 
-		void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
+		void on_size(glm::uvec2 sz) { m_size = sz; }
+
+	private:
+		glm::uvec2 m_size;
 	};
 }
 
-void ::UILayer::on_draw(OOGL::State& glState) const
-{
-	glm::vec2 sz = m_window->window()->size();
-	glm::mat4 proj = glm::ortho(0.f,sz.x,0.f,sz.y);
-
-	Indigo::Render::UIGroup::on_draw(glState,proj);
-}
-
-void ::UILayer::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
-{
-	Indigo::Render::UIGroup::on_draw(glState,mvp);
-}
-
-Indigo::Render::UIDrawable::UIDrawable(bool visible, const glm::i16vec2& position, const glm::u16vec2& size) :
+Indigo::Render::UIDrawable::UIDrawable(bool visible, const glm::ivec2& position) :
 		m_visible(visible),
-		m_position(position),
-		m_size(size)
+		m_position(position)
 {
 }
 
@@ -87,6 +75,185 @@ void Indigo::Render::UIGroup::add_widget_group(UIWidget* widget, unsigned int zo
 		*ret = true;
 }
 
+::UILayer::UILayer(Indigo::Render::Window* const window) :
+		Indigo::Render::Layer(window),
+		m_size(window->window()->size())
+{
+}
+
+void ::UILayer::on_draw(OOGL::State& glState) const
+{
+	if (m_visible)
+	{
+		glm::vec2 pos = m_position;
+		glm::vec2 sz = m_size;
+
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+		Indigo::Render::UIGroup::on_draw(glState,glm::ortho(pos.x,sz.x,pos.y,sz.y));
+	}
+}
+
+Indigo::UIWidget::UIWidget(const glm::ivec2& position, const glm::uvec2& size) :
+		m_visible(false),
+		m_enabled(true),
+		m_focused(false),
+		m_hilighted(false),
+		m_position(position),
+		m_min_size(size),
+		m_max_size(-1)
+{
+	m_size = min_size();
+}
+
+bool Indigo::UIWidget::visible(bool show)
+{
+	if (show != m_visible)
+	{
+		if (!can_show(show))
+			return false;
+
+		m_visible = show;
+	}
+	return true;
+}
+
+bool Indigo::UIWidget::enable(bool enable)
+{
+	if (enable != m_enabled)
+	{
+		if (!can_enable(enable))
+			return false;
+
+		m_enabled = enable;
+	}
+	return true;
+}
+
+bool Indigo::UIWidget::focus(bool focused)
+{
+	if (focused != m_focused)
+	{
+		if (!enabled() || !can_focus(focused))
+			return false;
+
+		m_focused = focused;
+	}
+	return true;
+}
+
+bool Indigo::UIWidget::hilight(bool hilighted)
+{
+	if (hilighted != m_hilighted)
+	{
+		if (!enabled() || !can_hilight(hilighted))
+			return false;
+
+		m_hilighted = hilighted;
+	}
+	return true;
+}
+
+glm::uvec2 Indigo::UIWidget::size(const glm::uvec2& sz)
+{
+	if (m_size != sz)
+	{
+		m_size = sz;
+
+		if (m_min_size.x != glm::uvec2::value_type(-1) && m_size.x < m_min_size.x)
+			m_size.x = m_min_size.x;
+
+		if (m_min_size.y != glm::uvec2::value_type(-1) && m_size.y < m_min_size.y)
+			m_size.y = m_min_size.y;
+
+		if (m_size.x > m_max_size.x)
+			m_size.x = m_max_size.x;
+
+		if (m_size.y > m_max_size.y)
+			m_size.y = m_max_size.y;
+	}
+
+	return m_size;
+}
+
+glm::uvec2 Indigo::UIWidget::min_size() const
+{
+	glm::uvec2 min_size(m_min_size);
+	if (min_size.x == glm::uvec2::value_type(-1) || min_size.y == glm::uvec2::value_type(-1))
+	{
+		glm::uvec2 ideal(ideal_size());
+		if (min_size.x == glm::uvec2::value_type(-1))
+			min_size.x = ideal.x;
+
+		if (min_size.y == glm::uvec2::value_type(-1))
+			min_size.y = ideal.y;
+	}
+
+	return min_size;
+}
+
+glm::uvec2 Indigo::UIWidget::min_size(const glm::uvec2& sz)
+{
+	if (m_min_size != sz)
+	{
+		m_min_size = sz;
+
+		if (m_min_size.x != glm::uvec2::value_type(-1))
+		{
+			if (m_max_size.x < m_min_size.x)
+				m_max_size.x = m_min_size.x;
+
+			if (m_size.x < m_min_size.x)
+				m_size.x = m_min_size.x;
+		}
+
+		if (m_min_size.y != glm::uvec2::value_type(-1))
+		{
+			if (m_max_size.y < m_min_size.y)
+				m_max_size.y = m_min_size.y;
+
+			if (m_size.y < m_min_size.y)
+				m_size.y = m_min_size.y;
+		}
+	}
+
+	return m_size;
+}
+
+glm::uvec2 Indigo::UIWidget::max_size(const glm::uvec2& sz)
+{
+	if (m_max_size != sz)
+	{
+		m_max_size = sz;
+
+		if (m_min_size.x != glm::uvec2::value_type(-1) && m_max_size.x < m_min_size.x)
+			m_max_size.x = m_min_size.x;
+
+		if (m_min_size.y != glm::uvec2::value_type(-1) && m_max_size.y < m_min_size.y)
+			m_max_size.y = m_min_size.y;
+
+		if (m_size.x > m_max_size.x)
+			m_size.x = m_max_size.x;
+
+		if (m_size.y > m_max_size.y)
+			m_size.y = m_max_size.y;
+	}
+
+	return m_size;
+}
+
+glm::uvec2 Indigo::UIWidget::ideal_size() const
+{
+	glm::uvec2 sz(0);
+	if (m_min_size.x != glm::uvec2::value_type(-1))
+		sz.x = m_min_size.x;
+
+	if (m_min_size.y != glm::uvec2::value_type(-1))
+		sz.y = m_min_size.y;
+
+	return sz;
+}
+
 bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder)
 {
 	if (m_children.insert(zorder,widget) == m_children.end())
@@ -110,7 +277,17 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 	if (!group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
 	else
+	{
 		m_render_group = OOBase::static_pointer_cast<Render::UIGroup>(group);
+		m_size = window->window()->size();
+	}
 
 	return OOBase::static_pointer_cast<Indigo::Render::Layer>(group);
+}
+
+void Indigo::UILayer::on_size(const glm::uvec2& sz)
+{
+	render_pipe()->post(OOBase::make_delegate(render_group< ::UILayer>().get(),&::UILayer::on_size),sz);
+
+	size(sz);
 }
