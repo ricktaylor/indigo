@@ -33,8 +33,21 @@ namespace Indigo
 	{
 		class UIDrawable : public OOBase::NonCopyable
 		{
+			friend class UIGroup;
+
 		public:
+			UIDrawable(bool visible = false, const glm::i16vec2& position = glm::i16vec2(0,0), const glm::u16vec2& size = glm::u16vec2(0,0));
+
+			void visible(bool show = true);
+			void position(const glm::i16vec2& pos);
+			void size(const glm::u16vec2& sz);
+
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
+
+		protected:
+			bool m_visible;
+			glm::i16vec2 m_position;
+			glm::u16vec2 m_size;
 		};
 
 		class UIGroup : public UIDrawable

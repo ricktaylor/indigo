@@ -28,7 +28,9 @@
 #include "../lib/VertexArrayObject.h"
 #include "../lib/BufferObject.h"
 #include "../lib/Texture.h"
+
 #include "Resource.h"
+#include "UILayer.h"
 
 namespace Indigo
 {
@@ -59,7 +61,7 @@ namespace Indigo
 			OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices;
 			OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements;
 
-			bool load(const OOBase::Vector<OOBase::SharedPtr<Indigo::Image>,OOBase::ThreadLocalAllocator>* vecPages);
+			bool load(const OOBase::SharedPtr<Indigo::Image>* pages, size_t page_count);
 
 			bool alloc_text(Text& text, const char* sz, size_t len);
 			void free_text(Text& text);
@@ -77,17 +79,27 @@ namespace Indigo
 
 			const OOBase::SharedPtr<Font>& font() const;
 
-			bool text(const char* sz, size_t len = -1);
+			void text(const char* sz, size_t len = -1);
 
-			float length() const;
-
-			void draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start = 0, GLsizei length = GLsizei(-1));
+			void draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start = 0, GLsizei length = -1) const;
 
 		private:
 			OOBase::SharedPtr<Font> m_font;
 			GLsizei m_glyph_start;
 			GLsizei m_glyph_len;
-			float m_length;
+		};
+
+		class UIText : public Text, public UIDrawable
+		{
+		public:
+			UIText(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = -1, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), bool visible = false, const glm::i16vec2& position = glm::i16vec2(0,0), const glm::u16vec2& size = glm::u16vec2(0,0));
+
+			void colour(const glm::vec4& colour);
+
+		private:
+			glm::vec4 m_colour;
+
+			void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};
 	}
 
@@ -99,8 +111,15 @@ namespace Indigo
 		Font();
 		~Font();
 
+		bool valid() const
+		{
+			return m_font;
+		}
+
 		bool load(const ResourceBundle& resource, const char* name);
 		bool destroy();
+
+		float measure_text(const char* sz, size_t len = -1);
 
 		const OOBase::SharedPtr<Render::Font>& render_font() const;
 
@@ -130,7 +149,7 @@ namespace Indigo
 		typedef OOBase::HashTable<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>,float,OOBase::ThreadLocalAllocator> kern_map_t;
 		kern_map_t m_mapKerning;
 
-		void do_load(OOBase::Vector<OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator>* vecPages, bool* ret_val);
+		void do_load(OOBase::SharedPtr<Indigo::Image>* pages, size_t page_count, bool* ret_val);
 		void do_destroy();
 	};
 }

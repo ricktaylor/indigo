@@ -49,10 +49,22 @@ void ::UILayer::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 	Indigo::Render::UIGroup::on_draw(glState,mvp);
 }
 
+Indigo::Render::UIDrawable::UIDrawable(bool visible, const glm::i16vec2& position, const glm::u16vec2& size) :
+		m_visible(visible),
+		m_position(position),
+		m_size(size)
+{
+}
+
 void Indigo::Render::UIGroup::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
+	glm::mat4 child_mvp = glm::translate(mvp,glm::vec3(m_position.x,m_position.y,0));
+
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIDrawable>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i!=m_children.end();++i)
-		i->second->on_draw(glState,mvp);
+	{
+		if (i->second->m_visible)
+			i->second->on_draw(glState,child_mvp);
+	}
 }
 
 void Indigo::Render::UIGroup::add_widget_group(UIWidget* widget, unsigned int zorder, bool* ret)

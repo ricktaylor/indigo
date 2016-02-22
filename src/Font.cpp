@@ -274,9 +274,9 @@ Indigo::Render::Font::~Font()
 {
 }
 
-bool Indigo::Render::Font::load(const OOBase::Vector<OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator>* vecPages)
+bool Indigo::Render::Font::load(const OOBase::SharedPtr<Indigo::Image>* pages, size_t page_count)
 {
-	if (vecPages->size() > 1)
+	if (page_count > 1)
 	{
 		if (!OOGL::StateFns::get_current()->check_glTextureArray())
 			LOG_ERROR_RETURN(("Multiple textures in font, no texture array support"),false);
@@ -286,7 +286,7 @@ bool Indigo::Render::Font::load(const OOBase::Vector<OOBase::SharedPtr<Image>,OO
 	}
 	else
 	{
-		m_ptrTexture = vecPages->at(0)->get()->make_texture(GL_R8);
+		m_ptrTexture = pages[0]->make_texture(GL_R8);
 		if (!m_ptrTexture)
 			LOG_ERROR_RETURN(("Failed to load font texture"),false);
 	}
@@ -396,8 +396,7 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 	OOBase::uint32_t prev_glyph = OOBase::uint32_t(-1);
 	const OOBase::uint32_t* start = glyphs.data();
 	const OOBase::uint32_t* end = start + len;
-
-	text.m_length = 0.0f;
+	float length = 0.0f;
 	text.m_glyph_len = len;
 
 	while (start < end)
@@ -409,7 +408,7 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 			{
 				Indigo::Font::kern_map_t::iterator k = m_owner->m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(prev_glyph,glyph));
 				if (k)
-					text.m_length += k->second;
+					length += k->second;
 			}
 			prev_glyph = glyph;
 
@@ -417,11 +416,11 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 			if (!i)
 				i = m_owner->m_mapCharInfo.find(static_cast<OOBase::uint8_t>('?'));
 
-			a[0].x = text.m_length + i->second.left;
+			a[0].x = length + i->second.left;
 			a[0].y = i->second.top;
 			a[1].x = a[0].x;
 			a[1].y = i->second.bottom;
-			a[2].x = text.m_length + i->second.right;
+			a[2].x = length + i->second.right;
 			a[2].y = a[0].y;
 			a[3].x = a[2].x;
 			a[3].y = a[1].y;
@@ -446,7 +445,7 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 			e += elements_per_glyph;
 			idx += vertices_per_glyph;
 
-			text.m_length += i->second.xadvance;
+			length += i->second.xadvance;
 		}
 		else
 		{
@@ -498,7 +497,7 @@ void Indigo::Render::Font::draw(OOGL::State& state, const glm::mat4& mvp, const 
 }
 
 Indigo::Render::Text::Text(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len) :
-		m_font(font), m_glyph_start(0), m_glyph_len(0), m_length(0.0f)
+		m_font(font), m_glyph_start(0), m_glyph_len(0)
 {
 	if (len == size_t(-1))
 		len = (sz ? strlen(sz) : 0);
@@ -511,21 +510,18 @@ Indigo::Render::Text::~Text()
 	m_font->free_text(*this);
 }
 
-bool Indigo::Render::Text::text(const char* sz, size_t len)
+void Indigo::Render::Text::text(const char* sz, size_t len)
 {
 	if (len == size_t(-1))
 		len = (sz ? strlen(sz) : 0);
 
-	bool ret = true;
 	m_font->free_text(*this);
 
 	m_glyph_start = 0;
 	m_glyph_len = 0;
 
 	if (len)
-		ret = m_font->alloc_text(*this,sz,len);
-
-	return ret;
+		m_font->alloc_text(*this,sz,len);
 }
 
 const OOBase::SharedPtr<Indigo::Render::Font>& Indigo::Render::Text::font() const
@@ -533,12 +529,7 @@ const OOBase::SharedPtr<Indigo::Render::Font>& Indigo::Render::Text::font() cons
 	return m_font;
 }
 
-float Indigo::Render::Text::length() const
-{
-	return m_length;
-}
-
-void Indigo::Render::Text::draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei length)
+void Indigo::Render::Text::draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei length) const
 {
 	if (start > m_glyph_len)
 		start = m_glyph_len;
@@ -550,6 +541,18 @@ void Indigo::Render::Text::draw(OOGL::State& state, const glm::mat4& mvp, const 
 		length = m_glyph_len - start;
 
 	m_font->draw(state,mvp,colour,m_glyph_start + start,length);
+}
+
+Indigo::Render::UIText::UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, const glm::vec4& colour, bool visible, const glm::i16vec2& position, const glm::u16vec2& size) :
+		Text(font,sz,len),
+		UIDrawable(visible,position,size),
+		m_colour(colour)
+{
+}
+
+void Indigo::Render::UIText::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
+{
+	draw(glState,mvp,m_colour);
 }
 
 Indigo::Font::Font() : m_line_height(0.f), m_packing(0)
@@ -615,12 +618,6 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 			else
 			{
 				m_packing = read_uint32(data);
-				/*if (m_packing == 0x04040400)
-					ok = (!!OOGL::ContextSingleton<FontProgram>::instance().program(m_packing));
-				else
-				{
-					// TODO: Funky packing
-				}*/
 			}
 			if (!pages)
 			{
@@ -702,16 +699,16 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 		LOG_WARNING(("Extra bytes at end of font data"));
 
 	bool ret = false;
-	return render_pipe()->call(OOBase::make_delegate(this,&Indigo::Font::do_load),&vecPages,&ret) && ret;
+	return render_pipe()->call(OOBase::make_delegate(this,&Indigo::Font::do_load),vecPages.data(),vecPages.size(),&ret) && ret;
 }
 
-void Indigo::Font::do_load(OOBase::Vector<OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator>* vecPages, bool* ret_val)
+void Indigo::Font::do_load(OOBase::SharedPtr<Indigo::Image>* pages, size_t page_count, bool* ret_val)
 {
 	*ret_val = false;
 	OOBase::SharedPtr<Indigo::Render::Font> font = OOBase::allocate_shared<Indigo::Render::Font,OOBase::ThreadLocalAllocator>(this);
 	if (!font)
 		LOG_ERROR(("Failed to allocate render font: %s",OOBase::system_error_text()));
-	else if (font->load(vecPages))
+	else if (font->load(pages,page_count))
 	{
 		m_font = font;
 		*ret_val = true;
@@ -731,4 +728,47 @@ void Indigo::Font::do_destroy()
 const OOBase::SharedPtr<Indigo::Render::Font>& Indigo::Font::render_font() const
 {
 	return m_font;
+}
+
+float Indigo::Font::measure_text(const char* sz, size_t s_len)
+{
+	float result = 0.f;
+	if (s_len == size_t(-1))
+		s_len = strlen(sz);
+
+	OOBase::Vector<OOBase::uint32_t,OOBase::ThreadLocalAllocator> glyphs;
+	GLsizei len = utf8_to_glyphs(sz,s_len,glyphs);
+	if (len)
+	{
+		OOBase::uint32_t prev_glyph = OOBase::uint32_t(-1);
+		const OOBase::uint32_t* start = glyphs.data();
+		const OOBase::uint32_t* end = start + len;
+
+		while (start < end)
+		{
+			OOBase::uint32_t glyph = *start++;
+			if (glyph > 31 && glyph != 127 && (glyph < 128 || glyph > 159))
+			{
+				if (prev_glyph != OOBase::uint32_t(-1))
+				{
+					kern_map_t::iterator k = m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(prev_glyph,glyph));
+					if (k)
+						result += k->second;
+				}
+				prev_glyph = glyph;
+
+				char_map_t::iterator i = m_mapCharInfo.find(glyph);
+				if (!i)
+					i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>('?'));
+
+				result += i->second.xadvance;
+			}
+			else
+			{
+				prev_glyph = OOBase::uint32_t(-1);
+			}
+		}
+	}
+
+	return result;
 }
