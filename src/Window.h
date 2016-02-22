@@ -55,7 +55,7 @@ namespace Indigo
 		friend class Render::Window;
 
 	public:
-		virtual bool is_valid()
+		virtual bool valid()
 		{
 			return m_render_layer;
 		}

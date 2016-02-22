@@ -62,7 +62,7 @@ namespace Indigo
 		friend class Render::UIGroup;
 
 	public:
-		virtual bool is_valid()
+		virtual bool valid()
 		{
 			return m_render_group;
 		}
