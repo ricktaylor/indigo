@@ -23,23 +23,23 @@
 
 #include <OOBase/Logger.h>
 
-static void* wrap_malloc(size_t sz)
-{
-	return OOBase::ThreadLocalAllocator::allocate(sz);
-}
-
-static void* wrap_realloc(void* p, size_t sz)
-{
-	return OOBase::ThreadLocalAllocator::reallocate(p,sz);
-}
-
-static void wrap_free(void* p)
-{
-	OOBase::ThreadLocalAllocator::free(p);
-}
-
 extern "C"
 {
+	static void* wrap_malloc(size_t sz)
+	{
+		return OOBase::ThreadLocalAllocator::allocate(sz);
+	}
+
+	static void* wrap_realloc(void* p, size_t sz)
+	{
+		return OOBase::ThreadLocalAllocator::reallocate(p,sz);
+	}
+
+	static void wrap_free(void* p)
+	{
+		OOBase::ThreadLocalAllocator::free(p);
+	}
+
 	#define STBI_MALLOC(sz)    wrap_malloc(sz)
 	#define STBI_REALLOC(p,sz) wrap_realloc(p,sz)
 	#define STBI_FREE(p)       wrap_free(p)
