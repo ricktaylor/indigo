@@ -35,6 +35,9 @@ namespace Indigo
 
 		void start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args);
 		void stop();
+
+	private:
+		void splash();
 	};
 
 	typedef OOBase::Singleton<Application> APP;

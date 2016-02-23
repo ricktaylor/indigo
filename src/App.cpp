@@ -27,19 +27,15 @@
 #include "Image.h"
 #include "NinePatch.h"
 
-static void splash()
+void Indigo::Application::splash()
 {
+	OOBase::SharedPtr<Indigo::UILayer> layer =OOBase::allocate_shared<Indigo::UILayer,OOBase::ThreadLocalAllocator>();
+	m_wnd->add_layer(layer,100);
 
 	Indigo::NinePatch n;
 	n.Image::load(Indigo::static_resources(),"menu_border.png");
 
 
-
-	OOBase::SharedPtr<Indigo::UILayer> layer = OOBase::allocate_shared<Indigo::UILayer,OOBase::ThreadLocalAllocator>();
-
-	Indigo::APP::instance().m_wnd->add_layer(layer,100);
-
-	Indigo::APP::instance().m_wnd->visible(true);
 }
 
 void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args)
@@ -48,12 +44,15 @@ void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::Cmd
 	m_args = args;
 	m_wnd = wnd;
 
+	// Add a simple white blanking layer
+	m_wnd->add_layer(OOBase::allocate_shared<Indigo::BlankingLayer,OOBase::ThreadLocalAllocator>(glm::vec4(1.f)),0);
+	m_wnd->visible(true);
+
 	splash();
 }
 
 void Indigo::Application::stop()
 {
-
 	thread_pipe()->close();
 }
 
