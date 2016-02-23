@@ -29,7 +29,7 @@
 
 void Indigo::Application::splash()
 {
-	OOBase::SharedPtr<Indigo::UILayer> layer =OOBase::allocate_shared<Indigo::UILayer,OOBase::ThreadLocalAllocator>();
+	OOBase::SharedPtr<Indigo::UILayer> layer = OOBase::allocate_shared<Indigo::UILayer,OOBase::ThreadLocalAllocator>();
 	m_wnd->add_layer(layer,100);
 
 	Indigo::NinePatch n;

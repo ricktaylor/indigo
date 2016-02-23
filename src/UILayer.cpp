@@ -48,7 +48,7 @@ void Indigo::Render::UIGroup::on_draw(OOGL::State& glState, const glm::mat4& mvp
 {
 	glm::mat4 child_mvp = glm::translate(mvp,glm::vec3(m_position.x,m_position.y,0));
 
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIDrawable>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i!=m_children.end();++i)
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIDrawable>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
 	{
 		if (i->second->m_visible)
 			i->second->on_draw(glState,child_mvp);
@@ -61,7 +61,7 @@ void Indigo::Render::UIGroup::add_widget_group(UIWidget* widget, unsigned int zo
 	widget->m_render_group = OOBase::allocate_shared<Render::UIGroup,OOBase::ThreadLocalAllocator>();
 	if (!widget->m_render_group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
-	else if (m_children.insert(zorder,widget->m_render_group) == m_children.end())
+	else if (!m_children.insert(zorder,widget->m_render_group))
 	{
 		LOG_ERROR(("Failed to insert group: %s",OOBase::system_error_text()));
 		widget->m_render_group.reset();

@@ -134,7 +134,7 @@ void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& 
 
 void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i!=m_layers.end();++i)
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
 		i->second->on_draw(glState);
 }
 
@@ -144,7 +144,7 @@ void Indigo::Render::Window::add_render_layer(Indigo::Layer* const layer, unsign
 	layer->m_render_layer = layer->create_render_layer(this);
 	if (layer->m_render_layer)
 	{
-		if (m_layers.insert(zorder,layer->m_render_layer) == m_layers.end())
+		if (!m_layers.insert(zorder,layer->m_render_layer))
 		{
 			LOG_ERROR(("Failed to insert layer: %s",OOBase::system_error_text()));
 			layer->m_render_layer.reset();
@@ -186,7 +186,7 @@ bool Indigo::Window::visible(bool show)
 
 bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, unsigned int zorder)
 {
-	if (m_layers.insert(zorder,layer) == m_layers.end())
+	if (!m_layers.insert(zorder,layer))
 		LOG_ERROR_RETURN(("Failed to insert layer: %s",OOBase::system_error_text()),false);
 
 	bool ret = false;
@@ -203,13 +203,13 @@ bool Indigo::Window::remove_layer(unsigned int zorder)
 unsigned int Indigo::Window::top_layer() const
 {
 	OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i = m_layers.back();
-	return (i == m_layers.end() ? 0 : i->first);
+	return (i ? i->first : 0);
 }
 
 void Indigo::Window::on_close()
 {
 	bool handled = false;
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i!=m_layers.begin();--i)
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
 		handled = i->second->on_quit();
 
 	if (!handled)
@@ -218,13 +218,13 @@ void Indigo::Window::on_close()
 
 void Indigo::Window::on_move(glm::ivec2 pos)
 {
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i!=m_layers.end();++i)
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
 		i->second->on_move(pos);
 }
 
 void Indigo::Window::on_size(glm::uvec2 sz)
 {
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i!=m_layers.end();++i)
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
 		i->second->on_size(sz);
 }
 
