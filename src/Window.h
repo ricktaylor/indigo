@@ -80,6 +80,19 @@ namespace Indigo
 		OOBase::SharedPtr<Render::Layer> m_render_layer;
 	};
 
+	class BlankingLayer : public Layer
+	{
+	public:
+		BlankingLayer(const glm::vec4& colour);
+
+		glm::vec4 colour(const glm::vec4& colour);
+
+	private:
+		glm::vec4 m_colour;
+
+		OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* const window);
+	};
+
 	class Window;
 
 	namespace Render

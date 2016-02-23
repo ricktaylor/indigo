@@ -24,6 +24,60 @@
 #include "Render.h"
 #include "App.h"
 
+namespace
+{
+	class BlankingLayer : public Indigo::Render::Layer
+	{
+	public:
+		BlankingLayer(Indigo::Render::Window* const window, const glm::vec4& colour);
+
+		void on_draw(OOGL::State& glState) const;
+
+		void colour(glm::vec4 colour);
+	};
+}
+
+::BlankingLayer::BlankingLayer(Indigo::Render::Window* const window, const glm::vec4& colour) :
+		Indigo::Render::Layer(window)
+{
+	glClearColor(colour.r,colour.g,colour.b,colour.a);
+}
+
+void ::BlankingLayer::on_draw(OOGL::State& glState) const
+{
+	glState.bind(GL_DRAW_FRAMEBUFFER,m_window->window()->default_frame_buffer());
+
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void ::BlankingLayer::colour(glm::vec4 colour)
+{
+	glClearColor(colour.r,colour.g,colour.b,colour.a);
+}
+
+Indigo::BlankingLayer::BlankingLayer(const glm::vec4& colour) :
+		m_colour(colour)
+{
+}
+
+OOBase::SharedPtr<Indigo::Render::Layer> Indigo::BlankingLayer::create_render_layer(Render::Window* const window)
+{
+	OOBase::SharedPtr< ::BlankingLayer> layer = OOBase::allocate_shared< ::BlankingLayer,OOBase::ThreadLocalAllocator>(window,m_colour);
+	if (!layer)
+		LOG_ERROR(("Failed to allocate layer: %s",OOBase::system_error_text()));
+
+	return OOBase::static_pointer_cast<Indigo::Render::Layer>(layer);
+}
+
+glm::vec4 Indigo::BlankingLayer::colour(const glm::vec4& colour)
+{
+	glm::vec4 prev_colour = m_colour;
+	if (colour != prev_colour)
+		render_pipe()->post(OOBase::make_delegate(render_layer< ::BlankingLayer>().get(),&::BlankingLayer::colour),colour);
+
+	return prev_colour;
+}
+
 Indigo::Render::Window::Window(Indigo::Window* owner) :
 		m_owner(owner)
 {
@@ -80,10 +134,6 @@ void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& 
 
 void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
-	//glState.bind(GL_DRAW_FRAMEBUFFER,win.default_frame_buffer());
-
-	//glClear(GL_COLOR_BUFFER_BIT);
-
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i!=m_layers.end();++i)
 		i->second->on_draw(glState);
 }
