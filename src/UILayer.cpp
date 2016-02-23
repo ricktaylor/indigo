@@ -31,7 +31,7 @@ namespace
 
 		void on_draw(OOGL::State& glState) const;
 
-		void on_size(glm::uvec2 sz) { m_size = sz; }
+		void size(glm::uvec2 sz) { m_size = sz; }
 
 	private:
 		glm::uvec2 m_size;
@@ -55,7 +55,7 @@ void Indigo::Render::UIGroup::on_draw(OOGL::State& glState, const glm::mat4& mvp
 	}
 }
 
-void Indigo::Render::UIGroup::add_widget_group(UIWidget* widget, unsigned int zorder, bool* ret)
+void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder, bool* ret)
 {
 	*ret = false;
 	widget->m_render_group = OOBase::allocate_shared<Render::UIGroup,OOBase::ThreadLocalAllocator>();
@@ -100,22 +100,18 @@ Indigo::UIWidget::UIWidget(const glm::ivec2& position, const glm::uvec2& size) :
 		m_focused(false),
 		m_hilighted(false),
 		m_position(position),
-		m_min_size(size),
-		m_max_size(-1)
+		m_size(size)
 {
-	m_size = min_size();
 }
 
-bool Indigo::UIWidget::visible(bool show)
+void Indigo::UIWidget::show(bool visible)
 {
-	if (show != m_visible)
+	if (visible != m_visible)
 	{
-		if (!can_show(show))
-			return false;
+		m_visible = visible;
 
-		m_visible = show;
+		render_pipe()->post(OOBase::make_delegate(render_group<Render::UIDrawable>().get(),&Render::UIDrawable::visible),visible);
 	}
-	return true;
 }
 
 bool Indigo::UIWidget::enable(bool enable)
@@ -154,113 +150,38 @@ bool Indigo::UIWidget::hilight(bool hilighted)
 	return true;
 }
 
+void Indigo::UIWidget::position(const glm::ivec2& pos)
+{
+	if (m_position != pos)
+	{
+		m_position = pos;
+
+		render_pipe()->post(OOBase::make_delegate(render_group<Render::UIDrawable>().get(),&Render::UIDrawable::position),pos);
+	}
+}
+
 glm::uvec2 Indigo::UIWidget::size(const glm::uvec2& sz)
 {
 	if (m_size != sz)
 	{
-		m_size = sz;
+		glm::uvec2 prev_size = m_size;
 
-		if (m_min_size.x != glm::uvec2::value_type(-1) && m_size.x < m_min_size.x)
-			m_size.x = m_min_size.x;
+		m_size = glm::clamp(sz,this->min_size(),this->max_size());
 
-		if (m_min_size.y != glm::uvec2::value_type(-1) && m_size.y < m_min_size.y)
-			m_size.y = m_min_size.y;
-
-		if (m_size.x > m_max_size.x)
-			m_size.x = m_max_size.x;
-
-		if (m_size.y > m_max_size.y)
-			m_size.y = m_max_size.y;
+		if (prev_size != m_size)
+			on_size(m_size);
 	}
 
 	return m_size;
-}
-
-glm::uvec2 Indigo::UIWidget::min_size() const
-{
-	glm::uvec2 min_size(m_min_size);
-	if (min_size.x == glm::uvec2::value_type(-1) || min_size.y == glm::uvec2::value_type(-1))
-	{
-		glm::uvec2 ideal(ideal_size());
-		if (min_size.x == glm::uvec2::value_type(-1))
-			min_size.x = ideal.x;
-
-		if (min_size.y == glm::uvec2::value_type(-1))
-			min_size.y = ideal.y;
-	}
-
-	return min_size;
-}
-
-glm::uvec2 Indigo::UIWidget::min_size(const glm::uvec2& sz)
-{
-	if (m_min_size != sz)
-	{
-		m_min_size = sz;
-
-		if (m_min_size.x != glm::uvec2::value_type(-1))
-		{
-			if (m_max_size.x < m_min_size.x)
-				m_max_size.x = m_min_size.x;
-
-			if (m_size.x < m_min_size.x)
-				m_size.x = m_min_size.x;
-		}
-
-		if (m_min_size.y != glm::uvec2::value_type(-1))
-		{
-			if (m_max_size.y < m_min_size.y)
-				m_max_size.y = m_min_size.y;
-
-			if (m_size.y < m_min_size.y)
-				m_size.y = m_min_size.y;
-		}
-	}
-
-	return m_size;
-}
-
-glm::uvec2 Indigo::UIWidget::max_size(const glm::uvec2& sz)
-{
-	if (m_max_size != sz)
-	{
-		m_max_size = sz;
-
-		if (m_min_size.x != glm::uvec2::value_type(-1) && m_max_size.x < m_min_size.x)
-			m_max_size.x = m_min_size.x;
-
-		if (m_min_size.y != glm::uvec2::value_type(-1) && m_max_size.y < m_min_size.y)
-			m_max_size.y = m_min_size.y;
-
-		if (m_size.x > m_max_size.x)
-			m_size.x = m_max_size.x;
-
-		if (m_size.y > m_max_size.y)
-			m_size.y = m_max_size.y;
-	}
-
-	return m_size;
-}
-
-glm::uvec2 Indigo::UIWidget::ideal_size() const
-{
-	glm::uvec2 sz(0);
-	if (m_min_size.x != glm::uvec2::value_type(-1))
-		sz.x = m_min_size.x;
-
-	if (m_min_size.y != glm::uvec2::value_type(-1))
-		sz.y = m_min_size.y;
-
-	return sz;
 }
 
 bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder)
 {
-	if (m_children.insert(zorder,widget) == m_children.end())
+	if (!m_children.insert(zorder,widget))
 		LOG_ERROR_RETURN(("Failed to insert widget: %s",OOBase::system_error_text()),false);
 
 	bool ret = false;
-	if (!render_pipe()->call(OOBase::make_delegate(m_render_group.get(),&Render::UIGroup::add_widget_group),widget.get(),zorder,&ret) || !ret)
+	if (!render_pipe()->call(OOBase::make_delegate(m_render_group.get(),&Render::UIGroup::add_subgroup),widget.get(),zorder,&ret) || !ret)
 		m_children.remove(zorder);
 
 	return ret;
@@ -269,6 +190,54 @@ bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsi
 bool Indigo::UIGroup::remove_widget(unsigned int zorder)
 {
 	return m_children.remove(zorder);
+}
+
+glm::uvec2 Indigo::UIGroup::min_size() const
+{
+	glm::uvec2 min(0);
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
+	{
+		if (i->second->visible())
+		{
+			glm::uvec2 min1(i->second->min_size());
+			min1 += i->second->position();
+			min = glm::max(min1,min);
+		}
+	}
+
+	return min;
+}
+
+glm::uvec2 Indigo::UIGroup::max_size() const
+{
+	glm::uvec2 max(0);
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
+	{
+		if (i->second->visible())
+		{
+			glm::uvec2 max1(i->second->max_size());
+			max1 += i->second->position();
+			max = glm::max(max1,max);
+		}
+	}
+
+	return max;
+}
+
+glm::uvec2 Indigo::UIGroup::ideal_size() const
+{
+	glm::uvec2 ideal(0);
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
+	{
+		if (i->second->visible())
+		{
+			glm::uvec2 ideal1(i->second->ideal_size());
+			ideal1 += i->second->position();
+			ideal = glm::max(ideal1,ideal);
+		}
+	}
+
+	return ideal;
 }
 
 OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(Indigo::Render::Window* const window)
@@ -287,7 +256,7 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 
 void Indigo::UILayer::on_size(const glm::uvec2& sz)
 {
-	render_pipe()->post(OOBase::make_delegate(render_group< ::UILayer>().get(),&::UILayer::on_size),sz);
+	render_pipe()->post(OOBase::make_delegate(render_group< ::UILayer>().get(),&::UILayer::size),sz);
 
 	size(sz);
 }
