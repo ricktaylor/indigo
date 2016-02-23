@@ -40,7 +40,7 @@ namespace Indigo
 		public:
 
 		protected:
-			Layer(Window* const window) : m_window(window)
+			Layer(Window* window) : m_window(window)
 			{}
 
 			virtual void on_draw(OOGL::State& glState) const = 0;
@@ -70,7 +70,7 @@ namespace Indigo
 			return OOBase::static_pointer_cast<RenderLayer>(m_render_layer);
 		}
 
-		virtual OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* const window) = 0;
+		virtual OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window) = 0;
 
 		virtual bool on_quit() { return false; }
 		virtual void on_move(const glm::ivec2& sz) {}
@@ -90,7 +90,7 @@ namespace Indigo
 	private:
 		glm::vec4 m_colour;
 
-		OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* const window);
+		OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window);
 	};
 
 	class Window;
@@ -109,7 +109,7 @@ namespace Indigo
 			}
 
 		private:
-			Window(Indigo::Window* const owner);
+			Window(Indigo::Window* owner);
 
 			OOBase::SharedPtr<OOGL::Window> m_wnd;
 			Indigo::Window* const m_owner;
@@ -123,7 +123,7 @@ namespace Indigo
 			void on_move(const OOGL::Window& win, const glm::ivec2& pos);
 			void on_size(const OOGL::Window& win, const glm::uvec2& sz);
 
-			void add_render_layer(Indigo::Layer* const layer, unsigned int zorder, bool* ret);
+			void add_render_layer(Indigo::Layer* layer, unsigned int zorder, bool* ret);
 		};
 	}
 

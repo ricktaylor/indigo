@@ -47,7 +47,7 @@ namespace Indigo
 			friend class Text;
 
 		public:
-			Font(Indigo::Font* const owner);
+			Font(Indigo::Font* owner);
 			~Font();
 
 		private:

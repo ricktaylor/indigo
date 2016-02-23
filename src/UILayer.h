@@ -108,7 +108,7 @@ namespace Indigo
 		virtual glm::uvec2 max_size() const { return glm::uvec2(-1); }
 		virtual glm::uvec2 ideal_size() const = 0;
 
-		virtual bool on_render_create(Indigo::Render::UIGroup* const group) { return true; }
+		virtual bool on_render_create(Indigo::Render::UIGroup* group) { return true; }
 		virtual void on_size(const glm::uvec2& sz) { }
 
 		virtual bool can_enable(bool enabled) { return false; }
@@ -155,7 +155,7 @@ namespace Indigo
 	class UILayer : public UIGroup, public Layer
 	{
 	protected:
-		OOBase::SharedPtr<Render::Layer> create_render_layer(Indigo::Render::Window* const window);
+		OOBase::SharedPtr<Render::Layer> create_render_layer(Indigo::Render::Window* window);
 
 		void on_size(const glm::uvec2& sz);
 	};

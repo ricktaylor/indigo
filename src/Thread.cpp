@@ -37,7 +37,7 @@ namespace
 	typedef OOBase::TLSSingleton<Indigo::Pipe*> THREAD_PIPE;
 }
 
-void Indigo::render_init(Pipe* const pipe)
+void Indigo::render_init(Pipe* pipe)
 {
 	THREAD_PIPE::instance() = pipe;
 }

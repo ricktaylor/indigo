@@ -31,7 +31,7 @@ namespace Indigo
 {
 	bool run_render_loop(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
 
-	void render_init(Pipe* const pipe);
+	void render_init(Pipe* pipe);
 }
 
 namespace

@@ -29,7 +29,7 @@ namespace
 	class BlankingLayer : public Indigo::Render::Layer
 	{
 	public:
-		BlankingLayer(Indigo::Render::Window* const window, const glm::vec4& colour);
+		BlankingLayer(Indigo::Render::Window* window, const glm::vec4& colour);
 
 		void on_draw(OOGL::State& glState) const;
 
@@ -37,7 +37,7 @@ namespace
 	};
 }
 
-::BlankingLayer::BlankingLayer(Indigo::Render::Window* const window, const glm::vec4& colour) :
+::BlankingLayer::BlankingLayer(Indigo::Render::Window* window, const glm::vec4& colour) :
 		Indigo::Render::Layer(window)
 {
 	glClearColor(colour.r,colour.g,colour.b,colour.a);
@@ -60,7 +60,7 @@ Indigo::BlankingLayer::BlankingLayer(const glm::vec4& colour) :
 {
 }
 
-OOBase::SharedPtr<Indigo::Render::Layer> Indigo::BlankingLayer::create_render_layer(Render::Window* const window)
+OOBase::SharedPtr<Indigo::Render::Layer> Indigo::BlankingLayer::create_render_layer(Render::Window* window)
 {
 	OOBase::SharedPtr< ::BlankingLayer> layer = OOBase::allocate_shared< ::BlankingLayer,OOBase::ThreadLocalAllocator>(window,m_colour);
 	if (!layer)
@@ -138,7 +138,7 @@ void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glSta
 		i->second->on_draw(glState);
 }
 
-void Indigo::Render::Window::add_render_layer(Indigo::Layer* const layer, unsigned int zorder, bool* ret)
+void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, unsigned int zorder, bool* ret)
 {
 	*ret = false;
 	layer->m_render_layer = layer->create_render_layer(this);

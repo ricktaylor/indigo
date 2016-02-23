@@ -27,7 +27,7 @@ namespace
 	class UILayer : public Indigo::Render::UIGroup, public Indigo::Render::Layer
 	{
 	public:
-		UILayer(Indigo::Render::Window* const window);
+		UILayer(Indigo::Render::Window* window);
 
 		void on_draw(OOGL::State& glState) const;
 
@@ -75,7 +75,7 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder
 		*ret = true;
 }
 
-::UILayer::UILayer(Indigo::Render::Window* const window) :
+::UILayer::UILayer(Indigo::Render::Window* window) :
 		Indigo::Render::Layer(window),
 		m_size(window->window()->size())
 {
@@ -240,7 +240,7 @@ glm::uvec2 Indigo::UIGroup::ideal_size() const
 	return ideal;
 }
 
-OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(Indigo::Render::Window* const window)
+OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(Indigo::Render::Window* window)
 {
 	OOBase::SharedPtr< ::UILayer> group = OOBase::allocate_shared< ::UILayer,OOBase::ThreadLocalAllocator>(window);
 	if (!group)
