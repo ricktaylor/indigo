@@ -26,13 +26,13 @@ bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
 
 %.vert.h: ../resources/%.vert bin2c
-	$(AM_V_GEN)./bin2c "$<" "$@" "$*_vert"
+	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_vert"
 
 %.frag.h: ../resources/%.frag bin2c
-	$(AM_V_GEN)./bin2c "$<" "$@" "$*_frag"
+	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_frag"
 	
 %.lua.h: ../resources/%.lua bin2c
-	$(AM_V_GEN)./bin2c "$<" "$@" "$*_lua"
+	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_lua"
 	
 BUILT_SOURCES = \
 	Font_8bit.vert.h \
@@ -60,12 +60,12 @@ indigo_SOURCES = \
 	Main.cpp \
 	Window.cpp \
 	UILayer.cpp \
+	UIButton.cpp \
 	Font.cpp \
 	App.cpp \
 	NinePatch.cpp \
 	Image.cpp
 	
-# 	Image.cpp \
 #	GUIStyle.cpp \
 #	GUIWidget.cpp \
 #	GUIPanel.cpp \
