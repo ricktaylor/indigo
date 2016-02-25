@@ -41,10 +41,11 @@ namespace Indigo
 
 		virtual bool load(const unsigned char* buffer, int len, int components = 0);
 
-		const glm::u16vec4& margins() const
-		{
-			return m_margins;
-		}
+		const glm::u16vec4& margins() const { return m_margins; }
+		const glm::uvec2& ideal_size() const { return m_ideal_size; }
+
+
+		OOBase::SharedPtr<Render::NinePatch> make_drawable(const glm::u16vec2& position = glm::u16vec2(0), const glm::u16vec2& size = glm::u16vec2(0), bool visible = true) const;
 
 	private:
 		bool pixel_cmp(int x, int y, bool black);
@@ -53,6 +54,7 @@ namespace Indigo
 		bool get_bounds();
 
 		glm::u16vec4 m_margins;
+		glm::uvec2 m_ideal_size;
 
 		struct PatchInfo
 		{
@@ -67,8 +69,10 @@ namespace Indigo
 	{
 		class NinePatch : public UIDrawable
 		{
+			friend class Indigo::NinePatch;
+
 		public:
-			NinePatch(const glm::u16vec2& size, const OOBase::SharedPtr<Indigo::NinePatch::PatchInfo>& info);
+			NinePatch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const OOBase::SharedPtr<Indigo::NinePatch::PatchInfo>& info);
 			virtual ~NinePatch();
 
 			bool valid() const;

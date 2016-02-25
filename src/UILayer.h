@@ -36,16 +36,16 @@ namespace Indigo
 			friend class UIGroup;
 
 		public:
-			UIDrawable(bool visible = false, const glm::ivec2& position = glm::ivec2(0,0));
-
 			void visible(bool show) { m_visible = show; };
 			void position(glm::ivec2 pos) { m_position = pos; };
 
-			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
-
 		protected:
+			UIDrawable(const glm::ivec2& position = glm::ivec2(0,0), bool visible = true);
+
 			bool m_visible;
 			glm::ivec2 m_position;
+
+			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
 		};
 
 		class UIGroup : public UIDrawable
@@ -53,6 +53,13 @@ namespace Indigo
 			friend class Indigo::UIGroup;
 
 		public:
+			UIGroup(const glm::ivec2& position = glm::ivec2(0,0), bool visible = true) : UIDrawable(position,visible)
+			{}
+
+			bool add_drawable(const OOBase::SharedPtr<UIDrawable>& drawable, unsigned int zorder);
+			bool remove_drawable(unsigned int zorder);
+
+		protected:
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 
 		private:
@@ -108,7 +115,7 @@ namespace Indigo
 		virtual glm::uvec2 max_size() const { return glm::uvec2(-1); }
 		virtual glm::uvec2 ideal_size() const = 0;
 
-		virtual bool on_render_create(Indigo::Render::UIGroup* group) { return true; }
+		virtual bool on_render_create(Indigo::Render::UIGroup* group) = 0;
 		virtual void on_size(const glm::uvec2& sz) { }
 
 		virtual bool can_enable(bool enabled) { return false; }
@@ -158,6 +165,8 @@ namespace Indigo
 		OOBase::SharedPtr<Render::Layer> create_render_layer(Indigo::Render::Window* window);
 
 		void on_size(const glm::uvec2& sz);
+
+		virtual bool on_render_create(Indigo::Render::UIGroup* group) { return true; }
 	};
 }
 

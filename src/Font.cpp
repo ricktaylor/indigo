@@ -546,9 +546,9 @@ void Indigo::Render::Text::draw(OOGL::State& state, const glm::mat4& mvp, const 
 	m_font->draw(state,mvp,colour,m_glyph_start + start,length);
 }
 
-Indigo::Render::UIText::UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, const glm::vec4& colour, bool visible, const glm::i16vec2& position) :
+Indigo::Render::UIText::UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, const glm::vec4& colour, const glm::i16vec2& position, bool visible) :
 		Text(font,sz,len),
-		UIDrawable(visible,position),
+		UIDrawable(position,visible),
 		m_colour(colour)
 {
 }

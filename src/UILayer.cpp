@@ -38,7 +38,7 @@ namespace
 	};
 }
 
-Indigo::Render::UIDrawable::UIDrawable(bool visible, const glm::ivec2& position) :
+Indigo::Render::UIDrawable::UIDrawable(const glm::ivec2& position, bool visible) :
 		m_visible(visible),
 		m_position(position)
 {
@@ -55,10 +55,22 @@ void Indigo::Render::UIGroup::on_draw(OOGL::State& glState, const glm::mat4& mvp
 	}
 }
 
+bool Indigo::Render::UIGroup::add_drawable(const OOBase::SharedPtr<UIDrawable>& drawable, unsigned int zorder)
+{
+	if (!m_children.insert(zorder,drawable))
+		LOG_ERROR_RETURN(("Failed to insert drawable: %s",OOBase::system_error_text()),false);
+	return true;
+}
+
+bool Indigo::Render::UIGroup::remove_drawable(unsigned int zorder)
+{
+	return m_children.remove(zorder);
+}
+
 void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder, bool* ret)
 {
 	*ret = false;
-	widget->m_render_group = OOBase::allocate_shared<Render::UIGroup,OOBase::ThreadLocalAllocator>();
+	widget->m_render_group = OOBase::allocate_shared<Render::UIGroup,OOBase::ThreadLocalAllocator>(widget->position());
 	if (!widget->m_render_group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
 	else if (!m_children.insert(zorder,widget->m_render_group))
@@ -87,6 +99,8 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 	{
 		glm::vec2 pos = m_position;
 		glm::vec2 sz = m_size;
+
+		glViewport(0, 0, sz.x, sz.y);
 
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 

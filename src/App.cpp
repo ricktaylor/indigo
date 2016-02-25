@@ -23,19 +23,21 @@
 #include "App.h"
 #include "Thread.h"
 #include "UILayer.h"
-
-#include "Image.h"
-#include "NinePatch.h"
+#include "UIButton.h"
 
 void Indigo::Application::splash()
 {
 	OOBase::SharedPtr<Indigo::UILayer> layer = OOBase::allocate_shared<Indigo::UILayer,OOBase::ThreadLocalAllocator>();
 	m_wnd->add_layer(layer,100);
 
-	Indigo::NinePatch n;
-	n.Image::load(Indigo::static_resources(),"menu_border.png");
 
+	OOBase::SharedPtr<Indigo::UIButton::UIStyle> button_style = OOBase::allocate_shared<Indigo::UIButton::UIStyle,OOBase::ThreadLocalAllocator>();
+	button_style->m_background.Image::load(Indigo::static_resources(),"menu_border.png");
 
+	OOBase::SharedPtr<Indigo::UIButton> button = OOBase::allocate_shared<Indigo::UIButton,OOBase::ThreadLocalAllocator>(button_style,glm::ivec2(100,100),glm::uvec2(100,100));
+	layer->add_widget(OOBase::static_pointer_cast<Indigo::UIWidget>(button),100);
+
+	layer->show(true);
 }
 
 void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args)

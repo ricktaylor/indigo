@@ -127,8 +127,6 @@ void Indigo::Render::Window::on_move(const OOGL::Window& win, const glm::ivec2& 
 
 void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& sz)
 {
-	//glViewport(0, 0, sz.x, sz.y);
-
 	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_size),sz);
 }
 
