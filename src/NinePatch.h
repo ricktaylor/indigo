@@ -38,13 +38,13 @@ namespace Indigo
 
 	public:
 		NinePatch();
-
+		virtual ~NinePatch();
+				
 		virtual bool load(const unsigned char* buffer, int len, int components = 0);
+		virtual void unload();
 
 		const glm::u16vec4& margins() const { return m_margins; }
-		const glm::uvec2& ideal_size() const { return m_ideal_size; }
-
-
+		
 		OOBase::SharedPtr<Render::NinePatch> make_drawable(const glm::u16vec2& position = glm::u16vec2(0), const glm::u16vec2& size = glm::u16vec2(0), bool visible = true) const;
 
 	private:
@@ -54,15 +54,16 @@ namespace Indigo
 		bool get_bounds();
 
 		glm::u16vec4 m_margins;
-		glm::uvec2 m_ideal_size;
-
-		struct PatchInfo
+		
+		struct Info
 		{
 			glm::u16vec4 m_borders;
 			glm::u16vec2 m_tex_size;
 			OOBase::SharedPtr<OOGL::Texture> m_texture;
 		};
-		OOBase::SharedPtr<Indigo::NinePatch::PatchInfo> m_info;
+		OOBase::SharedPtr<Indigo::NinePatch::Info> m_info;
+
+		static void cleanup(OOBase::SharedPtr<Indigo::NinePatch::Info>* info);
 	};
 
 	namespace Render
@@ -72,7 +73,7 @@ namespace Indigo
 			friend class Indigo::NinePatch;
 
 		public:
-			NinePatch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const OOBase::SharedPtr<Indigo::NinePatch::PatchInfo>& info);
+			NinePatch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info);
 			virtual ~NinePatch();
 
 			bool valid() const;
@@ -84,7 +85,7 @@ namespace Indigo
 			GLsizeiptr m_firsts[3];
 			GLsizei    m_counts[3];
 
-			OOBase::SharedPtr<Indigo::NinePatch::PatchInfo> m_info;
+			OOBase::SharedPtr<Indigo::NinePatch::Info> m_info;
 
 			void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};

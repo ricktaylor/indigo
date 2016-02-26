@@ -281,7 +281,7 @@ void NinePatchFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const GL
 	}
 }
 
-Indigo::Render::NinePatch::NinePatch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const OOBase::SharedPtr<Indigo::NinePatch::PatchInfo>& info) :
+Indigo::Render::NinePatch::NinePatch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info) :
 		UIDrawable(position,visible),
 		m_patch(-1),
 		m_info(info)
@@ -397,9 +397,13 @@ void Indigo::Render::NinePatch::on_draw(OOGL::State& glState, const glm::mat4& m
 }
 
 Indigo::NinePatch::NinePatch() : Image(),
-		m_margins(0),
-		m_ideal_size(0)
+		m_margins(0)
 {
+}
+
+Indigo::NinePatch::~NinePatch()
+{
+	unload();
 }
 
 bool Indigo::NinePatch::load(const unsigned char* buffer, int len, int components)
@@ -407,10 +411,8 @@ bool Indigo::NinePatch::load(const unsigned char* buffer, int len, int component
 	if (!Image::load(buffer,len,components))
 		return false;
 
-	m_ideal_size = size();
-
 	bool ret = false;
-	m_info = OOBase::allocate_shared<Indigo::NinePatch::PatchInfo>();
+	m_info = OOBase::allocate_shared<Indigo::NinePatch::Info>();
 	if (!m_info)
 		LOG_ERROR(("Failed to allocate 9-patch info block: %s",OOBase::system_error_text()));
 	else
@@ -425,6 +427,21 @@ bool Indigo::NinePatch::load(const unsigned char* buffer, int len, int component
 		unload();
 
 	return ret;
+}
+
+void Indigo::NinePatch::cleanup(OOBase::SharedPtr<Indigo::NinePatch::Info>* info)
+{
+	info->reset();
+}
+
+void Indigo::NinePatch::unload()
+{
+	Image::unload();
+
+	OOBase::SharedPtr<Indigo::NinePatch::Info> info;
+	info.swap(m_info);
+	if (info && info.unique())
+		render_pipe()->call(OOBase::make_delegate(&NinePatch::cleanup),&info);
 }
 
 bool Indigo::NinePatch::pixel_cmp(int x, int y, bool black)
@@ -491,26 +508,26 @@ bool Indigo::NinePatch::get_bounds()
 	if (!scan_line(0,span))
 		LOG_ERROR_RETURN(("Bad top row in 9-patch!"),false);
 
-	m_info->m_borders.x = span.x - 1;
-	m_info->m_borders.z = (m_width - 1) - span.y;
+	m_info->m_borders.x = span.x;
+	m_info->m_borders.z = m_width - span.y;
 
 	if (!scan_column(0,span))
 		LOG_ERROR_RETURN(("Bad left column in 9-patch!"),false);
 
-	m_info->m_borders.y = (m_height - 1) - span.y;
-	m_info->m_borders.w = span.x - 1;
+	m_info->m_borders.y = m_height - span.y;
+	m_info->m_borders.w = span.x;
 
 	if (!scan_line(m_height-1,span))
 		LOG_ERROR_RETURN(("Bad bottom row in 9-patch!"),false);
 
-	m_margins.x = span.x - 1;
-	m_margins.z = (m_width - 1)  - span.y;
+	m_margins.x = span.x;
+	m_margins.z = m_width  - span.y;
 
-	if (!scan_line(m_width-1,span))
+	if (!scan_column(m_width-1,span))
 		LOG_ERROR_RETURN(("Bad right column in 9-patch!"),false);
 
-	m_margins.y = (m_height - 1) - span.y;
-	m_margins.w = span.x - 1;
+	m_margins.y = m_height - span.y;
+	m_margins.w = span.x;
 
 	// Now swap out the pixels for a sub-image...
 	char* new_pixels = static_cast<char*>(OOBase::ThreadLocalAllocator::allocate((m_width-2)*(m_height-2)*m_components));
@@ -546,7 +563,7 @@ OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(co
 			return OOBase::SharedPtr<Indigo::Render::NinePatch>();
 
 		m_info->m_texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		m_info->m_texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+		m_info->m_texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 		m_info->m_texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 		m_info->m_texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	}
