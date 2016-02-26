@@ -46,12 +46,10 @@ Indigo::Render::UIDrawable::UIDrawable(const glm::ivec2& position, bool visible)
 
 void Indigo::Render::UIGroup::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	glm::mat4 child_mvp = glm::translate(mvp,glm::vec3(m_position.x,m_position.y,0));
-
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIDrawable>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
 	{
 		if (i->second->m_visible)
-			i->second->on_draw(glState,child_mvp);
+			i->second->on_draw(glState,glm::translate(mvp,glm::vec3(i->second->m_position.x,i->second->m_position.y,0)));
 	}
 }
 
@@ -99,12 +97,11 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 	{
 		glViewport(0, 0, m_size.x, m_size.y);
 
+		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-		glm::vec2 pos = m_position;
 		glm::vec2 sz = m_size;
-
-		Indigo::Render::UIGroup::on_draw(glState,glm::ortho(pos.x,sz.x,pos.y,sz.y));
+		Indigo::Render::UIGroup::on_draw(glState,glm::ortho(0.f,sz.x,0.f,sz.y));
 	}
 }
 

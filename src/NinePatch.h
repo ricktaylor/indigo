@@ -63,7 +63,7 @@ namespace Indigo
 		};
 		OOBase::SharedPtr<Indigo::NinePatch::Info> m_info;
 
-		static void cleanup(OOBase::SharedPtr<Indigo::NinePatch::Info>* info);
+		 void do_unload();
 	};
 
 	namespace Render

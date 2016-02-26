@@ -32,8 +32,67 @@
 
 namespace Indigo
 {
-	class Font;
 	class Image;
+
+	namespace Render
+	{
+		class Font;
+	}
+
+	class Font : public OOBase::NonCopyable
+	{
+		friend class Render::Font;
+
+	public:
+		Font();
+		~Font();
+
+		bool valid() const { return m_render_font; }
+		
+		bool load(const ResourceBundle& resource, const char* name);
+		void unload();
+
+		float measure_text(const char* sz, size_t len = -1);
+
+		OOBase::uint16_t line_height() const { return m_info->m_line_height; }
+		OOBase::uint16_t base_height() const { return m_info->m_base_height; }
+
+		const OOBase::SharedPtr<Render::Font>& render_font() const;
+
+	private:
+		struct Info
+		{
+			OOBase::uint16_t m_line_height;
+			OOBase::uint16_t m_base_height;
+			OOBase::uint32_t m_packing;
+
+			struct char_info
+			{
+				OOBase::uint16_t u0;
+				OOBase::uint16_t v0;
+				OOBase::uint16_t u1;
+				OOBase::uint16_t v1;
+				float left;
+				float top;
+				float right;
+				float bottom;
+				float xadvance;
+				OOBase::uint8_t page;
+				OOBase::uint8_t channel;
+			};
+			typedef OOBase::HashTable<OOBase::uint32_t,struct char_info> char_map_t;
+			char_map_t m_mapCharInfo;
+
+			typedef OOBase::HashTable<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>,float> kern_map_t;
+			kern_map_t m_mapKerning;
+		};
+
+		OOBase::SharedPtr<Indigo::Font::Info> m_info;
+		OOBase::SharedPtr<Render::Font> m_render_font;
+
+		void do_load(OOBase::SharedPtr<Indigo::Image>* pages, size_t page_count, bool* ret_val);
+		void do_unload();
+	};
 
 	namespace Render
 	{
@@ -45,19 +104,23 @@ namespace Indigo
 			friend class Text;
 
 		public:
-			Font(Indigo::Font* owner);
+			Font(const OOBase::SharedPtr<Indigo::Font::Info>& info);
 			~Font();
+
+			OOBase::uint16_t line_height() const { return m_info->m_line_height; }
+			OOBase::uint16_t base_height() const { return m_info->m_base_height; }
 
 		private:
 			typedef OOBase::Table<GLsizei,GLsizei,OOBase::Less<GLsizei>,OOBase::ThreadLocalAllocator> free_list_t;
 			free_list_t m_listFree;
-			Indigo::Font* const m_owner;
 			GLsizei m_allocated;
 
 			OOBase::SharedPtr<OOGL::Texture> m_ptrTexture;
 			OOBase::SharedPtr<OOGL::VertexArrayObject> m_ptrVAO;
 			OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices;
 			OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements;
+
+			OOBase::SharedPtr<Indigo::Font::Info> m_info;
 
 			bool load(const OOBase::SharedPtr<Indigo::Image>* pages, size_t page_count);
 
@@ -90,66 +153,17 @@ namespace Indigo
 		class UIText : public Text, public UIDrawable
 		{
 		public:
-			UIText(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = -1, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::i16vec2& position = glm::i16vec2(0), bool visible = true);
+			UIText(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = -1, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::i16vec2& position = glm::i16vec2(0), bool visible = true);
 
 			void colour(const glm::vec4& colour);
 
 		private:
 			glm::vec4 m_colour;
+			float m_scale;
 
 			void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};
 	}
-
-	class Font : public OOBase::NonCopyable
-	{
-		friend class Render::Font;
-
-	public:
-		Font();
-		~Font();
-
-		bool valid() const
-		{
-			return m_font;
-		}
-
-		bool load(const ResourceBundle& resource, const char* name);
-		bool destroy();
-
-		float measure_text(const char* sz, size_t len = -1);
-
-		const OOBase::SharedPtr<Render::Font>& render_font() const;
-
-	private:
-		OOBase::SharedPtr<Render::Font> m_font;
-
-		float m_line_height;
-		OOBase::uint32_t m_packing;
-
-		struct char_info
-		{
-			OOBase::uint16_t u0;
-			OOBase::uint16_t v0;
-			OOBase::uint16_t u1;
-			OOBase::uint16_t v1;
-			float left;
-			float top;
-			float right;
-			float bottom;
-			float xadvance;
-			OOBase::uint8_t page;
-			OOBase::uint8_t channel;
-		};
-		typedef OOBase::HashTable<OOBase::uint32_t,struct char_info,OOBase::ThreadLocalAllocator> char_map_t;
-		char_map_t m_mapCharInfo;
-
-		typedef OOBase::HashTable<OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>,float,OOBase::ThreadLocalAllocator> kern_map_t;
-		kern_map_t m_mapKerning;
-
-		void do_load(OOBase::SharedPtr<Indigo::Image>* pages, size_t page_count, bool* ret_val);
-		void do_destroy();
-	};
 }
 
 #endif // INDIGO_FONT_H_INCLUDED

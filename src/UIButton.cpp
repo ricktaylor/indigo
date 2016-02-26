@@ -22,24 +22,41 @@
 #include "Common.h"
 #include "UIButton.h"
 
-Indigo::UIButton::UIButton(const OOBase::SharedPtr<UIStyle>& style, const glm::ivec2& position, const glm::uvec2& size) :
+Indigo::UIButton::UIButton(const OOBase::SharedPtr<UIStyle>& style, const char* caption, const glm::ivec2& position, const glm::uvec2& size) :
 	UIWidget(position,size),
 	m_style(style)
 {
+	if (!m_text.assign(caption))
+		LOG_ERROR(("Failed to assign text: %s",OOBase::system_error_text()));
+
+	if (size == glm::uvec2(0))
+		this->size(ideal_size());
 }
 
 glm::uvec2 Indigo::UIButton::ideal_size() const
 {
 	glm::u16vec4 margins = m_style->m_background.margins();
 
-	return glm::uvec2(margins.x + margins.z,margins.y + margins.w);
+	unsigned int height = m_style->m_font.line_height();
+	unsigned int width = static_cast<unsigned int>(ceil(height * m_style->m_font.measure_text(m_text.c_str(),m_text.length())));
+
+	return glm::uvec2(width + margins.x + margins.z,height + margins.y + margins.w);
 }
 
 bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 {
-	m_background = m_style->m_background.make_drawable(position(),size());
+	m_background = m_style->m_background.make_drawable(glm::ivec2(0),size());
 	if (!m_background)
-		LOG_ERROR_RETURN(("Failed to allocate background image: %s",OOBase::system_error_text()),false);
+		return false;
 
-	return group->add_drawable(OOBase::static_pointer_cast<Render::UIDrawable>(m_background),0);
+	if (!group->add_drawable(OOBase::static_pointer_cast<Render::UIDrawable>(m_background),0))
+		return false;
+
+	glm::u16vec4 margins = m_style->m_background.margins();
+	glm::vec4 colour(1.f,1.f,1.f,1.f);
+	m_caption = OOBase::allocate_shared<Render::UIText,OOBase::ThreadLocalAllocator>(m_style->m_font.render_font(),m_text.c_str(),m_text.length(),0.f,colour,glm::ivec2(margins.x,margins.y));
+	if (!m_caption)
+		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
+		
+	return group->add_drawable(OOBase::static_pointer_cast<Render::UIDrawable>(m_caption),10);
 }

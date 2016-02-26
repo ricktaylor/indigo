@@ -426,19 +426,22 @@ bool Indigo::NinePatch::load(const unsigned char* buffer, int len, int component
 	return ret;
 }
 
-void Indigo::NinePatch::cleanup(OOBase::SharedPtr<Indigo::NinePatch::Info>* info)
+void Indigo::NinePatch::do_unload()
 {
-	info->reset();
+	m_info.reset();
 }
 
 void Indigo::NinePatch::unload()
 {
 	Image::unload();
 
-	OOBase::SharedPtr<Indigo::NinePatch::Info> info;
-	info.swap(m_info);
-	if (info && info.unique())
-		render_pipe()->call(OOBase::make_delegate(&NinePatch::cleanup),&info);
+	if (m_info)
+	{
+		if (m_info.unique())
+			render_pipe()->call(OOBase::make_delegate(this,&NinePatch::do_unload));
+		else
+			m_info.reset();
+	}
 }
 
 bool Indigo::NinePatch::pixel_cmp(int x, int y, bool black)

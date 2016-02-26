@@ -45,9 +45,13 @@ void Indigo::Application::splash()
 
 	OOBase::SharedPtr<Indigo::UIButton::UIStyle> button_style = OOBase::allocate_shared<Indigo::UIButton::UIStyle,OOBase::ThreadLocalAllocator>();
 	button_style->m_background.Image::load(Indigo::static_resources(),"menu_border.png");
+	button_style->m_font.load(Indigo::static_resources(),"Titillium-Regular.fnt");
 
-	OOBase::SharedPtr<Indigo::UIButton> button = OOBase::allocate_shared<Indigo::UIButton,OOBase::ThreadLocalAllocator>(button_style,glm::ivec2(100,100),glm::uvec2(100,100));
+	OOBase::SharedPtr<Indigo::UIButton> button = OOBase::allocate_shared<Indigo::UIButton,OOBase::ThreadLocalAllocator>(button_style,"   Hello   ",glm::ivec2(100,100));
 	layer->add_widget(OOBase::static_pointer_cast<Indigo::UIWidget>(button),100);
+
+	button_style->m_background.unload();
+	button_style->m_font.unload();
 
 	layer->show(true);
 }
@@ -68,7 +72,7 @@ void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::Cmd
 void Indigo::Application::on_quit()
 {
 	m_wnd.reset();
-}
+	}
 
 void Indigo::Application::stop()
 {

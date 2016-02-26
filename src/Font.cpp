@@ -280,7 +280,7 @@ bool FontProgram::load_8bit_shader()
 	return true;
 }
 
-Indigo::Render::Font::Font(Indigo::Font* const owner) : m_owner(owner), m_allocated(0)
+Indigo::Render::Font::Font(const OOBase::SharedPtr<Indigo::Font::Info>& info) : m_info(info), m_allocated(0)
 {
 }
 
@@ -306,7 +306,7 @@ bool Indigo::Render::Font::load(const OOBase::SharedPtr<Indigo::Image>* pages, s
 	}
 
 	m_ptrTexture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	m_ptrTexture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	m_ptrTexture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	m_ptrTexture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 	m_ptrTexture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 
@@ -377,7 +377,7 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 				LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 
-		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_owner->m_packing);
+		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_info->m_packing);
 		if (!ptrProgram)
 			return false;
 
@@ -420,15 +420,15 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		{
 			if (prev_glyph != OOBase::uint32_t(-1))
 			{
-				Indigo::Font::kern_map_t::iterator k = m_owner->m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(prev_glyph,glyph));
+				Indigo::Font::Info::kern_map_t::iterator k = m_info->m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(prev_glyph,glyph));
 				if (k)
 					length += k->second;
 			}
 			prev_glyph = glyph;
 
-			Indigo::Font::char_map_t::iterator i = m_owner->m_mapCharInfo.find(glyph);
+			Indigo::Font::Info::char_map_t::iterator i = m_info->m_mapCharInfo.find(glyph);
 			if (!i)
-				i = m_owner->m_mapCharInfo.find(static_cast<OOBase::uint8_t>('?'));
+				i = m_info->m_mapCharInfo.find(static_cast<OOBase::uint8_t>('?'));
 
 			a[0].x = length + i->second.left;
 			a[0].y = i->second.top;
@@ -496,7 +496,7 @@ void Indigo::Render::Font::draw(OOGL::State& state, const glm::mat4& mvp, const 
 {
 	if (len)
 	{
-		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_owner->m_packing);
+		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_info->m_packing);
 		if (ptrProgram)
 		{
 			state.use(ptrProgram);
@@ -557,30 +557,33 @@ void Indigo::Render::Text::draw(OOGL::State& state, const glm::mat4& mvp, const 
 	m_font->draw(state,mvp,colour,m_glyph_start + start,length);
 }
 
-Indigo::Render::UIText::UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, const glm::vec4& colour, const glm::i16vec2& position, bool visible) :
+Indigo::Render::UIText::UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::i16vec2& position, bool visible) :
 		Text(font,sz,len),
 		UIDrawable(position,visible),
+		m_scale(scale),
 		m_colour(colour)
 {
+	if (m_scale <= 0.f)
+		m_scale = font->line_height();
 }
 
 void Indigo::Render::UIText::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	draw(glState,mvp,m_colour);
+	draw(glState,glm::scale(mvp,glm::vec3(m_scale)),m_colour);
 }
 
-Indigo::Font::Font() : m_line_height(0.f), m_packing(0)
+Indigo::Font::Font()
 {
 }
 
 Indigo::Font::~Font()
 {
-	destroy();
+	unload();
 }
 
 bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 {
-	if (m_font)
+	if (m_render_font)
 		LOG_ERROR_RETURN(("Font already loaded"),false);
 
 	if (!resource.exists(name))
@@ -593,8 +596,12 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 	if (data[0] != 66 || data[1] != 77 || data[2] != 70 || data[3] != 3)
 		LOG_ERROR_RETURN(("Failed to load font data: Format not recognised"),false);
 
+	m_info = OOBase::allocate_shared<Info>();
+	if (!m_info)
+		LOG_ERROR_RETURN(("Failed to allocate information block: %s",OOBase::system_error_text()),false);
+	
 	const unsigned char* end = data + len;
-	float tex_width, tex_height;
+	float tex_width, tex_height, line_height;
 	unsigned int pages;
 	OOBase::Vector<OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator> vecPages;
 
@@ -619,8 +626,9 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 
 		case 2:
 			assert(len == 15);
-			m_line_height = read_uint16(data);
-			data += 2;
+			m_info->m_line_height = read_uint16(data);
+			line_height = m_info->m_line_height;
+			m_info->m_base_height = read_uint16(data);
 			tex_width = read_uint16(data);
 			tex_height = read_uint16(data);
 			pages = read_uint16(data);
@@ -631,7 +639,7 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 			}
 			else
 			{
-				m_packing = read_uint32(data);
+				m_info->m_packing = read_uint32(data);
 			}
 			if (!pages)
 			{
@@ -660,28 +668,30 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 			for (size_t c = 0;ok && c < len / 20; ++c)
 			{
 				unsigned int ushort_max = 0xFFFF;
-				struct char_info ci;
+				struct Info::char_info ci;
 				OOBase::uint32_t id = read_uint32(data);
 				OOBase::uint32_t u = read_uint16(data);
 				OOBase::uint32_t v = read_uint16(data);
-				float width = read_uint16(data);
-				float height = read_uint16(data);
-				OOBase::int32_t x = read_int16(data);
-				OOBase::int32_t y = read_int16(data);
+				int width = read_uint16(data);
+				int height = read_uint16(data);
+				int x = read_int16(data);
+				int y = read_int16(data);
 				ci.u0 = static_cast<OOBase::uint16_t>(u / tex_width * ushort_max);
 				ci.v0 = static_cast<OOBase::uint16_t>(v / tex_height * ushort_max);
 				ci.u1 = static_cast<OOBase::uint16_t>((u + width) / tex_width * ushort_max);
 				ci.v1 = static_cast<OOBase::uint16_t>((v + height) / tex_height * ushort_max);
-				ci.left = x / m_line_height;
-				ci.top = 1.0f - (y / m_line_height);
-				ci.right = (x + width) / m_line_height;
-				ci.bottom = 1.0f - ((y + height) / m_line_height);
+				ci.left = x / line_height;
+				ci.top = (line_height - y) / line_height;
+				ci.right = (x + width) / line_height;
+				ci.bottom = (line_height - y - height) / line_height;
 
-				ci.xadvance = read_int16(data) / m_line_height;
+				ci.xadvance = read_int16(data) / line_height;
 				ci.page = *data++;
 				ci.channel = *data++;
 
-				if (!(ok = m_mapCharInfo.insert(id,ci)))
+				LOG_DEBUG(("Character '%c' {%g,%g} {%g,%g}",id,ci.left,ci.bottom,ci.right,ci.top));
+
+				if (!(ok = m_info->m_mapCharInfo.insert(id,ci)))
 					LOG_ERROR(("Failed to add character to table: %s",OOBase::system_error_text()));
 			}
 			break;
@@ -692,8 +702,8 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 				OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t> ch;
 				ch.first = read_uint32(data);
 				ch.second = read_uint32(data);
-				float offset = read_int16(data) / m_line_height;
-				if (!(ok = m_mapKerning.insert(ch,offset)))
+				float offset = read_int16(data) / line_height;
+				if (!(ok = m_info->m_mapKerning.insert(ch,offset)))
 					LOG_ERROR(("Failed to add character to kerning table: %s",OOBase::system_error_text()));
 			}
 			break;
@@ -719,29 +729,37 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 void Indigo::Font::do_load(OOBase::SharedPtr<Indigo::Image>* pages, size_t page_count, bool* ret_val)
 {
 	*ret_val = false;
-	OOBase::SharedPtr<Indigo::Render::Font> font = OOBase::allocate_shared<Indigo::Render::Font,OOBase::ThreadLocalAllocator>(this);
+	OOBase::SharedPtr<Indigo::Render::Font> font = OOBase::allocate_shared<Indigo::Render::Font,OOBase::ThreadLocalAllocator>(m_info);
 	if (!font)
 		LOG_ERROR(("Failed to allocate render font: %s",OOBase::system_error_text()));
 	else if (font->load(pages,page_count))
 	{
-		m_font = font;
+		m_render_font = font;
 		*ret_val = true;
 	}
 }
 
-bool Indigo::Font::destroy()
+void Indigo::Font::unload()
 {
-	return !m_font || render_pipe()->call(OOBase::make_delegate(this,&Indigo::Font::do_destroy));
+	if (m_render_font)
+	{
+		if (m_render_font.unique())
+			render_pipe()->call(OOBase::make_delegate(this,&Font::do_unload));
+		else
+			m_render_font.reset();
+	}
+
+	m_info.reset();
 }
 
-void Indigo::Font::do_destroy()
+void Indigo::Font::do_unload()
 {
-	m_font.reset();
+	m_render_font.reset();
 }
 
 const OOBase::SharedPtr<Indigo::Render::Font>& Indigo::Font::render_font() const
 {
-	return m_font;
+	return m_render_font;
 }
 
 float Indigo::Font::measure_text(const char* sz, size_t s_len)
@@ -765,15 +783,15 @@ float Indigo::Font::measure_text(const char* sz, size_t s_len)
 			{
 				if (prev_glyph != OOBase::uint32_t(-1))
 				{
-					kern_map_t::iterator k = m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(prev_glyph,glyph));
+					Info::kern_map_t::iterator k = m_info->m_mapKerning.find(OOBase::Pair<OOBase::uint32_t,OOBase::uint32_t>(prev_glyph,glyph));
 					if (k)
 						result += k->second;
 				}
 				prev_glyph = glyph;
 
-				char_map_t::iterator i = m_mapCharInfo.find(glyph);
+				Info::char_map_t::iterator i = m_info->m_mapCharInfo.find(glyph);
 				if (!i)
-					i = m_mapCharInfo.find(static_cast<OOBase::uint8_t>('?'));
+					i = m_info->m_mapCharInfo.find(static_cast<OOBase::uint8_t>('?'));
 
 				result += i->second.xadvance;
 			}

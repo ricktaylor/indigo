@@ -22,6 +22,7 @@
 #ifndef INDIGO_UIBUTTON_H_INCLUDED
 #define INDIGO_UIBUTTON_H_INCLUDED
 
+#include "Font.h"
 #include "NinePatch.h"
 
 namespace Indigo
@@ -33,9 +34,10 @@ namespace Indigo
 		{
 		public:
 			NinePatch m_background;
+			Font m_font;
 		};
 
-		UIButton(const OOBase::SharedPtr<UIStyle>& style, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIButton(const OOBase::SharedPtr<UIStyle>& style, const char* caption, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 	protected:
 		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
@@ -50,9 +52,11 @@ namespace Indigo
 		virtual bool can_hilight(bool hilighted) { return true; }
 
 	private:
+		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_text;
 		OOBase::SharedPtr<UIStyle> m_style;
 
 		OOBase::SharedPtr<Render::NinePatch> m_background;
+		OOBase::SharedPtr<Render::UIText> m_caption;
 
 	};
 }
