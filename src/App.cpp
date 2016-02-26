@@ -25,6 +25,18 @@
 #include "UILayer.h"
 #include "UIButton.h"
 
+namespace Indigo
+{
+	namespace Application
+	{
+		const OOBase::CmdArgs::options_t* m_options;
+		const OOBase::CmdArgs::arguments_t* m_args;
+		OOBase::SharedPtr<Window> m_wnd;
+
+		void splash();
+	}
+}
+
 void Indigo::Application::splash()
 {
 	OOBase::SharedPtr<Indigo::UILayer> layer = OOBase::allocate_shared<Indigo::UILayer,OOBase::ThreadLocalAllocator>();
@@ -51,6 +63,11 @@ void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::Cmd
 	m_wnd->visible(true);
 
 	splash();
+}
+
+void Indigo::Application::on_quit()
+{
+	m_wnd.reset();
 }
 
 void Indigo::Application::stop()

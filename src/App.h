@@ -26,21 +26,13 @@
 
 namespace Indigo
 {
-	class Application
+	namespace Application
 	{
-	public:
-		const OOBase::CmdArgs::options_t* m_options;
-		const OOBase::CmdArgs::arguments_t* m_args;
-		OOBase::SharedPtr<Window> m_wnd;
-
 		void start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args);
 		void stop();
 
-	private:
-		void splash();
+		void on_quit();
 	};
-
-	typedef OOBase::Singleton<Application> APP;
 }
 
 #endif // INDIGO_APP_H_INCLUDED

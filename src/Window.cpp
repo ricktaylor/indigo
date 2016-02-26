@@ -211,7 +211,7 @@ void Indigo::Window::on_close()
 		handled = i->second->on_quit();
 
 	if (!handled)
-		APP::instance().m_wnd.reset();
+		Application::on_quit();
 }
 
 void Indigo::Window::on_move(glm::ivec2 pos)

@@ -85,7 +85,7 @@ static OOBase::SharedPtr<Indigo::Pipe> start_logic_thread(Indigo::Pipe& pipe, OO
 		{
 			logic_pipe = Indigo::start_thread("logic");
 			if (logic_pipe)
-				logic_pipe->post(OOBase::make_delegate(Indigo::APP::instance_ptr(),&Indigo::Application::start),wnd,&options,&args);
+				logic_pipe->post(OOBase::make_delegate(&Indigo::Application::start),wnd,&options,&args);
 		}
 	}
 
@@ -154,7 +154,7 @@ bool Indigo::run_render_loop(const OOBase::CmdArgs::options_t& options, const OO
 			}
 		}
 
-		logic_pipe->call(OOBase::make_delegate(Indigo::APP::instance_ptr(),&Indigo::Application::stop));
+		logic_pipe->call(OOBase::make_delegate(&Application::stop));
 	}
 
 	glfwTerminate();
