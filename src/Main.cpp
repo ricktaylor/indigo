@@ -21,19 +21,19 @@
 
 #include "Common.h"
 
-#include <stdlib.h>
-#include <limits.h>
-
 #if defined(_WIN32)
 #include <shlwapi.h>
+#else
+#include <stdlib.h>
 #endif
 
 #if defined(HAVE_UNISTD_H)
 #include <signal.h>
 #endif
 
-#include <OOBase/BTree.h>
-#include <OOBase/Morton.h>
+//#include <limits.h>
+//#include <OOBase/BTree.h>
+//#include <OOBase/Morton.h>
 
 static bool s_is_debug = false;
 

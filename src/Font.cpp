@@ -19,13 +19,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "Common.h"
 #include "Font.h"
-
-#include "Render.h"
 
 #include "../lib/Shader.h"
 #include "../lib/StateFns.h"
-#include <OOBase/TLSSingleton.h>
+
+#include "Render.h"
 #include "Image.h"
 
 namespace

@@ -19,9 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../src/Image.h"
-
-#include <OOBase/Logger.h>
+#include "Common.h"
+#include "Image.h"
 
 extern "C"
 {

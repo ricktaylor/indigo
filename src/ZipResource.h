@@ -22,8 +22,6 @@
 #ifndef INDIGO_ZIPRESOURCE_H_INCLUDED
 #define INDIGO_ZIPRESOURCE_H_INCLUDED
 
-#include "Common.h"
-
 #include "Resource.h"
 
 namespace Indigo

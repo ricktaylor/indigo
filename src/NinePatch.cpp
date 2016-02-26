@@ -19,6 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "Common.h"
 #include "NinePatch.h"
 
 #include "../lib/VertexArrayObject.h"
@@ -26,8 +27,6 @@
 #include "../lib/Shader.h"
 
 #include "Resource.h"
-
-#include <OOBase/TLSSingleton.h>
 
 namespace
 {

@@ -22,8 +22,6 @@
 #ifndef INDIGO_FONT_H_INCLUDED
 #define INDIGO_FONT_H_INCLUDED
 
-#include "Common.h"
-
 #include "../lib/Window.h"
 #include "../lib/VertexArrayObject.h"
 #include "../lib/BufferObject.h"

@@ -22,8 +22,6 @@
 #ifndef INDIGO_PIPE_H_INCLUDED
 #define INDIGO_PIPE_H_INCLUDED
 
-#include "Common.h"
-
 namespace Indigo
 {
 	namespace detail

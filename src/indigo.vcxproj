@@ -24,7 +24,6 @@
     <ClInclude Include="Common.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="Image.h" />
-    <ClInclude Include="Layer.h" />
     <ClInclude Include="NinePatch.h" />
     <ClInclude Include="Pipe.h" />
     <ClInclude Include="Render.h" />

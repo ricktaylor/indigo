@@ -23,6 +23,7 @@
 #define INDIGO_IMAGE_H_INCLUDED
 
 #include "../lib/Texture.h"
+
 #include "Resource.h"
 
 namespace Indigo

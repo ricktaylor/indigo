@@ -22,8 +22,9 @@
 #ifndef INDIGO_Window_H_INCLUDED
 #define INDIGO_Window_H_INCLUDED
 
-#include "Render.h"
 #include "../lib/Window.h"
+
+#include "Render.h"
 
 namespace Indigo
 {

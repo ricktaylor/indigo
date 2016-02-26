@@ -30,9 +30,6 @@
     <ClInclude Include="ZipResource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Layer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NinePatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
