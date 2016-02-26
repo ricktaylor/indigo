@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="BufferObject.cpp" />
     <ClCompile Include="Framebuffer.cpp" />
-    <ClCompile Include="Image.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="State.cpp" />
     <ClCompile Include="StateFns.cpp" />
@@ -33,9 +32,7 @@
     <ClInclude Include="BufferObject.h" />
     <ClInclude Include="Framebuffer.h" />
     <ClInclude Include="glext.h" />
-    <ClInclude Include="Image.h" />
     <ClInclude Include="OOGL.h" />
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="StateFns.h" />

@@ -21,9 +21,6 @@
     <ClCompile Include="Framebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Image.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -53,13 +50,7 @@
     <ClInclude Include="glext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="OOGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">

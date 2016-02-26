@@ -28,7 +28,9 @@
     <ClInclude Include="NinePatch.h" />
     <ClInclude Include="Pipe.h" />
     <ClInclude Include="Render.h" />
+    <ClInclude Include="Resource.h" />
     <ClInclude Include="Thread.h" />
+    <ClInclude Include="UIButton.h" />
     <ClInclude Include="UILayer.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="ZipResource.h" />
@@ -43,6 +45,7 @@
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="StaticResources.cpp" />
     <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UILayer.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="ZipResource.cpp" />
