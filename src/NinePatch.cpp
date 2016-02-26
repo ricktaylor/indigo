@@ -285,8 +285,6 @@ Indigo::Render::NinePatch::NinePatch(const glm::u16vec2& position, const glm::u1
 		m_patch(-1),
 		m_info(info)
 {
-
-
 	layout(size);
 }
 
