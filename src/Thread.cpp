@@ -23,7 +23,7 @@
 
 namespace Indigo
 {
-	void render_init(Pipe* const pipe);
+	void render_init(Pipe* pipe);
 }
 
 namespace

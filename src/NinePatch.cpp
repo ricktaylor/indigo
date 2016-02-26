@@ -31,9 +31,6 @@
 
 namespace
 {
-	#include "NinePatch.vert.h"
-	#include "NinePatch.frag.h"
-
 	class NinePatchFactory
 	{
 	public:
@@ -85,16 +82,30 @@ NinePatchFactory::~NinePatchFactory()
 
 bool NinePatchFactory::create_program()
 {
+#if defined(_WIN32)
+	static const char* s_NinePatch_vert = static_cast<const char*>(Indigo::static_resources().load("NinePatch.vert"));
+	static const GLint s_len_NinePatch_vert = static_cast<GLint>(Indigo::static_resources().size("NinePatch.vert"));
+
+	static const char* s_NinePatch_frag = static_cast<const char*>(Indigo::static_resources().load("NinePatch.frag"));
+	static const GLint s_len_NinePatch_frag = static_cast<GLint>(Indigo::static_resources().size("NinePatch.frag"));
+#else
+	#include "NinePatch.vert.h"
+	#include "NinePatch.frag.h"
+
+	#define s_len_NinePatch_vert static_cast<GLint>(sizeof(s_NinePatch_vert))
+	#define s_len_NinePatch_frag static_cast<GLint>(sizeof(s_NinePatch_frag))		
+#endif
+
 	if (!m_ptrProgram)
 	{
 		OOBase::SharedPtr<OOGL::Shader> shaders[2];
 		shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
 
-		if (!shaders[0]->compile(s_NinePatch_vert,sizeof(s_NinePatch_vert)))
+		if (!shaders[0]->compile(s_NinePatch_vert,s_len_NinePatch_vert))
 			LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
 		
 		shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
-		if (!shaders[1]->compile(s_NinePatch_frag,sizeof(s_NinePatch_frag)))
+		if (!shaders[1]->compile(s_NinePatch_frag,s_len_NinePatch_frag))
 			LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()),false);
 		
 		OOBase::SharedPtr<OOGL::Program> program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();

@@ -23,9 +23,15 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 // RCDATA
 //
 
+IDR_NINEPATCH_FS        RCDATA                  "NinePatch.frag"
+IDR_NINEPATCH_VS        RCDATA                  "NinePatch.vert"
+IDR_FONT_8BIT_VS        RCDATA                  "Font_8bit.vert"
+IDR_FONT_8BIT_FS        RCDATA                  "Font_8bit.frag"
+
 IDR_TITILLIUM           RCDATA                  "Titillium-Regular.fnt"
-IDB_MENU_BORDER         RCDATA                  "menu_border.png"
 IDB_TITILLIUM           RCDATA                  "Titillium-Regular_0.png"
+
+IDB_MENU_BORDER         RCDATA                  "menu_border.png"
 
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////

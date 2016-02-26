@@ -30,9 +30,6 @@
 
 namespace
 {
-	#include "Font_8bit.vert.h"
-	#include "Font_8bit.frag.h"
-
 	OOBase::uint32_t read_uint32(const unsigned char*& data)
 	{
 		OOBase::uint32_t r = 0;
@@ -249,13 +246,27 @@ OOBase::SharedPtr<OOGL::Program> FontProgram::program(OOBase::uint32_t packing)
 
 bool FontProgram::load_8bit_shader()
 {
+#if defined(_WIN32)
+	static const char* s_Font_8bit_vert = static_cast<const char*>(Indigo::static_resources().load("Font_8bit.vert"));
+	static const GLint s_len_Font_8bit_vert = static_cast<GLint>(Indigo::static_resources().size("Font_8bit.vert"));
+
+	static const char* s_Font_8bit_frag = static_cast<const char*>(Indigo::static_resources().load("Font_8bit.frag"));
+	static const GLint s_len_Font_8bit_frag = static_cast<GLint>(Indigo::static_resources().size("Font_8bit.frag"));
+#else
+	#include "Font_8bit.vert.h"
+	#include "Font_8bit.frag.h"
+
+	#define s_len_Font_8bit_vert static_cast<GLint>(sizeof(s_Font_8bit_vert))
+	#define s_len_Font_8bit_frag static_cast<GLint>(sizeof(s_Font_8bit_frag))		
+#endif
+
 	OOBase::SharedPtr<OOGL::Shader> shaders[2];
 	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
-	if (!shaders[0]->compile(s_Font_8bit_vert,sizeof(s_Font_8bit_vert)))
+	if (!shaders[0]->compile(s_Font_8bit_vert,s_len_Font_8bit_vert))
 		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
 
 	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
-	if (!shaders[1]->compile(s_Font_8bit_frag,sizeof(s_Font_8bit_frag)))
+	if (!shaders[1]->compile(s_Font_8bit_frag,s_len_Font_8bit_frag))
 		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()),false);
 
 	OOBase::SharedPtr<OOGL::Program> program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
