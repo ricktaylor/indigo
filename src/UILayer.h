@@ -31,6 +31,8 @@ namespace Indigo
 
 	namespace Render
 	{
+		class UIGroup;
+
 		class UIDrawable : public OOBase::NonCopyable
 		{
 			friend class UIGroup;

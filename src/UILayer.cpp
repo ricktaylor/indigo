@@ -97,12 +97,12 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 {
 	if (m_visible)
 	{
-		glm::vec2 pos = m_position;
-		glm::vec2 sz = m_size;
-
-		glViewport(0, 0, sz.x, sz.y);
+		glViewport(0, 0, m_size.x, m_size.y);
 
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+		glm::vec2 pos = m_position;
+		glm::vec2 sz = m_size;
 
 		Indigo::Render::UIGroup::on_draw(glState,glm::ortho(pos.x,sz.x,pos.y,sz.y));
 	}
@@ -270,7 +270,11 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 
 void Indigo::UILayer::on_size(const glm::uvec2& sz)
 {
-	render_pipe()->post(OOBase::make_delegate(render_group< ::UILayer>().get(),&::UILayer::size),sz);
-
-	size(sz);
+	OOBase::SharedPtr< ::UILayer> layer = render_group< ::UILayer>();
+	if (layer)
+	{
+		render_pipe()->post(OOBase::make_delegate(layer.get(),&::UILayer::size),sz);
+	
+		size(sz);
+	}
 }
