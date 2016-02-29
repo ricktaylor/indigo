@@ -101,6 +101,23 @@ bool Indigo::Image::load(const unsigned char* buffer, int len, int components)
 	return (p != NULL);
 }
 
+glm::vec4 Indigo::Image::pixel(int x, int y) const
+{
+	glm::vec4 pixel(0.f);
+	if (m_pixels)
+	{
+		const char* p = static_cast<const char*>(m_pixels) + (m_width * y + x) * m_components;
+		pixel.r = p[0]/256.f;
+		if (m_components > 1)
+			pixel.g = p[1]/256.f;
+		if (m_components > 2)
+			pixel.b = p[2]/256.f;
+		if (m_components > 3)
+			pixel.a = p[3]/256.f;
+	}
+	return pixel;
+}
+
 void Indigo::Image::unload()
 {
 	if (m_pixels)
