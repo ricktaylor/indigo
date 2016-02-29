@@ -37,8 +37,8 @@ bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 BUILT_SOURCES = \
 	Font_8bit.vert.h \
 	Font_8bit.frag.h \
-	NinePatch.vert.h \
-	NinePatch.frag.h \
+	UI9Patch.vert.h \
+	UI9Patch.frag.h \
 	Titillium-Regular_0.png.h \
 	Titillium-Regular.fnt.h \
 	menu_border.png.h
@@ -59,12 +59,13 @@ indigo_SOURCES = \
 	Render.cpp \
 	Main.cpp \
 	Window.cpp \
+	Image.cpp \
+	Font.cpp \
 	UILayer.cpp \
 	UIButton.cpp \
-	Font.cpp \
-	App.cpp \
-	NinePatch.cpp \
-	Image.cpp
+	UI9Patch.cpp \
+	App.cpp
+	
 	
 #	GUIStyle.cpp \
 #	GUIWidget.cpp \

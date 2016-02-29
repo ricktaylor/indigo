@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_NINEPATCH_H_INCLUDED
-#define INDIGO_NINEPATCH_H_INCLUDED
+#ifndef INDIGO_UI9Patch_H_INCLUDED
+#define INDIGO_UI9Patch_H_INCLUDED
 
 #include "UILayer.h"
 #include "Image.h"
@@ -29,23 +29,23 @@ namespace Indigo
 {
 	namespace Render
 	{
-		class NinePatch;
+		class UI9Patch;
 	}
 
-	class NinePatch : public Image
+	class UI9Patch : public Image
 	{
-		friend class Render::NinePatch;
+		friend class Render::UI9Patch;
 
 	public:
-		NinePatch();
-		virtual ~NinePatch();
+		UI9Patch();
+		virtual ~UI9Patch();
 				
 		virtual bool load(const unsigned char* buffer, int len, int components = 0);
 		virtual void unload();
 
 		const glm::u16vec4& margins() const { return m_margins; }
 		
-		OOBase::SharedPtr<Render::NinePatch> make_drawable(const glm::u16vec2& position = glm::u16vec2(0), const glm::u16vec2& size = glm::u16vec2(0), bool visible = true, const glm::vec4& colour = glm::vec4(1.f)) const;
+		OOBase::SharedPtr<Render::UI9Patch> make_drawable(const glm::u16vec2& position = glm::u16vec2(0), const glm::u16vec2& size = glm::u16vec2(0), bool visible = true, const glm::vec4& colour = glm::vec4(1.f)) const;
 
 	private:
 		bool pixel_cmp(int x, int y, bool black);
@@ -61,20 +61,20 @@ namespace Indigo
 			glm::u16vec2 m_tex_size;
 			OOBase::SharedPtr<OOGL::Texture> m_texture;
 		};
-		OOBase::SharedPtr<Indigo::NinePatch::Info> m_info;
+		OOBase::SharedPtr<Indigo::UI9Patch::Info> m_info;
 
 		 void do_unload();
 	};
 
 	namespace Render
 	{
-		class NinePatch : public UIDrawable
+		class UI9Patch : public UIDrawable
 		{
-			friend class Indigo::NinePatch;
+			friend class Indigo::UI9Patch;
 
 		public:
-			NinePatch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info);
-			virtual ~NinePatch();
+			UI9Patch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::UI9Patch::Info>& info);
+			virtual ~UI9Patch();
 
 			bool valid() const;
 
@@ -88,7 +88,7 @@ namespace Indigo
 			GLsizeiptr m_firsts[3];
 			GLsizei    m_counts[3];
 
-			OOBase::SharedPtr<Indigo::NinePatch::Info> m_info;
+			OOBase::SharedPtr<Indigo::UI9Patch::Info> m_info;
 
 			void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};

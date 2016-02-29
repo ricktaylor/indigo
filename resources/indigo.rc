@@ -23,8 +23,8 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 // RCDATA
 //
 
-IDR_NINEPATCH_FS        RCDATA                  "NinePatch.frag"
-IDR_NINEPATCH_VS        RCDATA                  "NinePatch.vert"
+IDR_UI9PATCH_FS         RCDATA                  "UI9Patch.frag"
+IDR_UI9PATCH_VS         RCDATA                  "UI9Patch.vert"
 IDR_FONT_8BIT_VS        RCDATA                  "Font_8bit.vert"
 IDR_FONT_8BIT_FS        RCDATA                  "Font_8bit.frag"
 

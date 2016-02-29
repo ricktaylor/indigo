@@ -23,7 +23,7 @@
 #define INDIGO_UIBUTTON_H_INCLUDED
 
 #include "Font.h"
-#include "NinePatch.h"
+#include "UI9Patch.h"
 
 namespace Indigo
 {
@@ -33,7 +33,7 @@ namespace Indigo
 		class UIStyle
 		{
 		public:
-			NinePatch m_background;
+			UI9Patch m_background;
 			Font m_font;
 		};
 
@@ -55,7 +55,7 @@ namespace Indigo
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_text;
 		OOBase::SharedPtr<UIStyle> m_style;
 
-		OOBase::SharedPtr<Render::NinePatch> m_background;
+		OOBase::SharedPtr<Render::UI9Patch> m_background;
 		OOBase::SharedPtr<Render::UIText> m_caption;
 
 	};

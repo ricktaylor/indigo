@@ -21,9 +21,9 @@
 
 #include "../old/GUILabel.h"
 
+#include "../src/UI9Patch.h"
 #include "Font.h"
 #include "Render.h"
-#include "NinePatch.h"
 
 namespace
 {
@@ -37,7 +37,7 @@ namespace
 	private:
 		OOBase::String m_string;
 		OOBase::SharedPtr<Indigo::Render::Text> m_text;
-		OOBase::SharedPtr<Indigo::Render::NinePatch> m_border;
+		OOBase::SharedPtr<Indigo::Render::UI9Patch> m_border;
 
 		void draw(OOGL::State& glState, const glm::mat4& mvp);
 
@@ -108,9 +108,9 @@ bool Label::refresh_border()
 		const OOBase::SharedPtr<Indigo::Render::GUI::Style>& style = Widget::style();
 		if (!m_border)
 		{
-			m_border = OOBase::allocate_shared<Indigo::Render::NinePatch,OOBase::ThreadLocalAllocator>(Widget::size(),style->borders(),style->border_image_size());
+			m_border = OOBase::allocate_shared<Indigo::Render::UI9Patch,OOBase::ThreadLocalAllocator>(Widget::size(),style->borders(),style->border_image_size());
 			if (!m_border)
-				LOG_ERROR_RETURN(("Failed to allocate NinePatch: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+				LOG_ERROR_RETURN(("Failed to allocate UI9Patch: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 		else
 			m_border->layout(Widget::size(),style->borders(),style->border_image_size());
