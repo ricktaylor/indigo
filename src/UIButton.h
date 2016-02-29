@@ -33,8 +33,11 @@ namespace Indigo
 		class UIStyle
 		{
 		public:
-			UI9Patch m_background;
 			Font m_font;
+			UI9Patch m_background;
+			glm::vec4 m_colour;
+			glm::vec4 m_shadow;
+			glm::u16vec2 m_drop;
 		};
 
 		template <typename Allocator>

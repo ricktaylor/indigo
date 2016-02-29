@@ -53,9 +53,7 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 		return false;
 
 	glm::u16vec4 margins = m_style->m_background.margins();
-	glm::vec4 colour(1.f,1.f,1.f,1.f);
-	glm::vec4 shadow(.0f,.0f,.0f,.75f);
-	m_caption = OOBase::allocate_shared<Render::UIShadowText,OOBase::ThreadLocalAllocator>(m_style->m_font.render_font(),m_text,0.f,colour,shadow,glm::ivec2(margins.x,margins.y));
+	m_caption = OOBase::allocate_shared<Render::UIShadowText,OOBase::ThreadLocalAllocator>(m_style->m_font.render_font(),m_text,0.f,m_style->m_colour,m_style->m_shadow,glm::ivec2(margins.x,margins.y),m_style->m_drop);
 	if (!m_caption)
 		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 		

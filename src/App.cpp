@@ -42,10 +42,12 @@ void Indigo::Application::splash()
 	OOBase::SharedPtr<Indigo::UILayer> layer = OOBase::allocate_shared<Indigo::UILayer,OOBase::ThreadLocalAllocator>();
 	m_wnd->add_layer(layer,100);
 
-
 	OOBase::SharedPtr<Indigo::UIButton::UIStyle> button_style = OOBase::allocate_shared<Indigo::UIButton::UIStyle,OOBase::ThreadLocalAllocator>();
 	button_style->m_background.Image::load(Indigo::static_resources(),"menu_border.png");
 	button_style->m_font.load(Indigo::static_resources(),"Titillium-Regular.fnt");
+	button_style->m_colour = glm::vec4(1.f,1.f,1.f,1.f);
+	button_style->m_shadow = glm::vec4(.0f,.0f,.0f,.75f);
+	button_style->m_drop = glm::i16vec2(0,-1);
 
 	OOBase::SharedPtr<Indigo::UIButton> button = OOBase::allocate_shared<Indigo::UIButton,OOBase::ThreadLocalAllocator>(button_style,"   Hello   ",-1,glm::ivec2(100,100));
 	layer->add_widget(OOBase::static_pointer_cast<Indigo::UIWidget>(button),100);
