@@ -494,7 +494,7 @@ void Indigo::Render::Font::free_text(Text& text)
 
 void Indigo::Render::Font::draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei len)
 {
-	if (len)
+	if (len && colour.a > 0.f)
 	{
 		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_info->m_packing);
 		if (ptrProgram)

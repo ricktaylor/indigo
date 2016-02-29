@@ -373,7 +373,7 @@ void Indigo::Render::UI9Patch::layout(const glm::u16vec2& size)
 
 void Indigo::Render::UI9Patch::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	if (m_patch != GLsizei(-1) && m_info->m_texture)
+	if (m_patch != GLsizei(-1) && m_info->m_texture && m_colour.a > 0.f)
 	{
 		glState.bind(0,m_info->m_texture);
 
