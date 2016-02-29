@@ -420,3 +420,30 @@ bool OOGL::State::set_singleton(const void* key, void* val, void (*destructor)(v
 
 	return m_mapSingletons.insert(key,val);
 }
+
+bool OOGL::State::enable(GLenum cap, bool enable)
+{
+	bool prev_state;
+	OOBase::HashTable<GLenum,bool,OOBase::ThreadLocalAllocator>::iterator i = m_enables.find(cap);
+	if (!i)
+	{
+		prev_state = glIsEnabled(cap) == GL_TRUE;
+		m_enables.insert(cap,enable);
+	}
+	else
+	{
+		prev_state = i->second;
+		if (enable != i->second)
+			i->second = enable;
+	}
+
+	if (prev_state != enable)
+	{
+		if (enable)
+			glEnable(cap);
+		else
+			glDisable(cap);
+	}
+
+	return prev_state;
+}

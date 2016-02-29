@@ -97,7 +97,7 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 	{
 		glViewport(0, 0, m_size.x, m_size.y);
 
-		glEnable(GL_BLEND);
+		glState.enable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 		glm::vec2 sz = m_size;

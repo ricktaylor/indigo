@@ -63,6 +63,9 @@ namespace OOGL
 		bool get_singleton(const void* key, void** val);
 		bool set_singleton(const void* key, void* val, void (*destructor)(void*) = NULL);
 
+		bool enable(GLenum cap, bool enable = true);
+		bool disable(GLenum cap) { return enable(cap,false); }
+
 	private:
 		StateFns&                            m_state_fns;
 		OOBase::SharedPtr<Framebuffer>       m_draw_fb;
@@ -83,6 +86,8 @@ namespace OOGL
 
 		void bind_buffer(GLuint buffer, GLenum target);
 		OOBase::HashTable<GLenum,OOBase::SharedPtr<BufferObject>,OOBase::ThreadLocalAllocator> m_buffer_objects;
+
+		OOBase::HashTable<GLenum,bool,OOBase::ThreadLocalAllocator> m_enables;
 
 		State(StateFns& fns);
 		~State();
