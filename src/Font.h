@@ -155,7 +155,7 @@ namespace Indigo
 		public:
 			UIText(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = -1, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::i16vec2& position = glm::i16vec2(0), bool visible = true);
 
-			void colour(const glm::vec4& colour);
+			void colour(const glm::vec4& colour) { m_colour = colour; }
 
 		private:
 			glm::vec4 m_colour;
