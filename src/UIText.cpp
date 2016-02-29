@@ -47,7 +47,7 @@ Indigo::Render::UIShadowText::UIShadowText(const OOBase::SharedPtr<Font>& font, 
 void Indigo::Render::UIShadowText::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	if (m_drop != glm::i16vec2(0) && m_shadow.a > 0.f)
-		m_text.draw(glState,glm::scale(glm::translate(mvp,glm::vec3(m_drop.x,m_drop.y,0.f)),glm::vec3(m_scale)),m_shadow * m_colour);
+		m_text.draw(glState,glm::scale(glm::translate(mvp,glm::vec3(m_drop.x,m_drop.y,0.f)),glm::vec3(m_scale)),m_shadow);
 
 	m_text.draw(glState,glm::scale(mvp,glm::vec3(m_scale)),m_colour);
 }
