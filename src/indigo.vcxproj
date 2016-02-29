@@ -24,13 +24,14 @@
     <ClInclude Include="Common.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="Image.h" />
-    <ClInclude Include="NinePatch.h" />
     <ClInclude Include="Pipe.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Thread.h" />
+    <ClInclude Include="UI9Patch.h" />
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UILayer.h" />
+    <ClInclude Include="UIText.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="ZipResource.h" />
   </ItemGroup>
@@ -39,13 +40,14 @@
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="NinePatch.cpp" />
     <ClCompile Include="Pipe.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="StaticResources.cpp" />
     <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="UI9Patch.cpp" />
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UILayer.cpp" />
+    <ClCompile Include="UIText.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="ZipResource.cpp" />
   </ItemGroup>
