@@ -30,7 +30,7 @@ namespace Indigo
 	class UIButton : public UIWidget
 	{
 	public:
-		class UIStyle
+		class Style
 		{
 		public:
 			Font m_font;
@@ -41,7 +41,7 @@ namespace Indigo
 		};
 
 		template <typename Allocator>
-		UIButton(const OOBase::SharedPtr<UIStyle>& style, const OOBase::SharedString<Allocator>& caption, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0)) :
+		UIButton(const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<Allocator>& caption, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0)) :
 				UIWidget(position,size),
 				m_text(caption),
 				m_style(style)
@@ -50,7 +50,7 @@ namespace Indigo
 				this->size(ideal_size());
 		}
 
-		UIButton(const OOBase::SharedPtr<UIStyle>& style, const char* sz, size_t len = -1, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIButton(const OOBase::SharedPtr<Style>& style, const char* sz, size_t len = -1, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 	protected:
 		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
@@ -66,7 +66,7 @@ namespace Indigo
 
 	private:
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_text;
-		OOBase::SharedPtr<UIStyle> m_style;
+		OOBase::SharedPtr<Style> m_style;
 
 		OOBase::SharedPtr<Render::UI9Patch> m_background;
 		OOBase::SharedPtr<Render::UIShadowText> m_caption;

@@ -22,7 +22,7 @@
 #include "Common.h"
 #include "UIButton.h"
 
-Indigo::UIButton::UIButton(const OOBase::SharedPtr<UIStyle>& style, const char* sz, size_t len, const glm::ivec2& position, const glm::uvec2& size) :
+Indigo::UIButton::UIButton(const OOBase::SharedPtr<Style>& style, const char* sz, size_t len, const glm::ivec2& position, const glm::uvec2& size) :
 	UIWidget(position,size),
 	m_style(style)
 {

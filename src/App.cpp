@@ -42,7 +42,7 @@ void Indigo::Application::splash()
 	OOBase::SharedPtr<Indigo::UILayer> layer = OOBase::allocate_shared<Indigo::UILayer,OOBase::ThreadLocalAllocator>();
 	m_wnd->add_layer(layer,100);
 
-	OOBase::SharedPtr<Indigo::UIButton::UIStyle> button_style = OOBase::allocate_shared<Indigo::UIButton::UIStyle,OOBase::ThreadLocalAllocator>();
+	OOBase::SharedPtr<Indigo::UIButton::Style> button_style = OOBase::allocate_shared<Indigo::UIButton::Style,OOBase::ThreadLocalAllocator>();
 	button_style->m_background.Image::load(Indigo::static_resources(),"menu_border.png");
 	button_style->m_font.load(Indigo::static_resources(),"Titillium-Regular.fnt");
 	button_style->m_colour = glm::vec4(1.f,1.f,1.f,1.f);
