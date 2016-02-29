@@ -45,7 +45,7 @@ namespace Indigo
 
 		const glm::u16vec4& margins() const { return m_margins; }
 		
-		OOBase::SharedPtr<Render::NinePatch> make_drawable(const glm::u16vec2& position = glm::u16vec2(0), const glm::u16vec2& size = glm::u16vec2(0), bool visible = true) const;
+		OOBase::SharedPtr<Render::NinePatch> make_drawable(const glm::u16vec2& position = glm::u16vec2(0), const glm::u16vec2& size = glm::u16vec2(0), bool visible = true, const glm::vec4& colour = glm::vec4(1.f)) const;
 
 	private:
 		bool pixel_cmp(int x, int y, bool black);
@@ -73,7 +73,7 @@ namespace Indigo
 			friend class Indigo::NinePatch;
 
 		public:
-			NinePatch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info);
+			NinePatch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info);
 			virtual ~NinePatch();
 
 			bool valid() const;
@@ -81,6 +81,7 @@ namespace Indigo
 			void layout(const glm::u16vec2& size);
 
 		private:
+			glm::vec4  m_colour;
 			GLsizei    m_patch;
 			GLsizeiptr m_firsts[3];
 			GLsizei    m_counts[3];

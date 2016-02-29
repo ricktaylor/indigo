@@ -40,7 +40,7 @@ namespace
 		void free_patch(GLsizei p);
 		void layout_patch(GLsizei patch, const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size);
 
-		void draw(OOGL::State& state, const glm::mat4& mvp, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount);
+		void draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount);
 
 	private:
 		typedef OOBase::Table<GLsizei,GLsizei,OOBase::Less<GLsizei>,OOBase::ThreadLocalAllocator> free_list_t;
@@ -268,20 +268,22 @@ void NinePatchFactory::free_patch(GLsizei p)
 	}
 }
 
-void NinePatchFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount)
+void NinePatchFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const glm::vec4& colour, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount)
 {
 	if (m_ptrProgram)
 	{
 		glState.use(m_ptrProgram);
 
+		m_ptrProgram->uniform("in_Colour",colour);
 		m_ptrProgram->uniform("MVP",mvp);
 
 		m_ptrVAO->multi_draw_elements(GL_TRIANGLE_STRIP,counts,GL_UNSIGNED_INT,firsts,drawcount);
 	}
 }
 
-Indigo::Render::NinePatch::NinePatch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info) :
+Indigo::Render::NinePatch::NinePatch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info) :
 		UIDrawable(position,visible),
+		m_colour(colour),
 		m_patch(-1),
 		m_info(info)
 {
@@ -379,16 +381,16 @@ void Indigo::Render::NinePatch::on_draw(OOGL::State& glState, const glm::mat4& m
 		if (m_counts[0])
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(glState,mvp,m_firsts,m_counts,3);
+				NinePatchFactory_t::instance().draw(glState,mvp,m_colour,m_firsts,m_counts,3);
 			else
-				NinePatchFactory_t::instance().draw(glState,mvp,m_firsts,m_counts,2);
+				NinePatchFactory_t::instance().draw(glState,mvp,m_colour,m_firsts,m_counts,2);
 		}
 		else
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(glState,mvp,&m_firsts[1],&m_counts[1],2);
+				NinePatchFactory_t::instance().draw(glState,mvp,m_colour,&m_firsts[1],&m_counts[1],2);
 			else
-				NinePatchFactory_t::instance().draw(glState,mvp,&m_firsts[1],&m_counts[1],1);
+				NinePatchFactory_t::instance().draw(glState,mvp,m_colour,&m_firsts[1],&m_counts[1],1);
 		}
 	}
 }
@@ -554,7 +556,7 @@ bool Indigo::NinePatch::get_bounds()
 	return true;
 }
 
-OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(const glm::u16vec2& position, const glm::u16vec2& size, bool visible) const
+OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour) const
 {
 	if (!m_info->m_texture)
 	{
@@ -568,5 +570,5 @@ OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(co
 		m_info->m_texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	}
 
-	return OOBase::allocate_shared<Render::NinePatch,OOBase::ThreadLocalAllocator>(position,size,visible,m_info);
+	return OOBase::allocate_shared<Render::NinePatch,OOBase::ThreadLocalAllocator>(position,size,visible,colour,m_info);
 }
