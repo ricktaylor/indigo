@@ -47,7 +47,7 @@ void Indigo::Application::splash()
 	button_style->m_background.Image::load(Indigo::static_resources(),"menu_border.png");
 	button_style->m_font.load(Indigo::static_resources(),"Titillium-Regular.fnt");
 
-	OOBase::SharedPtr<Indigo::UIButton> button = OOBase::allocate_shared<Indigo::UIButton,OOBase::ThreadLocalAllocator>(button_style,"   Hello   ",glm::ivec2(100,100));
+	OOBase::SharedPtr<Indigo::UIButton> button = OOBase::allocate_shared<Indigo::UIButton,OOBase::ThreadLocalAllocator>(button_style,"   Hello   ",-1,glm::ivec2(100,100));
 	layer->add_widget(OOBase::static_pointer_cast<Indigo::UIWidget>(button),100);
 
 	button_style->m_background.unload();

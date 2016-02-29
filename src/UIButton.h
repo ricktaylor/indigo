@@ -22,7 +22,7 @@
 #ifndef INDIGO_UIBUTTON_H_INCLUDED
 #define INDIGO_UIBUTTON_H_INCLUDED
 
-#include "Font.h"
+#include "UIText.h"
 #include "UI9Patch.h"
 
 namespace Indigo
@@ -37,7 +37,17 @@ namespace Indigo
 			Font m_font;
 		};
 
-		UIButton(const OOBase::SharedPtr<UIStyle>& style, const char* caption, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		template <typename Allocator>
+		UIButton(const OOBase::SharedPtr<UIStyle>& style, const OOBase::SharedString<Allocator>& caption, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0)) :
+				UIWidget(position,size),
+				m_text(caption),
+				m_style(style)
+		{
+			if (size == glm::uvec2(0))
+				this->size(ideal_size());
+		}
+
+		UIButton(const OOBase::SharedPtr<UIStyle>& style, const char* sz, size_t len = -1, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 	protected:
 		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
@@ -56,7 +66,7 @@ namespace Indigo
 		OOBase::SharedPtr<UIStyle> m_style;
 
 		OOBase::SharedPtr<Render::UI9Patch> m_background;
-		OOBase::SharedPtr<Render::UIText> m_caption;
+		OOBase::SharedPtr<Render::UIShadowText> m_caption;
 
 	};
 }

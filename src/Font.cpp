@@ -557,21 +557,6 @@ void Indigo::Render::Text::draw(OOGL::State& state, const glm::mat4& mvp, const 
 	m_font->draw(state,mvp,colour,m_glyph_start + start,length);
 }
 
-Indigo::Render::UIText::UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::i16vec2& position, bool visible) :
-		Text(font,sz,len),
-		UIDrawable(position,visible),
-		m_colour(colour),
-		m_scale(scale)
-{
-	if (m_scale <= 0.f)
-		m_scale = font->line_height();
-}
-
-void Indigo::Render::UIText::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
-{
-	draw(glState,glm::scale(mvp,glm::vec3(m_scale)),m_colour);
-}
-
 Indigo::Font::Font()
 {
 }

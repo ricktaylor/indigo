@@ -22,11 +22,11 @@
 #include "Common.h"
 #include "UIButton.h"
 
-Indigo::UIButton::UIButton(const OOBase::SharedPtr<UIStyle>& style, const char* caption, const glm::ivec2& position, const glm::uvec2& size) :
+Indigo::UIButton::UIButton(const OOBase::SharedPtr<UIStyle>& style, const char* sz, size_t len, const glm::ivec2& position, const glm::uvec2& size) :
 	UIWidget(position,size),
 	m_style(style)
 {
-	if (!m_text.assign(caption))
+	if (!m_text.assign(sz,len))
 		LOG_ERROR(("Failed to assign text: %s",OOBase::system_error_text()));
 
 	if (size == glm::uvec2(0))
@@ -54,7 +54,8 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 
 	glm::u16vec4 margins = m_style->m_background.margins();
 	glm::vec4 colour(1.f,1.f,1.f,1.f);
-	m_caption = OOBase::allocate_shared<Render::UIText,OOBase::ThreadLocalAllocator>(m_style->m_font.render_font(),m_text.c_str(),m_text.length(),0.f,colour,glm::ivec2(margins.x,margins.y));
+	glm::vec4 shadow(.0f,.0f,.0f,.75f);
+	m_caption = OOBase::allocate_shared<Render::UIShadowText,OOBase::ThreadLocalAllocator>(m_style->m_font.render_font(),m_text,0.f,colour,shadow,glm::ivec2(margins.x,margins.y));
 	if (!m_caption)
 		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 		

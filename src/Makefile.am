@@ -64,6 +64,7 @@ indigo_SOURCES = \
 	UILayer.cpp \
 	UIButton.cpp \
 	UI9Patch.cpp \
+	UIText.cpp \
 	App.cpp
 	
 	

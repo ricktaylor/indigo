@@ -135,6 +135,13 @@ namespace Indigo
 			friend class Font;
 
 		public:
+			template <typename Allocator>
+			Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<Allocator>& text) :
+					m_font(font), m_glyph_start(0), m_glyph_len(0)
+			{
+				m_font->alloc_text(*this,text.c_str(),text.length());
+			}
+
 			Text(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = -1);
 			~Text();
 
@@ -148,20 +155,6 @@ namespace Indigo
 			OOBase::SharedPtr<Font> m_font;
 			GLsizei m_glyph_start;
 			GLsizei m_glyph_len;
-		};
-
-		class UIText : public Text, public UIDrawable
-		{
-		public:
-			UIText(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = -1, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::i16vec2& position = glm::i16vec2(0), bool visible = true);
-
-			void colour(const glm::vec4& colour) { m_colour = colour; }
-
-		private:
-			glm::vec4 m_colour;
-			float m_scale;
-
-			void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};
 	}
 }
