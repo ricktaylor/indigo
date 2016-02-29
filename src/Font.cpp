@@ -280,7 +280,7 @@ bool FontProgram::load_8bit_shader()
 	return true;
 }
 
-Indigo::Render::Font::Font(const OOBase::SharedPtr<Indigo::Font::Info>& info) : m_info(info), m_allocated(0)
+Indigo::Render::Font::Font(const OOBase::SharedPtr<Indigo::Font::Info>& info) : m_allocated(0), m_info(info)
 {
 }
 
@@ -560,8 +560,8 @@ void Indigo::Render::Text::draw(OOGL::State& state, const glm::mat4& mvp, const 
 Indigo::Render::UIText::UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::i16vec2& position, bool visible) :
 		Text(font,sz,len),
 		UIDrawable(position,visible),
-		m_scale(scale),
-		m_colour(colour)
+		m_colour(colour),
+		m_scale(scale)
 {
 	if (m_scale <= 0.f)
 		m_scale = font->line_height();
@@ -688,8 +688,6 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 				ci.xadvance = read_int16(data) / line_height;
 				ci.page = *data++;
 				ci.channel = *data++;
-
-				LOG_DEBUG(("Character '%c' {%g,%g} {%g,%g}",id,ci.left,ci.bottom,ci.right,ci.top));
 
 				if (!(ok = m_info->m_mapCharInfo.insert(id,ci)))
 					LOG_ERROR(("Failed to add character to table: %s",OOBase::system_error_text()));
