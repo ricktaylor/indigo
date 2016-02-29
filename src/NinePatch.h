@@ -80,6 +80,8 @@ namespace Indigo
 
 			void layout(const glm::u16vec2& size);
 
+			void colour(const glm::vec4& colour) { m_colour = colour; }
+
 		private:
 			glm::vec4  m_colour;
 			GLsizei    m_patch;
