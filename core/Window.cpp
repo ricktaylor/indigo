@@ -67,7 +67,7 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::BlankingLayer::create_render_la
 	if (!layer)
 		LOG_ERROR(("Failed to allocate layer: %s",OOBase::system_error_text()));
 
-	return OOBase::static_pointer_cast<Indigo::Render::Layer>(layer);
+	return layer;
 }
 
 glm::vec4 Indigo::BlankingLayer::colour(const glm::vec4& colour)

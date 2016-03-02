@@ -50,7 +50,7 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 	if (!m_background)
 		return false;
 
-	if (!group->add_drawable(OOBase::static_pointer_cast<Render::UIDrawable>(m_background),0))
+	if (!group->add_drawable(m_background,0))
 		return false;
 
 	glm::u16vec4 margins = m_style->m_background.margins();
@@ -58,5 +58,5 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 	if (!m_caption)
 		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 		
-	return group->add_drawable(OOBase::static_pointer_cast<Render::UIDrawable>(m_caption),10);
+	return group->add_drawable(m_caption,10);
 }
