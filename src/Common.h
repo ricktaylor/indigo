@@ -29,7 +29,7 @@
 
 //////////////////////////////////////////////
 
-#include <OOBase/CDRStream.h>
+#include <OOBase/ByteSwap.h>
 #include <OOBase/Condition.h>
 #include <OOBase/Queue.h>
 #include <OOBase/Thread.h>
