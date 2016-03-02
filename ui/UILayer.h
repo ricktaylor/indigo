@@ -81,12 +81,9 @@ namespace Indigo
 		virtual ~UIWidget()
 		{}
 
-		virtual bool valid()
-		{
-			return m_render_group;
-		}
+		virtual bool valid() const { return m_render_group; }
 
-		bool visible() const { return m_visible; }
+		bool visible() const { return valid() && m_visible; }
 		void show(bool visible = true);
 
 		bool enabled() const { return m_enabled; }
