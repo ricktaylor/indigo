@@ -22,7 +22,7 @@
 #ifndef INDIGO_APP_H_INCLUDED
 #define INDIGO_APP_H_INCLUDED
 
-#include "Window.h"
+#include "../core/Window.h"
 
 namespace Indigo
 {

@@ -22,7 +22,7 @@
 #ifndef INDIGO_GUISTYLE_H_INCLUDED
 #define INDIGO_GUISTYLE_H_INCLUDED
 
-#include "../lib/Window.h"
+#include "../oogl/Window.h"
 #include "Font.h"
 #include "Image.h"
 

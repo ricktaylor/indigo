@@ -19,11 +19,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
+#include "../core/Common.h"
+
 #include "App.h"
-#include "Thread.h"
-#include "UILayer.h"
-#include "UIButton.h"
+
+#include "../core/Thread.h"
+#include "../ui/UILayer.h"
+#include "../ui/UIButton.h"
 
 namespace Indigo
 {
@@ -49,7 +51,7 @@ void Indigo::Application::splash()
 	button_style->m_shadow = glm::vec4(.0f,.0f,.0f,.75f);
 	button_style->m_drop = glm::i16vec2(0,-1);
 
-	OOBase::SharedPtr<Indigo::UIButton> button = OOBase::allocate_shared<Indigo::UIButton,OOBase::ThreadLocalAllocator>(button_style,"   Hello   ",-1,glm::ivec2(100,100));
+	OOBase::SharedPtr<Indigo::UIButton> button = OOBase::allocate_shared<Indigo::UIButton,OOBase::ThreadLocalAllocator>(button_style,"Hello",-1,glm::ivec2(100,100));
 	layer->add_widget(OOBase::static_pointer_cast<Indigo::UIWidget>(button),100);
 
 	button_style->m_background.unload();
