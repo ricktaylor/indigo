@@ -2,7 +2,7 @@ AC_PREREQ(2.61)
 
 AC_INIT(indigo,0.0.1)
 AC_CONFIG_SRCDIR([README.md])
-AC_CONFIG_HEADERS([autoheader_dummy.h src/Config.h])
+AC_CONFIG_HEADERS([autoheader_dummy.h core/Config.h])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SUBDIRS([oobase])
@@ -11,7 +11,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([
 	Makefile
 	3rdparty/Makefile
-	src/Makefile
 ])
 
 AM_INIT_AUTOMAKE([foreign 1.10 no-define subdir-objects])

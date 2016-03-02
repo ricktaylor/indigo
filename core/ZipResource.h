@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2014 Rick Taylor
+// Copyright (C) 2015 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,20 +19,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_APP_H_INCLUDED
-#define INDIGO_APP_H_INCLUDED
+#ifndef INDIGO_ZIPRESOURCE_H_INCLUDED
+#define INDIGO_ZIPRESOURCE_H_INCLUDED
 
-#include "../core/Window.h"
+#include "../core/Resource.h"
 
 namespace Indigo
 {
-	namespace Application
+	namespace detail
 	{
-		void start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args);
-		void stop();
+		class ZipFile;
+	}
 
-		void on_quit();
+	class ZipResource : public ResourceBundle
+	{
+	public:
+		ZipResource();
+
+		bool open(const char* filename);
+		bool is_open() const;
+
+		ZipResource sub_dir(const char* prefix);
+
+		const void* load(const char* name, size_t start, size_t length = size_t(-1)) const;
+		OOBase::uint64_t size(const char* name) const;
+		bool exists(const char* name) const;
+
+	private:
+		OOBase::SharedPtr<detail::ZipFile> m_zip;
+		OOBase::String m_prefix;
+
+		ZipResource(const OOBase::SharedPtr<detail::ZipFile>& zip, const OOBase::String& prefix);
 	};
 }
 
-#endif // INDIGO_APP_H_INCLUDED
+
+#endif // INDIGO_ZIPRESOURCE_H_INCLUDED

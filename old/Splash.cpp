@@ -20,10 +20,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Render.h"
-#include "../lib/BufferObject.h"
-#include "../lib/VertexArrayObject.h"
-#include "../lib/Shader.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include "../oogl/BufferObject.h"
+#include "../oogl/Shader.h"
+#include "../oogl/VertexArrayObject.h"
 #include "../src/Resource.h"
 #include "Font.h"
 
