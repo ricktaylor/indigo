@@ -57,7 +57,6 @@ namespace
 		{ "UI9Patch.frag", IDR_UI9PATCH_FS, RT_RCDATA, NULL, NULL, 0 },
 		{ "Font_8bit.vert", IDR_FONT_8BIT_VS, RT_RCDATA, NULL, NULL, 0 },
 		{ "Font_8bit.frag", IDR_FONT_8BIT_FS, RT_RCDATA, NULL, NULL, 0 },
-		{ "init.lua", IDR_INIT_LUA, RT_RCDATA, NULL, NULL, 0 },
 	};
 
 	const RES* find_resource(const char* name)
@@ -111,7 +110,6 @@ namespace
 	#include "Titillium-Regular_0.png.h"
 	#include "Titillium-Regular.fnt.h"
 	#include "menu_border.png.h"
-	#include "init.lua.h"
 
 	struct RES
 	{
@@ -124,7 +122,6 @@ namespace
 		{ "Titillium-Regular.fnt", s_Titillium_Regular, sizeof(s_Titillium_Regular) },
 		{ "Titillium-Regular_0.png", s_Titillium_Regular_0, sizeof(s_Titillium_Regular_0) },
 		{ "menu_border.png", s_menu_border, sizeof(s_menu_border) },
-		{ "init.lua", (const unsigned char*)s_init_lua, sizeof(s_init_lua) }
 	};
 
 	const RES* find_resource(const char* name)
