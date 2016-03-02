@@ -49,7 +49,7 @@ void Indigo::Application::splash()
 	button_style->m_font.load(Indigo::static_resources(),"Titillium-Regular.fnt");
 	button_style->m_colour = glm::vec4(1.f,1.f,1.f,1.f);
 	button_style->m_shadow = glm::vec4(.0f,.0f,.0f,.75f);
-	button_style->m_drop = glm::i16vec2(0,-1);
+	button_style->m_drop = glm::ivec2(0,-1);
 
 	OOBase::SharedPtr<Indigo::UIButton> button = OOBase::allocate_shared<Indigo::UIButton,OOBase::ThreadLocalAllocator>(button_style,"Hello",-1,glm::ivec2(100,100));
 	layer->add_widget(button,100);
