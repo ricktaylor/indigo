@@ -74,7 +74,7 @@ namespace Indigo
 			friend class Indigo::UI9Patch;
 
 		public:
-			UI9Patch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::UI9Patch::Info>& info);
+			UI9Patch(const glm::ivec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::UI9Patch::Info>& info);
 			virtual ~UI9Patch();
 
 			bool valid() const;

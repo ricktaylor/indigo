@@ -206,13 +206,13 @@ const OOBase::SharedPtr<OOGL::Framebuffer>& OOGL::Window::default_frame_buffer()
 	return m_default_fb;
 }
 
-glm::u16vec2 OOGL::Window::size() const
+glm::uvec2 OOGL::Window::size() const
 {
 	int width = 0, height = 0;
 	if (m_glfw_window)
 		glfwGetFramebufferSize(m_glfw_window,&width,&height);
 
-	return glm::u16vec2(width,height);
+	return glm::uvec2(width,height);
 }
 
 GLFWmonitor* OOGL::Window::monitor() const
@@ -233,7 +233,7 @@ GLFWmonitor* OOGL::Window::monitor() const
 		int xpos, ypos;
 		glfwGetWindowPos(m_glfw_window,&xpos,&ypos);
 
-		glm::u16vec2 centre(xpos - left + width/2,ypos - top + height/2);
+		glm::ivec2 centre(xpos - left + width/2,ypos - top + height/2);
 
 		int count;
 		GLFWmonitor** monitors = glfwGetMonitors(&count);

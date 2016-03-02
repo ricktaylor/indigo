@@ -54,7 +54,7 @@ namespace OOGL
 		bool iconified() const;
 		void iconify(bool minimize);
 
-		glm::u16vec2 size() const;
+		glm::uvec2 size() const;
 		glm::vec2 dots_per_mm() const;
 
 		const OOBase::SharedPtr<Framebuffer>& default_frame_buffer() const;

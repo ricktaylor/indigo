@@ -281,7 +281,7 @@ void UI9PatchFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const glm
 	}
 }
 
-Indigo::Render::UI9Patch::UI9Patch(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::UI9Patch::Info>& info) :
+Indigo::Render::UI9Patch::UI9Patch(const glm::ivec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::UI9Patch::Info>& info) :
 		UIDrawable(position,visible),
 		m_colour(colour),
 		m_patch(-1),
