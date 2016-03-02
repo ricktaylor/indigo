@@ -11,7 +11,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([
 	Makefile
 	3rdparty/Makefile
-	src/Makefile
 ])
 
 AM_INIT_AUTOMAKE([foreign 1.10 no-define subdir-objects])

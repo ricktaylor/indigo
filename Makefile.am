@@ -103,11 +103,11 @@ indigo_SOURCES = \
 	core/Image.cpp \
 	core/Font.cpp \
 	core/StaticResources.cpp \
+	core/ZipResource.cpp \
 	ui/UILayer.cpp \
 	ui/UIButton.cpp \
 	ui/UI9Patch.cpp \
 	ui/UIText.cpp \
-	src/ZipResource.cpp \
 	src/App.cpp
 	
 	
