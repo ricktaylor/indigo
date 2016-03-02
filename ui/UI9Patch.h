@@ -46,7 +46,7 @@ namespace Indigo
 
 		const glm::u16vec4& margins() const { return m_margins; }
 		
-		OOBase::SharedPtr<Render::UI9Patch> make_drawable(const glm::u16vec2& position = glm::u16vec2(0), const glm::u16vec2& size = glm::u16vec2(0), bool visible = true, const glm::vec4& colour = glm::vec4(1.f)) const;
+		OOBase::SharedPtr<Render::UI9Patch> make_drawable(const glm::ivec2& position = glm::ivec2(0), const glm::u16vec2& size = glm::u16vec2(0), bool visible = true, const glm::vec4& colour = glm::vec4(1.f)) const;
 
 	private:
 		bool pixel_cmp(int x, int y, bool black);

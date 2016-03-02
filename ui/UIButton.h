@@ -37,7 +37,7 @@ namespace Indigo
 			UI9Patch m_background;
 			glm::vec4 m_colour;
 			glm::vec4 m_shadow;
-			glm::uvec2 m_drop;
+			glm::ivec2 m_drop;
 		};
 
 		template <typename Allocator>

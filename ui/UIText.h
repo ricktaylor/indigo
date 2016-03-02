@@ -32,7 +32,7 @@ namespace Indigo
 		{
 		public:
 			template <typename Allocator>
-			UIText(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<Allocator>& text, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::i16vec2& position = glm::i16vec2(0), bool visible = true) :
+			UIText(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<Allocator>& text, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::ivec2& position = glm::ivec2(0), bool visible = true) :
 					UIDrawable(position,visible),
 					m_text(font,text),
 					m_colour(colour),
@@ -42,7 +42,7 @@ namespace Indigo
 					m_scale = font->line_height();
 			}
 
-			UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::i16vec2& position = glm::i16vec2(0), bool visible = true);
+			UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::ivec2& position = glm::ivec2(0), bool visible = true);
 
 			void colour(const glm::vec4& colour) { m_colour = colour; }
 
@@ -58,20 +58,20 @@ namespace Indigo
 		{
 		public:
 			template <typename Allocator>
-			UIShadowText(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<Allocator>& text, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::vec4& shadow = glm::vec4(0.f,0.f,0.f,.5f), const glm::i16vec2& position = glm::i16vec2(0), const glm::i16vec2& drop = glm::i16vec2(0,-1), bool visible = true) :
+			UIShadowText(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<Allocator>& text, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::vec4& shadow = glm::vec4(0.f,0.f,0.f,.5f), const glm::ivec2& position = glm::ivec2(0), const glm::ivec2& drop = glm::ivec2(0,-1), bool visible = true) :
 					UIText(font,text,scale,colour,position,visible),
 					m_shadow(shadow),
 					m_drop(drop)
 			{
 			}
 
-			UIShadowText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::vec4& shadow = glm::vec4(.5f), const glm::i16vec2& position = glm::i16vec2(0), const glm::i16vec2& drop = glm::i16vec2(0,-1), bool visible = true);
+			UIShadowText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::vec4& shadow = glm::vec4(.5f), const glm::ivec2& position = glm::ivec2(0), const glm::ivec2& drop = glm::ivec2(0,-1), bool visible = true);
 
 			void shadow(const glm::vec4& shadow) { m_shadow = shadow; }
 
 		private:
 			glm::vec4 m_shadow;
-			glm::i16vec2 m_drop;
+			glm::ivec2 m_drop;
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};

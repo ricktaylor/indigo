@@ -23,7 +23,7 @@
 
 #include "UIText.h"
 
-Indigo::Render::UIText::UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::i16vec2& position, bool visible) :
+Indigo::Render::UIText::UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::ivec2& position, bool visible) :
 		UIDrawable(position,visible),
 		m_text(font,sz,len),
 		m_colour(colour),
@@ -38,7 +38,7 @@ void Indigo::Render::UIText::on_draw(OOGL::State& glState, const glm::mat4& mvp)
 	m_text.draw(glState,glm::scale(mvp,glm::vec3(m_scale)),m_colour);
 }
 
-Indigo::Render::UIShadowText::UIShadowText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::vec4& shadow, const glm::i16vec2& position, const glm::i16vec2& drop, bool visible) :
+Indigo::Render::UIShadowText::UIShadowText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::vec4& shadow, const glm::ivec2& position, const glm::ivec2& drop, bool visible) :
 		UIText(font,sz,len,scale,colour,position,visible),
 		m_shadow(shadow),
 		m_drop(drop)
@@ -47,7 +47,7 @@ Indigo::Render::UIShadowText::UIShadowText(const OOBase::SharedPtr<Font>& font, 
 
 void Indigo::Render::UIShadowText::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	if (m_drop != glm::i16vec2(0) && m_shadow.a > 0.f)
+	if (m_drop != glm::ivec2(0) && m_shadow.a > 0.f)
 		m_text.draw(glState,glm::scale(glm::translate(mvp,glm::vec3(m_drop.x,m_drop.y,0.f)),glm::vec3(m_scale)),m_shadow * m_colour);
 
 	m_text.draw(glState,glm::scale(mvp,glm::vec3(m_scale)),m_colour);

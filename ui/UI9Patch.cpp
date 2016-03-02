@@ -556,7 +556,7 @@ bool Indigo::UI9Patch::get_bounds()
 	return true;
 }
 
-OOBase::SharedPtr<Indigo::Render::UI9Patch> Indigo::UI9Patch::make_drawable(const glm::u16vec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour) const
+OOBase::SharedPtr<Indigo::Render::UI9Patch> Indigo::UI9Patch::make_drawable(const glm::ivec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour) const
 {
 	if (!m_info->m_texture)
 	{
