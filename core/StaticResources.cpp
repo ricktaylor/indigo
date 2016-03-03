@@ -51,10 +51,10 @@ namespace
 	RES s_resources[] =
 	{
 		{ "2d_colour.vert", IDR_2D_COLOUR_VS, RT_RCDATA, NULL, NULL, 0 },
-		{ "colour_blend.frag", IDR_UI9PATCH_FS, RT_RCDATA, NULL, NULL, 0 },
-		{ "alpha_blend.frag", IDR_FONT_8BIT_FS, RT_RCDATA, NULL, NULL, 0 },
-		{ "Titillium-Regular.fnt", IDR_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
-		{ "Titillium-Regular_0.png", IDB_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
+		{ "colour_blend.frag", IDR_COLOUR_BLEND_FS, RT_RCDATA, NULL, NULL, 0 },
+		{ "alpha_blend.frag", IDR_ALPHA_BLEND_FS, RT_RCDATA, NULL, NULL, 0 },
+		{ "Blokletters.fnt", IDR_BLOKLETTERS, RT_RCDATA, NULL, NULL, 0 },
+		{ "Blokletters_0.png", IDB_BLOKLETTERS, RT_RCDATA, NULL, NULL, 0 },
 		{ "menu_border.png", IDB_MENU_BORDER, RT_RCDATA, NULL, NULL, 0 },
 	};
 
@@ -85,8 +85,8 @@ namespace
 	#include "2d_colour.vert.h"
 	#include "alpha_blend.frag.h"
 	#include "colour_blend.frag.h"
-	#include "Titillium-Regular_0.png.h"
-	#include "Titillium-Regular.fnt.h"
+	#include "Blokletters_0.png.h"
+	#include "Blokletters.fnt.h"
 	#include "menu_border.png.h"
 
 	struct RES
@@ -100,8 +100,8 @@ namespace
 		{ "2d_colour.vert", s_2d_colour_vert, sizeof(s_2d_colour_vert) },
 		{ "alpha_blend.frag", s_alpha_blend_frag, sizeof(s_alpha_blend_frag) },
 		{ "colour_blend.frag", s_colour_blend_frag, sizeof(s_colour_blend_frag) },
-		{ "Titillium-Regular.fnt", s_Titillium_Regular, sizeof(s_Titillium_Regular) },
-		{ "Titillium-Regular_0.png", s_Titillium_Regular_0, sizeof(s_Titillium_Regular_0) },
+		{ "Blokletters.fnt", s_Blokletters, sizeof(s_Blokletters) },
+		{ "Blokletters_0.png", s_Blokletters_0, sizeof(s_Blokletters_0) },
 		{ "menu_border.png", s_menu_border, sizeof(s_menu_border) },
 	};
 

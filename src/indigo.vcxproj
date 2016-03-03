@@ -19,39 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\resources\resource.h" />
-    <ClInclude Include="App.h" />
-    <ClInclude Include="Common.h" />
-    <ClInclude Include="Font.h" />
-    <ClInclude Include="Image.h" />
-    <ClInclude Include="Pipe.h" />
-    <ClInclude Include="Render.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="Thread.h" />
-    <ClInclude Include="UI9Patch.h" />
-    <ClInclude Include="UIButton.h" />
-    <ClInclude Include="UILayer.h" />
-    <ClInclude Include="UIText.h" />
-    <ClInclude Include="Window.h" />
-    <ClInclude Include="ZipResource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="App.cpp" />
-    <ClCompile Include="Font.cpp" />
-    <ClCompile Include="Image.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Pipe.cpp" />
-    <ClCompile Include="Render.cpp" />
-    <ClCompile Include="StaticResources.cpp" />
-    <ClCompile Include="Thread.cpp" />
-    <ClCompile Include="UI9Patch.cpp" />
-    <ClCompile Include="UIButton.cpp" />
-    <ClCompile Include="UILayer.cpp" />
-    <ClCompile Include="UIText.cpp" />
-    <ClCompile Include="Window.cpp" />
-    <ClCompile Include="ZipResource.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\3rdparty\glfw\x64\src\glfw.vcxproj">
       <Project>{14b5a911-43eb-41cc-b0dd-8546c46603ee}</Project>
       <Private>false</Private>
@@ -68,14 +35,6 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
-    <ProjectReference Include="..\lib\OOGL.vcxproj">
-      <Project>{14cbc351-a489-4554-80c2-cfef873bc6ea}</Project>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-    </ProjectReference>
     <ProjectReference Include="..\oobase\src\OOBase.vcxproj">
       <Project>{10616ef7-6939-463a-9af6-8a1f3e9f5b16}</Project>
       <Private>false</Private>
@@ -84,18 +43,56 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
+    <ProjectReference Include="..\oogl\OOGL.vcxproj">
+      <Project>{14cbc351-a489-4554-80c2-cfef873bc6ea}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\resources\Font_8bit.frag" />
-    <None Include="..\resources\Font_8bit.vert" />
-    <None Include="..\resources\menu_border.png" />
-    <None Include="..\resources\NinePatch.frag" />
-    <None Include="..\resources\NinePatch.vert" />
-    <None Include="..\resources\Titillium-Regular.fnt" />
-    <None Include="..\resources\Titillium-Regular_0.png" />
+    <None Include="..\resources\2d_colour.vert" />
+    <None Include="..\resources\alpha_blend.frag" />
+    <None Include="..\resources\Blokletters.fnt" />
+    <None Include="..\resources\Blokletters_0.png" />
+    <None Include="..\resources\colour_blend.frag" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\indigo.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\core\Common.h" />
+    <ClInclude Include="..\core\Font.h" />
+    <ClInclude Include="..\core\Image.h" />
+    <ClInclude Include="..\core\Pipe.h" />
+    <ClInclude Include="..\core\Render.h" />
+    <ClInclude Include="..\core\Resource.h" />
+    <ClInclude Include="..\core\ShaderPool.h" />
+    <ClInclude Include="..\core\Thread.h" />
+    <ClInclude Include="..\core\Window.h" />
+    <ClInclude Include="..\core\ZipResource.h" />
+    <ClInclude Include="..\resources\resource.h" />
+    <ClInclude Include="..\ui\UI9Patch.h" />
+    <ClInclude Include="..\ui\UIButton.h" />
+    <ClInclude Include="..\ui\UIImage.h" />
+    <ClInclude Include="..\ui\UILayer.h" />
+    <ClInclude Include="..\ui\UIText.h" />
+    <ClInclude Include="App.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\core\Font.cpp" />
+    <ClCompile Include="..\core\Image.cpp" />
+    <ClCompile Include="..\core\Main.cpp" />
+    <ClCompile Include="..\core\Pipe.cpp" />
+    <ClCompile Include="..\core\Render.cpp" />
+    <ClCompile Include="..\core\ShaderPool.cpp" />
+    <ClCompile Include="..\core\StaticResources.cpp" />
+    <ClCompile Include="..\core\Thread.cpp" />
+    <ClCompile Include="..\core\Window.cpp" />
+    <ClCompile Include="..\core\ZipResource.cpp" />
+    <ClCompile Include="..\ui\UI9Patch.cpp" />
+    <ClCompile Include="..\ui\UIButton.cpp" />
+    <ClCompile Include="..\ui\UIImage.cpp" />
+    <ClCompile Include="..\ui\UILayer.cpp" />
+    <ClCompile Include="..\ui\UIText.cpp" />
+    <ClCompile Include="App.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{45062950-051B-42F7-A502-3F0F39282C22}</ProjectGuid>
