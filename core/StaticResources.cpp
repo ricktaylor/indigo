@@ -45,18 +45,17 @@ namespace
 		const DWORD id;
 		LPCTSTR type;
 		HRSRC res;
-		const unsigned char* data;
+		const void* data;
 		OOBase::uint64_t length;
 	};
 	RES s_resources[] =
 	{
+		{ "2d_colour.vert", IDR_2D_COLOUR_VS, RT_RCDATA, NULL, NULL, 0 },
+		{ "colour_blend.frag", IDR_UI9PATCH_FS, RT_RCDATA, NULL, NULL, 0 },
+		{ "alpha_blend.frag", IDR_FONT_8BIT_FS, RT_RCDATA, NULL, NULL, 0 },
 		{ "Titillium-Regular.fnt", IDR_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
 		{ "Titillium-Regular_0.png", IDB_TITILLIUM, RT_RCDATA, NULL, NULL, 0 },
 		{ "menu_border.png", IDB_MENU_BORDER, RT_RCDATA, NULL, NULL, 0 },
-		{ "UI9Patch.vert", IDR_UI9PATCH_VS, RT_RCDATA, NULL, NULL, 0 },
-		{ "UI9Patch.frag", IDR_UI9PATCH_FS, RT_RCDATA, NULL, NULL, 0 },
-		{ "Font_8bit.vert", IDR_FONT_8BIT_VS, RT_RCDATA, NULL, NULL, 0 },
-		{ "Font_8bit.frag", IDR_FONT_8BIT_FS, RT_RCDATA, NULL, NULL, 0 },
 	};
 
 	const RES* find_resource(const char* name)
@@ -67,7 +66,7 @@ namespace
 			{
 				if (!s_resources[i].res && (s_resources[i].res = FindResource(NULL,MAKEINTRESOURCE(s_resources[i].id),s_resources[i].type)))
 				{
-					s_resources[i].data = static_cast<const unsigned char*>(LockResource(LoadResource(NULL,s_resources[i].res)));
+					s_resources[i].data = LockResource(LoadResource(NULL,s_resources[i].res));
 					s_resources[i].length = SizeofResource(NULL,s_resources[i].res);
 				}
 				return &s_resources[i];
@@ -78,35 +77,14 @@ namespace
 	}
 }
 
-const void* StaticResources::load(const char* name, size_t start, size_t length) const
-{
-	const RES* r = find_resource(name);
-	if (!r || !r->data)
-		return NULL;
-
-	if (start > r->length)
-		start = r->length;
-
-	return r->data + start;
-}
-
-OOBase::uint64_t StaticResources::size(const char* name) const
-{
-	const RES* r = find_resource(name);
-	return (r ? r->length : 0);
-}
-
-bool StaticResources::exists(const char* name) const
-{
-	const RES* r = find_resource(name);
-	return (r && r->data);
-}
-
 #else
 
 namespace
 {
 	// Include the bin2c files here
+	#include "2d_colour.vert.h"
+	#include "alpha_blend.frag.h"
+	#include "colour_blend.frag.h"
 	#include "Titillium-Regular_0.png.h"
 	#include "Titillium-Regular.fnt.h"
 	#include "menu_border.png.h"
@@ -114,11 +92,14 @@ namespace
 	struct RES
 	{
 		const char* name;
-		const unsigned char* data;
+		const void* data;
 		OOBase::uint64_t length;
 	};
 	const RES s_resources[] =
 	{
+		{ "2d_colour.vert", s_2d_colour_vert, sizeof(s_2d_colour_vert) },
+		{ "alpha_blend.frag", s_alpha_blend_frag, sizeof(s_alpha_blend_frag) },
+		{ "colour_blend.frag", s_colour_blend_frag, sizeof(s_colour_blend_frag) },
 		{ "Titillium-Regular.fnt", s_Titillium_Regular, sizeof(s_Titillium_Regular) },
 		{ "Titillium-Regular_0.png", s_Titillium_Regular_0, sizeof(s_Titillium_Regular_0) },
 		{ "menu_border.png", s_menu_border, sizeof(s_menu_border) },
@@ -136,16 +117,18 @@ namespace
 	}
 }
 
+#endif
+
 const void* StaticResources::load(const char* name, size_t start, size_t length) const
 {
 	const RES* r = find_resource(name);
-	if (!r)
+	if (!r || !r->data)
 		return NULL;
 
 	if (start > r->length)
 		start = r->length;
 
-	return r->data + start;
+	return static_cast<const unsigned char*>(r->data) + start;
 }
 
 OOBase::uint64_t StaticResources::size(const char* name) const
@@ -156,10 +139,9 @@ OOBase::uint64_t StaticResources::size(const char* name) const
 
 bool StaticResources::exists(const char* name) const
 {
-	return find_resource(name) != NULL;
+	const RES* r = find_resource(name);
+	return (r && r->data);
 }
-
-#endif
 
 namespace Indigo
 {

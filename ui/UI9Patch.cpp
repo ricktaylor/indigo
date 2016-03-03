@@ -20,7 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "../core/Common.h"
-#include "../core/Resource.h"
+#include "../core/ShaderPool.h"
 
 #include "UI9Patch.h"
 
@@ -81,42 +81,13 @@ UI9PatchFactory::~UI9PatchFactory()
 
 bool UI9PatchFactory::create_program()
 {
-#if defined(_WIN32)
-	static const char* s_UI9Patch_vert = static_cast<const char*>(Indigo::static_resources().load("UI9Patch.vert"));
-	static const GLint s_len_UI9Patch_vert = static_cast<GLint>(Indigo::static_resources().size("UI9Patch.vert"));
+	OOBase::SharedPtr<OOGL::Shader> shaders[2];
+	shaders[0] = Indigo::ShaderPool::add_shader("2d_colour.vert",GL_VERTEX_SHADER,Indigo::static_resources());
+	shaders[1] = Indigo::ShaderPool::add_shader("colour_blend.frag",GL_FRAGMENT_SHADER,Indigo::static_resources());
+	if (shaders[0] && shaders[1])
+		m_ptrProgram = Indigo::ShaderPool::add_program("2d_image",shaders,2);
 
-	static const char* s_UI9Patch_frag = static_cast<const char*>(Indigo::static_resources().load("UI9Patch.frag"));
-	static const GLint s_len_UI9Patch_frag = static_cast<GLint>(Indigo::static_resources().size("UI9Patch.frag"));
-#else
-	#include "UI9Patch.vert.h"
-	#include "UI9Patch.frag.h"
-
-	#define s_len_UI9Patch_vert static_cast<GLint>(sizeof(s_UI9Patch_vert))
-	#define s_len_UI9Patch_frag static_cast<GLint>(sizeof(s_UI9Patch_frag))		
-#endif
-
-	if (!m_ptrProgram)
-	{
-		OOBase::SharedPtr<OOGL::Shader> shaders[2];
-		shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
-
-		if (!shaders[0]->compile(s_UI9Patch_vert,s_len_UI9Patch_vert))
-			LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
-		
-		shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
-		if (!shaders[1]->compile(s_UI9Patch_frag,s_len_UI9Patch_frag))
-			LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()),false);
-		
-		OOBase::SharedPtr<OOGL::Program> program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
-		if (!program)
-			LOG_ERROR_RETURN(("Failed to allocate shader program: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
-
-		if (!program->link(shaders,2))
-			LOG_ERROR_RETURN(("Failed to link shaders: %s",program->info_log().c_str()),false);
-
-		m_ptrProgram = program;
-	}
-	return true;
+	return m_ptrProgram;
 }
 
 GLsizei UI9PatchFactory::alloc_patch(const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size)
@@ -213,12 +184,12 @@ GLsizei UI9PatchFactory::alloc_patch(const glm::u16vec2& size, const glm::u16vec
 
 void UI9PatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size)
 {
-	unsigned int ushort_max = 0xFFFF;
+	static const unsigned int ushort_max = 0xFFFF;
 
 	OOBase::SharedPtr<vertex_data> attribs = m_ptrVertices->auto_map<vertex_data>(GL_MAP_WRITE_BIT,patch * vertices_per_patch * sizeof(vertex_data),vertices_per_patch * sizeof(vertex_data));
 	vertex_data* a = attribs.get();
 
-	a[0].x = 0;
+	a[0].x = 0.f;
 	a[1].x = borders.x;
 	a[3].x = size.x;
 	a[2].x = a[3].x - borders.z;
@@ -235,7 +206,7 @@ void UI9PatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, cons
 		a[i].y = size.y;
 		a[i+4].y = a[i].y - borders.y;
 		a[i+8].y = borders.w;
-		a[i+12].y = 0;
+		a[i+12].y = 0.f;
 
 		a[i+12].u = a[i+8].u = a[i+4].u = a[i].u;
 

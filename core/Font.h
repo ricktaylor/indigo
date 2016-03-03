@@ -120,6 +120,7 @@ namespace Indigo
 			OOBase::SharedPtr<OOGL::VertexArrayObject> m_ptrVAO;
 			OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices;
 			OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements;
+			OOBase::SharedPtr<OOGL::Program> m_ptrProgram;
 
 			OOBase::SharedPtr<Indigo::Font::Info> m_info;
 
@@ -127,6 +128,8 @@ namespace Indigo
 
 			bool alloc_text(Text& text, const char* sz, size_t len);
 			void free_text(Text& text);
+
+			bool font_program(OOBase::uint32_t packing);
 
 			void draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei len);
 		};

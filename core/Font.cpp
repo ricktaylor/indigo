@@ -27,6 +27,7 @@
 
 #include "Render.h"
 #include "Image.h"
+#include "ShaderPool.h"
 
 namespace
 {
@@ -201,20 +202,6 @@ namespace
 		return drawable;
 	}
 
-	class FontProgram
-	{
-	public:
-		FontProgram()
-		{}
-
-		OOBase::SharedPtr<OOGL::Program> program(OOBase::uint32_t packing);
-
-	private:
-		OOBase::SharedPtr<OOGL::Program> m_ptr_ch1_8_Program;
-
-		bool load_8bit_shader();
-	};
-
 	struct vertex_data
 	{
 		float x;
@@ -225,59 +212,6 @@ namespace
 
 	static const unsigned int vertices_per_glyph = 4;
 	static const unsigned int elements_per_glyph = 6;
-}
-
-OOBase::SharedPtr<OOGL::Program> FontProgram::program(OOBase::uint32_t packing)
-{
-	OOBase::SharedPtr<OOGL::Program> program;
-	switch (packing)
-	{
-	case 0x04040400:
-		if (!m_ptr_ch1_8_Program)
-			load_8bit_shader();
-		program = m_ptr_ch1_8_Program;
-		break;
-
-	default:
-		break;
-	}
-	return program;
-}
-
-bool FontProgram::load_8bit_shader()
-{
-#if defined(_WIN32)
-	static const char* s_Font_8bit_vert = static_cast<const char*>(Indigo::static_resources().load("Font_8bit.vert"));
-	static const GLint s_len_Font_8bit_vert = static_cast<GLint>(Indigo::static_resources().size("Font_8bit.vert"));
-
-	static const char* s_Font_8bit_frag = static_cast<const char*>(Indigo::static_resources().load("Font_8bit.frag"));
-	static const GLint s_len_Font_8bit_frag = static_cast<GLint>(Indigo::static_resources().size("Font_8bit.frag"));
-#else
-	#include "Font_8bit.vert.h"
-	#include "Font_8bit.frag.h"
-
-	#define s_len_Font_8bit_vert static_cast<GLint>(sizeof(s_Font_8bit_vert))
-	#define s_len_Font_8bit_frag static_cast<GLint>(sizeof(s_Font_8bit_frag))		
-#endif
-
-	OOBase::SharedPtr<OOGL::Shader> shaders[2];
-	shaders[0] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_VERTEX_SHADER);
-	if (!shaders[0]->compile(s_Font_8bit_vert,s_len_Font_8bit_vert))
-		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[0]->info_log().c_str()),false);
-
-	shaders[1] = OOBase::allocate_shared<OOGL::Shader,OOBase::ThreadLocalAllocator>(GL_FRAGMENT_SHADER);
-	if (!shaders[1]->compile(s_Font_8bit_frag,s_len_Font_8bit_frag))
-		LOG_ERROR_RETURN(("Failed to compile vertex shader: %s",shaders[1]->info_log().c_str()),false);
-
-	OOBase::SharedPtr<OOGL::Program> program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
-	if (!program)
-		LOG_ERROR_RETURN(("Failed to allocate shader program: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
-
-	if (!program->link(shaders,2))
-		LOG_ERROR_RETURN(("Failed to link shaders: %s",program->info_log().c_str()),false);
-
-	m_ptr_ch1_8_Program = program;
-	return true;
 }
 
 Indigo::Render::Font::Font(const OOBase::SharedPtr<Indigo::Font::Info>& info) : m_allocated(0), m_info(info)
@@ -311,6 +245,26 @@ bool Indigo::Render::Font::load(const OOBase::SharedPtr<Indigo::Image>* pages, s
 	m_ptrTexture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 
 	return true;
+}
+
+bool Indigo::Render::Font::font_program(OOBase::uint32_t packing)
+{
+	switch (packing)
+	{
+	case 0x04040400:
+		{
+			OOBase::SharedPtr<OOGL::Shader> shaders[2];
+			shaders[0] = Indigo::ShaderPool::add_shader("2d_colour.vert",GL_VERTEX_SHADER,Indigo::static_resources());
+			shaders[1] = Indigo::ShaderPool::add_shader("alpha_blend.frag",GL_FRAGMENT_SHADER,Indigo::static_resources());
+			if (shaders[0] && shaders[1])
+				m_ptrProgram = Indigo::ShaderPool::add_program("Font_8bit",shaders,2);
+		}
+		break;
+
+	default:
+		break;
+	}
+	return m_ptrProgram;
 }
 
 bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
@@ -377,19 +331,18 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 				LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 
-		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_info->m_packing);
-		if (!ptrProgram)
+		if (!font_program(m_info->m_packing))
 			return false;
 
 		text.m_glyph_start = last->first;
 		last->first += len;
 		last->second -= len;
 
-		GLint a = ptrProgram->attribute_location("in_Position");
+		GLint a = m_ptrProgram->attribute_location("in_Position");
 		m_ptrVAO->attribute(a,m_ptrVertices,2,GL_FLOAT,false,sizeof(vertex_data),offsetof(vertex_data,x));
 		m_ptrVAO->enable_attribute(a);
 
-		a = ptrProgram->attribute_location("in_TexCoord");
+		a = m_ptrProgram->attribute_location("in_TexCoord");
 		if (a != -1)
 		{
 			m_ptrVAO->attribute(a,m_ptrVertices,2,GL_UNSIGNED_SHORT,true,sizeof(vertex_data),offsetof(vertex_data,u));
@@ -496,14 +449,13 @@ void Indigo::Render::Font::draw(OOGL::State& state, const glm::mat4& mvp, const 
 {
 	if (len && colour.a > 0.f)
 	{
-		OOBase::SharedPtr<OOGL::Program> ptrProgram = OOGL::ContextSingleton<FontProgram>::instance().program(m_info->m_packing);
-		if (ptrProgram)
+		if (m_ptrProgram)
 		{
-			state.use(ptrProgram);
+			state.use(m_ptrProgram);
 			state.bind(0,m_ptrTexture);
 
-			ptrProgram->uniform("in_Colour",colour);
-			ptrProgram->uniform("MVP",mvp);
+			m_ptrProgram->uniform("in_Colour",colour);
+			m_ptrProgram->uniform("MVP",mvp);
 
 			m_ptrVAO->draw_elements(GL_TRIANGLES,elements_per_glyph * len,GL_UNSIGNED_INT,start * elements_per_glyph * sizeof(GLuint));
 		}
@@ -652,7 +604,7 @@ bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 		case 4:
 			for (size_t c = 0;ok && c < len / 20; ++c)
 			{
-				unsigned int ushort_max = 0xFFFF;
+				static const unsigned int ushort_max = 0xFFFF;
 				struct Info::char_info ci;
 				OOBase::uint32_t id = read_uint32(data);
 				OOBase::uint32_t u = read_uint16(data);

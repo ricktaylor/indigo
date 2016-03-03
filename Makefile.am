@@ -78,10 +78,9 @@ bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_lua"
 	
 BUILT_SOURCES = \
-	Font_8bit.vert.h \
-	Font_8bit.frag.h \
-	UI9Patch.vert.h \
-	UI9Patch.frag.h \
+	2d_colour.vert.h \
+	alpha_blend.frag.h \
+	colour_blend.frag.h \
 	Titillium-Regular_0.png.h \
 	Titillium-Regular.fnt.h \
 	menu_border.png.h
@@ -102,10 +101,12 @@ indigo_SOURCES = \
 	core/Window.cpp \
 	core/Image.cpp \
 	core/Font.cpp \
+	core/ShaderPool.cpp \
 	core/StaticResources.cpp \
 	core/ZipResource.cpp \
 	ui/UILayer.cpp \
 	ui/UIButton.cpp \
+	ui/UIImage.cpp \
 	ui/UI9Patch.cpp \
 	ui/UIText.cpp \
 	src/App.cpp

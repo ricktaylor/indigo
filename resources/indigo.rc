@@ -23,10 +23,9 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 // RCDATA
 //
 
-IDR_UI9PATCH_FS         RCDATA                  "UI9Patch.frag"
-IDR_UI9PATCH_VS         RCDATA                  "UI9Patch.vert"
-IDR_FONT_8BIT_VS        RCDATA                  "Font_8bit.vert"
-IDR_FONT_8BIT_FS        RCDATA                  "Font_8bit.frag"
+IDR_2D_COLOUR_VS        RCDATA                  "2d_colour.vert"
+IDR_COLOUR_BLEND_FS     RCDATA                  "colour_blend.frag"
+IDR_ALPHA_BLEND_FS      RCDATA                  "alpha_blend.frag"
 
 IDR_TITILLIUM           RCDATA                  "Titillium-Regular.fnt"
 IDB_TITILLIUM           RCDATA                  "Titillium-Regular_0.png"
