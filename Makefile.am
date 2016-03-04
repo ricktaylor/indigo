@@ -62,28 +62,34 @@ endif
 bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 	$(AM_V_CC)$(CC_FOR_BUILD) $(INCLUDES) $(AM_CFLAGS) -o $@ $(top_srcdir)/tools/bin2c.c
 	
-%.png.h: ../resources/%.png bin2c
-	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
+resources/%.h: resources/% bin2c
+	$(AM_V_GEN) mkdir -p resources
+	$(AM_V_GEN) @top_builddir@/bin2c "$<" "$@" "$(*F)"
 	
-%.fnt.h: ../resources/%.fnt bin2c
-	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
-
-%.vert.h: ../resources/%.vert bin2c
-	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_vert"
-
-%.frag.h: ../resources/%.frag bin2c
-	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_frag"
-	
-%.lua.h: ../resources/%.lua bin2c
-	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_lua"
+#%.png.h: ../resources/%.png bin2c
+#	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
+#	
+#%.fnt.h: ../resources/%.fnt bin2c
+#	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
+#
+#%.vert.h: ../resources/%.vert bin2c
+#	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_vert"
+#
+#%.frag.h: ../resources/%.frag bin2c
+#	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_frag"
+#	
+#%.lua.h: ../resources/%.lua bin2c
+#	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_lua"
 	
 BUILT_SOURCES = \
-	2d_colour.vert.h \
-	alpha_blend.frag.h \
-	colour_blend.frag.h \
-	Titillium-Regular_0.png.h \
-	Titillium-Regular.fnt.h \
-	menu_border.png.h
+	resources/2d_colour.vert.h \
+	resources/alpha_blend.frag.h \
+	resources/colour_blend.frag.h \
+	resources/Blokletters_0.png.h \
+	resources/Blokletters.fnt.h \
+	resources/menu_border.png.h
+	
+CLEANFILES = $(BUILT_SOURCES)
 	
 indigo_SOURCES = \
 	oogl/Window.cpp \

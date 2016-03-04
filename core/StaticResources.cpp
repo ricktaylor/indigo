@@ -82,12 +82,12 @@ namespace
 namespace
 {
 	// Include the bin2c files here
-	#include "2d_colour.vert.h"
-	#include "alpha_blend.frag.h"
-	#include "colour_blend.frag.h"
-	#include "Blokletters_0.png.h"
-	#include "Blokletters.fnt.h"
-	#include "menu_border.png.h"
+	#include "./resources/2d_colour.vert.h"
+	#include "./resources/alpha_blend.frag.h"
+	#include "./resources/colour_blend.frag.h"
+	#include "./resources/Blokletters_0.png.h"
+	#include "./resources/Blokletters.fnt.h"
+	#include "./resources/menu_border.png.h"
 
 	struct RES
 	{
@@ -100,9 +100,9 @@ namespace
 		{ "2d_colour.vert", s_2d_colour_vert, sizeof(s_2d_colour_vert) },
 		{ "alpha_blend.frag", s_alpha_blend_frag, sizeof(s_alpha_blend_frag) },
 		{ "colour_blend.frag", s_colour_blend_frag, sizeof(s_colour_blend_frag) },
-		{ "Blokletters.fnt", s_Blokletters, sizeof(s_Blokletters) },
-		{ "Blokletters_0.png", s_Blokletters_0, sizeof(s_Blokletters_0) },
-		{ "menu_border.png", s_menu_border, sizeof(s_menu_border) },
+		{ "Blokletters.fnt", s_Blokletters_fnt, sizeof(s_Blokletters_fnt) },
+		{ "Blokletters_0.png", s_Blokletters_0_png, sizeof(s_Blokletters_0_png) },
+		{ "menu_border.png", s_menu_border_png, sizeof(s_menu_border_png) },
 	};
 
 	const RES* find_resource(const char* name)

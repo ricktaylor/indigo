@@ -64,7 +64,7 @@ int main( int argc, char* argv[])
     char* c = ident;
     for (; *c != '\0';++c)
     {
-    	if (*c == '-')
+    	if (*c == '-' || *c == '.')
     		*c = '_';
     }
 
