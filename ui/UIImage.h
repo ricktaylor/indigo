@@ -23,60 +23,48 @@
 #define INDIGO_UIImage_H_INCLUDED
 
 #include "../core/Image.h"
-
 #include "UILayer.h"
+#include "Quad.h"
 
 namespace Indigo
 {
 	namespace Render
 	{
-		class UIImage;
-	}
-
-	class UIImage : public Image
-	{
-		friend class Render::UIImage;
-
-	public:
-		UIImage();
-		virtual ~UIImage();
-
-		virtual void unload();
-
-		OOBase::SharedPtr<Render::UIImage> make_drawable(const glm::ivec2& position = glm::ivec2(0), const glm::u16vec2& size = glm::u16vec2(0), bool visible = true, const glm::vec4& colour = glm::vec4(1.f));
-
-	private:
-		OOBase::SharedPtr<OOGL::Texture> m_texture;
-
-		void do_unload();
-	};
-
-	namespace Render
-	{
 		class UIImage : public UIDrawable
 		{
-			friend class Indigo::UIImage;
-
 		public:
-			UIImage(const glm::ivec2& position, const glm::u16vec2& size, bool visible, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture);
-			virtual ~UIImage();
-
-			bool valid() const;
-
-			void size(const glm::u16vec2& size) { m_size = glm::vec3(size.x,size.y,1.f); }
+			UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::uvec2& size, const glm::vec4& colour = glm::vec4(1.f), const glm::ivec2& position = glm::ivec2(0));
 
 			void colour(const glm::vec4& colour) { m_colour = colour; }
+			void size(const glm::uvec2& size) { m_size = glm::vec3(size.x,size.y,1.f); }
 
-		private:
-			glm::vec4  m_colour;
-			glm::vec3  m_size;
-			GLsizei    m_quad;
-
+		protected:
 			OOBase::SharedPtr<OOGL::Texture> m_texture;
+			glm::vec4 m_colour;
+			glm::vec3 m_size;
 
-			void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
+			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};
 	}
+
+	class UIImage : public UIWidget
+	{
+	public:
+		UIImage(const OOBase::SharedPtr<Image>& image, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0), const glm::vec4& colour = glm::vec4(1.f));
+
+	protected:
+		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
+		virtual glm::uvec2 max_size() const { return glm::uvec2(-1); }
+		virtual glm::uvec2 ideal_size() const;
+
+		virtual bool on_render_create(Indigo::Render::UIGroup* group);
+
+	private:
+		OOBase::SharedPtr<Image> m_image;
+		OOBase::SharedPtr<Render::UIImage> m_render_image;
+
+		glm::vec4 m_colour;
+	};
 }
 
 #endif // INDIGO_FONT_H_INCLUDED

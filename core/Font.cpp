@@ -210,8 +210,8 @@ namespace
 		GLushort v;
 	};
 
-	static const unsigned int vertices_per_glyph = 4;
-	static const unsigned int elements_per_glyph = 6;
+	const unsigned int vertices_per_glyph = 4;
+	const unsigned int elements_per_glyph = 6;
 }
 
 Indigo::Render::Font::Font(const OOBase::SharedPtr<Indigo::Font::Info>& info) : m_allocated(0), m_info(info)

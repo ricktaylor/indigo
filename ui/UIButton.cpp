@@ -23,6 +23,15 @@
 
 #include "UIButton.h"
 
+Indigo::UIButton::UIButton(const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const glm::ivec2& position, const glm::uvec2& size) :
+		UIWidget(position,size),
+		m_text(caption),
+		m_style(style)
+{
+	if (size == glm::uvec2(0))
+		this->size(ideal_size());
+}
+
 Indigo::UIButton::UIButton(const OOBase::SharedPtr<Style>& style, const char* sz, size_t len, const glm::ivec2& position, const glm::uvec2& size) :
 	UIWidget(position,size),
 	m_style(style)
@@ -54,9 +63,20 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 		return false;
 
 	glm::u16vec4 margins = m_style->m_background.margins();
-	m_caption = OOBase::allocate_shared<Render::UIShadowText,OOBase::ThreadLocalAllocator>(m_style->m_font.render_font(),m_text,0.f,m_style->m_colour,m_style->m_shadow,glm::ivec2(margins.x,margins.y),m_style->m_drop);
+	m_caption = OOBase::allocate_shared<Render::ShadowLabel,OOBase::ThreadLocalAllocator>(m_style->m_font.render_font(),m_text.c_str(),m_text.length(),0.f,m_style->m_colour,m_style->m_shadow,glm::ivec2(margins.x,margins.y),m_style->m_drop);
 	if (!m_caption)
 		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 		
-	return group->add_drawable(m_caption,10);
+	if (!group->add_drawable(m_caption,10))
+		return false;
+
+	m_background->visible(true);
+	m_caption->visible(true);
+
+	return true;
+}
+
+void Indigo::UIButton::on_size(const glm::uvec2& sz)
+{
+	/* TODO */
 }

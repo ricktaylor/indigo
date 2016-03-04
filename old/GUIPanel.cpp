@@ -133,9 +133,9 @@ bool Indigo::Render::GUI::Panel::refresh_border()
 		const OOBase::SharedPtr<Style>& style = Widget::style();
 		if (!m_border)
 		{
-			m_border = OOBase::allocate_shared<UI9Patch,OOBase::ThreadLocalAllocator>(Widget::size(),style->borders(),style->border_image_size());
+			m_border = OOBase::allocate_shared<NinePatch,OOBase::ThreadLocalAllocator>(Widget::size(),style->borders(),style->border_image_size());
 			if (!m_border)
-				LOG_ERROR_RETURN(("Failed to allocate UI9Patch: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+				LOG_ERROR_RETURN(("Failed to allocate NinePatch: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 		}
 		else
 			m_border->layout(Widget::size(),style->borders(),style->border_image_size());

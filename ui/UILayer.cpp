@@ -39,8 +39,8 @@ namespace
 	};
 }
 
-Indigo::Render::UIDrawable::UIDrawable(const glm::ivec2& position, bool visible) :
-		m_visible(visible),
+Indigo::Render::UIDrawable::UIDrawable(const glm::ivec2& position) :
+		m_visible(false),
 		m_position(position)
 {
 }

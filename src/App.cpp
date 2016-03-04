@@ -26,6 +26,7 @@
 #include "../core/Thread.h"
 #include "../ui/UILayer.h"
 #include "../ui/UIButton.h"
+#include "../ui/UIImage.h"
 
 namespace Indigo
 {
@@ -44,6 +45,7 @@ void Indigo::Application::splash()
 	OOBase::SharedPtr<Indigo::UILayer> layer = OOBase::allocate_shared<Indigo::UILayer,OOBase::ThreadLocalAllocator>();
 	m_wnd->add_layer(layer,100);
 
+#if 0
 	OOBase::SharedPtr<Indigo::UIButton::Style> button_style = OOBase::allocate_shared<Indigo::UIButton::Style,OOBase::ThreadLocalAllocator>();
 	button_style->m_background.Image::load(Indigo::static_resources(),"menu_border.png");
 	button_style->m_font.load(Indigo::static_resources(),"Blokletters.fnt");
@@ -56,6 +58,18 @@ void Indigo::Application::splash()
 
 	button_style->m_background.unload();
 	button_style->m_font.unload();
+
+	button->show();
+#else
+	OOBase::SharedPtr<Indigo::Image> image = OOBase::allocate_shared<Indigo::Image,OOBase::ThreadLocalAllocator>();
+	image->load(Indigo::static_resources(),"menu_border.png");
+
+	OOBase::SharedPtr<Indigo::UIImage> piccy = OOBase::allocate_shared<Indigo::UIImage,OOBase::ThreadLocalAllocator>(image,glm::ivec2(100,100));
+	layer->add_widget(piccy,100);
+
+	image->unload();
+	piccy->show();
+#endif
 
 	layer->show(true);
 }

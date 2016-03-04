@@ -21,11 +21,11 @@
 
 #include "../core/Common.h"
 
-#include "UIText.h"
+#include "Label.h"
 
-Indigo::Render::UIText::UIText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::ivec2& position, bool visible) :
-		UIDrawable(position,visible),
-		m_text(font,sz,len),
+Indigo::Render::Label::Label(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::ivec2& position) :
+		Text(font,sz,len),
+		UIDrawable(position),
 		m_colour(colour),
 		m_scale(scale)
 {
@@ -33,23 +33,23 @@ Indigo::Render::UIText::UIText(const OOBase::SharedPtr<Font>& font, const char* 
 		m_scale = font->line_height();
 }
 
-void Indigo::Render::UIText::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
+void Indigo::Render::Label::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	m_text.draw(glState,glm::scale(mvp,glm::vec3(m_scale)),m_colour);
+	Text::draw(glState,glm::scale(mvp,glm::vec3(m_scale)),m_colour);
 }
 
-Indigo::Render::UIShadowText::UIShadowText(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::vec4& shadow, const glm::ivec2& position, const glm::ivec2& drop, bool visible) :
-		UIText(font,sz,len,scale,colour,position,visible),
+Indigo::Render::ShadowLabel::ShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::vec4& shadow, const glm::ivec2& position, const glm::ivec2& drop) :
+		Label(font,sz,len,scale,colour,position),
 		m_shadow(shadow),
 		m_drop(drop)
 {
 }
 
-void Indigo::Render::UIShadowText::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
+void Indigo::Render::ShadowLabel::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	if (m_drop != glm::ivec2(0) && m_shadow.a > 0.f)
-		m_text.draw(glState,glm::scale(glm::translate(mvp,glm::vec3(m_drop.x,m_drop.y,0.f)),glm::vec3(m_scale)),m_shadow);
+		Text::draw(glState,glm::scale(glm::translate(mvp,glm::vec3(m_drop.x,m_drop.y,0.f)),glm::vec3(m_scale)),m_shadow);
 
-	m_text.draw(glState,glm::scale(mvp,glm::vec3(m_scale)),m_colour);
+	Text::draw(glState,glm::scale(mvp,glm::vec3(m_scale)),m_colour);
 }
 

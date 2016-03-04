@@ -139,13 +139,6 @@ namespace Indigo
 			friend class Font;
 
 		public:
-			template <typename Allocator>
-			Text(const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<Allocator>& text) :
-					m_font(font), m_glyph_start(0), m_glyph_len(0)
-			{
-				m_font->alloc_text(*this,text.c_str(),text.length());
-			}
-
 			Text(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = -1);
 			~Text();
 

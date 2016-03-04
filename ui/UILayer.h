@@ -38,11 +38,13 @@ namespace Indigo
 			friend class UIGroup;
 
 		public:
+			virtual bool valid() const { return true; }
+
 			void visible(bool show) { m_visible = show; };
 			void position(glm::ivec2 pos) { m_position = pos; };
 
 		protected:
-			UIDrawable(const glm::ivec2& position = glm::ivec2(0,0), bool visible = true);
+			UIDrawable(const glm::ivec2& position = glm::ivec2(0,0));
 
 			bool m_visible;
 			glm::ivec2 m_position;
@@ -55,7 +57,7 @@ namespace Indigo
 			friend class Indigo::UIGroup;
 
 		public:
-			UIGroup(const glm::ivec2& position = glm::ivec2(0,0), bool visible = true) : UIDrawable(position,visible)
+			UIGroup(const glm::ivec2& position = glm::ivec2(0,0)) : UIDrawable(position)
 			{}
 
 			bool add_drawable(const OOBase::SharedPtr<UIDrawable>& drawable, unsigned int zorder);

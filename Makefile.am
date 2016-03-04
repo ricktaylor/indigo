@@ -110,11 +110,12 @@ indigo_SOURCES = \
 	core/ShaderPool.cpp \
 	core/StaticResources.cpp \
 	core/ZipResource.cpp \
+	ui/Quad.cpp \
+	ui/NinePatch.cpp \
+	ui/Label.cpp \
 	ui/UILayer.cpp \
 	ui/UIButton.cpp \
 	ui/UIImage.cpp \
-	ui/UI9Patch.cpp \
-	ui/UIText.cpp \
 	src/App.cpp
 	
 	

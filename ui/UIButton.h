@@ -22,8 +22,8 @@
 #ifndef INDIGO_UIBUTTON_H_INCLUDED
 #define INDIGO_UIBUTTON_H_INCLUDED
 
-#include "UIText.h"
-#include "UI9Patch.h"
+#include "Label.h"
+#include "NinePatch.h"
 
 namespace Indigo
 {
@@ -34,22 +34,13 @@ namespace Indigo
 		{
 		public:
 			Font m_font;
-			UI9Patch m_background;
+			NinePatch m_background;
 			glm::vec4 m_colour;
 			glm::vec4 m_shadow;
 			glm::ivec2 m_drop;
 		};
 
-		template <typename Allocator>
-		UIButton(const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<Allocator>& caption, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0)) :
-				UIWidget(position,size),
-				m_text(caption),
-				m_style(style)
-		{
-			if (size == glm::uvec2(0))
-				this->size(ideal_size());
-		}
-
+		UIButton(const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 		UIButton(const OOBase::SharedPtr<Style>& style, const char* sz, size_t len = -1, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 	protected:
@@ -58,7 +49,7 @@ namespace Indigo
 		virtual glm::uvec2 ideal_size() const;
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group);
-		virtual void on_size(const glm::uvec2& sz) { }
+		virtual void on_size(const glm::uvec2& sz);
 
 		virtual bool can_enable(bool enabled) { return true; }
 		virtual bool can_focus(bool focused) { return true; }
@@ -68,9 +59,8 @@ namespace Indigo
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_text;
 		OOBase::SharedPtr<Style> m_style;
 
-		OOBase::SharedPtr<Render::UI9Patch> m_background;
-		OOBase::SharedPtr<Render::UIShadowText> m_caption;
-
+		OOBase::SharedPtr<Render::NinePatch> m_background;
+		OOBase::SharedPtr<Render::ShadowLabel> m_caption;
 	};
 }
 

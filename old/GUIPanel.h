@@ -24,7 +24,7 @@
 
 #include "../old/GUISizer.h"
 #include "../old/GUIWidget.h"
-#include "../src/UI9Patch.h"
+#include "../src/NinePatch.h"
 
 namespace Indigo
 {
@@ -65,7 +65,7 @@ namespace Indigo
 			private:
 				OOBase::SharedPtr<Sizer> m_sizer;
 				unsigned int m_style_flags;
-				OOBase::SharedPtr<UI9Patch> m_border;
+				OOBase::SharedPtr<NinePatch> m_border;
 				OOBase::Vector<OOBase::SharedPtr<Widget>,OOBase::ThreadLocalAllocator> m_children;
 
 				bool refresh_border();
