@@ -29,11 +29,11 @@ namespace
 	public:
 
 
-		typedef OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::SharedPtr<OOGL::Shader>,OOBase::ThreadLocalAllocator> shader_name_map_t;
+		typedef OOBase::HashTable<const char*,OOBase::SharedPtr<OOGL::Shader>,OOBase::ThreadLocalAllocator> shader_name_map_t;
 		typedef OOBase::HashTable<GLenum,shader_name_map_t,OOBase::ThreadLocalAllocator> shader_map_t;
 		shader_map_t m_shader_map;
 
-		typedef OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::SharedPtr<OOGL::Program>,OOBase::ThreadLocalAllocator> program_map_t;
+		typedef OOBase::HashTable<const char*,OOBase::SharedPtr<OOGL::Program>,OOBase::ThreadLocalAllocator> program_map_t;
 		program_map_t m_program_map;
 	};
 
@@ -42,18 +42,12 @@ namespace
 
 OOBase::SharedPtr<OOGL::Shader> Indigo::ShaderPool::add_shader(const char* name, GLenum shaderType, ResourceBundle& resource, const char* res_name)
 {
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> str;
-	if (!str.assign(name))
-		LOG_WARNING(("Failed to assign string: %s",OOBase::system_error_text()));
-	else
+	::ShaderPool::shader_map_t::iterator i = SHADER_POOL::instance().m_shader_map.find(shaderType);
+	if (i)
 	{
-		::ShaderPool::shader_map_t::iterator i = SHADER_POOL::instance().m_shader_map.find(shaderType);
-		if (i)
-		{
-			::ShaderPool::shader_name_map_t::iterator j = i->second.find(str);
-			if (j)
-				return j->second;
-		}
+		::ShaderPool::shader_name_map_t::iterator j = i->second.find(name);
+		if (j)
+			return j->second;
 	}
 
 	if (!res_name)
@@ -70,33 +64,24 @@ OOBase::SharedPtr<OOGL::Shader> Indigo::ShaderPool::add_shader(const char* name,
 	if (!shader->compile(static_cast<const char*>(Indigo::static_resources().load(res_name)),static_cast<GLint>(Indigo::static_resources().size(res_name))))
 		LOG_ERROR_RETURN(("Failed to compile shader: %s",shader->info_log().c_str()),OOBase::SharedPtr<OOGL::Shader>());
 
-	if (!str.empty())
+	i = SHADER_POOL::instance().m_shader_map.find(shaderType);
+	if (!i)
 	{
-		::ShaderPool::shader_map_t::iterator i = SHADER_POOL::instance().m_shader_map.find(shaderType);
+		i = SHADER_POOL::instance().m_shader_map.insert(shaderType,::ShaderPool::shader_name_map_t());
 		if (!i)
-		{
-			i = SHADER_POOL::instance().m_shader_map.insert(shaderType,::ShaderPool::shader_name_map_t());
-			if (!i)
-				LOG_WARNING(("Failed to insert shader into pool: %s",OOBase::system_error_text()));
-		}
-		if (i && !i->second.insert(str,shader))
 			LOG_WARNING(("Failed to insert shader into pool: %s",OOBase::system_error_text()));
 	}
+	if (i && !i->second.insert(name,shader))
+		LOG_WARNING(("Failed to insert shader into pool: %s",OOBase::system_error_text()));
 
 	return shader;
 }
 
 OOBase::SharedPtr<OOGL::Program> Indigo::ShaderPool::add_program(const char* name, const OOBase::SharedPtr<OOGL::Shader>* shaders, size_t count)
 {
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> str;
-	if (!str.assign(name))
-		LOG_WARNING(("Failed to assign string: %s",OOBase::system_error_text()));
-	else
-	{
-		::ShaderPool::program_map_t::iterator i = SHADER_POOL::instance().m_program_map.find(str);
-		if (i)
-			return i->second;
-	}
+	::ShaderPool::program_map_t::iterator i = SHADER_POOL::instance().m_program_map.find(name);
+	if (i)
+		return i->second;
 
 	OOBase::SharedPtr<OOGL::Program> program = OOBase::allocate_shared<OOGL::Program,OOBase::ThreadLocalAllocator>();
 	if (!program)
@@ -105,7 +90,7 @@ OOBase::SharedPtr<OOGL::Program> Indigo::ShaderPool::add_program(const char* nam
 	if (!program->link(shaders,count))
 		LOG_ERROR_RETURN(("Failed to link shader program: %s",program->info_log().c_str()),OOBase::SharedPtr<OOGL::Program>());
 
-	if (!str.empty() && !SHADER_POOL::instance().m_program_map.insert(str,program))
+	if (!SHADER_POOL::instance().m_program_map.insert(name,program))
 		LOG_WARNING(("Failed to insert program into pool: %s",OOBase::system_error_text()));
 
 	return program;
