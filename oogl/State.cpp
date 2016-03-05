@@ -188,12 +188,12 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::Sh
 		prev = i->second.tex_ptr;
 		if (prev != texture)
 		{
-			i->second.tex_ptr = texture;
 			if (i->second.texture != texture->m_tex)
 			{
 				texture->internal_bind(*this,unit);
 				i->second.texture = texture->m_tex;
 			}
+			i->second.tex_ptr = texture;
 		}
 	}
 
@@ -232,6 +232,7 @@ void OOGL::State::bind_texture(GLuint texture, GLenum target)
 		else if (i->second.texture != texture)
 		{
 			i->second.texture = texture;
+			i->second.tex_ptr.reset();
 
 			bind = true;
 		}
@@ -240,9 +241,7 @@ void OOGL::State::bind_texture(GLuint texture, GLenum target)
 
 	if (bind)
 	{
-		glBindTexture(target,texture);
-
-		OOGL_CHECK("glBindTexture");
+		m_state_fns.glBindTextureUnit(*this,m_active_texture_unit,target,texture);
 	}
 }
 

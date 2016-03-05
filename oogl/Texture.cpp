@@ -127,8 +127,8 @@ OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLs
 			fns->glGenerateTextureMipmap(m_tex,m_target);
 		else
 		{
-			parameter(GL_TEXTURE_BASE_LEVEL,0);
-			parameter(GL_TEXTURE_MAX_LEVEL,0);
+			glTexParameteri(target,GL_TEXTURE_BASE_LEVEL,0);
+			glTexParameteri(target,GL_TEXTURE_MAX_LEVEL,0);
 		}
 	}
 }
@@ -154,8 +154,8 @@ OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLs
 			fns->glGenerateTextureMipmap(m_tex,m_target);
 		else
 		{
-			parameter(GL_TEXTURE_BASE_LEVEL,0);
-			parameter(GL_TEXTURE_MAX_LEVEL,0);
+			glTexParameteri(target,GL_TEXTURE_BASE_LEVEL,0);
+			glTexParameteri(target,GL_TEXTURE_MAX_LEVEL,0);
 		}
 	}
 }
@@ -181,8 +181,8 @@ OOGL::Texture::Texture(GLenum target, GLsizei levels, GLenum internalFormat, GLs
 			fns->glGenerateTextureMipmap(m_tex,m_target);
 		else
 		{
-			parameter(GL_TEXTURE_BASE_LEVEL,0);
-			parameter(GL_TEXTURE_MAX_LEVEL,0);
+			glTexParameteri(target,GL_TEXTURE_BASE_LEVEL,0);
+			glTexParameteri(target,GL_TEXTURE_MAX_LEVEL,0);
 		}
 	}
 }

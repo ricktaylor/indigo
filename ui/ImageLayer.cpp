@@ -75,6 +75,11 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::ImageLayer::create_render_layer
 	OOBase::SharedPtr<OOGL::Texture> texture = m_image->make_texture(GL_RGBA8);
 	if (!texture)
 		return layer;
+
+	texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+	texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	
 	layer = OOBase::allocate_shared< ::ImageLayer,OOBase::ThreadLocalAllocator>(texture,window,m_colour);
 	if (!layer)

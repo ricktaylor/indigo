@@ -55,7 +55,7 @@ namespace Indigo
 
 		glm::vec4 pixel(int x, int y) const;
 
-		OOBase::SharedPtr<OOGL::Texture> make_texture(GLenum internalFormat) const;
+		OOBase::SharedPtr<OOGL::Texture> make_texture(GLenum internalFormat, GLsizei levels = 0) const;
 		
 	protected:
 		int   m_width;

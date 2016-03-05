@@ -127,7 +127,7 @@ void Indigo::Image::unload()
 	}
 }
 
-OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalFormat) const
+OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalFormat, GLsizei levels) const
 {
 	OOBase::SharedPtr<OOGL::Texture> tex;
 	if (!m_pixels)
@@ -158,7 +158,7 @@ OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalForm
 			return tex;
 		}
 
-		tex = OOBase::allocate_shared<OOGL::Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,0,internalFormat,m_width,m_height,format,GL_UNSIGNED_BYTE,m_pixels);
+		tex = OOBase::allocate_shared<OOGL::Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,levels,internalFormat,m_width,m_height,format,GL_UNSIGNED_BYTE,m_pixels);
 	}
 	return tex;
 }
