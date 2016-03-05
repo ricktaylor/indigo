@@ -22,13 +22,15 @@
 #ifndef CORE_QUAD_H_
 #define CORE_QUAD_H_
 
+#include "../oogl/Texture.h"
+
 namespace Indigo
 {
 	namespace Render
 	{
 		namespace Quad
 		{
-			void draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour);
+			void draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, glm::mat4& mvp, const glm::vec4& colour);
 		}
 	}
 }

@@ -69,11 +69,13 @@
     <ClInclude Include="..\core\Window.h" />
     <ClInclude Include="..\core\ZipResource.h" />
     <ClInclude Include="..\resources\resource.h" />
-    <ClInclude Include="..\ui\UI9Patch.h" />
+    <ClInclude Include="..\ui\ImageLayer.h" />
+    <ClInclude Include="..\ui\Label.h" />
+    <ClInclude Include="..\ui\NinePatch.h" />
+    <ClInclude Include="..\ui\Quad.h" />
     <ClInclude Include="..\ui\UIButton.h" />
     <ClInclude Include="..\ui\UIImage.h" />
     <ClInclude Include="..\ui\UILayer.h" />
-    <ClInclude Include="..\ui\UIText.h" />
     <ClInclude Include="App.h" />
   </ItemGroup>
   <ItemGroup>
@@ -87,11 +89,13 @@
     <ClCompile Include="..\core\Thread.cpp" />
     <ClCompile Include="..\core\Window.cpp" />
     <ClCompile Include="..\core\ZipResource.cpp" />
-    <ClCompile Include="..\ui\UI9Patch.cpp" />
+    <ClCompile Include="..\ui\ImageLayer.cpp" />
+    <ClCompile Include="..\ui\Label.cpp" />
+    <ClCompile Include="..\ui\NinePatch.cpp" />
+    <ClCompile Include="..\ui\Quad.cpp" />
     <ClCompile Include="..\ui\UIButton.cpp" />
     <ClCompile Include="..\ui\UIImage.cpp" />
     <ClCompile Include="..\ui\UILayer.cpp" />
-    <ClCompile Include="..\ui\UIText.cpp" />
     <ClCompile Include="App.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

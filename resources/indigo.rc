@@ -31,6 +31,7 @@ IDR_BLOKLETTERS         RCDATA                  "Blokletters.fnt"
 IDB_BLOKLETTERS         RCDATA                  "Blokletters_0.png"
 
 IDB_MENU_BORDER         RCDATA                  "menu_border.png"
+IDB_BOOK                RCDATA                  "ui/open-book-1-1145426.png"
 
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////

@@ -56,6 +56,7 @@ namespace
 		{ "Blokletters.fnt", IDR_BLOKLETTERS, RT_RCDATA, NULL, NULL, 0 },
 		{ "Blokletters_0.png", IDB_BLOKLETTERS, RT_RCDATA, NULL, NULL, 0 },
 		{ "menu_border.png", IDB_MENU_BORDER, RT_RCDATA, NULL, NULL, 0 },
+		{ "book.png", IDB_BOOK, RT_RCDATA, NULL, NULL, 0 },
 	};
 
 	const RES* find_resource(const char* name)

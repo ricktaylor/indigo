@@ -40,7 +40,7 @@ namespace
 		void free_patch(GLsizei p);
 		void layout_patch(GLsizei patch, const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size);
 
-		void draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount);
+		void draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp, const glm::vec4& colour, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount);
 
 	private:
 		typedef OOBase::Table<GLsizei,GLsizei,OOBase::Less<GLsizei>,OOBase::ThreadLocalAllocator> free_list_t;
@@ -117,8 +117,8 @@ GLsizei NinePatchFactory::alloc_patch(const glm::u16vec2& size, const glm::u16ve
 		while (new_size < m_allocated + 1)
 			new_size *= 2;
 
-		OOBase::SharedPtr<OOGL::BufferObject> ptrNewVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW,new_size * vertices_per_patch * sizeof(vertex_data));
-		OOBase::SharedPtr<OOGL::BufferObject> ptrNewElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_DYNAMIC_DRAW,new_size * elements_per_patch * sizeof(GLuint));
+		OOBase::SharedPtr<OOGL::BufferObject> ptrNewVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,new_size * vertices_per_patch * sizeof(vertex_data));
+		OOBase::SharedPtr<OOGL::BufferObject> ptrNewElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,new_size * elements_per_patch * sizeof(GLuint));
 		if (!ptrNewVertices || !ptrNewElements)
 			LOG_ERROR_RETURN(("Failed to allocate VBO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),patch);
 
@@ -239,11 +239,12 @@ void NinePatchFactory::free_patch(GLsizei p)
 	}
 }
 
-void NinePatchFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const glm::vec4& colour, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount)
+void NinePatchFactory::draw(OOGL::State& glState, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp, const glm::vec4& colour, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount)
 {
 	if (m_ptrProgram)
 	{
 		glState.use(m_ptrProgram);
+		glState.bind(0,texture);
 
 		m_ptrProgram->uniform("in_Colour",colour);
 		m_ptrProgram->uniform("MVP",mvp);
@@ -347,21 +348,19 @@ void Indigo::Render::NinePatch::on_draw(OOGL::State& glState, const glm::mat4& m
 {
 	if (m_patch != GLsizei(-1) && m_info->m_texture && m_colour.a > 0.f)
 	{
-		glState.bind(0,m_info->m_texture);
-
 		if (m_counts[0])
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(glState,mvp,m_colour,m_firsts,m_counts,3);
+				NinePatchFactory_t::instance().draw(glState,m_info->m_texture,mvp,m_colour,m_firsts,m_counts,3);
 			else
-				NinePatchFactory_t::instance().draw(glState,mvp,m_colour,m_firsts,m_counts,2);
+				NinePatchFactory_t::instance().draw(glState,m_info->m_texture,mvp,m_colour,m_firsts,m_counts,2);
 		}
 		else
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(glState,mvp,m_colour,&m_firsts[1],&m_counts[1],2);
+				NinePatchFactory_t::instance().draw(glState,m_info->m_texture,mvp,m_colour,&m_firsts[1],&m_counts[1],2);
 			else
-				NinePatchFactory_t::instance().draw(glState,mvp,m_colour,&m_firsts[1],&m_counts[1],1);
+				NinePatchFactory_t::instance().draw(glState,m_info->m_texture,mvp,m_colour,&m_firsts[1],&m_counts[1],1);
 		}
 	}
 }

@@ -31,11 +31,6 @@ namespace
 		UILayer(Indigo::Render::Window* window);
 
 		void on_draw(OOGL::State& glState) const;
-
-		void size(glm::uvec2 sz) { m_size = sz; }
-
-	private:
-		glm::uvec2 m_size;
 	};
 }
 
@@ -87,8 +82,7 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder
 }
 
 ::UILayer::UILayer(Indigo::Render::Window* window) :
-		Indigo::Render::Layer(window),
-		m_size(window->window()->size())
+		Indigo::Render::Layer(window)
 {
 }
 
@@ -96,12 +90,13 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 {
 	if (m_visible)
 	{
-		glViewport(0, 0, m_size.x, m_size.y);
+		glm::uvec2 size = m_window->window()->size();
+		glViewport(0, 0, size.x, size.y);
 
 		glState.enable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-		glm::vec2 sz = m_size;
+		glm::vec2 sz = size;
 		Indigo::Render::UIGroup::on_draw(glState,glm::ortho(0.f,sz.x,0.f,sz.y));
 	}
 }
@@ -264,15 +259,4 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 	}
 
 	return OOBase::static_pointer_cast<Indigo::Render::Layer>(group);
-}
-
-void Indigo::UILayer::on_size(const glm::uvec2& sz)
-{
-	OOBase::SharedPtr< ::UILayer> layer = render_group< ::UILayer>();
-	if (layer)
-	{
-		render_pipe()->post(OOBase::make_delegate(layer.get(),&::UILayer::size),sz);
-	
-		size(sz);
-	}
 }

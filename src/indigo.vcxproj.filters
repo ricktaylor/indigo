@@ -70,9 +70,6 @@
     <ClInclude Include="..\core\ZipResource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\UI9Patch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\ui\UIButton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -82,10 +79,19 @@
     <ClInclude Include="..\ui\UILayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\UIText.h">
+    <ClInclude Include="App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="App.h">
+    <ClInclude Include="..\ui\Label.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\NinePatch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\Quad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\ImageLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -120,9 +126,6 @@
     <ClCompile Include="..\core\ZipResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\UI9Patch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ui\UIButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -132,10 +135,19 @@
     <ClCompile Include="..\ui\UILayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\UIText.cpp">
+    <ClCompile Include="App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="App.cpp">
+    <ClCompile Include="..\ui\Label.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui\NinePatch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui\Quad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui\ImageLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

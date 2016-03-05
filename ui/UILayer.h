@@ -165,8 +165,6 @@ namespace Indigo
 	protected:
 		OOBase::SharedPtr<Render::Layer> create_render_layer(Indigo::Render::Window* window);
 
-		void on_size(const glm::uvec2& sz);
-
 		virtual bool on_render_create(Indigo::Render::UIGroup* group) { return true; }
 	};
 }

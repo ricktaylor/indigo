@@ -27,6 +27,7 @@
 #include "../ui/UILayer.h"
 #include "../ui/UIButton.h"
 #include "../ui/UIImage.h"
+#include "../ui/ImageLayer.h"
 
 namespace Indigo
 {
@@ -42,29 +43,36 @@ namespace Indigo
 
 void Indigo::Application::splash()
 {
-	OOBase::SharedPtr<Indigo::UILayer> layer = OOBase::allocate_shared<Indigo::UILayer,OOBase::ThreadLocalAllocator>();
+	// Add the book layer
+	OOBase::SharedPtr<Image> book_image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
+	book_image->load(static_resources(),"book.png");
+		
+	OOBase::SharedPtr<ImageLayer> img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(book_image);
+	m_wnd->add_layer(img_layer,50);
+	
+	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>();
 	m_wnd->add_layer(layer,100);
 
-#if 0
-	OOBase::SharedPtr<Indigo::UIButton::Style> button_style = OOBase::allocate_shared<Indigo::UIButton::Style,OOBase::ThreadLocalAllocator>();
-	button_style->m_background.Image::load(Indigo::static_resources(),"menu_border.png");
-	button_style->m_font.load(Indigo::static_resources(),"Blokletters.fnt");
+#if 1
+	OOBase::SharedPtr<UIButton::Style> button_style = OOBase::allocate_shared<UIButton::Style,OOBase::ThreadLocalAllocator>();
+	button_style->m_background.Image::load(static_resources(),"menu_border.png");
+	button_style->m_font.load(static_resources(),"Blokletters.fnt");
 	button_style->m_colour = glm::vec4(1.f,1.f,1.f,1.f);
 	button_style->m_shadow = glm::vec4(.0f,.0f,.0f,.75f);
 	button_style->m_drop = glm::ivec2(0,-1);
 
-	OOBase::SharedPtr<Indigo::UIButton> button = OOBase::allocate_shared<Indigo::UIButton,OOBase::ThreadLocalAllocator>(button_style,"Hello",-1,glm::ivec2(100,100));
+	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(button_style,"Hello",-1,glm::ivec2(100,100));
 	layer->add_widget(button,100);
 
 	button_style->m_background.unload();
 	button_style->m_font.unload();
 
 	button->show();
-#else
-	OOBase::SharedPtr<Indigo::Image> image = OOBase::allocate_shared<Indigo::Image,OOBase::ThreadLocalAllocator>();
-	image->load(Indigo::static_resources(),"menu_border.png");
+#elif 1
+	OOBase::SharedPtr<Image> image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
+	image->load(static_resources(),"menu_border.png");
 
-	OOBase::SharedPtr<Indigo::UIImage> piccy = OOBase::allocate_shared<Indigo::UIImage,OOBase::ThreadLocalAllocator>(image,glm::ivec2(100,100));
+	OOBase::SharedPtr<UIImage> piccy = OOBase::allocate_shared<UIImage,OOBase::ThreadLocalAllocator>(image,glm::ivec2(10,100));
 	layer->add_widget(piccy,100);
 
 	image->unload();
@@ -81,7 +89,7 @@ void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::Cmd
 	m_wnd = wnd;
 
 	// Add a simple white blanking layer
-	m_wnd->add_layer(OOBase::allocate_shared<Indigo::BlankingLayer,OOBase::ThreadLocalAllocator>(glm::vec4(1.f)),0);
+	//m_wnd->add_layer(OOBase::allocate_shared<BlankingLayer,OOBase::ThreadLocalAllocator>(glm::vec4(1.f)),0);
 	m_wnd->visible(true);
 
 	splash();
@@ -90,7 +98,7 @@ void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::Cmd
 void Indigo::Application::on_quit()
 {
 	m_wnd.reset();
-	}
+}
 
 void Indigo::Application::stop()
 {

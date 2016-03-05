@@ -303,8 +303,8 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		while (new_size < m_allocated + len)
 			new_size *= 2;
 
-		OOBase::SharedPtr<OOGL::BufferObject> ptrNewVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW,new_size * vertices_per_glyph * sizeof(vertex_data));
-		OOBase::SharedPtr<OOGL::BufferObject> ptrNewElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_DYNAMIC_DRAW,new_size * elements_per_glyph * sizeof(GLuint));
+		OOBase::SharedPtr<OOGL::BufferObject> ptrNewVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,new_size * vertices_per_glyph * sizeof(vertex_data));
+		OOBase::SharedPtr<OOGL::BufferObject> ptrNewElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,new_size * elements_per_glyph * sizeof(GLuint));
 		if (!ptrNewVertices || !ptrNewElements)
 			LOG_ERROR_RETURN(("Failed to allocate VBO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
@@ -343,12 +343,9 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		m_ptrVAO->enable_attribute(a);
 
 		a = m_ptrProgram->attribute_location("in_TexCoord");
-		if (a != -1)
-		{
-			m_ptrVAO->attribute(a,m_ptrVertices,2,GL_UNSIGNED_SHORT,true,sizeof(vertex_data),offsetof(vertex_data,u));
-			m_ptrVAO->enable_attribute(a);
-		}
-
+		m_ptrVAO->attribute(a,m_ptrVertices,2,GL_UNSIGNED_SHORT,true,sizeof(vertex_data),offsetof(vertex_data,u));
+		m_ptrVAO->enable_attribute(a);
+		
 		m_ptrVAO->element_array(m_ptrElements);
 
 		m_ptrVAO->unbind();
@@ -447,18 +444,15 @@ void Indigo::Render::Font::free_text(Text& text)
 
 void Indigo::Render::Font::draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei len)
 {
-	if (len && colour.a > 0.f)
+	if (len && colour.a > 0.f && m_ptrProgram && m_ptrTexture)
 	{
-		if (m_ptrProgram)
-		{
-			state.use(m_ptrProgram);
-			state.bind(0,m_ptrTexture);
+		state.use(m_ptrProgram);
+		state.bind(0,m_ptrTexture);
 
-			m_ptrProgram->uniform("in_Colour",colour);
-			m_ptrProgram->uniform("MVP",mvp);
+		m_ptrProgram->uniform("in_Colour",colour);
+		m_ptrProgram->uniform("MVP",mvp);
 
-			m_ptrVAO->draw_elements(GL_TRIANGLES,elements_per_glyph * len,GL_UNSIGNED_INT,start * elements_per_glyph * sizeof(GLuint));
-		}
+		m_ptrVAO->draw_elements(GL_TRIANGLES,elements_per_glyph * len,GL_UNSIGNED_INT,start * elements_per_glyph * sizeof(GLuint));
 	}
 }
 

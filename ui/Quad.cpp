@@ -33,7 +33,7 @@ namespace
 	class QuadFactory
 	{
 	public:
-		void draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour);
+		void draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp, const glm::vec4& colour);
 
 	private:
 		struct vertex_data
@@ -58,8 +58,8 @@ namespace
 
 bool QuadFactory::alloc_quad()
 {
-	OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_DYNAMIC_DRAW,vertices_per_quad * sizeof(vertex_data));
-	OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_DYNAMIC_DRAW,elements_per_quad * sizeof(GLuint));
+	OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,vertices_per_quad * sizeof(vertex_data));
+	OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,elements_per_quad * sizeof(GLuint));
 	if (!m_ptrVertices || !m_ptrElements)
 		LOG_ERROR_RETURN(("Failed to allocate VBO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
@@ -125,7 +125,7 @@ bool QuadFactory::alloc_quad()
 	return true;
 }
 
-void QuadFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const glm::vec4& colour)
+void QuadFactory::draw(OOGL::State& glState, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp, const glm::vec4& colour)
 {
 	if (!m_ptrProgram)
 		alloc_quad();
@@ -133,6 +133,7 @@ void QuadFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const glm::ve
 	if (m_ptrProgram)
 	{
 		glState.use(m_ptrProgram);
+		glState.bind(0,texture);
 
 		m_ptrProgram->uniform("in_Colour",colour);
 		m_ptrProgram->uniform("MVP",mvp);
@@ -141,7 +142,8 @@ void QuadFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const glm::ve
 	}
 }
 
-void Indigo::Render::Quad::draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour)
+void Indigo::Render::Quad::draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, glm::mat4& mvp, const glm::vec4& colour)
 {
-	OOGL::ContextSingleton<QuadFactory>::instance().draw(state,mvp,colour);
+	if (texture && colour.a > 0.f)
+		OOGL::ContextSingleton<QuadFactory>::instance().draw(state,texture,mvp,colour);
 }
