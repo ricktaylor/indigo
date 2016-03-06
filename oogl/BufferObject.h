@@ -120,7 +120,6 @@ namespace OOGL
 		BufferObject(GLenum target);
 
 		OOBase::SharedPtr<char> auto_map_i(GLenum access, GLintptr offset, GLsizeiptr length);
-		void internal_bind(GLenum target) const;
 	};
 }
 

@@ -87,7 +87,6 @@ namespace OOGL
 		Texture(GLuint tex, GLenum target);
 
 		void init();
-		void internal_bind(State& state, GLuint unit) const;
 	};
 
 	class MutableTexture : public Texture

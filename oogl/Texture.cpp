@@ -208,7 +208,8 @@ void OOGL::Texture::init()
 	glGenTextures(1,&m_tex);
 
 	// We always explicitly bind as this is when the create happens
-	State::get_current()->bind_texture(m_tex,m_target);
+	glBindTexture(m_target,m_tex);
+	State::get_current()->update_texture_binding(m_tex,m_target);
 }
 
 void OOGL::Texture::init_mutable(GLsizei levels, GLenum internalFormat, GLsizei width, GLenum format, GLenum type, const void* pixels)
@@ -377,11 +378,6 @@ void OOGL::Texture::sub_image(GLint level, GLint xoffset, GLint yoffset, GLint z
 GLenum OOGL::Texture::target() const
 {
 	return m_target;
-}
-
-void OOGL::Texture::internal_bind(State& state, GLuint unit) const
-{
-	StateFns::get_current()->glBindTextureUnit(state,unit,m_target,m_tex);
 }
 
 void OOGL::Texture::parameter(GLenum name, GLfloat val)

@@ -64,8 +64,6 @@ namespace OOGL
 		OOBase::SharedPtr<BufferObject> m_element_array;
 
 		VertexArrayObject(GLuint array);
-
-		void internal_bind() const;
 	};
 }
 

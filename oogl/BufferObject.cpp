@@ -79,11 +79,6 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::BufferObject::bind()
 	return State::get_current()->bind(shared_from_this());
 }
 
-void OOGL::BufferObject::internal_bind(GLenum target) const
-{
-	StateFns::get_current()->glBindBuffer(target,m_buffer);
-}
-
 void* OOGL::BufferObject::map(GLenum access, GLintptr offset, GLsizeiptr length)
 {
 	return StateFns::get_current()->glMapBufferRange(shared_from_this(),offset,length,m_usage,m_size,access);

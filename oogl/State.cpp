@@ -97,7 +97,7 @@ OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBa
 			m_read_fb = fb;
 
 			if (fb)
-				fb->internal_bind(GL_FRAMEBUFFER);
+				m_state_fns.glBindFramebuffer(GL_FRAMEBUFFER,fb->m_id);
 		}
 	}
 	else if (target == GL_DRAW_FRAMEBUFFER)
@@ -108,7 +108,7 @@ OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBa
 			m_draw_fb = fb;
 
 			if (fb)
-				fb->internal_bind(GL_DRAW_FRAMEBUFFER);
+				m_state_fns.glBindFramebuffer(GL_DRAW_FRAMEBUFFER,fb->m_id);
 		}
 	}
 	else if (target == GL_READ_FRAMEBUFFER)
@@ -119,7 +119,7 @@ OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBa
 			m_read_fb = fb;
 
 			if (fb)
-				fb->internal_bind(GL_READ_FRAMEBUFFER);
+				m_state_fns.glBindFramebuffer(GL_READ_FRAMEBUFFER,fb->m_id);
 		}
 	}
 
@@ -164,8 +164,8 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::Sh
 		{
 			LOG_WARNING(("Failed to resize texture unit cache"));
 
-			texture->internal_bind(*this,unit);
-
+			m_state_fns.glBindTextureUnit(*this,unit,texture->m_target,texture->m_tex);
+			
 			return prev;
 		}
 		tu = m_vecTexUnits.at(unit);
@@ -174,7 +174,7 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::Sh
 	tex_unit_t::iterator i = tu->find(texture->target());
 	if (!i)
 	{
-		texture->internal_bind(*this,unit);
+		m_state_fns.glBindTextureUnit(*this,unit,texture->m_target,texture->m_tex);
 
 		tex_pair p;
 		p.texture = texture->m_tex;
@@ -190,7 +190,8 @@ OOBase::SharedPtr<OOGL::Texture> OOGL::State::bind(GLuint unit, const OOBase::Sh
 		{
 			if (i->second.texture != texture->m_tex)
 			{
-				texture->internal_bind(*this,unit);
+				m_state_fns.glBindTextureUnit(*this,unit,texture->m_target,texture->m_tex);
+
 				i->second.texture = texture->m_tex;
 			}
 			i->second.tex_ptr = texture;
@@ -271,7 +272,7 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind_buffer_target(const OOBa
 	if (!i)
 	{
 		if (buffer_object)
-			buffer_object->internal_bind(target);
+			m_state_fns.glBindBuffer(target,buffer_object->m_buffer);
 		else
 			m_state_fns.glBindBuffer(target,0);
 
@@ -286,7 +287,7 @@ OOBase::SharedPtr<OOGL::BufferObject> OOGL::State::bind_buffer_target(const OOBa
 			i->second = buffer_object;
 
 			if (buffer_object)
-				buffer_object->internal_bind(target);
+				m_state_fns.glBindBuffer(target,buffer_object->m_buffer);
 			else
 				m_state_fns.glBindBuffer(target,0);
 		}
@@ -333,7 +334,12 @@ OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::State::bind(const OOBase::Share
 		m_current_vao = vao;
 
 		if (vao)
-			vao->internal_bind();
+		{
+			m_state_fns.glBindVertexArray(vao->m_array);
+
+			// VAO bind sets the GL_ELEMENT_ARRAY_BUFFER binding
+			update_bind(vao->m_element_array,GL_ELEMENT_ARRAY_BUFFER);
+		}
 	}
 
 	return prev;

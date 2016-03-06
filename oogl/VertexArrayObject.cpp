@@ -60,14 +60,6 @@ OOBase::SharedPtr<OOGL::VertexArrayObject> OOGL::VertexArrayObject::unbind()
 	return State::get_current()->unbind_vao();
 }
 
-void OOGL::VertexArrayObject::internal_bind() const
-{
-	StateFns::get_current()->glBindVertexArray(m_array);
-
-	// VAO bind sets the GL_ELEMENT_ARRAY_BUFFER binding
-	State::get_current()->update_bind(m_element_array,GL_ELEMENT_ARRAY_BUFFER);
-}
-
 void OOGL::VertexArrayObject::attribute(GLuint index, const OOBase::SharedPtr<BufferObject>& buffer, GLint components, GLenum type, GLsizei stride, GLsizeiptr offset)
 {
 	OOBase::SharedPtr<State> ptrState = State::get_current();

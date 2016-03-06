@@ -62,7 +62,3 @@ GLenum OOGL::Framebuffer::check() const
 	return StateFns::get_current()->glCheckFramebufferStatus(m_id);
 }
 
-void OOGL::Framebuffer::internal_bind(GLenum target) const
-{
-	StateFns::get_current()->glBindFramebuffer(target,m_id);
-}
