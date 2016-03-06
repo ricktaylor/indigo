@@ -133,6 +133,15 @@ namespace Indigo
 		glm::uvec2 m_size;
 	};
 
+	class UISizer
+	{
+	public:
+		virtual void size(const glm::uvec2& size) = 0;
+		virtual glm::uvec2 min_size() const = 0;
+		virtual glm::uvec2 max_size() const = 0;
+		virtual glm::uvec2 ideal_size() const = 0;
+	};
+
 	class UIGroup : public UIWidget
 	{
 	public:
@@ -151,13 +160,19 @@ namespace Indigo
 			return OOBase::static_pointer_cast<Widget>(i->second);
 		}
 
+		const OOBase::SharedPtr<UISizer>& sizer() const { return m_sizer; }
+		void sizer(const OOBase::SharedPtr<UISizer>& s);
+
 	protected:
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 max_size() const;
 		virtual glm::uvec2 ideal_size() const;
 
+		virtual void on_size(const glm::uvec2& sz);
+
 	private:
 		OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_children;
+		OOBase::SharedPtr<UISizer> m_sizer;
 	};
 
 	class UILayer : public UIGroup, public Layer

@@ -528,6 +528,9 @@ bool Indigo::NinePatch::get_bounds()
 
 OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(const glm::ivec2& position, const glm::u16vec2& size, const glm::vec4& colour) const
 {
+	if (!m_info)
+		return OOBase::SharedPtr<Indigo::Render::NinePatch>();
+
 	if (!m_info->m_texture)
 	{
 		m_info->m_texture = make_texture(GL_RGBA8);

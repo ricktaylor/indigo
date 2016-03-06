@@ -54,7 +54,6 @@ void ::ImageLayer::on_draw(OOGL::State& glState) const
 		glm::uvec2 size = m_window->window()->size();
 		glViewport(0, 0, size.x, size.y);
 
-		glState.disable(GL_DEPTH_TEST);
 		glState.enable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 

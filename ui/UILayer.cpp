@@ -196,8 +196,21 @@ bool Indigo::UIGroup::remove_widget(unsigned int zorder)
 	return m_children.remove(zorder);
 }
 
+void Indigo::UIGroup::sizer(const OOBase::SharedPtr<UISizer>& s)
+{
+	if (s != m_sizer)
+	{
+		m_sizer = s;
+		if (m_sizer)
+			m_sizer->size(m_size);
+	}
+}
+
 glm::uvec2 Indigo::UIGroup::min_size() const
 {
+	if (m_sizer)
+		return m_sizer->min_size();
+
 	glm::uvec2 min(0);
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
 	{
@@ -214,6 +227,9 @@ glm::uvec2 Indigo::UIGroup::min_size() const
 
 glm::uvec2 Indigo::UIGroup::max_size() const
 {
+	if (m_sizer)
+		return m_sizer->max_size();
+
 	glm::uvec2 max(0);
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
 	{
@@ -230,6 +246,9 @@ glm::uvec2 Indigo::UIGroup::max_size() const
 
 glm::uvec2 Indigo::UIGroup::ideal_size() const
 {
+	if (m_sizer)
+		return m_sizer->ideal_size();
+
 	glm::uvec2 ideal(0);
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
 	{
@@ -242,6 +261,12 @@ glm::uvec2 Indigo::UIGroup::ideal_size() const
 	}
 
 	return ideal;
+}
+
+void Indigo::UIGroup::on_size(const glm::uvec2& sz)
+{
+	if (m_sizer)
+		m_sizer->size(sz);
 }
 
 void Indigo::UILayer::show(bool visible)
