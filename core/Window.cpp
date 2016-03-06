@@ -56,6 +56,16 @@ void ::BlankingLayer::colour(glm::vec4 colour)
 	glClearColor(colour.r,colour.g,colour.b,colour.a);
 }
 
+void Indigo::Layer::show(bool visible)
+{
+	if (visible != m_visible)
+	{
+		m_visible = visible;
+
+		render_pipe()->post(OOBase::make_delegate(m_render_layer.get(),&Render::Layer::show),visible);
+	}
+}
+
 Indigo::BlankingLayer::BlankingLayer(const glm::vec4& colour) :
 		m_colour(colour)
 {
@@ -134,7 +144,10 @@ void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& 
 void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
-		i->second->on_draw(glState);
+	{ 
+		if (i->second->m_visible)
+			i->second->on_draw(glState);
+	}
 }
 
 void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, unsigned int zorder, bool* ret)
@@ -178,9 +191,9 @@ void Indigo::Window::on_destroy()
 	m_render_wnd.reset();
 }
 
-bool Indigo::Window::visible(bool show)
+bool Indigo::Window::show(bool visible)
 {
-	return render_pipe()->post(OOBase::make_delegate(m_render_wnd->m_wnd.get(),&OOGL::Window::visible),show);
+	return render_pipe()->post(OOBase::make_delegate(m_render_wnd->m_wnd.get(),&OOGL::Window::show),visible);
 }
 
 bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, unsigned int zorder)

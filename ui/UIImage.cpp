@@ -69,7 +69,7 @@ bool Indigo::UIImage::on_render_create(Indigo::Render::UIGroup* group)
 	if (!group->add_drawable(m_render_image,0))
 		return false;
 
-	m_render_image->visible(true);
+	m_render_image->show();
 
 	return true;
 }

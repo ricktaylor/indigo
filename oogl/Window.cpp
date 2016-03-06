@@ -87,11 +87,11 @@ bool OOGL::Window::visible() const
 	return glfwGetWindowAttrib(m_glfw_window,GLFW_VISIBLE) != 0;
 }
 
-void OOGL::Window::visible(bool show)
+void OOGL::Window::show(bool visible)
 {
 	if (m_glfw_window)
 	{
-		if (show)
+		if (visible)
 			glfwShowWindow(m_glfw_window);
 		else
 			glfwHideWindow(m_glfw_window);

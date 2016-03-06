@@ -39,14 +39,16 @@ namespace Indigo
 			friend class Window;
 
 		public:
+			void show(bool visible) { m_visible = visible; };
 
 		protected:
-			Layer(Window* window) : m_window(window)
+			Layer(Window* window) : m_window(window), m_visible(false)
 			{}
 
 			virtual void on_draw(OOGL::State& glState) const = 0;
 
 			Window* const m_window;
+			bool m_visible;
 		};
 	}
 
@@ -56,13 +58,13 @@ namespace Indigo
 		friend class Render::Window;
 
 	public:
-		virtual bool valid()
-		{
-			return m_render_layer;
-		}
+		virtual bool valid() const { return m_render_layer; }
+		
+		void show(bool visible = true);
+		bool visible() const { return m_visible; }
 
 	protected:
-		Layer()
+		Layer() : m_visible(false)
 		{}
 
 		template <typename RenderLayer>
@@ -79,6 +81,7 @@ namespace Indigo
 
 	private:
 		OOBase::SharedPtr<Render::Layer> m_render_layer;
+		bool m_visible;
 	};
 
 	class BlankingLayer : public Layer
@@ -139,7 +142,7 @@ namespace Indigo
 
 		OOBase::WeakPtr<OOGL::Window> create();
 
-		bool visible(bool show);
+		bool show(bool visible = true);
 
 		bool add_layer(const OOBase::SharedPtr<Layer>& layer, unsigned int zorder);
 		bool remove_layer(unsigned int zorder);

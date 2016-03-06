@@ -49,7 +49,7 @@ namespace OOGL
 		bool valid() const;
 
 		bool visible() const;
-		void visible(bool show);
+		void show(bool visible = true);
 
 		bool iconified() const;
 		void iconify(bool minimize);

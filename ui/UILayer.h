@@ -40,7 +40,7 @@ namespace Indigo
 		public:
 			virtual bool valid() const { return true; }
 
-			void visible(bool show) { m_visible = show; };
+			void show(bool visible = true) { m_visible = visible; };
 			void position(glm::ivec2 pos) { m_position = pos; };
 
 		protected:
@@ -162,6 +162,9 @@ namespace Indigo
 
 	class UILayer : public UIGroup, public Layer
 	{
+	public:
+		void show(bool visible = true);
+
 	protected:
 		OOBase::SharedPtr<Render::Layer> create_render_layer(Indigo::Render::Window* window);
 

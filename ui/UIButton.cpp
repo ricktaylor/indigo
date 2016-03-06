@@ -70,8 +70,8 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 	if (!group->add_drawable(m_caption,10))
 		return false;
 
-	m_background->visible(true);
-	m_caption->visible(true);
+	m_background->show();
+	m_caption->show();
 
 	return true;
 }

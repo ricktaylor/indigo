@@ -79,7 +79,10 @@ void Indigo::Application::splash()
 	piccy->show();
 #endif
 
-	layer->show(true);
+	img_layer->show();
+	layer->show();
+
+	m_wnd->show();
 }
 
 void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args)
@@ -87,10 +90,6 @@ void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::Cmd
 	m_options = options;
 	m_args = args;
 	m_wnd = wnd;
-
-	// Add a simple white blanking layer
-	//m_wnd->add_layer(OOBase::allocate_shared<BlankingLayer,OOBase::ThreadLocalAllocator>(glm::vec4(1.f)),0);
-	m_wnd->visible(true);
 
 	splash();
 }
@@ -104,4 +103,3 @@ void Indigo::Application::stop()
 {
 	thread_pipe()->close();
 }
-

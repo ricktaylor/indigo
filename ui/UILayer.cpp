@@ -88,17 +88,14 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder
 
 void ::UILayer::on_draw(OOGL::State& glState) const
 {
-	if (m_visible)
-	{
-		glm::uvec2 size = m_window->window()->size();
-		glViewport(0, 0, size.x, size.y);
+	glm::uvec2 size = m_window->window()->size();
+	glViewport(0, 0, size.x, size.y);
 
-		glState.enable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	glState.enable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-		glm::vec2 sz = size;
-		Indigo::Render::UIGroup::on_draw(glState,glm::ortho(0.f,sz.x,0.f,sz.y));
-	}
+	glm::vec2 sz = size;
+	Indigo::Render::UIGroup::on_draw(glState,glm::ortho(0.f,sz.x,0.f,sz.y));
 }
 
 Indigo::UIWidget::UIWidget(const glm::ivec2& position, const glm::uvec2& size) :
@@ -117,7 +114,7 @@ void Indigo::UIWidget::show(bool visible)
 	{
 		m_visible = visible;
 
-		render_pipe()->post(OOBase::make_delegate(render_group<Render::UIDrawable>().get(),&Render::UIDrawable::visible),visible);
+		render_pipe()->post(OOBase::make_delegate(render_group<Render::UIDrawable>().get(),&Render::UIDrawable::show),visible);
 	}
 }
 
@@ -245,6 +242,12 @@ glm::uvec2 Indigo::UIGroup::ideal_size() const
 	}
 
 	return ideal;
+}
+
+void Indigo::UILayer::show(bool visible)
+{
+	UIGroup::show(visible);
+	Layer::show(visible);
 }
 
 OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(Indigo::Render::Window* window)
