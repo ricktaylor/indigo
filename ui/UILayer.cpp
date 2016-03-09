@@ -88,13 +88,10 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder
 
 void ::UILayer::on_draw(OOGL::State& glState) const
 {
-	glm::uvec2 size = m_window->window()->size();
-	glViewport(0, 0, size.x, size.y);
-
 	glState.enable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	glm::vec2 sz = size;
+	glm::vec2 sz = m_window->window()->size();
 	Indigo::Render::UIGroup::on_draw(glState,glm::ortho(0.f,sz.x,0.f,sz.y));
 }
 

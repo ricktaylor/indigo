@@ -65,6 +65,17 @@ namespace OOGL
 		bool enable(GLenum cap, bool enable = true);
 		bool disable(GLenum cap) { return enable(cap,false); }
 
+		struct viewport_t
+		{
+			GLint x;
+			GLint y;
+			GLsizei width;
+			GLsizei height;
+		};
+		viewport_t viewport(const viewport_t& vp);
+		const viewport_t& viewport() const;
+
+
 	private:
 		StateFns&                            m_state_fns;
 		OOBase::SharedPtr<Framebuffer>       m_draw_fb;
@@ -72,6 +83,7 @@ namespace OOGL
 		GLuint                               m_active_texture_unit;
 		OOBase::SharedPtr<Program>           m_current_program;
 		OOBase::SharedPtr<VertexArrayObject> m_current_vao;
+		viewport_t                           m_viewport;
 		
 		struct tex_pair
 		{

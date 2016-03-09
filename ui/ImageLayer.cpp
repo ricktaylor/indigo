@@ -51,9 +51,6 @@ void ::ImageLayer::on_draw(OOGL::State& glState) const
 {
 	if (m_texture)
 	{
-		glm::uvec2 size = m_window->window()->size();
-		glViewport(0, 0, size.x, size.y);
-
 		glState.enable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 

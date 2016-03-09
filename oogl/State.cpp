@@ -39,6 +39,13 @@ OOGL::State::State(StateFns& fns) :
 		m_state_fns(fns),
 		m_active_texture_unit(0)
 {
+	GLint params[4] = {0};
+	glGetIntegerv(GL_VIEWPORT,params);
+	OOGL_CHECK("glGetIntegerv");
+	m_viewport.x = params[0];
+	m_viewport.y = params[1];
+	m_viewport.width = params[2];
+	m_viewport.height = params[3];
 }
 
 OOGL::State::~State()
@@ -83,6 +90,23 @@ OOBase::SharedPtr<OOGL::State> OOGL::State::get_current()
 	}
 
 	return window->m_state;
+}
+
+OOGL::State::viewport_t OOGL::State::viewport(const viewport_t& vp)
+{
+	viewport_t prev = m_viewport;
+	if (memcmp(&m_viewport,&vp,sizeof(vp)) != 0)
+	{
+		glViewport(vp.x,vp.y,vp.width,vp.height);
+		OOGL_CHECK("glViewport");
+		m_viewport = vp;
+	}
+	return prev;
+}
+
+const OOGL::State::viewport_t& OOGL::State::viewport() const
+{
+	return m_viewport;
 }
 
 OOBase::SharedPtr<OOGL::Framebuffer> OOGL::State::bind(GLenum target, const OOBase::SharedPtr<Framebuffer>& fb)
@@ -431,7 +455,8 @@ bool OOGL::State::enable(GLenum cap, bool enable)
 	OOBase::HashTable<GLenum,bool,OOBase::ThreadLocalAllocator>::iterator i = m_enables.find(cap);
 	if (!i)
 	{
-		prev_state = glIsEnabled(cap) == GL_TRUE;
+		prev_state = (glIsEnabled(cap) == GL_TRUE);
+		OOGL_CHECK("glIsEnabled");
 		m_enables.insert(cap,enable);
 	}
 	else
@@ -444,9 +469,15 @@ bool OOGL::State::enable(GLenum cap, bool enable)
 	if (prev_state != enable)
 	{
 		if (enable)
+		{
 			glEnable(cap);
+			OOGL_CHECK("glEnable");
+		}
 		else
+		{
 			glDisable(cap);
+			OOGL_CHECK("glDisable");
+		}
 	}
 
 	return prev_state;

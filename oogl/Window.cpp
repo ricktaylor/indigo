@@ -127,8 +127,16 @@ void OOGL::Window::cb_on_move(GLFWwindow* window, int left, int top)
 void OOGL::Window::cb_on_size(GLFWwindow* window, int width, int height)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
-	if (pThis && pThis->m_on_sized)
-		pThis->m_on_sized.invoke(*pThis,glm::uvec2(width,height));
+	if (pThis)
+	{
+		glfwMakeContextCurrent(window);
+
+		OOGL::State::viewport_t vp = {0,0,width,height};
+		pThis->m_state->viewport(vp);
+
+		if (pThis->m_on_sized)
+			pThis->m_on_sized.invoke(*pThis,glm::uvec2(width,height));
+	}
 }
 
 void OOGL::Window::cb_on_close(GLFWwindow* window)
