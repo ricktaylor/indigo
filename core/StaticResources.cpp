@@ -56,7 +56,7 @@ namespace
 		{ "Blokletters.fnt", IDR_BLOKLETTERS, RT_RCDATA, NULL, NULL, 0 },
 		{ "Blokletters_0.png", IDB_BLOKLETTERS, RT_RCDATA, NULL, NULL, 0 },
 		{ "menu_border.png", IDB_MENU_BORDER, RT_RCDATA, NULL, NULL, 0 },
-		{ "book.png", IDB_BOOK, RT_RCDATA, NULL, NULL, 0 },
+		{ "ui/book.png", IDB_BOOK, RT_RCDATA, NULL, NULL, 0 },
 	};
 
 	const RES* find_resource(const char* name)
@@ -89,6 +89,7 @@ namespace
 	#include "./resources/Blokletters_0.png.h"
 	#include "./resources/Blokletters.fnt.h"
 	#include "./resources/menu_border.png.h"
+	#include "./resources/ui/book.png.h"
 
 	struct RES
 	{
@@ -104,6 +105,7 @@ namespace
 		{ "Blokletters.fnt", s_Blokletters_fnt, sizeof(s_Blokletters_fnt) },
 		{ "Blokletters_0.png", s_Blokletters_0_png, sizeof(s_Blokletters_0_png) },
 		{ "menu_border.png", s_menu_border_png, sizeof(s_menu_border_png) },
+		{ "ui/book.png", s_book_png, sizeof(s_book_png) },
 	};
 
 	const RES* find_resource(const char* name)

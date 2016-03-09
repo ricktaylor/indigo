@@ -89,7 +89,7 @@ bool Indigo::Image::load(const unsigned char* buffer, int len, int components)
 	int x,y,c = 0;
 	void* p = stbi_load_from_memory(buffer,len,&x,&y,&c,components);
 	if (!p)
-		LOG_WARNING(("Failed to load image: %s\n",stbi_failure_reason()));
+		LOG_ERROR(("Failed to load image: %s\n",stbi_failure_reason()));
 	else
 	{
 		m_pixels = p;
@@ -131,7 +131,7 @@ OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalForm
 {
 	OOBase::SharedPtr<OOGL::Texture> tex;
 	if (!m_pixels)
-		LOG_WARNING(("Invalid image for make_texture\n"));
+		LOG_ERROR(("Invalid image for make_texture\n"));
 	else
 	{
 		GLenum format = 0;
@@ -154,7 +154,7 @@ OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalForm
 			break;
 
 		default:
-			LOG_WARNING(("Invalid image for make_texture\n"));
+			LOG_ERROR(("Invalid image for make_texture\n"));
 			return tex;
 		}
 

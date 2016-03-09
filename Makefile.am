@@ -63,7 +63,7 @@ bin2c: $(top_srcdir)/tools/bin2c.c Makefile
 	$(AM_V_CC)$(CC_FOR_BUILD) $(INCLUDES) $(AM_CFLAGS) -o $@ $(top_srcdir)/tools/bin2c.c
 	
 resources/%.h: resources/% bin2c
-	$(AM_V_GEN) mkdir -p resources
+	$(AM_V_GEN) mkdir -p $(@D)
 	$(AM_V_GEN) @top_builddir@/bin2c "$<" "$@" "$(*F)"
 	
 #%.png.h: ../resources/%.png bin2c
@@ -87,7 +87,8 @@ BUILT_SOURCES = \
 	resources/colour_blend.frag.h \
 	resources/Blokletters_0.png.h \
 	resources/Blokletters.fnt.h \
-	resources/menu_border.png.h
+	resources/menu_border.png.h \
+	resources/ui/book.png.h
 	
 CLEANFILES = $(BUILT_SOURCES)
 	
@@ -113,6 +114,7 @@ indigo_SOURCES = \
 	ui/Quad.cpp \
 	ui/NinePatch.cpp \
 	ui/Label.cpp \
+	ui/ImageLayer.cpp \
 	ui/UILayer.cpp \
 	ui/UIButton.cpp \
 	ui/UIImage.cpp \
