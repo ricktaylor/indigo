@@ -23,8 +23,8 @@
 
 #include "UIButton.h"
 
-Indigo::UIButton::UIButton(const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const glm::ivec2& position, const glm::uvec2& size) :
-		UIWidget(position,size),
+Indigo::UIButton::UIButton(UIWidget* parent, const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const glm::ivec2& position, const glm::uvec2& size) :
+		UIWidget(parent,position,size),
 		m_text(caption),
 		m_style(style)
 {
@@ -32,8 +32,8 @@ Indigo::UIButton::UIButton(const OOBase::SharedPtr<Style>& style, const OOBase::
 		this->size(ideal_size());
 }
 
-Indigo::UIButton::UIButton(const OOBase::SharedPtr<Style>& style, const char* sz, size_t len, const glm::ivec2& position, const glm::uvec2& size) :
-	UIWidget(position,size),
+Indigo::UIButton::UIButton(UIWidget* parent, const OOBase::SharedPtr<Style>& style, const char* sz, size_t len, const glm::ivec2& position, const glm::uvec2& size) :
+	UIWidget(parent,position,size),
 	m_style(style)
 {
 	if (!m_text.assign(sz,len))

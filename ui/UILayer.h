@@ -83,7 +83,9 @@ namespace Indigo
 		virtual ~UIWidget()
 		{}
 
-		virtual bool valid() const { return m_render_group; }
+		UIWidget* parent() const { return m_parent; }
+
+		virtual bool valid() const { return m_parent != NULL && m_render_group; }
 
 		bool visible() const { return valid() && m_visible; }
 		void show(bool visible = true);
@@ -103,18 +105,17 @@ namespace Indigo
 		const glm::uvec2& size() const { return m_size; }
 		glm::uvec2 size(const glm::uvec2& sz);
 
+		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
+		virtual glm::uvec2 ideal_size() const = 0;
+
 	protected:
-		UIWidget(const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIWidget(UIWidget* parent, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 		template <typename T>
 		OOBase::SharedPtr<T> render_group() const
 		{
 			return OOBase::static_pointer_cast<T>(m_render_group);
 		}
-
-		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
-		virtual glm::uvec2 max_size() const { return glm::uvec2(-1); }
-		virtual glm::uvec2 ideal_size() const = 0;
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group) = 0;
 		virtual void on_size(const glm::uvec2& sz) { }
@@ -124,6 +125,7 @@ namespace Indigo
 		virtual bool can_hilight(bool hilighted) { return false; }
 
 	private:
+		UIWidget* m_parent;
 		OOBase::SharedPtr<Indigo::Render::UIGroup> m_render_group;
 		bool m_visible;
 		bool m_enabled;
@@ -138,15 +140,13 @@ namespace Indigo
 	public:
 		virtual void size(const glm::uvec2& size) = 0;
 		virtual glm::uvec2 min_size() const = 0;
-		virtual glm::uvec2 max_size() const = 0;
 		virtual glm::uvec2 ideal_size() const = 0;
 	};
 
 	class UIGroup : public UIWidget
 	{
 	public:
-		UIGroup(const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0)) : UIWidget(position,size)
-		{}
+		UIGroup(UIWidget* parent, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder);
 		bool remove_widget(unsigned int zorder);
@@ -165,7 +165,6 @@ namespace Indigo
 
 	protected:
 		virtual glm::uvec2 min_size() const;
-		virtual glm::uvec2 max_size() const;
 		virtual glm::uvec2 ideal_size() const;
 
 		virtual void on_size(const glm::uvec2& sz);
@@ -178,6 +177,8 @@ namespace Indigo
 	class UILayer : public UIGroup, public Layer
 	{
 	public:
+		UILayer();
+
 		void show(bool visible = true);
 
 	protected:

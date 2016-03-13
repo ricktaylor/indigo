@@ -40,12 +40,11 @@ namespace Indigo
 			glm::ivec2 m_drop;
 		};
 
-		UIButton(const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
-		UIButton(const OOBase::SharedPtr<Style>& style, const char* sz, size_t len = -1, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIButton(UIWidget* parent, const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIButton(UIWidget* parent, const OOBase::SharedPtr<Style>& style, const char* sz, size_t len = -1, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 	protected:
 		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
-		virtual glm::uvec2 max_size() const { return glm::uvec2(-1); }
 		virtual glm::uvec2 ideal_size() const;
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group);

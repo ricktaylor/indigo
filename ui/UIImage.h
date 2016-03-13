@@ -50,11 +50,10 @@ namespace Indigo
 	class UIImage : public UIWidget
 	{
 	public:
-		UIImage(const OOBase::SharedPtr<Image>& image, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0), const glm::vec4& colour = glm::vec4(1.f));
+		UIImage(UIWidget* parent, const OOBase::SharedPtr<Image>& image, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0), const glm::vec4& colour = glm::vec4(1.f));
 
 	protected:
 		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
-		virtual glm::uvec2 max_size() const { return glm::uvec2(-1); }
 		virtual glm::uvec2 ideal_size() const;
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group);

@@ -26,7 +26,7 @@ namespace Indigo
 {
 	namespace detail
 	{
-		namespace Post
+		namespace IPC
 		{
 			template <typename Allocator>
 			struct thunk0
@@ -347,7 +347,7 @@ namespace Indigo
 		template <typename Allocator>
 		bool post(const OOBase::Delegate0<void,Allocator>& delegate)
 		{
-			typedef detail::Post::thunk0<Allocator> thunk;
+			typedef detail::IPC::thunk0<Allocator> thunk;
 
 			thunk* t;
 			if (!OOBase::ThreadLocalAllocator::allocate_new(t,delegate))
@@ -364,7 +364,7 @@ namespace Indigo
 		template <typename P1, typename Allocator>
 		bool post(const OOBase::Delegate1<void,P1,Allocator>& delegate, P1 p1)
 		{
-			typedef detail::Post::thunk1<Allocator,P1> thunk;
+			typedef detail::IPC::thunk1<Allocator,P1> thunk;
 
 			thunk* t;
 			if (!OOBase::ThreadLocalAllocator::allocate_new(t,delegate,p1))
@@ -381,7 +381,7 @@ namespace Indigo
 		template <typename P1, typename P2, typename Allocator>
 		bool post(const OOBase::Delegate2<void,P1,P2,Allocator>& delegate, P1 p1, P2 p2)
 		{
-			typedef detail::Post::thunk2<Allocator,P1,P2> thunk;
+			typedef detail::IPC::thunk2<Allocator,P1,P2> thunk;
 
 			thunk* t;
 			if (!OOBase::ThreadLocalAllocator::allocate_new(t,delegate,p1,p2))
@@ -398,7 +398,7 @@ namespace Indigo
 		template <typename P1, typename P2, typename P3, typename Allocator>
 		bool post(const OOBase::Delegate3<void,P1,P2,P3,Allocator>& delegate, P1 p1, P2 p2, P3 p3)
 		{
-			typedef detail::Post::thunk3<Allocator,P1,P2,P3> thunk;
+			typedef detail::IPC::thunk3<Allocator,P1,P2,P3> thunk;
 
 			thunk* t;
 			if (!OOBase::ThreadLocalAllocator::allocate_new(t,delegate,p1,p2,p3))

@@ -95,7 +95,8 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 	Indigo::Render::UIGroup::on_draw(glState,glm::ortho(0.f,sz.x,0.f,sz.y));
 }
 
-Indigo::UIWidget::UIWidget(const glm::ivec2& position, const glm::uvec2& size) :
+Indigo::UIWidget::UIWidget(UIWidget* parent, const glm::ivec2& position, const glm::uvec2& size) :
+		m_parent(parent),
 		m_visible(false),
 		m_enabled(true),
 		m_focused(false),
@@ -167,13 +168,18 @@ glm::uvec2 Indigo::UIWidget::size(const glm::uvec2& sz)
 	{
 		glm::uvec2 prev_size = m_size;
 
-		m_size = glm::clamp(sz,this->min_size(),this->max_size());
+		m_size = glm::max(sz,this->min_size());
 
 		if (prev_size != m_size)
 			on_size(m_size);
 	}
 
 	return m_size;
+}
+
+Indigo::UIGroup::UIGroup(UIWidget* parent, const glm::ivec2& position, const glm::uvec2& size) : 
+		UIWidget(parent,position,size)
+{
 }
 
 bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder)
@@ -222,25 +228,6 @@ glm::uvec2 Indigo::UIGroup::min_size() const
 	return min;
 }
 
-glm::uvec2 Indigo::UIGroup::max_size() const
-{
-	if (m_sizer)
-		return m_sizer->max_size();
-
-	glm::uvec2 max(0);
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
-	{
-		if (i->second->visible())
-		{
-			glm::uvec2 max1(i->second->max_size());
-			max1 += i->second->position();
-			max = glm::max(max1,max);
-		}
-	}
-
-	return max;
-}
-
 glm::uvec2 Indigo::UIGroup::ideal_size() const
 {
 	if (m_sizer)
@@ -264,6 +251,11 @@ void Indigo::UIGroup::on_size(const glm::uvec2& sz)
 {
 	if (m_sizer)
 		m_sizer->size(sz);
+}
+
+Indigo::UILayer::UILayer() : 
+		UIGroup(NULL)
+{
 }
 
 void Indigo::UILayer::show(bool visible)

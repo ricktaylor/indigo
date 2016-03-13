@@ -55,13 +55,13 @@ void Indigo::Application::splash()
 
 #if 1
 	OOBase::SharedPtr<UIButton::Style> button_style = OOBase::allocate_shared<UIButton::Style,OOBase::ThreadLocalAllocator>();
-	button_style->m_background.Image::load(static_resources(),"menu_border.png");
-	button_style->m_font.load(static_resources(),"Blokletters.fnt");
-	button_style->m_colour = glm::vec4(1.f,1.f,1.f,1.f);
+	button_style->m_background.Image::load(static_resources(),"menu_border.png",4);
+	button_style->m_font.load(static_resources(),"Bilbo.fnt");
+	button_style->m_colour = glm::vec4(0.f,0.f,0.f,.95f);
 	button_style->m_shadow = glm::vec4(.0f,.0f,.0f,.75f);
-	button_style->m_drop = glm::ivec2(0,-1);
+	button_style->m_drop = glm::ivec2(0,0);
 
-	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(button_style,"Hello",-1,glm::ivec2(100,100));
+	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(layer.get(),button_style,"Hello there, very long text.  This is fun!  ",-1,glm::ivec2(100,100));
 	layer->add_widget(button,100);
 
 	button_style->m_background.unload();

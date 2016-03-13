@@ -27,11 +27,11 @@ IDR_2D_COLOUR_VS        RCDATA                  "2d_colour.vert"
 IDR_COLOUR_BLEND_FS     RCDATA                  "colour_blend.frag"
 IDR_ALPHA_BLEND_FS      RCDATA                  "alpha_blend.frag"
 
-IDR_BLOKLETTERS         RCDATA                  "Blokletters.fnt"
-IDB_BLOKLETTERS         RCDATA                  "Blokletters_0.png"
+IDR_BLOKLETTERS         RCDATA                  "BilboSwashCaps.fnt"
+IDB_BLOKLETTERS         RCDATA                  "BilboSwashCaps_0.png"
 
-IDB_MENU_BORDER         RCDATA                  "menu_border.png"
-IDB_BOOK                RCDATA                  "ui/open-book-1-1145426.png"
+IDB_MENU_BORDER         RCDATA                  "menu_border2.png"
+IDB_BOOK                RCDATA                  "ui/book.png"
 
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////

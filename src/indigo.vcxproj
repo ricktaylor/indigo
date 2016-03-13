@@ -50,9 +50,11 @@
   <ItemGroup>
     <None Include="..\resources\2d_colour.vert" />
     <None Include="..\resources\alpha_blend.frag" />
-    <None Include="..\resources\Blokletters.fnt" />
-    <None Include="..\resources\Blokletters_0.png" />
+    <None Include="..\resources\Bilbo.fnt" />
+    <None Include="..\resources\Bilbo_0.png" />
     <None Include="..\resources\colour_blend.frag" />
+    <None Include="..\resources\menu_border.png" />
+    <None Include="..\resources\menu_border2.png" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\indigo.rc" />
@@ -73,6 +75,7 @@
     <ClInclude Include="..\ui\Label.h" />
     <ClInclude Include="..\ui\NinePatch.h" />
     <ClInclude Include="..\ui\Quad.h" />
+    <ClInclude Include="..\ui\UISizer.h" />
     <ClInclude Include="..\ui\UIButton.h" />
     <ClInclude Include="..\ui\UIImage.h" />
     <ClInclude Include="..\ui\UILayer.h" />
@@ -96,6 +99,7 @@
     <ClCompile Include="..\ui\UIButton.cpp" />
     <ClCompile Include="..\ui\UIImage.cpp" />
     <ClCompile Include="..\ui\UILayer.cpp" />
+    <ClCompile Include="..\ui\UISizer.cpp" />
     <ClCompile Include="App.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
