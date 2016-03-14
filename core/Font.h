@@ -51,7 +51,6 @@ namespace Indigo
 		bool valid() const { return m_render_font; }
 		
 		bool load(const ResourceBundle& resource, const char* name);
-		void unload();
 
 		float measure_text(const char* sz, size_t len = -1);
 

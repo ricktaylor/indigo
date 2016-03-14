@@ -23,6 +23,50 @@
 
 #include "UISizer.h"
 
+namespace
+{
+	static const Indigo::UIGridSizer::Layout s_default_layout = { Indigo::UIGridSizer::Layout::align_centre | Indigo::UIGridSizer::Layout::expand, 1 };
+}
+
+Indigo::UIGridSizer::UIGridSizer(const glm::uvec2& padding) :
+	m_default_layout(s_default_layout),
+	m_padding(padding)
+{
+}
+
+bool Indigo::UIGridSizer::add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget)
+{
+	return add_widget(row,col,widget,m_default_layout);
+}
+
+bool Indigo::UIGridSizer::add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget, const Layout& layout)
+{
+	struct Item item;
+	item.m_widget = widget;
+	item.m_layout = layout;
+
+	return m_items.insert(OOBase::Pair<unsigned int,unsigned int>(row,col),item);
+}
+
+bool Indigo::UIGridSizer::add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size)
+{
+	return add_spacer(row,col,size,m_default_layout);
+}
+
+bool Indigo::UIGridSizer::add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size, const Layout& layout)
+{
+	struct Item item;
+	item.m_size = size;
+	item.m_layout = layout;
+
+	return m_items.insert(OOBase::Pair<unsigned int,unsigned int>(row,col),item);
+}
+
+bool Indigo::UIGridSizer::remove_item(unsigned int row, unsigned int col)
+{
+	return m_items.remove(OOBase::Pair<unsigned int,unsigned int>(row,col));
+}
+
 glm::uvec2 Indigo::UIGridSizer::min_size() const
 {
 	OOBase::Vector<unsigned int,OOBase::ThreadLocalAllocator> widths;

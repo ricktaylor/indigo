@@ -509,7 +509,15 @@ Indigo::Font::Font()
 
 Indigo::Font::~Font()
 {
-	unload();
+	if (m_render_font)
+	{
+		if (m_render_font.unique())
+			render_pipe()->call(OOBase::make_delegate(this,&Font::do_unload));
+		else
+			m_render_font.reset();
+	}
+
+	m_info.reset();
 }
 
 bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
@@ -666,19 +674,6 @@ void Indigo::Font::do_load(OOBase::SharedPtr<Indigo::Image>* pages, size_t page_
 		m_render_font = font;
 		*ret_val = true;
 	}
-}
-
-void Indigo::Font::unload()
-{
-	if (m_render_font)
-	{
-		if (m_render_font.unique())
-			render_pipe()->call(OOBase::make_delegate(this,&Font::do_unload));
-		else
-			m_render_font.reset();
-	}
-
-	m_info.reset();
 }
 
 void Indigo::Font::do_unload()

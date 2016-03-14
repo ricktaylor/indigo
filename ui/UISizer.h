@@ -59,12 +59,12 @@ namespace Indigo
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;
 
-		bool add_widget(const glm::uvec2& pos, const OOBase::SharedPtr<UIWidget>& widget);
-		bool add_widget(const glm::uvec2& pos, const OOBase::SharedPtr<UIWidget>& widget, const Layout& layout);
-		bool add_spacer(const glm::uvec2& pos, const glm::uvec2& size);
-		bool add_spacer(const glm::uvec2& pos, const glm::uvec2& size, const Layout& layout);
+		bool add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget);
+		bool add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget, const Layout& layout);
+		bool add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size);
+		bool add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size, const Layout& layout);
 
-		bool remove_item(const glm::uvec2& pos);
+		bool remove_item(unsigned int row, unsigned int col);
 
 	private:
 		Layout m_default_layout;

@@ -85,9 +85,10 @@ BUILT_SOURCES = \
 	resources/2d_colour.vert.h \
 	resources/alpha_blend.frag.h \
 	resources/colour_blend.frag.h \
-	resources/Blokletters_0.png.h \
-	resources/Blokletters.fnt.h \
+	resources/BilboSwashCaps_0.png.h \
+	resources/BilboSwashCaps.fnt.h \
 	resources/menu_border.png.h \
+	resources/menu_border2.png.h \
 	resources/ui/book.png.h
 	
 CLEANFILES = $(BUILT_SOURCES)
@@ -109,8 +110,8 @@ indigo_SOURCES = \
 	core/Image.cpp \
 	core/Font.cpp \
 	core/ShaderPool.cpp \
-	core/StaticResources.cpp \
 	core/ZipResource.cpp \
+	resources/StaticResources.cpp \
 	ui/Quad.cpp \
 	ui/NinePatch.cpp \
 	ui/Label.cpp \
@@ -118,6 +119,7 @@ indigo_SOURCES = \
 	ui/UILayer.cpp \
 	ui/UIButton.cpp \
 	ui/UIImage.cpp \
+	ui/UISizer.cpp \
 	src/App.cpp
 	
 	

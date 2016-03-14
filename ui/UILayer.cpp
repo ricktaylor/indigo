@@ -264,6 +264,11 @@ void Indigo::UILayer::show(bool visible)
 	Layer::show(visible);
 }
 
+void Indigo::UILayer::on_size(const glm::uvec2& sz)
+{
+	UIGroup::on_size(sz);
+}
+
 OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(Indigo::Render::Window* window)
 {
 	OOBase::SharedPtr< ::UILayer> group = OOBase::allocate_shared< ::UILayer,OOBase::ThreadLocalAllocator>(window);

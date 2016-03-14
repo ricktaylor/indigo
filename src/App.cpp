@@ -28,6 +28,7 @@
 #include "../ui/UIButton.h"
 #include "../ui/UIImage.h"
 #include "../ui/ImageLayer.h"
+#include "../ui/UISizer.h"
 
 namespace Indigo
 {
@@ -53,19 +54,23 @@ void Indigo::Application::splash()
 	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>();
 	m_wnd->add_layer(layer,100);
 
+	OOBase::SharedPtr<UIGridSizer> sizer = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>();
+	sizer->default_layout().m_flags = UIGridSizer::Layout::align_centre;
+	layer->sizer(sizer);
+
 #if 1
 	OOBase::SharedPtr<UIButton::Style> button_style = OOBase::allocate_shared<UIButton::Style,OOBase::ThreadLocalAllocator>();
 	button_style->m_background.Image::load(static_resources(),"menu_border.png",4);
-	button_style->m_font.load(static_resources(),"Bilbo.fnt");
+	button_style->m_font.load(static_resources(),"BilboSwashCaps.fnt");
 	button_style->m_colour = glm::vec4(0.f,0.f,0.f,.95f);
 	button_style->m_shadow = glm::vec4(.0f,.0f,.0f,.75f);
 	button_style->m_drop = glm::ivec2(0,0);
 
-	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(layer.get(),button_style,"Hello there, very long text.  This is fun!  ",-1,glm::ivec2(100,100));
+	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(layer.get(),button_style,"Hello there, very long text.  This is fun!  ",-1);
 	layer->add_widget(button,100);
+	sizer->add_widget(0,0,button);
 
 	button_style->m_background.unload();
-	button_style->m_font.unload();
 
 	button->show();
 #elif 1
@@ -78,6 +83,8 @@ void Indigo::Application::splash()
 	image->unload();
 	piccy->show();
 #endif
+
+	sizer->size(layer->size());
 
 	img_layer->show();
 	layer->show();
