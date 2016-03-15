@@ -393,24 +393,6 @@ bool Indigo::NinePatch::load(const unsigned char* buffer, int len, int component
 	return ret;
 }
 
-void Indigo::NinePatch::do_unload()
-{
-	m_info.reset();
-}
-
-void Indigo::NinePatch::unload()
-{
-	Image::unload();
-
-	if (m_info)
-	{
-		if (m_info.unique())
-			render_pipe()->call(OOBase::make_delegate(this,&NinePatch::do_unload));
-		else
-			m_info.reset();
-	}
-}
-
 bool Indigo::NinePatch::pixel_cmp(int x, int y, bool black)
 {
 	static const char black_rgba[4] = { 0, 0, 0, char(0xFF) };
@@ -528,15 +510,28 @@ OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(co
 
 	if (!m_info->m_texture)
 	{
-		m_info->m_texture = make_texture(GL_RGBA8);
+		m_info->m_texture = make_texture(GL_RGBA8,1);
 		if (!m_info->m_texture)
 			return OOBase::SharedPtr<Indigo::Render::NinePatch>();
 
 		m_info->m_texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		m_info->m_texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+		m_info->m_texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 		m_info->m_texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 		m_info->m_texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	}
 
 	return OOBase::allocate_shared<Render::NinePatch,OOBase::ThreadLocalAllocator>(position,size,colour,m_info);
+}
+
+glm::uvec2 Indigo::NinePatch::min_size() const
+{
+	glm::uvec2 margins(m_margins.x + m_margins.z,m_margins.y + m_margins.w);
+	glm::uvec2 borders(0);
+	if (m_info)
+	{
+		borders.x = m_info->m_borders.x + m_info->m_borders.z;
+		borders.y = m_info->m_borders.y + m_info->m_borders.w;
+	}
+
+	return glm::max(margins,borders);
 }

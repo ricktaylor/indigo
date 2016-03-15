@@ -42,10 +42,11 @@ namespace Indigo
 		virtual ~NinePatch();
 				
 		virtual bool load(const unsigned char* buffer, int len, int components = 0);
-		virtual void unload();
 
 		const glm::uvec4& margins() const { return m_margins; }
 		
+		glm::uvec2 min_size() const;
+
 		OOBase::SharedPtr<Render::NinePatch> make_drawable(const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0), const glm::vec4& colour = glm::vec4(1.f)) const;
 
 	private:
@@ -63,8 +64,6 @@ namespace Indigo
 			OOBase::SharedPtr<OOGL::Texture> m_texture;
 		};
 		OOBase::SharedPtr<Indigo::NinePatch::Info> m_info;
-
-		 void do_unload();
 	};
 
 	namespace Render

@@ -50,7 +50,7 @@ glm::uvec2 Indigo::UIButton::min_size() const
 	unsigned int height = m_style->m_font.line_height();
 	unsigned int width = static_cast<unsigned int>(ceil(height * m_style->m_font.measure_text(m_text.c_str(),m_text.length())));
 
-	return glm::uvec2(width + margins.x + margins.z,height + margins.y + margins.w);
+	return glm::max(m_style->m_background.min_size(),glm::uvec2(width + margins.x + margins.z,height + margins.y + margins.w));
 }
 
 glm::uvec2 Indigo::UIButton::ideal_size() const
@@ -60,7 +60,7 @@ glm::uvec2 Indigo::UIButton::ideal_size() const
 	unsigned int height = m_style->m_font.line_height();
 	unsigned int width = static_cast<unsigned int>(ceil(height * m_style->m_font.measure_text(m_text.c_str(),m_text.length())));
 
-	return glm::uvec2(width + margins.x + margins.z + 2 * height,height + margins.y + margins.w);
+	return glm::max(m_style->m_background.min_size(),glm::uvec2(width + margins.x + margins.z + 2 * height,height + margins.y + margins.w));
 }
 
 bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
