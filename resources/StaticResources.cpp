@@ -35,7 +35,7 @@ namespace
 
 #if defined(_WIN32)
 
-#include "../resource.h"
+#include "./resource.h"
 
 namespace
 {
@@ -53,8 +53,8 @@ namespace
 		{ "2d_colour.vert", IDR_2D_COLOUR_VS, RT_RCDATA, NULL, NULL, 0 },
 		{ "colour_blend.frag", IDR_COLOUR_BLEND_FS, RT_RCDATA, NULL, NULL, 0 },
 		{ "alpha_blend.frag", IDR_ALPHA_BLEND_FS, RT_RCDATA, NULL, NULL, 0 },
-		{ "Bilbo.fnt", IDR_BLOKLETTERS, RT_RCDATA, NULL, NULL, 0 },
-		{ "BilboSwashCaps_0.png", IDB_BLOKLETTERS, RT_RCDATA, NULL, NULL, 0 },
+		{ "BilboSwashCaps.fnt", IDR_FONT, RT_RCDATA, NULL, NULL, 0 },
+		{ "BilboSwashCaps_0.png", IDB_FONT, RT_RCDATA, NULL, NULL, 0 },
 		{ "menu_border.png", IDB_MENU_BORDER, RT_RCDATA, NULL, NULL, 0 },
 		{ "ui/book.png", IDB_BOOK, RT_RCDATA, NULL, NULL, 0 },
 	};

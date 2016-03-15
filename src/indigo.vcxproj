@@ -88,10 +88,10 @@
     <ClCompile Include="..\core\Pipe.cpp" />
     <ClCompile Include="..\core\Render.cpp" />
     <ClCompile Include="..\core\ShaderPool.cpp" />
-    <ClCompile Include="..\core\StaticResources.cpp" />
     <ClCompile Include="..\core\Thread.cpp" />
     <ClCompile Include="..\core\Window.cpp" />
     <ClCompile Include="..\core\ZipResource.cpp" />
+    <ClCompile Include="..\resources\StaticResources.cpp" />
     <ClCompile Include="..\ui\ImageLayer.cpp" />
     <ClCompile Include="..\ui\Label.cpp" />
     <ClCompile Include="..\ui\NinePatch.cpp" />
