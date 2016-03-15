@@ -44,8 +44,11 @@ namespace Indigo
 				expand_vert = 2 << 4,
 				expand = expand_horiz | expand_vert
 			};
-			OOBase::uint16_t m_flags;
-			OOBase::uint16_t m_proportion;
+			unsigned int m_flags;
+			unsigned int m_proportion;
+
+			Layout(unsigned int flags = 0, unsigned int proportion = 0) : m_flags(flags), m_proportion(proportion)
+			{}
 		};
 
 		UIGridSizer(const glm::uvec2& padding = glm::uvec2(0));
@@ -61,6 +64,7 @@ namespace Indigo
 
 		bool add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget);
 		bool add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget, const Layout& layout);
+		
 		bool add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size);
 		bool add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size, const Layout& layout);
 

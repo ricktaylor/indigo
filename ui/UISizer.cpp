@@ -25,7 +25,7 @@
 
 namespace
 {
-	static const Indigo::UIGridSizer::Layout s_default_layout = { Indigo::UIGridSizer::Layout::align_centre | Indigo::UIGridSizer::Layout::expand, 1 };
+	static const Indigo::UIGridSizer::Layout s_default_layout(Indigo::UIGridSizer::Layout::align_centre | Indigo::UIGridSizer::Layout::expand, 1);
 }
 
 Indigo::UIGridSizer::UIGridSizer(const glm::uvec2& padding) :
@@ -44,7 +44,6 @@ bool Indigo::UIGridSizer::add_widget(unsigned int row, unsigned int col, const O
 	struct Item item;
 	item.m_widget = widget;
 	item.m_layout = layout;
-
 	return m_items.insert(OOBase::Pair<unsigned int,unsigned int>(row,col),item);
 }
 
@@ -58,7 +57,6 @@ bool Indigo::UIGridSizer::add_spacer(unsigned int row, unsigned int col, const g
 	struct Item item;
 	item.m_size = size;
 	item.m_layout = layout;
-
 	return m_items.insert(OOBase::Pair<unsigned int,unsigned int>(row,col),item);
 }
 
@@ -250,67 +248,59 @@ void Indigo::UIGridSizer::size(const glm::uvec2& size)
 	}
 
 	// Loop through the grid resizing cells
-	glm::ivec2 cell_pos;
-	glm::uvec2 cell_size;
-	unsigned int y = 0;
-	for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator k=heights.begin();k;++k)
+	for (items_t::iterator i = m_items.begin();i;++i)
 	{
-		cell_pos.x = 0;
-		if (k->first)
+		if (i->second.m_widget)
 		{
-			cell_pos.y += m_padding.y;
-			cell_size.y = k->first - m_padding.y;
-
-			unsigned int x = 0;
-			for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator j=widths.begin();j;++j)
+			OOBase::SharedPtr<UIWidget> widget(i->second.m_widget.lock());
+			if (widget && widget->visible())
 			{
-				if (j->first)
+				glm::ivec2 cell_pos(m_padding);
+				glm::uvec2 cell_size(0);
+
+				for (size_t x=0;x<i->first.first;++x)
+					cell_pos.x += widths[x].first;
+			
+				for (size_t y=0;y<i->first.second;++y)
+					cell_pos.y += heights[y].first;
+
+				cell_pos.x += m_padding.x * i->first.first;
+				cell_pos.y += m_padding.y * i->first.second;
+
+				cell_size.x = widths[i->first.first].first;
+				cell_size.y = heights[i->first.second].first;
+
+				glm::ivec2 item_pos(cell_pos);
+				glm::uvec2 item_size;
+
+				// Expand if required
+				if (item_size != cell_size && (i->second.m_layout.m_flags & Layout::expand))
 				{
-					cell_pos.x += m_padding.x;
-					cell_size.x = j->first - m_padding.x;
+					if (i->second.m_layout.m_flags & Layout::expand_horiz)
+						item_size.x = cell_size.x;
+					if (i->second.m_layout.m_flags & Layout::expand_vert)
+						item_size.y = cell_size.y;
 
-					items_t::iterator i = m_items.find(OOBase::Pair<unsigned int,unsigned int>(x,y));
-					if (i && i->second.m_widget)
-					{
-						OOBase::SharedPtr<UIWidget> widget(i->second.m_widget.lock());
-						if (widget && widget->visible())
-						{
-							glm::ivec2 item_pos(cell_pos);
-							glm::uvec2 item_size(widget->size());
-
-							// Expand if required
-							if (item_size != cell_size && (i->second.m_layout.m_flags & Layout::expand))
-							{
-								if (i->second.m_layout.m_flags & Layout::expand_horiz)
-									item_size.x = cell_size.x;
-								if (i->second.m_layout.m_flags & Layout::expand_vert)
-									item_size.y = cell_size.y;
-							}
-							else
-								item_size = widget->ideal_size();
-
-							item_size = widget->size(item_size);
-
-							// Align if required
-							if (i->second.m_layout.m_flags & Layout::align_right)
-								item_pos.x = cell_pos.x + cell_size.x - item_size.x;
-							else if (i->second.m_layout.m_flags & Layout::align_hcentre)
-								item_pos.x = cell_pos.x + (cell_size.x - item_size.x)/2;
-
-							if (i->second.m_layout.m_flags & Layout::align_top)
-								item_pos.y = cell_pos.y + cell_size.y - item_size.y;
-							else if (i->second.m_layout.m_flags & Layout::align_vcentre)
-								item_pos.y = cell_pos.y + (cell_size.y - item_size.y)/2;
-
-							widget->position(item_pos);
-						}
-					}
-					cell_pos.x += j->first;
+					item_size = widget->size(item_size);
 				}
-				++x;
+				else
+					item_size = widget->size();
+				
+				// Align if required
+				if (i->second.m_layout.m_flags & Layout::align_right)
+					item_pos.x = cell_pos.x + static_cast<int>(cell_size.x) - static_cast<int>(item_size.x);
+				else if (i->second.m_layout.m_flags & Layout::align_hcentre)
+					item_pos.x = cell_pos.x + (static_cast<int>(cell_size.x) - static_cast<int>(item_size.x))/2;
+
+				if (i->second.m_layout.m_flags & Layout::align_top)
+					item_pos.y = cell_pos.y + static_cast<int>(cell_size.y) - static_cast<int>(item_size.y);
+				else if (i->second.m_layout.m_flags & Layout::align_vcentre)
+					item_pos.y = cell_pos.y + (static_cast<int>(cell_size.y) - static_cast<int>(item_size.y))/2;
+
+				widget->position(item_pos);
+
+				LOG_DEBUG(("[%d,%d] {%u,%u}",item_pos.x,item_pos.y,item_size.x,item_size.y));
 			}
-			cell_pos.y += k->first;
 		}
-		++y;
 	}
 }

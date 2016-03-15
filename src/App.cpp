@@ -56,6 +56,8 @@ void Indigo::Application::splash()
 
 	OOBase::SharedPtr<UIGridSizer> sizer = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>();
 	sizer->default_layout().m_flags = UIGridSizer::Layout::align_centre;
+	sizer->add_spacer(0,0,glm::uvec2(100,100),UIGridSizer::Layout());
+	sizer->add_spacer(2,2,glm::uvec2(100,100),UIGridSizer::Layout());
 	layer->sizer(sizer);
 
 #if 1
@@ -68,7 +70,7 @@ void Indigo::Application::splash()
 
 	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(layer.get(),button_style,"Hello there, very long text.  This is fun!  ",-1);
 	layer->add_widget(button,100);
-	sizer->add_widget(0,0,button);
+	sizer->add_widget(1,1,button);
 
 	button_style->m_background.unload();
 
