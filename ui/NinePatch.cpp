@@ -526,12 +526,7 @@ OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(co
 glm::uvec2 Indigo::NinePatch::min_size() const
 {
 	glm::uvec2 margins(m_margins.x + m_margins.z,m_margins.y + m_margins.w);
-	glm::uvec2 borders(0);
-	if (m_info)
-	{
-		borders.x = m_info->m_borders.x + m_info->m_borders.z;
-		borders.y = m_info->m_borders.y + m_info->m_borders.w;
-	}
+	glm::uvec2 borders(m_info->m_borders.x + m_info->m_borders.z,m_info->m_borders.y + m_info->m_borders.w);
 
 	return glm::max(margins,borders);
 }

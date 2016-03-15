@@ -55,8 +55,8 @@ void Indigo::Application::splash()
 	m_wnd->add_layer(layer,100);
 
 	OOBase::SharedPtr<UIGridSizer> sizer = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>();
-	sizer->add_spacer(0,0,glm::uvec2(50,50));
-	sizer->add_spacer(2,2,glm::uvec2(50,50));
+	sizer->add_spacer(0,0,glm::uvec2(32,32));
+	sizer->add_spacer(2,2,glm::uvec2(32,32));
 	layer->sizer(sizer);
 
 #if 1
