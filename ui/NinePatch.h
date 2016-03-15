@@ -44,22 +44,22 @@ namespace Indigo
 		virtual bool load(const unsigned char* buffer, int len, int components = 0);
 		virtual void unload();
 
-		const glm::u16vec4& margins() const { return m_margins; }
+		const glm::uvec4& margins() const { return m_margins; }
 		
-		OOBase::SharedPtr<Render::NinePatch> make_drawable(const glm::ivec2& position = glm::ivec2(0), const glm::u16vec2& size = glm::u16vec2(0), const glm::vec4& colour = glm::vec4(1.f)) const;
+		OOBase::SharedPtr<Render::NinePatch> make_drawable(const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0), const glm::vec4& colour = glm::vec4(1.f)) const;
 
 	private:
 		bool pixel_cmp(int x, int y, bool black);
-		bool scan_line(int line, glm::u16vec2& span);
-		bool scan_column(int column, glm::u16vec2& span);
+		bool scan_line(int line, glm::uvec2& span);
+		bool scan_column(int column, glm::uvec2& span);
 		bool get_bounds();
 
-		glm::u16vec4 m_margins;
+		glm::uvec4 m_margins;
 		
 		struct Info
 		{
-			glm::u16vec4 m_borders;
-			glm::u16vec2 m_tex_size;
+			glm::uvec4 m_borders;
+			glm::uvec2 m_tex_size;
 			OOBase::SharedPtr<OOGL::Texture> m_texture;
 		};
 		OOBase::SharedPtr<Indigo::NinePatch::Info> m_info;
@@ -74,12 +74,12 @@ namespace Indigo
 			friend class Indigo::NinePatch;
 
 		public:
-			NinePatch(const glm::ivec2& position, const glm::u16vec2& size, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info);
+			NinePatch(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info);
 			virtual ~NinePatch();
 
 			virtual bool valid() const;
 
-			void layout(const glm::u16vec2& size);
+			void size(const glm::uvec2& size);
 
 			void colour(const glm::vec4& colour) { m_colour = colour; }
 

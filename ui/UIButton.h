@@ -44,7 +44,7 @@ namespace Indigo
 		UIButton(UIWidget* parent, const OOBase::SharedPtr<Style>& style, const char* sz, size_t len = -1, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 	protected:
-		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
+		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group);
@@ -60,6 +60,8 @@ namespace Indigo
 
 		OOBase::SharedPtr<Render::NinePatch> m_background;
 		OOBase::SharedPtr<Render::ShadowLabel> m_caption;
+
+		void do_size(glm::uvec2 sz);
 	};
 }
 

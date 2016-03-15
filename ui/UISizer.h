@@ -29,32 +29,22 @@ namespace Indigo
 	class UIGridSizer : public UISizer
 	{
 	public:
-		struct Layout
+		enum eLayoutFlags
 		{
-			enum eLayoutFlags
-			{
-				align_left = 0,
-				align_right = 1,
-				align_hcentre = 2,
-				align_bottom = 0,
-				align_top = 1 << 2,
-				align_vcentre = 2 << 2,
-				align_centre = align_hcentre | align_vcentre,
-				expand_horiz = 1 << 4,
-				expand_vert = 2 << 4,
-				expand = expand_horiz | expand_vert
-			};
-			unsigned int m_flags;
-			unsigned int m_proportion;
-
-			Layout(unsigned int flags = 0, unsigned int proportion = 0) : m_flags(flags), m_proportion(proportion)
-			{}
+			align_left = 0,
+			align_right = 1,
+			align_hcentre = 2,
+			align_bottom = 0,
+			align_top = 1 << 2,
+			align_vcentre = 2 << 2,
+			align_centre = align_hcentre | align_vcentre,
+			expand_horiz = 1 << 4,
+			expand_vert = 2 << 4,
+			expand = expand_horiz | expand_vert
 		};
 
 		UIGridSizer(const glm::uvec2& padding = glm::uvec2(0));
 		
-		Layout& default_layout() { return m_default_layout; }
-
 		const glm::uvec2& padding() const { return m_padding; }
 		void padding(const glm::uvec2& p);
 
@@ -62,23 +52,20 @@ namespace Indigo
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;
 
-		bool add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget);
-		bool add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget, const Layout& layout);
-		
-		bool add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size);
-		bool add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size, const Layout& layout);
+		bool add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget, unsigned int layout_flags = (align_centre | expand), unsigned int proportion = 1);
+		bool add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size, unsigned int proportion = 0);
 
 		bool remove_item(unsigned int row, unsigned int col);
 
 	private:
-		Layout m_default_layout;
 		glm::uvec2 m_padding;
 
 		struct Item
 		{
 			OOBase::WeakPtr<UIWidget> m_widget;
 			glm::uvec2                m_size;
-			Layout                    m_layout;
+			unsigned int              m_flags;
+			unsigned int              m_proportion;
 		};
 
 		typedef OOBase::Table<OOBase::Pair<unsigned int,unsigned int>,Item,OOBase::Less<OOBase::Pair<unsigned int,unsigned int> >,OOBase::ThreadLocalAllocator> items_t;

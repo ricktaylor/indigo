@@ -53,15 +53,15 @@ namespace Indigo
 			return m_components;
 		}
 
-		glm::vec4 pixel(int x, int y) const;
+		glm::vec4 pixel(const glm::uvec2& pos) const;
 
 		OOBase::SharedPtr<OOGL::Texture> make_texture(GLenum internalFormat, GLsizei levels = 0) const;
 		
 	protected:
-		int   m_width;
-		int   m_height;
-		int   m_components;
-		void* m_pixels;
+		unsigned int m_width;
+		unsigned int m_height;
+		unsigned int m_components;
+		void*        m_pixels;
 	};
 }
 

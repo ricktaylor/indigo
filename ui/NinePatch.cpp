@@ -36,9 +36,9 @@ namespace
 		NinePatchFactory();
 		~NinePatchFactory();
 
-		GLsizei alloc_patch(const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size);
+		GLsizei alloc_patch(const glm::uvec2& size, const glm::uvec4& borders, const glm::uvec2& tex_size);
 		void free_patch(GLsizei p);
-		void layout_patch(GLsizei patch, const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size);
+		void layout_patch(GLsizei patch, const glm::uvec2& size, const glm::uvec4& borders, const glm::uvec2& tex_size);
 
 		void draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp, const glm::vec4& colour, const GLsizeiptr* firsts, const GLsizei* counts, GLsizei drawcount);
 
@@ -90,7 +90,7 @@ bool NinePatchFactory::create_program()
 	return m_ptrProgram;
 }
 
-GLsizei NinePatchFactory::alloc_patch(const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size)
+GLsizei NinePatchFactory::alloc_patch(const glm::uvec2& size, const glm::uvec4& borders, const glm::uvec2& tex_size)
 {
 	GLsizei patch = GLsizei(-1);
 
@@ -182,7 +182,7 @@ GLsizei NinePatchFactory::alloc_patch(const glm::u16vec2& size, const glm::u16ve
 	return patch;
 }
 
-void NinePatchFactory::layout_patch(GLsizei patch, const glm::u16vec2& size, const glm::u16vec4& borders, const glm::u16vec2& tex_size)
+void NinePatchFactory::layout_patch(GLsizei patch, const glm::uvec2& size, const glm::uvec4& borders, const glm::uvec2& tex_size)
 {
 	static const unsigned int ushort_max = 0xFFFF;
 
@@ -253,13 +253,13 @@ void NinePatchFactory::draw(OOGL::State& glState, const OOBase::SharedPtr<OOGL::
 	}
 }
 
-Indigo::Render::NinePatch::NinePatch(const glm::ivec2& position, const glm::u16vec2& size, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info) :
+Indigo::Render::NinePatch::NinePatch(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info) :
 		UIDrawable(position),
 		m_colour(colour),
 		m_patch(-1),
 		m_info(info)
 {
-	layout(size);
+	this->size(size);
 }
 
 Indigo::Render::NinePatch::~NinePatch()
@@ -273,7 +273,7 @@ bool Indigo::Render::NinePatch::valid() const
 	return m_patch != GLsizei(-1);
 }
 
-void Indigo::Render::NinePatch::layout(const glm::u16vec2& size)
+void Indigo::Render::NinePatch::size(const glm::uvec2& size)
 {
 	if (size.x && size.y && m_info->m_tex_size.x && m_info->m_tex_size.y)
 	{
@@ -281,11 +281,6 @@ void Indigo::Render::NinePatch::layout(const glm::u16vec2& size)
 			m_patch = NinePatchFactory_t::instance().alloc_patch(size,m_info->m_borders,m_info->m_tex_size);
 		else
 			NinePatchFactory_t::instance().layout_patch(m_patch,size,m_info->m_borders,m_info->m_tex_size);
-	}
-	else if (m_patch != GLsizei(-1))
-	{
-		NinePatchFactory_t::instance().free_patch(m_patch);
-		m_patch = GLsizei(-1);
 	}
 
 	if (m_patch != GLsizei(-1))
@@ -423,7 +418,7 @@ bool Indigo::NinePatch::pixel_cmp(int x, int y, bool black)
 
 	const char* p = static_cast<char*>(m_pixels) + ((y * m_width) + x) * m_components;
 
-	for (int c=0;c<m_components;++c)
+	for (unsigned int c=0;c<m_components;++c)
 	{
 		if (p[c] == black_rgba[c])
 			comp_bits |= (1 << c);
@@ -432,7 +427,7 @@ bool Indigo::NinePatch::pixel_cmp(int x, int y, bool black)
 	return (black == (comp_bits == ((1 << m_components)-1)));
 }
 
-bool Indigo::NinePatch::scan_line(int line, glm::u16vec2& span)
+bool Indigo::NinePatch::scan_line(int line, glm::uvec2& span)
 {
 	for (span.x = 0;span.x < m_width && pixel_cmp(span.x,line,false);++span.x)
 		;
@@ -446,14 +441,14 @@ bool Indigo::NinePatch::scan_line(int line, glm::u16vec2& span)
 	if (span.x == span.y || span.y == m_width)
 		return false;
 
-	int eol = span.y;
+	unsigned int eol = span.y;
 	for (;eol < m_width && pixel_cmp(eol,line,false);++eol)
 		;
 
 	return (eol == m_width);
 }
 
-bool Indigo::NinePatch::scan_column(int column, glm::u16vec2& span)
+bool Indigo::NinePatch::scan_column(int column, glm::uvec2& span)
 {
 	for (span.x = 0;span.x < m_height && pixel_cmp(column,span.x,false);++span.x)
 		;
@@ -467,7 +462,7 @@ bool Indigo::NinePatch::scan_column(int column, glm::u16vec2& span)
 	if (span.x == span.y || span.y == m_height)
 		return false;
 
-	int eoc = span.y;
+	unsigned int eoc = span.y;
 	for (;eoc < m_height && pixel_cmp(column,eoc,false);++eoc)
 		;
 
@@ -476,7 +471,7 @@ bool Indigo::NinePatch::scan_column(int column, glm::u16vec2& span)
 
 bool Indigo::NinePatch::get_bounds()
 {
-	glm::u16vec2 span;
+	glm::uvec2 span;
 	if (!scan_line(0,span))
 		LOG_ERROR_RETURN(("Bad top row in 9-patch!"),false);
 
@@ -508,7 +503,7 @@ bool Indigo::NinePatch::get_bounds()
 
 	char* dest = new_pixels;
 	const char* src = static_cast<const char*>(m_pixels) + (m_width+1)*m_components;
-	for (int y=1;y<m_height-1;++y)
+	for (unsigned int y=1;y<m_height-1;++y)
 	{
 		memcpy(dest,src,(m_width-2)*m_components);
 
@@ -526,7 +521,7 @@ bool Indigo::NinePatch::get_bounds()
 	return true;
 }
 
-OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(const glm::ivec2& position, const glm::u16vec2& size, const glm::vec4& colour) const
+OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour) const
 {
 	if (!m_info)
 		return OOBase::SharedPtr<Indigo::Render::NinePatch>();
