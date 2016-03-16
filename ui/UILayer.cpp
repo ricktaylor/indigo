@@ -112,7 +112,8 @@ void Indigo::UIWidget::show(bool visible)
 	{
 		m_visible = visible;
 
-		render_pipe()->post(OOBase::make_delegate(render_group<Render::UIDrawable>().get(),&Render::UIDrawable::show),visible);
+		if (m_render_group)
+			render_pipe()->post(OOBase::make_delegate(render_group<Render::UIDrawable>().get(),&Render::UIDrawable::show),visible);
 	}
 }
 
@@ -158,7 +159,8 @@ void Indigo::UIWidget::position(const glm::ivec2& pos)
 	{
 		m_position = pos;
 
-		render_pipe()->post(OOBase::make_delegate(render_group<Render::UIDrawable>().get(),&Render::UIDrawable::position),pos);
+		if (m_render_group)
+			render_pipe()->post(OOBase::make_delegate(render_group<Render::UIDrawable>().get(),&Render::UIDrawable::position),pos);
 	}
 }
 
@@ -184,6 +186,9 @@ Indigo::UIGroup::UIGroup(UIWidget* parent, const glm::ivec2& position, const glm
 
 bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder)
 {
+	if (!m_render_group)
+		return false;
+
 	if (!m_children.insert(zorder,widget))
 		LOG_ERROR_RETURN(("Failed to insert widget: %s",OOBase::system_error_text()),false);
 

@@ -370,7 +370,7 @@ Indigo::NinePatch::~NinePatch()
 	unload();
 }
 
-bool Indigo::NinePatch::load(const unsigned char* buffer, int len, int components)
+bool Indigo::NinePatch::load(const unsigned char* buffer, size_t len, int components)
 {
 	if (!Image::load(buffer,len,components))
 		return false;
@@ -506,7 +506,7 @@ bool Indigo::NinePatch::get_bounds()
 OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour) const
 {
 	if (!m_info)
-		return OOBase::SharedPtr<Indigo::Render::NinePatch>();
+		LOG_ERROR_RETURN(("NinePatch::make_drawbale called with no info!"),OOBase::SharedPtr<Indigo::Render::NinePatch>());
 
 	if (!m_info->m_texture)
 	{
@@ -526,7 +526,12 @@ OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(co
 glm::uvec2 Indigo::NinePatch::min_size() const
 {
 	glm::uvec2 margins(m_margins.x + m_margins.z,m_margins.y + m_margins.w);
-	glm::uvec2 borders(m_info->m_borders.x + m_info->m_borders.z,m_info->m_borders.y + m_info->m_borders.w);
+	glm::uvec2 borders(0);
+	if (m_info)
+	{
+		borders.x = m_info->m_borders.x + m_info->m_borders.z;
+		borders.y = m_info->m_borders.y + m_info->m_borders.w;
+	}
 
 	return glm::max(margins,borders);
 }

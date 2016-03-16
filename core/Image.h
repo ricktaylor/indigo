@@ -39,7 +39,7 @@ namespace Indigo
 		bool valid() const;
 
 		bool load(const ResourceBundle& resource, const char* name, int components = 0);
-		virtual bool load(const unsigned char* buffer, int len, int components = 0);
+		virtual bool load(const unsigned char* buffer, size_t len, int components = 0);
 
 		virtual void unload();
 

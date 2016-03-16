@@ -58,13 +58,19 @@ namespace Indigo
 		{
 		public:
 			bool open(const char* filename);
-			const void* load(const OOBase::String& prefix, const char* name, size_t start, size_t length = size_t(-1));
+			bool load(void* dest, const OOBase::String& prefix, const char* name, size_t start, size_t length);
 			OOBase::uint64_t size(const OOBase::String& prefix, const char* name);
 			bool exists(const OOBase::String& prefix, const char* name);
 
 		private:
 			OOBase::File m_file;
-			OOBase::Table<OOBase::String,OOBase::uint32_t> m_mapFiles;
+
+			struct Info
+			{
+				OOBase::uint32_t m_offset;
+				OOBase::uint32_t m_length;
+			};
+			OOBase::Table<OOBase::String,Info> m_mapFiles;
 		};
 	}
 }
@@ -102,7 +108,7 @@ bool Indigo::detail::ZipFile::open(const char* filename)
 		// Scan forwards looking for signatures
 		for (OOBase::uint8_t* c = buf.get(); c < buf.get() + chunk_len - 4; ++c)
 		{
-			if (*c == END_OF_CDR[0] && memcmp(c,END_OF_CDR,4) == 0)
+			if (memcmp(c,END_OF_CDR,4) == 0)
 			{
 				OOBase::uint64_t eof_cdr = p + (c - buf.get());
 				if (len - eof_cdr >= 22 && m_file.seek(eof_cdr,OOBase::File::seek_begin) == eof_cdr)
@@ -147,12 +153,14 @@ bool Indigo::detail::ZipFile::open(const char* filename)
 	// Now loop reading file entries
 	for (;;)
 	{
-		//OOBase::uint16_t compression = read_uint16(buf,10);
+		struct Info info = {0};
+
+		info.m_length = read_uint32(buf,24);
 		OOBase::uint16_t filename_len = read_uint16(buf,28);
 		OOBase::uint16_t extra_len = read_uint16(buf,30);
 		OOBase::uint16_t comments = read_uint16(buf,32);
 		OOBase::uint16_t disk_no = read_uint16(buf,34);
-		OOBase::uint32_t offset = read_uint32(buf,42);
+		info.m_offset = read_uint32(buf,42);
 
 		if (disk_no != 0)
 			LOG_ERROR_RETURN(("Multi-disk zip file not supported: %s",filename),false);
@@ -171,7 +179,7 @@ bool Indigo::detail::ZipFile::open(const char* filename)
 			if (!strFilename.assign(reinterpret_cast<char*>(buf.get()),filename_len))
 				LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),false);
 
-			if (!m_mapFiles.insert(strFilename,offset))
+			if (!m_mapFiles.insert(strFilename,info))
 				LOG_ERROR_RETURN(("Failed to insert zip entry: %s",OOBase::system_error_text()),false);
 		}
 
@@ -192,13 +200,28 @@ bool Indigo::detail::ZipFile::open(const char* filename)
 	return true;
 }
 
-const void* Indigo::detail::ZipFile::load(const OOBase::String& prefix, const char* name, size_t start, size_t length)
+bool Indigo::detail::ZipFile::load(void* dest, const OOBase::String& prefix, const char* name, size_t start, size_t length)
 {
 	OOBase::String filename(prefix);
 	if (!filename.append(name))
-		LOG_ERROR_RETURN(("Cannot append string: %s",OOBase::system_error_text()),(const void*)NULL);
+		LOG_ERROR_RETURN(("Failed to append string: %s",OOBase::system_error_text()),false);
 
-	return NULL;
+	OOBase::Table<OOBase::String,Info>::iterator i=m_mapFiles.find(filename);
+	if (!i)
+		return false;
+
+	// Read the local file header
+	if (m_file.seek(i->second.m_offset,OOBase::File::seek_begin) == OOBase::uint64_t(-1))
+		LOG_ERROR_RETURN(("Failed to get seek in file: %s",OOBase::system_error_text()),false);
+
+	OOBase::ScopedArrayPtr<OOBase::uint8_t,OOBase::ThreadLocalAllocator,30> header;
+	if (m_file.read(header.get(),30) != 30)
+		LOG_ERROR_RETURN(("Failed to read local file header header in zip"),false);
+
+
+
+
+	return false;
 }
 
 OOBase::uint64_t Indigo::detail::ZipFile::size(const OOBase::String& prefix, const char* name)
@@ -207,7 +230,11 @@ OOBase::uint64_t Indigo::detail::ZipFile::size(const OOBase::String& prefix, con
 	if (!filename.append(name))
 		LOG_ERROR_RETURN(("Cannot append string: %s",OOBase::system_error_text()),OOBase::uint64_t(-1));
 
-	return 0;
+	OOBase::Table<OOBase::String,Info>::iterator i=m_mapFiles.find(filename);
+	if (!i)
+		return 0;
+
+	return i->second.m_length;
 }
 
 bool Indigo::detail::ZipFile::exists(const OOBase::String& prefix, const char* name)
@@ -231,7 +258,7 @@ bool Indigo::ZipResource::open(const char* filename)
 {
 	OOBase::SharedPtr<detail::ZipFile> zip = OOBase::allocate_shared<detail::ZipFile>();
 	if (!zip)
-		LOG_ERROR_RETURN(("Faield to allocate: %s",OOBase::system_error_text()),false);
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
 	bool r = zip->open(filename);
 	if (r)
@@ -254,12 +281,12 @@ Indigo::ZipResource Indigo::ZipResource::sub_dir(const char* prefix)
 	return ZipResource(m_zip,new_prefix);
 }
 
-const void* Indigo::ZipResource::load(const char* name, size_t start, size_t length) const
+bool Indigo::ZipResource::load(void* dest, const char* name, size_t start, size_t length) const
 {
 	if (!m_zip)
-		return NULL;
+		return false;
 
-	return m_zip->load(m_prefix,name,start,length);
+	return m_zip->load(dest,m_prefix,name,start,length);
 }
 
 OOBase::uint64_t Indigo::ZipResource::size(const char* name) const

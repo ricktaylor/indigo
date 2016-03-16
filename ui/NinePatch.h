@@ -41,7 +41,7 @@ namespace Indigo
 		NinePatch();
 		virtual ~NinePatch();
 				
-		virtual bool load(const unsigned char* buffer, int len, int components = 0);
+		virtual bool load(const unsigned char* buffer, size_t len, int components = 0);
 
 		const glm::uvec4& margins() const { return m_margins; }
 		

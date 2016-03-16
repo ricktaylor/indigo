@@ -27,7 +27,7 @@ namespace
 	class StaticResources : public Indigo::ResourceBundle
 	{
 	public:
-		const void* load(const char* name, size_t start, size_t length) const;
+		bool load(void* dest, const char* name, size_t start, size_t length) const;
 		OOBase::uint64_t size(const char* name) const;
 		bool exists(const char* name) const;
 	};
@@ -124,16 +124,23 @@ namespace
 
 #endif
 
-const void* StaticResources::load(const char* name, size_t start, size_t length) const
+bool StaticResources::load(void* dest, const char* name, size_t start, size_t length) const
 {
 	const RES* r = find_resource(name);
 	if (!r || !r->data)
-		return NULL;
+		return false;
+
+	if (!length)
+		length = r->length;
 
 	if (start > r->length)
 		start = r->length;
 
-	return static_cast<const unsigned char*>(r->data) + start;
+	if (start + length > r->length)
+		length = r->length - start;
+
+	memcpy(dest,static_cast<const unsigned char*>(r->data) + start,length);
+	return true;
 }
 
 OOBase::uint64_t StaticResources::size(const char* name) const

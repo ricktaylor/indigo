@@ -61,7 +61,11 @@ OOBase::SharedPtr<OOGL::Shader> Indigo::ShaderPool::add_shader(const char* name,
 	if (!shader)
 		LOG_ERROR_RETURN(("Failed to allocate shader: %s",OOBase::system_error_text()),shader);
 
-	if (!shader->compile(static_cast<const char*>(Indigo::static_resources().load(res_name)),static_cast<GLint>(Indigo::static_resources().size(res_name))))
+	OOBase::SharedPtr<char> text = Indigo::static_resources().load<char,OOBase::ThreadLocalAllocator>(res_name);
+	if (!text)
+		return OOBase::SharedPtr<OOGL::Shader>();
+
+	if (!shader->compile(text.get(),static_cast<GLint>(Indigo::static_resources().size(res_name))))
 		LOG_ERROR_RETURN(("Failed to compile shader: %s",shader->info_log().c_str()),OOBase::SharedPtr<OOGL::Shader>());
 
 	i = SHADER_POOL::instance().m_shader_map.find(shaderType);

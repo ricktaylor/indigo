@@ -522,14 +522,17 @@ Indigo::Font::~Font()
 
 bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 {
+	OOBase::SharedPtr<unsigned char> buffer = resource.load<unsigned char,OOBase::ThreadLocalAllocator>(name);
+	if (!buffer)
+		return false;
+
+	return load(resource,buffer.get(),resource.size(name));
+}
+
+bool Indigo::Font::load(const ResourceBundle& resource, const unsigned char* data, size_t len)
+{
 	if (m_render_font)
 		LOG_ERROR_RETURN(("Font already loaded"),false);
-
-	if (!resource.exists(name))
-		LOG_ERROR_RETURN(("Failed to find resource %s",name),false);
-
-	const unsigned char* data = static_cast<const unsigned char*>(resource.load(name));
-	size_t len = resource.size(name);
 
 	// BMF\0x3
 	if (data[0] != 66 || data[1] != 77 || data[2] != 70 || data[3] != 3)

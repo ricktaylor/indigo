@@ -67,14 +67,14 @@ bool Indigo::Image::valid() const
 
 bool Indigo::Image::load(const ResourceBundle& resource, const char* name, int components)
 {
-	const unsigned char* buffer = static_cast<const unsigned char*>(resource.load(name));
+	OOBase::SharedPtr<unsigned char> buffer = resource.load<unsigned char,OOBase::ThreadLocalAllocator>(name);
 	if (!buffer)
 		return false;
 
-	return load(buffer,static_cast<int>(resource.size(name)),components);
+	return this->load(buffer.get(),resource.size(name),components);
 }
 
-bool Indigo::Image::load(const unsigned char* buffer, int len, int components)
+bool Indigo::Image::load(const unsigned char* buffer, size_t len, int components)
 {
 	if (m_pixels)
 	{
