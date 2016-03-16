@@ -144,7 +144,7 @@ static bool load_config(OOBase::CmdArgs::options_t& options)
 		err = OOBase::ConfigFile::load(strFile.c_str(),options,&error);
 		if (err == EINVAL)
 			LOG_ERROR_RETURN(("Failed read configuration file %s: Syntax error at line %lu, column %lu",rpath,(unsigned long)error.line,(unsigned long)error.col),false);
-		else if (err != ENOENT)
+		else if (err)
 			LOG_ERROR_RETURN(("Failed load configuration file %s: %s",rpath,OOBase::system_error_text(err)),false);
 
 		OOBase::Logger::log(OOBase::Logger::Information,"Configuration loaded successfully");
