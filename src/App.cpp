@@ -63,7 +63,7 @@ void Indigo::Application::splash()
 	OOBase::SharedPtr<UIButton::Style> button_style = OOBase::allocate_shared<UIButton::Style,OOBase::ThreadLocalAllocator>();
 	button_style->m_background.Image::load(static_resources(),"menu_border.png",4);
 	button_style->m_font.load(static_resources(),"BilboSwashCaps.fnt");
-	button_style->m_colour = glm::vec4(0.f,0.f,0.f,.95f);
+	button_style->m_colour = glm::vec4(.0f,.0f,.0f,.95f);
 	button_style->m_shadow = glm::vec4(.0f,.0f,.0f,.75f);
 	button_style->m_drop = glm::ivec2(0,0);
 
@@ -78,7 +78,7 @@ void Indigo::Application::splash()
 	OOBase::SharedPtr<Image> image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
 	image->load(static_resources(),"menu_border.png");
 
-	OOBase::SharedPtr<UIImage> piccy = OOBase::allocate_shared<UIImage,OOBase::ThreadLocalAllocator>(image,glm::ivec2(10,100));
+	OOBase::SharedPtr<UIImage> piccy = OOBase::allocate_shared<UIImage,OOBase::ThreadLocalAllocator>(layer.get(),image);
 	layer->add_widget(piccy,100);
 
 	image->unload();
