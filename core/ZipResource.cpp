@@ -23,6 +23,11 @@
 
 #include "ZipResource.h"
 
+extern "C"
+{
+	#include "../3rdparty/stb/stb_image.h"
+}
+
 namespace
 {
 	template <typename T>
@@ -210,6 +215,18 @@ bool Indigo::detail::ZipFile::load(void* dest, const OOBase::String& prefix, con
 	if (!i)
 		return false;
 
+	if (!length)
+		length = i->second.m_length;
+
+	if (start > i->second.m_length)
+		start = i->second.m_length;
+
+	if (start + length > i->second.m_length)
+		length = i->second.m_length - start;
+
+	if (!length)
+		return true;
+
 	// Read the local file header
 	if (m_file.seek(i->second.m_offset,OOBase::File::seek_begin) == OOBase::uint64_t(-1))
 		LOG_ERROR_RETURN(("Failed to get seek in file: %s",OOBase::system_error_text()),false);
@@ -218,8 +235,56 @@ bool Indigo::detail::ZipFile::load(void* dest, const OOBase::String& prefix, con
 	if (m_file.read(header.get(),30) != 30)
 		LOG_ERROR_RETURN(("Failed to read local file header header in zip"),false);
 
+	static const OOBase::uint8_t LFR_HEADER[4] = { 0x50, 0x4b, 0x03, 0x04 };
+	if (memcmp(header.get(),LFR_HEADER,4) != 0)
+		LOG_ERROR_RETURN(("Invalid local file header header in zip"),false);
 
+	OOBase::uint16_t compression = read_uint16(header,8);
+	OOBase::uint32_t compressed_size = read_uint32(header,18);
 
+	size_t offset = read_uint16(header,26) + read_uint16(header,28);
+
+	if (compression == 0)
+	{
+		if (m_file.seek(offset + start,OOBase::File::seek_current) == OOBase::uint64_t(-1))
+			LOG_ERROR_RETURN(("Failed to get seek in file: %s",OOBase::system_error_text()),false);
+
+		if (!m_file.read(dest,length))
+			LOG_ERROR_RETURN(("Failed to read from file: %s",OOBase::system_error_text()),false);
+
+		return true;
+	}
+
+	if (compression == 8)
+	{
+		if (m_file.seek(offset,OOBase::File::seek_current) == OOBase::uint64_t(-1))
+			LOG_ERROR_RETURN(("Failed to get seek in file: %s",OOBase::system_error_text()),false);
+
+		if (start)
+		{
+			// We need a temporary buffer...
+			//stbi_zlib_decode_malloc
+		}
+		else
+		{
+			void* p = OOBase::ThreadLocalAllocator::allocate(compressed_size,1);
+			if (!p)
+				LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
+
+			bool res = false;
+			if (m_file.read(p,compressed_size) != compressed_size)
+				LOG_ERROR(("Failed to read from file: %s",OOBase::system_error_text()));
+			else if (stbi_zlib_decode_noheader_buffer((char*)dest,length,(const char*)p,compressed_size) == -1)
+				LOG_ERROR(("Failed to decompress file: %s",stbi_failure_reason()));
+			else
+				res = true;
+
+			OOBase::ThreadLocalAllocator::free(p);
+			return res;
+		}
+	}
+
+	LOG_ERROR(("Unsupported zip compression method: %u",compression));
 
 	return false;
 }

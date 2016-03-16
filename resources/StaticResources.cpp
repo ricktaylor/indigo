@@ -139,7 +139,9 @@ bool StaticResources::load(void* dest, const char* name, size_t start, size_t le
 	if (start + length > r->length)
 		length = r->length - start;
 
-	memcpy(dest,static_cast<const unsigned char*>(r->data) + start,length);
+	if (length)
+		memcpy(dest,static_cast<const unsigned char*>(r->data) + start,length);
+
 	return true;
 }
 
