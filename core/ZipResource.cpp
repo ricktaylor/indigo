@@ -274,7 +274,7 @@ bool Indigo::detail::ZipFile::load(void* dest, const OOBase::String& prefix, con
 			bool res = false;
 			if (m_file.read(p,compressed_size) != compressed_size)
 				LOG_ERROR(("Failed to read from file: %s",OOBase::system_error_text()));
-			else if (stbi_zlib_decode_noheader_buffer((char*)dest,length,(const char*)p,compressed_size) == -1)
+			else if (stbi_zlib_decode_noheader_buffer((char*)dest,(int)length,(const char*)p,(int)compressed_size) == -1)
 				LOG_ERROR(("Failed to decompress file: %s",stbi_failure_reason()));
 			else
 				res = true;

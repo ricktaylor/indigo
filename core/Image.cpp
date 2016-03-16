@@ -88,7 +88,7 @@ bool Indigo::Image::load(const unsigned char* buffer, size_t len, int components
 	}
 	
 	int x,y,c = 0;
-	void* p = stbi_load_from_memory(buffer,len,&x,&y,&c,components);
+	void* p = stbi_load_from_memory(buffer,(int)len,&x,&y,&c,components);
 	if (!p)
 		LOG_ERROR(("Failed to load image: %s",stbi_failure_reason()));
 	else

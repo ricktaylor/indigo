@@ -213,14 +213,14 @@ void Indigo::UIGridSizer::size(const glm::uvec2& size)
 		float expand_x = (static_cast<float>(size.x) - ideal_width.first) / ideal_width.second;
 
 		for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
-			i->first += expand_x * i->second / ideal_width.second;
+			i->first += static_cast<unsigned int>(expand_x * i->second / ideal_width.second);
 	}
 	if (size.y != ideal_height.first && ideal_height.second)
 	{
 		float expand_y = (static_cast<float>(size.y) - ideal_height.first) / ideal_height.second;
 
 		for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
-			i->first += expand_y * i->second / ideal_height.second;
+			i->first += static_cast<unsigned int>(expand_y * i->second / ideal_height.second);
 	}
 
 	// Reset the widths and heights .second to the accumulated position

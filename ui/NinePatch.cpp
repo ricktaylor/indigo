@@ -190,8 +190,8 @@ void NinePatchFactory::layout_patch(GLsizei patch, const glm::uvec2& size, const
 	vertex_data* a = attribs.get();
 
 	a[0].x = 0.f;
-	a[1].x = borders.x;
-	a[3].x = size.x;
+	a[1].x = static_cast<float>(borders.x);
+	a[3].x = static_cast<float>(size.x);
 	a[2].x = a[3].x - borders.z;
 
 	a[0].u = 0;
@@ -203,9 +203,9 @@ void NinePatchFactory::layout_patch(GLsizei patch, const glm::uvec2& size, const
 	{
 		a[i+12].x = a[i+8].x = a[i+4].x = a[i].x;
 
-		a[i].y = size.y;
+		a[i].y = static_cast<float>(size.y);
 		a[i+4].y = a[i].y - borders.y;
-		a[i+8].y = borders.w;
+		a[i+8].y = static_cast<float>(borders.w);
 		a[i+12].y = 0.f;
 
 		a[i+12].u = a[i+8].u = a[i+4].u = a[i].u;
