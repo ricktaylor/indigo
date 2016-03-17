@@ -28,26 +28,6 @@
 namespace OOGL
 {
 	class State;
-	class BufferObject;
-
-	namespace detail
-	{
-		class BufferMapping : public OOBase::detail::SharedCountBase
-		{
-		public:
-			BufferMapping(const OOBase::SharedPtr<BufferObject>& buffer, void* map) :
-				SharedCountBase(), m_buffer(buffer), m_map(map)
-			{
-			}
-
-			void dispose();
-			void destroy();
-
-		private:
-			OOBase::SharedPtr<BufferObject> m_buffer;
-			void* m_map;
-		};
-	}
 
 	class BufferObject : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<BufferObject>
 	{

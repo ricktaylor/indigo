@@ -522,7 +522,7 @@ Indigo::Font::~Font()
 
 bool Indigo::Font::load(const ResourceBundle& resource, const char* name)
 {
-	OOBase::SharedPtr<unsigned char> buffer = resource.load<unsigned char,OOBase::ThreadLocalAllocator>(name);
+	OOBase::SharedPtr<const unsigned char> buffer = resource.load<unsigned char>(name);
 	if (!buffer)
 		return false;
 

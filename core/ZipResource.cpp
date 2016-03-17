@@ -63,7 +63,7 @@ namespace Indigo
 		{
 		public:
 			bool open(const char* filename);
-			bool load(void* dest, const OOBase::String& prefix, const char* name, size_t start, size_t length);
+			OOBase::SharedPtr<const char> load(const OOBase::String& prefix, const char* name);
 			OOBase::uint64_t size(const OOBase::String& prefix, const char* name);
 			bool exists(const OOBase::String& prefix, const char* name);
 
@@ -205,88 +205,66 @@ bool Indigo::detail::ZipFile::open(const char* filename)
 	return true;
 }
 
-bool Indigo::detail::ZipFile::load(void* dest, const OOBase::String& prefix, const char* name, size_t start, size_t length)
+OOBase::SharedPtr<const char> Indigo::detail::ZipFile::load(const OOBase::String& prefix, const char* name)
 {
+	OOBase::SharedPtr<const char> ret;
 	OOBase::String filename(prefix);
 	if (!filename.append(name))
-		LOG_ERROR_RETURN(("Failed to append string: %s",OOBase::system_error_text()),false);
+		LOG_ERROR_RETURN(("Failed to append string: %s",OOBase::system_error_text()),ret);
 
 	OOBase::Table<OOBase::String,Info>::iterator i=m_mapFiles.find(filename);
 	if (!i)
-		return false;
-
-	if (!length)
-		length = i->second.m_length;
-
-	if (start > i->second.m_length)
-		start = i->second.m_length;
-
-	if (start + length > i->second.m_length)
-		length = i->second.m_length - start;
-
-	if (!length)
-		return true;
+		return ret;
 
 	// Read the local file header
 	if (m_file.seek(i->second.m_offset,OOBase::File::seek_begin) == OOBase::uint64_t(-1))
-		LOG_ERROR_RETURN(("Failed to get seek in file: %s",OOBase::system_error_text()),false);
+		LOG_ERROR_RETURN(("Failed to get seek in file: %s",OOBase::system_error_text()),ret);
 
-	OOBase::ScopedArrayPtr<OOBase::uint8_t,OOBase::ThreadLocalAllocator,30> header;
-	if (m_file.read(header.get(),30) != 30)
-		LOG_ERROR_RETURN(("Failed to read local file header header in zip"),false);
+	OOBase::uint8_t header[30];
+	if (m_file.read(header,30) != 30)
+		LOG_ERROR_RETURN(("Failed to read local file header header in zip"),ret);
 
 	static const OOBase::uint8_t LFR_HEADER[4] = { 0x50, 0x4b, 0x03, 0x04 };
-	if (memcmp(header.get(),LFR_HEADER,4) != 0)
-		LOG_ERROR_RETURN(("Invalid local file header header in zip"),false);
+	if (memcmp(header,LFR_HEADER,4) != 0)
+		LOG_ERROR_RETURN(("Invalid local file header header in zip"),ret);
 
 	OOBase::uint16_t compression = read_uint16(header,8);
 	OOBase::uint32_t compressed_size = read_uint32(header,18);
+	size_t offset = 30 + read_uint16(header,26) + read_uint16(header,28);
 
-	size_t offset = read_uint16(header,26) + read_uint16(header,28);
+	OOBase::SharedPtr<const char> mapping = m_file.auto_map<const char>(OOBase::File::map_read,i->second.m_offset + offset,compressed_size);
+	if (!mapping)
+		LOG_ERROR_RETURN(("Failed to map file content: %s",OOBase::system_error_text()),ret);
 
 	if (compression == 0)
 	{
-		if (m_file.seek(offset + start,OOBase::File::seek_current) == OOBase::uint64_t(-1))
-			LOG_ERROR_RETURN(("Failed to get seek in file: %s",OOBase::system_error_text()),false);
-
-		if (!m_file.read(dest,length))
-			LOG_ERROR_RETURN(("Failed to read from file: %s",OOBase::system_error_text()),false);
-
-		return true;
+		ret = mapping;
 	}
-
-	if (compression == 8)
+	else if (compression == 8)
 	{
-		if (m_file.seek(offset,OOBase::File::seek_current) == OOBase::uint64_t(-1))
-			LOG_ERROR_RETURN(("Failed to get seek in file: %s",OOBase::system_error_text()),false);
+		void* p = OOBase::CrtAllocator::allocate(i->second.m_length,1);
+		if (!p)
+			LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),ret);
 
-		if (start)
+		if (stbi_zlib_decode_noheader_buffer(static_cast<char*>(p),(int)i->second.m_length,mapping.get(),(int)compressed_size) == -1)
 		{
-			// We need a temporary buffer...
-			//stbi_zlib_decode_malloc
+			LOG_ERROR(("Failed to inflate file: %s",stbi_failure_reason()));
+			OOBase::CrtAllocator::free(p);
 		}
 		else
 		{
-			void* p = OOBase::ThreadLocalAllocator::allocate(compressed_size,1);
-			if (!p)
-				LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
-
-			bool res = false;
-			if (m_file.read(p,compressed_size) != compressed_size)
-				LOG_ERROR(("Failed to read from file: %s",OOBase::system_error_text()));
-			else if (stbi_zlib_decode_noheader_buffer((char*)dest,(int)length,(const char*)p,(int)compressed_size) == -1)
-				LOG_ERROR(("Failed to decompress file: %s",stbi_failure_reason()));
-			else
-				res = true;
-
-			OOBase::ThreadLocalAllocator::free(p);
-			return res;
+			ret = OOBase::const_pointer_cast<const char>(OOBase::make_shared<char>(static_cast<char*>(p)));
+			if (!ret)
+			{
+				LOG_ERROR(("Failed to allocate: %s",OOBase::system_error_text()));
+				OOBase::CrtAllocator::free(p);
+			}
 		}
 	}
+	else
+		LOG_ERROR(("Unsupported zip compression method: %u",compression));
 
-	LOG_ERROR(("Unsupported zip compression method: %u",compression));
-
-	return false;
+	return ret;
 }
 
 OOBase::uint64_t Indigo::detail::ZipFile::size(const OOBase::String& prefix, const char* name)
@@ -346,12 +324,12 @@ Indigo::ZipResource Indigo::ZipResource::sub_dir(const char* prefix)
 	return ZipResource(m_zip,new_prefix);
 }
 
-bool Indigo::ZipResource::load(void* dest, const char* name, size_t start, size_t length) const
+OOBase::SharedPtr<const char> Indigo::ZipResource::load_i(const char* name) const
 {
 	if (!m_zip)
-		return false;
+		return OOBase::SharedPtr<const char>();
 
-	return m_zip->load(dest,m_prefix,name,start,length);
+	return m_zip->load(m_prefix,name);
 }
 
 OOBase::uint64_t Indigo::ZipResource::size(const char* name) const

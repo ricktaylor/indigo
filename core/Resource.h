@@ -32,45 +32,17 @@ namespace Indigo
 		virtual ~ResourceBundle()
 		{}
 
-		template <typename T, typename Allocator>
-		OOBase::SharedPtr<T> load(const char* name, size_t length = 0) const
+		template <typename T>
+		OOBase::SharedPtr<const T> load(const char* name) const
 		{
-			return load<T,Allocator>(name,0,length);
+			return OOBase::reinterpret_pointer_cast<const T,const char>(load_i(name));
 		}
 
-		template <typename T, typename Allocator>
-		OOBase::SharedPtr<T> load(const char* name, size_t start, size_t length = 0) const
-		{
-			if (!length)
-				length = size(name);
-
-			OOBase::SharedPtr<T> ret;
-			if (length)
-			{
-				T* p = static_cast<T*>(Allocator::allocate(length,16));
-				if (!p)
-					LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),OOBase::SharedPtr<T>());
-
-				ret = OOBase::make_shared<T,Allocator>(p);
-				if (!ret)
-				{
-					LOG_ERROR(("Failed to allocate: %s\n",OOBase::system_error_text()));
-					Allocator::free(p);
-				}
-				else if (!load(p,name,start,length))
-					ret.reset();
-			}
-			return ret;
-		}
-
-		bool load(void* dest, const char* name, size_t length = 0) const
-		{
-			return load(dest,name,0,length);
-		}
-
-		virtual bool load(void* dest, const char* name, size_t start, size_t length = 0) const = 0;
 		virtual OOBase::uint64_t size(const char* name) const = 0;
 		virtual bool exists(const char* name) const = 0;
+
+	protected:
+		virtual OOBase::SharedPtr<const char> load_i(const char* name) const = 0;
 	};
 
 	ResourceBundle& static_resources();

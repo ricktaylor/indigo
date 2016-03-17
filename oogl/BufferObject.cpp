@@ -24,13 +24,32 @@
 #include "../oogl/State.h"
 #include "../oogl/StateFns.h"
 
-void OOGL::detail::BufferMapping::dispose()
+namespace
+{
+	class BufferMapping : public OOBase::detail::SharedCountBase
+	{
+	public:
+		BufferMapping(OOGL::BufferObject* buffer, void* map) :
+			SharedCountBase(), m_buffer(buffer), m_map(map)
+		{
+		}
+
+		void dispose();
+		void destroy();
+
+	private:
+		OOGL::BufferObject* m_buffer;
+		void* m_map;
+	};
+}
+
+void BufferMapping::dispose()
 {
 	// Unmap the buffer
 	m_buffer->unmap();
 }
 
-void OOGL::detail::BufferMapping::destroy()
+void BufferMapping::destroy()
 {
 	OOBase::ThreadLocalAllocator::delete_free(this);
 }
@@ -92,18 +111,19 @@ bool OOGL::BufferObject::unmap()
 OOBase::SharedPtr<char> OOGL::BufferObject::auto_map_i(GLenum access, GLintptr offset, GLsizeiptr length)
 {
 	OOBase::SharedPtr<char> ret;
-	OOBase::SharedPtr<BufferObject> self(shared_from_this());
-
-	void* m = StateFns::get_current()->glMapBufferRange(self,offset,length,m_usage,m_size,access);
+	void* m = map(access,offset,length);
 	if (m)
 	{
-		detail::BufferMapping* bm = NULL;
-		OOBase::ThreadLocalAllocator::allocate_new(bm,self,m);
-		if (bm)
+		BufferMapping* bm = NULL;
+		if (OOBase::ThreadLocalAllocator::allocate_new(bm,this,m))
+		{
 			ret = OOBase::make_shared(reinterpret_cast<char*>(m),bm);
+			if (!ret)
+				OOBase::ThreadLocalAllocator::delete_free(bm);
+		}
 
 		if (!ret)
-			StateFns::get_current()->glUnmapBuffer(self);
+			unmap();
 	}
 
 	return ret;

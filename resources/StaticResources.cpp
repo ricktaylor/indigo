@@ -27,9 +27,17 @@ namespace
 	class StaticResources : public Indigo::ResourceBundle
 	{
 	public:
-		bool load(void* dest, const char* name, size_t start, size_t length) const;
+		OOBase::SharedPtr<const char> load_i(const char* name) const;
 		OOBase::uint64_t size(const char* name) const;
 		bool exists(const char* name) const;
+	};
+
+	class NullShare : public OOBase::detail::SharedCountBase
+	{
+	public:
+		NullShare() : OOBase::detail::SharedCountBase() {}
+		void dispose() {}
+		void destroy() {}
 	};
 }
 
@@ -124,25 +132,27 @@ namespace
 
 #endif
 
-bool StaticResources::load(void* dest, const char* name, size_t start, size_t length) const
+OOBase::SharedPtr<const char> StaticResources::load_i(const char* name) const
 {
+	OOBase::SharedPtr<const char> ret;
 	const RES* r = find_resource(name);
-	if (!r || !r->data)
-		return false;
+	if (r && r->data)
+	{
+		NullShare* ns = NULL;
+		if (!OOBase::CrtAllocator::allocate_new(ns))
+			LOG_ERROR(("Failed to find allocate: %s",OOBase::system_error_text()));
+		else
+		{
+			ret = OOBase::make_shared(static_cast<const char*>(r->data),ns);
+			if (!ret)
+			{
+				LOG_ERROR(("Failed to find allocate: %s",OOBase::system_error_text()));
+				OOBase::CrtAllocator::delete_free(ns);
+			}
+		}
+	}
 
-	if (!length)
-		length = r->length;
-
-	if (start > r->length)
-		start = r->length;
-
-	if (start + length > r->length)
-		length = r->length - start;
-
-	if (length)
-		memcpy(dest,static_cast<const unsigned char*>(r->data) + start,length);
-
-	return true;
+	return ret;
 }
 
 OOBase::uint64_t StaticResources::size(const char* name) const

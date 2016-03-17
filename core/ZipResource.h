@@ -41,7 +41,6 @@ namespace Indigo
 
 		ZipResource sub_dir(const char* prefix);
 
-		bool load(void* dest, const char* name, size_t start, size_t length = 0) const;
 		OOBase::uint64_t size(const char* name) const;
 		bool exists(const char* name) const;
 
@@ -50,6 +49,8 @@ namespace Indigo
 		OOBase::String m_prefix;
 
 		ZipResource(const OOBase::SharedPtr<detail::ZipFile>& zip, const OOBase::String& prefix);
+
+		OOBase::SharedPtr<const char> load_i(const char* name) const;
 	};
 }
 
