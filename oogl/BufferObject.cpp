@@ -29,7 +29,7 @@ namespace
 	class BufferMapping : public OOBase::detail::SharedCountBase
 	{
 	public:
-		BufferMapping(OOGL::BufferObject* buffer, void* map) :
+		BufferMapping(const OOBase::SharedPtr<OOGL::BufferObject>& buffer, void* map) :
 			SharedCountBase(), m_buffer(buffer), m_map(map)
 		{
 		}
@@ -38,7 +38,7 @@ namespace
 		void destroy();
 
 	private:
-		OOGL::BufferObject* m_buffer;
+		OOBase::SharedPtr<OOGL::BufferObject> m_buffer;
 		void* m_map;
 	};
 }
@@ -110,12 +110,13 @@ bool OOGL::BufferObject::unmap()
 
 OOBase::SharedPtr<char> OOGL::BufferObject::auto_map_i(GLenum access, GLintptr offset, GLsizeiptr length)
 {
+	OOBase::SharedPtr<OOGL::BufferObject> self(shared_from_this());
 	OOBase::SharedPtr<char> ret;
-	void* m = map(access,offset,length);
+	void* m = StateFns::get_current()->glMapBufferRange(self,offset,length,m_usage,m_size,access);
 	if (m)
 	{
 		BufferMapping* bm = NULL;
-		if (OOBase::ThreadLocalAllocator::allocate_new(bm,this,m))
+		if (OOBase::ThreadLocalAllocator::allocate_new(bm,self,m))
 		{
 			ret = OOBase::make_shared(reinterpret_cast<char*>(m),bm);
 			if (!ret)
@@ -123,7 +124,7 @@ OOBase::SharedPtr<char> OOGL::BufferObject::auto_map_i(GLenum access, GLintptr o
 		}
 
 		if (!ret)
-			unmap();
+			StateFns::get_current()->glUnmapBuffer(self);
 	}
 
 	return ret;
