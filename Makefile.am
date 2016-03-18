@@ -120,6 +120,7 @@ indigo_SOURCES = \
 	ui/UIButton.cpp \
 	ui/UIImage.cpp \
 	ui/UISizer.cpp \
+	ui/UILoader.cpp \
 	src/App.cpp
 	
 	
