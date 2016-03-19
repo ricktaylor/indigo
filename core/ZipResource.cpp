@@ -232,7 +232,7 @@ OOBase::SharedPtr<const char> Indigo::detail::ZipFile::load(const OOBase::String
 	OOBase::uint32_t compressed_size = read_uint32(header,18);
 	size_t offset = 30 + read_uint16(header,26) + read_uint16(header,28);
 
-	OOBase::SharedPtr<const char> mapping = m_file.auto_map<const char>(OOBase::File::map_read,i->second.m_offset + offset,compressed_size);
+	OOBase::SharedPtr<const char> mapping = m_file.auto_map<const char>(false,i->second.m_offset + offset,compressed_size);
 	if (!mapping)
 		LOG_ERROR_RETURN(("Failed to map file content: %s",OOBase::system_error_text()),ret);
 

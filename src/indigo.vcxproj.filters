@@ -103,6 +103,9 @@
     <ClInclude Include="..\ui\UISizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\ui\UILoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\core\Font.cpp">
@@ -161,6 +164,9 @@
     </ClCompile>
     <ClCompile Include="..\resources\StaticResources.cpp">
       <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui\UILoader.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

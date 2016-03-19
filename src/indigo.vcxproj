@@ -75,6 +75,7 @@
     <ClInclude Include="..\ui\Label.h" />
     <ClInclude Include="..\ui\NinePatch.h" />
     <ClInclude Include="..\ui\Quad.h" />
+    <ClInclude Include="..\ui\UILoader.h" />
     <ClInclude Include="..\ui\UISizer.h" />
     <ClInclude Include="..\ui\UIButton.h" />
     <ClInclude Include="..\ui\UIImage.h" />
@@ -99,6 +100,7 @@
     <ClCompile Include="..\ui\UIButton.cpp" />
     <ClCompile Include="..\ui\UIImage.cpp" />
     <ClCompile Include="..\ui\UILayer.cpp" />
+    <ClCompile Include="..\ui\UILoader.cpp" />
     <ClCompile Include="..\ui\UISizer.cpp" />
     <ClCompile Include="App.cpp" />
   </ItemGroup>
