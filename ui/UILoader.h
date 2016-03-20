@@ -61,6 +61,7 @@ namespace Indigo
 
 		OOBase::SharedPtr<Indigo::UIWidget> load_top_level(const char*& p, const char* pe, UIGroup* parent);
 		OOBase::SharedPtr<Indigo::UIWidget> load_layer(const char*& p, const char* pe);
+		bool load_children(const char*& p, const char* pe, UIGroup* parent, const char* parent_name);
 		OOBase::SharedPtr<Indigo::UIWidget> load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, const char* parent_name);
 
 		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name);

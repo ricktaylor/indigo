@@ -242,25 +242,8 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 			LOG_ERROR_RETURN(("Syntax error: ')' expected"),ret);
 	}
 
-	if (character(p,pe,'{'))
-	{
-		for (;;)
-		{
-			OOBase::ScopedString type;
-			if (!type_name(p,pe,type))
-				LOG_ERROR_RETURN(("Syntax error: type name expected"),ret);
-
-			OOBase::SharedPtr<Indigo::UIWidget> child = load_child(p,pe,type,layer.get(),name.c_str());
-			if (!child)
-				return ret;
-
-			if (!character(p,pe,','))
-				break;
-		}
-
-		if (!character(p,pe,'}'))
-			LOG_ERROR_RETURN(("Syntax error: '}' expected"),ret);
-	}
+	if (!load_children(p,pe,layer.get(),name.c_str()))
+		return ret;
 	
 	return layer;
 }
@@ -415,6 +398,31 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 	return true;
 }
 
+bool Indigo::UILoader::load_children(const char*& p, const char* pe, UIGroup* parent, const char* parent_name)
+{
+	if (character(p,pe,'{'))
+	{
+		for (;;)
+		{
+			OOBase::ScopedString type;
+			if (!type_name(p,pe,type))
+				LOG_ERROR_RETURN(("Syntax error: type name expected"),false);
+
+			OOBase::SharedPtr<Indigo::UIWidget> child = load_child(p,pe,type,parent,parent_name);
+			if (!child)
+				return false;
+
+			if (!character(p,pe,','))
+				break;
+		}
+
+		if (!character(p,pe,'}'))
+			LOG_ERROR_RETURN(("Syntax error: '}' expected"),false);
+	}
+
+	return true;
+}
+
 OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, const char* parent_name)
 {
 	OOBase::SharedPtr<Indigo::UIWidget> ret;
@@ -447,7 +455,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_child(const char*& p,
 	if (ret && !fq_name.empty())
 	{
 		if (!m_hashWidgets.insert(fq_name.c_str(),ret))
-			LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),ret);
+			LOG_ERROR_RETURN(("Failed to insert widget into map: %s",OOBase::system_error_text()),ret);
 	}
 
 	return ret;
