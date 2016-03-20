@@ -31,9 +31,11 @@ namespace Indigo
 	class UILoader
 	{
 	public:
-		bool load(ResourceBundle& resource, const char* name, UIGroup* parent);
-		bool load(const char* data, size_t len, UIGroup* parent);
+		UILoader(ResourceBundle& resource) : m_resource(resource)
+		{}
 
+		bool load(const char* name, UIGroup* parent);
+		
 		struct error_pos_t
 		{
 			size_t m_line;
@@ -42,6 +44,7 @@ namespace Indigo
 		error_pos_t error_pos() const { return m_error_pos; }
 
 	private:
+		ResourceBundle& m_resource;
 		error_pos_t m_error_pos;
 
 		typedef OOBase::HashTable<const char*,OOBase::SharedPtr<UIWidget>,OOBase::ThreadLocalAllocator> widget_hash_t;
@@ -56,10 +59,11 @@ namespace Indigo
 		bool parse_uint(const char*& p, const char* pe, unsigned int& u);
 		bool parse_uvec2(const char*& p, const char* pe, glm::uvec2& u);
 
-		bool load_top_level(const char*& p, const char* pe, UIGroup* parent);
-		bool load_layer(const char*& p, const char* pe, const char* name);
-		bool load_children(const char*& p, const char* pe, UIGroup* parent);
-		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent);
+		OOBase::SharedPtr<Indigo::UIWidget> load_top_level(const char*& p, const char* pe, UIGroup* parent);
+		OOBase::SharedPtr<Indigo::UIWidget> load_layer(const char*& p, const char* pe);
+		OOBase::SharedPtr<Indigo::UIWidget> load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, const char* parent_name);
+
+		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name);
 	};
 }
 

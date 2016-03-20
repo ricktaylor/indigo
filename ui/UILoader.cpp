@@ -25,6 +25,8 @@
 
 #include "../core/Resource.h"
 
+#include "UISizer.h"
+
 namespace
 {
 	bool is_whitespace(char c)
@@ -136,22 +138,37 @@ bool Indigo::UILoader::parse_uint(const char*& p, const char* pe, unsigned int& 
 	return (p != start);
 }
 
-bool Indigo::UILoader::load(ResourceBundle& resource, const char* name, UIGroup* parent)
+bool Indigo::UILoader::parse_uvec2(const char*& p, const char* pe, glm::uvec2& u)
 {
-	OOBase::SharedPtr<const char> res = resource.load<const char>(name);
+	if (!character(p,pe,'('))
+		LOG_ERROR_RETURN(("Syntax error: '(' expected"),false);
+
+	if (!parse_uint(p,pe,u.x))
+		LOG_ERROR_RETURN(("Syntax error: unsigned integer expected"),false);
+
+	if (!character(p,pe,','))
+		LOG_ERROR_RETURN(("Syntax error: ',' expected"),false);
+
+	if (!parse_uint(p,pe,u.y))
+		LOG_ERROR_RETURN(("Syntax error: unsigned integer expected"),false);
+
+	if (!character(p,pe,')'))
+		LOG_ERROR_RETURN(("Syntax error: ')' expected"),false);
+
+	return true;
+}
+
+bool Indigo::UILoader::load(const char* name, UIGroup* parent)
+{
+	OOBase::SharedPtr<const char> res = m_resource.load<const char>(name);
 	if (!res)
 		LOG_ERROR_RETURN(("UIResource '%s' does not exist in bundle",name),false);
 
-	return load(res.get(),resource.size(name),parent);
-}
-
-bool Indigo::UILoader::load(const char* data, size_t len, UIGroup* parent)
-{
 	m_error_pos.m_line = 1;
 	m_error_pos.m_col = 1;
 
-	const char* p = data;
-	const char* pe = p + len;
+	const char* p = res.get();
+	const char* pe = p + m_resource.size(name);
 	while (p != pe)
 	{
 		if (!load_top_level(p,pe,parent))
@@ -161,113 +178,277 @@ bool Indigo::UILoader::load(const char* data, size_t len, UIGroup* parent)
 	return true;
 }
 
-bool Indigo::UILoader::load_top_level(const char*& p, const char* pe, UIGroup* parent)
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_top_level(const char*& p, const char* pe, UIGroup* parent)
 {
-	OOBase::ScopedString name;
-	if (!ident(p,pe,name))
-		LOG_ERROR_RETURN(("Syntax error: identifier expected"),false);
+	OOBase::SharedPtr<Indigo::UIWidget> ret;
 
 	OOBase::ScopedString type;
 	if (!type_name(p,pe,type))
-		LOG_ERROR_RETURN(("Syntax error: type name expected"),false);
+		LOG_ERROR_RETURN(("Syntax error: type name expected"),ret);
 
 	if (type == "LAYER")
 	{
 		if (parent)
 			LOG_WARNING(("Loading LAYER with parent?"));
 
-		return load_layer(p,pe,name.c_str());
+		return load_layer(p,pe);
 	}
-
-	LOG_ERROR(("Syntax error: unknown type name %s",type.c_str()));
-	return false;
+	
+	return load_child(p,pe,type,parent,NULL);
 }
 
-bool Indigo::UILoader::load_layer(const char*& p, const char* pe, const char* name)
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p, const char* pe)
 {
-	if (m_hashWidgets.find(name))
-		LOG_ERROR_RETURN(("Duplicate identifier: %s",name),false);
+	OOBase::SharedPtr<Indigo::UIWidget> ret;
+
+	OOBase::ScopedString name;
+	if (!ident(p,pe,name))
+		LOG_ERROR_RETURN(("Syntax error: identifier expected"),ret);
+
+	if (m_hashWidgets.find(name.c_str()))
+		LOG_ERROR_RETURN(("Duplicate identifier: %s",name),ret);
 
 	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>();
 	if (!layer)
-		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),ret);
 
-	if (!load_children(p,pe,layer.get()))
-		return false;
+	if (!m_hashWidgets.insert(name.c_str(),layer))
+		LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),ret);
 
-	if (!m_hashWidgets.insert(name,layer))
-		LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),false);
-
-	return true;
-}
-
-bool Indigo::UILoader::parse_uvec2(const char*& p, const char* pe, glm::uvec2& u)
-{
-	if (!character(p,pe,'('))
-		LOG_ERROR_RETURN(("Syntax error: '(' expected"),false);
-
-	if (!parse_uint(p,pe,u.x))
-		LOG_ERROR_RETURN(("Syntax error: integer expected"),false);
-
-	if (!character(p,pe,','))
-		LOG_ERROR_RETURN(("Syntax error: ',' expected"),false);
-
-	if (!parse_uint(p,pe,u.y))
-		LOG_ERROR_RETURN(("Syntax error: integer expected"),false);
-
-	if (!character(p,pe,')'))
-		LOG_ERROR_RETURN(("Syntax error: ')' expected"),false);
-
-	return true;
-}
-
-bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent)
-{
-	glm::uvec2 padding(0);
-	for (OOBase::ScopedString arg;p != pe && type_name(p,pe,arg);skip_whitespace(p,pe))
+	if (character(p,pe,'('))
 	{
-		if (arg == "PADDING")
+		OOBase::ScopedString arg;
+		if (type_name(p,pe,arg))
 		{
-			if (!parse_uvec2(p,pe,padding))
-				return false;
+			for (;;)
+			{
+				if (arg == "GRID_SIZER")
+				{
+					if (!load_grid_sizer(p,pe,layer.get(),name.c_str()))
+						return ret;
+				}
+				else
+					LOG_ERROR_RETURN(("Unexpected argument in LAYER: %s",arg.c_str()),ret);
+
+				if (!character(p,pe,','))
+					break;
+
+				if (!type_name(p,pe,arg))
+					LOG_ERROR_RETURN(("Missing argument in LAYER: %s",arg.c_str()),ret);
+			}
 		}
-		else
-			LOG_ERROR_RETURN(("Unexpected argument in GRID_SIZER: %s",arg.c_str()),false);
+
+		if (!character(p,pe,')'))
+			LOG_ERROR_RETURN(("Syntax error: ')' expected"),ret);
 	}
 
-	if (!character(p,pe,'['))
-		LOG_ERROR_RETURN(("Syntax error: '[' expected"),false);
-
-	while (!character(p,pe,']'))
-	{
-		// TODO;
-	}
-
-	return true;
-}
-
-bool Indigo::UILoader::load_children(const char*& p, const char* pe, UIGroup* parent)
-{
 	if (character(p,pe,'{'))
 	{
-		while (!character(p,pe,'}'))
+		for (;;)
 		{
-			// TODO;
-		}
-	}
+			OOBase::ScopedString type;
+			if (!type_name(p,pe,type))
+				LOG_ERROR_RETURN(("Syntax error: type name expected"),ret);
 
-	OOBase::ScopedString type;
-	if (type_name(p,pe,type))
+			OOBase::SharedPtr<Indigo::UIWidget> child = load_child(p,pe,type,layer.get(),name.c_str());
+			if (!child)
+				return ret;
+
+			if (!character(p,pe,','))
+				break;
+		}
+
+		if (!character(p,pe,'}'))
+			LOG_ERROR_RETURN(("Syntax error: '}' expected"),ret);
+	}
+	
+	return layer;
+}
+
+bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name)
+{
+	glm::uvec2 padding(0);
+	if (character(p,pe,'('))
 	{
-		if (type == "GRID_SIZER")
+		OOBase::ScopedString arg;
+		if (type_name(p,pe,arg))
 		{
-			if (!load_grid_sizer(p,pe,parent))
-				return false;
+			for (;;)
+			{
+				if (arg == "PADDING")
+				{
+					if (!parse_uvec2(p,pe,padding))
+						return false;
+				}
+				else
+					LOG_ERROR_RETURN(("Unexpected argument in GRID_SIZER: %s",arg.c_str()),false);
+
+				if (!character(p,pe,','))
+					break;
+
+				if (!type_name(p,pe,arg))
+					LOG_ERROR_RETURN(("Missing argument in GRID_SIZER: %s",arg.c_str()),false);
+			}
 		}
 
-		LOG_ERROR(("Syntax error: unknown sizer type: %s",type.c_str()));
-		return false;
+		if (!character(p,pe,')'))
+			LOG_ERROR_RETURN(("Syntax error: ')' expected"),false);
 	}
 
+	OOBase::SharedPtr<UIGridSizer> sizer = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>();
+	if (!sizer)
+		LOG_ERROR_RETURN(("Faiedl to allocate sizer: %s",OOBase::system_error_text()),false);
+	parent->sizer(sizer);
+	
+	if (character(p,pe,'{'))
+	{
+		for (;;)
+		{
+			unsigned int row,col,proportion = -1;
+
+			if (!character(p,pe,'['))
+				LOG_ERROR_RETURN(("Syntax error: '[' expected"),false);
+
+			if (!parse_uint(p,pe,row))
+				LOG_ERROR_RETURN(("Missing row argument in GRID_SIZER"),false);
+
+			if (!character(p,pe,','))
+				LOG_ERROR_RETURN(("Syntax error: ',' expected"),false);
+
+			if (!parse_uint(p,pe,col))
+				LOG_ERROR_RETURN(("Missing col argument in GRID_SIZER"),false);
+
+			if (character(p,pe,'/') && !parse_uint(p,pe,proportion))
+				LOG_ERROR_RETURN(("Missing proportion argument in GRID_SIZER"),false);
+			
+			if (!character(p,pe,']'))
+				LOG_ERROR_RETURN(("Syntax error: ']' expected"),false);
+
+			if (character(p,pe,'('))
+			{
+				unsigned int flags = UIGridSizer::align_centre | UIGridSizer::expand;
+				do
+				{
+					OOBase::ScopedString arg;
+					if (!type_name(p,pe,arg))
+						LOG_ERROR_RETURN(("Missing layout argument"),false);
+
+					if (arg == "ALIGN_LEFT")
+						flags = (flags & 0x3c) | UIGridSizer::align_left;
+					else if (arg == "ALIGN_RIGHT")
+						flags = (flags & 0x3c) | UIGridSizer::align_right;
+					else if (arg == "ALIGN_HCENTRE")
+						flags = (flags & 0x3c) | UIGridSizer::align_hcentre;
+					else if (arg == "ALIGN_BOTTOM")
+						flags = (flags & 0x33) | UIGridSizer::align_bottom;
+					else if (arg == "ALIGN_TOP")
+						flags = (flags & 0x33) | UIGridSizer::align_top;
+					else if (arg == "ALIGN_VCENTRE")
+						flags = (flags & 0x33) | UIGridSizer::align_vcentre;
+					else if (arg == "ALIGN_CENTRE")
+						flags = (flags & 0x30) | UIGridSizer::align_centre;
+					else if (arg == "EXPAND_HORIZ")
+						flags = (flags & 0xF) | UIGridSizer::expand_horiz;
+					else if (arg == "EXPAND_VERT")
+						flags = (flags & 0xF) | UIGridSizer::expand_vert;
+					else if (arg == "EXPAND")
+						flags = (flags & 0xF) | UIGridSizer::expand;
+					else
+						LOG_ERROR_RETURN(("Unexpected layout argument: %s",arg.c_str()),false);
+				}
+				while (character(p,pe,'|'));
+
+				if (!character(p,pe,')'))
+					LOG_ERROR_RETURN(("Syntax error: ')' expected"),false);
+
+				if (proportion == -1)
+					proportion = 1;
+
+				OOBase::ScopedString type;
+				if (!type_name(p,pe,type))
+					LOG_ERROR_RETURN(("Syntax error: type name expected"),false);
+
+				OOBase::SharedPtr<Indigo::UIWidget> child = load_child(p,pe,type,parent,parent_name);
+				if (!child)
+					return false;
+
+				if (!sizer->add_widget(row,col,child,flags,proportion))
+					return false;
+			}
+			else
+			{
+				OOBase::ScopedString type;
+				if (!type_name(p,pe,type))
+					LOG_ERROR_RETURN(("Missing type name"),false);
+
+				if (type == "SPACER")
+				{
+					if (proportion == -1)
+						proportion = 0;
+
+					glm::uvec2 size(0);
+					if (!parse_uvec2(p,pe,size))
+						LOG_ERROR_RETURN(("Syntax error: (width,height) expected"),false);
+					
+					if (!sizer->add_spacer(row,col,size,proportion))
+						return false;
+				}
+				else
+				{
+					OOBase::SharedPtr<Indigo::UIWidget> child = load_child(p,pe,type,parent,parent_name);
+					if (!child)
+						return false;
+
+					if (!sizer->add_widget(row,col,child))
+						return false;
+				}
+			}
+			
+			if (!character(p,pe,','))
+				break;
+		}
+
+		if (!character(p,pe,'}'))
+			LOG_ERROR_RETURN(("Syntax error: '}' expected"),false);
+	}
+	
 	return true;
+}
+
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, const char* parent_name)
+{
+	OOBase::SharedPtr<Indigo::UIWidget> ret;
+	OOBase::ScopedString fq_name;
+
+	OOBase::ScopedString name;
+	if (ident(p,pe,name))
+	{
+		if (parent_name && (!fq_name.assign(parent_name) || !!fq_name.append('.')))
+			LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),ret);
+		
+		if (!fq_name.append(name.c_str(),name.length()))
+			LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),ret);
+
+		if (m_hashWidgets.find(fq_name.c_str()))
+			LOG_ERROR_RETURN(("Duplicate identifier: %s",fq_name.c_str()),ret);
+	}
+
+	if (type == "BUTTON")
+	{
+		// TODO
+	}
+	else if (type == "IMAGE")
+	{
+		// TODO
+	}
+	else
+		LOG_ERROR_RETURN(("Syntax error: unknown type name %s",type.c_str()),ret);
+
+	if (ret && !fq_name.empty())
+	{
+		if (!m_hashWidgets.insert(fq_name.c_str(),ret))
+			LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),ret);
+	}
+
+	return ret;
 }

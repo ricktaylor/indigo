@@ -36,6 +36,9 @@
     <None Include="..\resources\menu_border2.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\resources\ui.txt">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\indigo.rc">

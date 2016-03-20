@@ -55,6 +55,7 @@
     <None Include="..\resources\colour_blend.frag" />
     <None Include="..\resources\menu_border.png" />
     <None Include="..\resources\menu_border2.png" />
+    <None Include="..\resources\ui.txt" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\indigo.rc" />
