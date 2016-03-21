@@ -78,7 +78,12 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder
 		widget->m_render_group.reset();
 	}
 	else
+	{
+		if (widget->visible())
+			widget->m_render_group->show(true);
+
 		*ret = true;
+	}
 }
 
 ::UILayer::UILayer(Indigo::Render::Window* window) :
