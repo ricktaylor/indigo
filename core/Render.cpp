@@ -130,9 +130,6 @@ bool Indigo::run_render_loop(const OOBase::CmdArgs::options_t& options, const OO
 
 				// Draw window
 				wnd->draw();
-
-				// Swap window
-				wnd->swap();
 			}
 
 			// Poll for UI events

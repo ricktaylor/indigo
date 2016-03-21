@@ -163,7 +163,6 @@ void OOGL::Window::cb_on_refresh(GLFWwindow* window)
 	{
 		// This causes content refresh when resizing...
 		pThis->draw();
-		pThis->swap();
 	}
 }
 
@@ -286,21 +285,18 @@ void OOGL::Window::make_current() const
 
 void OOGL::Window::draw() const
 {
-	if (m_glfw_window && visible() && !iconified() && m_on_draw)
+	if (m_glfw_window)
 	{
 		// Make this context current
 		glfwMakeContextCurrent(m_glfw_window);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		m_on_draw.invoke(*this,*m_state);
-	}
-}
+		if (m_on_draw)
+			m_on_draw.invoke(*this,*m_state);
 
-void OOGL::Window::swap() const
-{
-	if (m_glfw_window)
 		glfwSwapBuffers(m_glfw_window);
+	}
 }
 
 OOBase::Delegate1<void,const OOGL::Window&,OOBase::ThreadLocalAllocator> OOGL::Window::on_close(const OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator>& delegate)
