@@ -291,6 +291,8 @@ void OOGL::Window::draw() const
 		// Make this context current
 		glfwMakeContextCurrent(m_glfw_window);
 
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 		m_on_draw.invoke(*this,*m_state);
 	}
 }
