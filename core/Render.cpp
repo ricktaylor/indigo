@@ -75,6 +75,9 @@ static OOBase::SharedPtr<Indigo::Pipe> start_logic_thread(Indigo::Pipe& pipe, OO
 {
 	OOBase::SharedPtr<Indigo::Pipe> logic_pipe;
 
+	// Set defaults
+	glfwDefaultWindowHints();
+
 	// Create the frame window
 	OOBase::SharedPtr<Indigo::Window> wnd = OOBase::allocate_shared<Indigo::Window>();
 	if (!wnd)
@@ -106,9 +109,6 @@ bool Indigo::run_render_loop(const OOBase::CmdArgs::options_t& options, const OO
 
 	if (!glfwInit())
 		LOG_ERROR_RETURN(("glfwInit failed"),false);
-
-	// Set defaults
-	glfwDefaultWindowHints();
 
 	// Start the logic thread
 	OOBase::WeakPtr<OOGL::Window> main_wnd;
