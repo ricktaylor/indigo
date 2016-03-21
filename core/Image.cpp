@@ -43,6 +43,7 @@ extern "C"
 	#define STBI_REALLOC(p,sz) wrap_realloc(p,sz)
 	#define STBI_FREE(p)       wrap_free(p)
 
+	#define STBI_NO_STDIO
 	#define STBI_SUPPORT_ZLIB
 	#define STB_IMAGE_IMPLEMENTATION
 	#include "../3rdparty/stb/stb_image.h"
@@ -96,7 +97,11 @@ bool Indigo::Image::load(const unsigned char* buffer, size_t len, int components
 		m_pixels = p;
 		m_width = x;
 		m_height = y;
-		m_components = c;
+
+		if (!components)
+			m_components = c;
+		else
+			m_components = components;
 	}
 
 	return (p != NULL);

@@ -599,7 +599,7 @@ bool Indigo::Font::load(const ResourceBundle& resource, const unsigned char* dat
 					LOG_ERROR(("Failed to allocate image"));
 					ok = false;
 				}
-				else if ((ok = ptrImage->load(resource,reinterpret_cast<const char*>(data),1)))
+				else if ((ok = ptrImage->load(resource,reinterpret_cast<const char*>(data))))
 					ok = (vecPages.push_back(ptrImage));
 
 				data += len/pages;
