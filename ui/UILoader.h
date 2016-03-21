@@ -56,7 +56,6 @@ namespace Indigo
 		void syntax_error(const char* fmt, ...) OOBASE_FORMAT(printf,2,3);
 
 		void skip_whitespace(const char*& p, const char* pe);
-		void skip_to(char to, const char*& p, const char* pe);
 		const char*& inc_p(const char*& p, const char* pe);
 		bool character(const char*& p, const char* pe, char c);
 		bool ident(const char*& p, const char* pe, OOBase::ScopedString& i);
@@ -66,6 +65,8 @@ namespace Indigo
 		bool parse_int(const char*& p, const char* pe, int& i);
 		bool parse_ivec2(const char*& p, const char* pe, glm::ivec2& i);
 		bool parse_string(const char*& p, const char* pe, OOBase::ScopedString& s);
+		bool parse_float(const char*& p, const char* pe, float& i);
+		bool parse_colour(const char*& p, const char* pe, glm::vec4& c);
 
 		OOBase::SharedPtr<UIWidget> load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder);
 		OOBase::SharedPtr<UIWidget> load_layer(const char*& p, const char* pe, unsigned int zorder);

@@ -34,6 +34,16 @@ namespace
 	{
 		return (c == ' ' || c == '\r' || c == '\n' || c == '\t');
 	}
+
+	unsigned int hex(char c)
+	{
+		if (c >= '0' && c <= '9')
+			return c - '0';
+		if (c >= 'A' && c <= 'F')
+			return 10 + (c - 'A');
+		else
+			return 10 + (c - 'a');
+	}
 }
 
 void Indigo::UILoader::syntax_error(const char* fmt, ...)
@@ -68,25 +78,40 @@ const char*& Indigo::UILoader::inc_p(const char*& p, const char* pe)
 	return p;
 }
 
-void Indigo::UILoader::skip_to(char to, const char*& p, const char* pe)
-{
-	while (p != pe && *p != to)
-		inc_p(p,pe);
-
-	inc_p(p,pe);
-}
-
 void Indigo::UILoader::skip_whitespace(const char*& p, const char* pe)
 {
 	for (;p != pe;inc_p(p,pe))
 	{
-		if (*p == '#')
+		if (*p == '/' && p != (pe-1))
 		{
-			// Comment, skip to \n
-			skip_to('\n',inc_p(p,pe),pe);
-		}
+			if (p[1] == '/')
+			{
+				// Comment, skip to \n
+				do
+				{
+					inc_p(p,pe);
+				}
+				while (p != pe && *p != '\n');
+			}
+			else if (p[1] == '*')
+			{
+				/* Comment, skip to */
+				do
+				{
+					do
+					{
+						inc_p(p,pe);
+					}
+					while (p != pe && *p != '*');
 
-		if (!is_whitespace(*p))
+					inc_p(p,pe);
+				}
+				while (p != pe && *p != '/');
+			}
+			else
+				break;
+		}
+		else if (!is_whitespace(*p))
 			break;
 	}
 }
@@ -277,6 +302,127 @@ bool Indigo::UILoader::parse_string(const char*& p, const char* pe, OOBase::Scop
 		LOG_ERROR_RETURN(("Failed to append to string: %s",OOBase::system_error_text()),false);
 
 	return true;
+}
+
+bool Indigo::UILoader::parse_float(const char*& p, const char* pe, float& i)
+{
+	skip_whitespace(p,pe);
+
+	if (*p == '-' || *p == '+')
+		inc_p(p,pe);
+
+	const char* start = p;
+	for (;p != pe;inc_p(p,pe))
+	{
+		if (*p < '0' || *p > '9')
+			break;
+	}
+
+	if (*p == '.')
+	{
+		inc_p(p,pe);
+
+		for (;p != pe;inc_p(p,pe))
+		{
+			if (*p < '0' || *p > '9')
+				break;
+		}
+	}
+
+	if (*p == 'E' || *p == 'e')
+	{
+		inc_p(p,pe);
+
+		if (*p == '-' || *p == '+')
+			inc_p(p,pe);
+
+		for (;p != pe;inc_p(p,pe))
+		{
+			if (*p < '0' || *p > '9')
+				break;
+		}
+	}
+
+	if (p == start)
+		return false;
+
+	char* e = NULL;
+	i = static_cast<float>(strtod(start,&e));
+
+	return (p == e);
+}
+
+bool Indigo::UILoader::parse_colour(const char*& p, const char* pe, glm::vec4& c)
+{
+	if (character(p,pe,'('))
+	{
+		if (!parse_float(p,pe,c.r))
+			SYNTAX_ERROR_RETURN(("Float expected"),false);
+
+		if (c.r < 0.f || c.r > 1.f)
+			SYNTAX_ERROR_RETURN(("Value between 0.0 and 1.0 expected"),false);
+
+		if (!character(p,pe,','))
+			SYNTAX_ERROR_RETURN(("',' expected"),false);
+
+		if (!parse_float(p,pe,c.g))
+			SYNTAX_ERROR_RETURN(("Float expected"),false);
+
+		if (c.g < 0.f || c.g > 1.f)
+			SYNTAX_ERROR_RETURN(("Value between 0.0 and 1.0 expected"),false);
+
+		if (!character(p,pe,','))
+			SYNTAX_ERROR_RETURN(("',' expected"),false);
+
+		if (c.b < 0.f || c.b > 1.f)
+			SYNTAX_ERROR_RETURN(("Value between 0.0 and 1.0 expected"),false);
+
+		if (!parse_float(p,pe,c.b))
+			SYNTAX_ERROR_RETURN(("Float expected"),false);
+
+		if (character(p,pe,','))
+		{
+			if (!parse_float(p,pe,c.a))
+				SYNTAX_ERROR_RETURN(("Float expected"),false);
+
+			if (c.a < 0.f || c.a > 1.f)
+				SYNTAX_ERROR_RETURN(("Value between 0.0 and 1.0 expected"),false);
+		}
+		else
+			c.a = 1.f;
+
+		if (!character(p,pe,')'))
+			SYNTAX_ERROR_RETURN(("')' expected"),false);
+
+		return true;
+	}
+	else if (character(p,pe,'#'))
+	{
+		const char* start = p;
+		for (;p != pe && (p - start) <= 8;inc_p(p,pe))
+		{
+			if (*p < '0' || (*p > '9' && *p < 'A') || (*p > 'F' && *p < 'a') || *p > 'f')
+				break;
+		}
+
+		if (p - start >= 6)
+		{
+			c.r = (hex(start[0]) * 16 + hex(start[1])) / 255.f;
+			c.g = (hex(start[2]) * 16 + hex(start[3])) / 255.f;
+			c.b = (hex(start[4]) * 16 + hex(start[5])) / 255.f;
+			c.a = 1.f;
+
+			if (p - start == 8)
+			{
+				c.a = (hex(start[6]) * 16 + hex(start[7])) / 255.f;
+				return true;
+			}
+			else if (p - start == 6)
+				return true;
+		}
+	}
+
+	SYNTAX_ERROR_RETURN(("Invalid colour value"),false);
 }
 
 bool Indigo::UILoader::load(const char* name, unsigned int& zorder, UIGroup* parent)
@@ -647,10 +793,11 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 				}
 				else if (arg == "COLOUR")
 				{
-
+					if (!parse_colour(p,pe,colour))
+						return OOBase::SharedPtr<UIWidget>();
 				}
 				else
-					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in GRID_SIZER",arg.c_str()),OOBase::SharedPtr<UIWidget>());
+					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in IMAGE",arg.c_str()),OOBase::SharedPtr<UIWidget>());
 
 				if (!character(p,pe,','))
 					break;
