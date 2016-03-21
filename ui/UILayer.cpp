@@ -95,7 +95,7 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 	Indigo::Render::UIGroup::on_draw(glState,glm::ortho(0.f,sz.x,0.f,sz.y));
 }
 
-Indigo::UIWidget::UIWidget(UIWidget* parent, const glm::ivec2& position, const glm::uvec2& size) :
+Indigo::UIWidget::UIWidget(UIGroup* parent, const glm::ivec2& position, const glm::uvec2& size) :
 		m_parent(parent),
 		m_visible(false),
 		m_enabled(true),
@@ -179,7 +179,7 @@ glm::uvec2 Indigo::UIWidget::size(const glm::uvec2& sz)
 	return m_size;
 }
 
-Indigo::UIGroup::UIGroup(UIWidget* parent, const glm::ivec2& position, const glm::uvec2& size) : 
+Indigo::UIGroup::UIGroup(UIGroup* parent, const glm::ivec2& position, const glm::uvec2& size) : 
 		UIWidget(parent,position,size)
 {
 }

@@ -83,7 +83,7 @@ namespace Indigo
 		virtual ~UIWidget()
 		{}
 
-		UIWidget* parent() const { return m_parent; }
+		UIGroup* parent() const { return m_parent; }
 
 		virtual bool valid() const { return m_parent != NULL && m_render_group; }
 
@@ -109,7 +109,7 @@ namespace Indigo
 		virtual glm::uvec2 ideal_size() const = 0;
 
 	protected:
-		UIWidget(UIWidget* parent, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIWidget(UIGroup* parent, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 		template <typename T>
 		OOBase::SharedPtr<T> render_group() const
@@ -125,7 +125,7 @@ namespace Indigo
 		virtual bool can_hilight(bool hilighted) { return false; }
 
 	private:
-		UIWidget* m_parent;
+		UIGroup* m_parent;
 		OOBase::SharedPtr<Indigo::Render::UIGroup> m_render_group;
 		bool m_visible;
 		bool m_enabled;
@@ -146,7 +146,7 @@ namespace Indigo
 	class UIGroup : public UIWidget
 	{
 	public:
-		UIGroup(UIWidget* parent, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIGroup(UIGroup* parent, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder);
 		bool remove_widget(unsigned int zorder);
