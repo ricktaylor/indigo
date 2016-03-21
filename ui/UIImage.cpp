@@ -52,6 +52,12 @@ glm::uvec2 Indigo::UIImage::ideal_size() const
 	return m_image->size();
 }
 
+void Indigo::UIImage::on_size(const glm::uvec2& sz)
+{
+	if (m_render_image)
+		render_pipe()->post(OOBase::make_delegate(m_render_image.get(),&Render::UIImage::size),sz);
+}
+
 bool Indigo::UIImage::on_render_create(Indigo::Render::UIGroup* group)
 {
 	OOBase::SharedPtr<OOGL::Texture> texture = m_image->make_texture(GL_RGBA8);
