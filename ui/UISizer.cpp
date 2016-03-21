@@ -278,8 +278,6 @@ void Indigo::UIGridSizer::size(const glm::uvec2& size)
 					item_pos.y = cell_pos.y + (static_cast<int>(cell_size.y) - static_cast<int>(item_size.y))/2;
 
 				widget->position(item_pos);
-
-				LOG_DEBUG(("[%d,%d] {%u,%u}",item_pos.x,item_pos.y,item_size.x,item_size.y));
 			}
 		}
 	}
