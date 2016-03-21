@@ -24,11 +24,14 @@
 #include "App.h"
 
 #include "../core/Thread.h"
+#include "../core/ZipResource.h"
+
 #include "../ui/UILayer.h"
 #include "../ui/UIButton.h"
 #include "../ui/UIImage.h"
 #include "../ui/ImageLayer.h"
 #include "../ui/UISizer.h"
+#include "../ui/UILoader.h"
 
 namespace Indigo
 {
@@ -47,10 +50,23 @@ void Indigo::Application::splash()
 	// Add the book layer
 	OOBase::SharedPtr<Image> book_image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
 	book_image->load(static_resources(),"ui/book.png");
-		
+
 	OOBase::SharedPtr<ImageLayer> img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(book_image);
 	m_wnd->add_layer(img_layer,50);
+	img_layer->show();
+
+#if 0
 	
+	ZipResource zip;
+	zip.open("test.zip");
+
+	UILoader loader(m_wnd,zip);
+
+	unsigned int zorder = 100;
+	loader.load("ui.txt",zorder);
+
+#else
+
 	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>();
 	m_wnd->add_layer(layer,100);
 
@@ -59,7 +75,6 @@ void Indigo::Application::splash()
 	sizer->add_spacer(2,2,glm::uvec2(32,32));
 	layer->sizer(sizer);
 
-#if 1
 	OOBase::SharedPtr<UIButton::Style> button_style = OOBase::allocate_shared<UIButton::Style,OOBase::ThreadLocalAllocator>();
 	button_style->m_background.Image::load(static_resources(),"menu_border.png",4);
 	button_style->m_font.load(static_resources(),"BilboSwashCaps.fnt");
@@ -74,21 +89,11 @@ void Indigo::Application::splash()
 	button_style->m_background.unload();
 
 	button->show();
-#elif 1
-	OOBase::SharedPtr<Image> image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
-	image->load(static_resources(),"menu_border.png");
-
-	OOBase::SharedPtr<UIImage> piccy = OOBase::allocate_shared<UIImage,OOBase::ThreadLocalAllocator>(layer.get(),image);
-	layer->add_widget(piccy,100);
-
-	image->unload();
-	piccy->show();
-#endif
 
 	sizer->size(layer->size());
 
-	img_layer->show();
 	layer->show();
+#endif
 
 	m_wnd->show();
 }
