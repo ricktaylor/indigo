@@ -484,11 +484,6 @@ void Indigo::Render::Text::text(const char* sz, size_t len)
 		m_font->alloc_text(*this,sz,len);
 }
 
-const OOBase::SharedPtr<Indigo::Render::Font>& Indigo::Render::Text::font() const
-{
-	return m_font;
-}
-
 void Indigo::Render::Text::draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour, GLsizei start, GLsizei length) const
 {
 	if (start > m_glyph_len)

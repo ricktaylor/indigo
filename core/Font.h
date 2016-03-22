@@ -142,7 +142,7 @@ namespace Indigo
 			Text(const OOBase::SharedPtr<Font>& font, const char* sz = NULL, size_t len = -1);
 			~Text();
 
-			const OOBase::SharedPtr<Font>& font() const;
+			const OOBase::SharedPtr<Font>& font() const { return m_font; }
 
 			void text(const char* sz, size_t len = -1);
 

@@ -43,15 +43,8 @@ namespace Indigo
 
 		virtual void unload();
 
-		glm::uvec2 size() const
-		{
-			return glm::uvec2(m_width,m_height);
-		}
-
-		unsigned int components() const
-		{
-			return m_components;
-		}
+		glm::uvec2 size() const { return glm::uvec2(m_width,m_height); }
+		unsigned int components() const { return m_components; }
 
 		glm::vec4 pixel(const glm::uvec2& pos) const;
 
