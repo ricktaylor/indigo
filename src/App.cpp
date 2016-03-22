@@ -70,10 +70,8 @@ void Indigo::Application::splash()
 	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>();
 	m_wnd->add_layer(layer,100);
 
-	OOBase::SharedPtr<UIGridSizer> sizer = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>();
-	sizer->add_spacer(0,0,glm::uvec2(32,32));
-	sizer->add_spacer(2,2,glm::uvec2(32,32));
-	layer->sizer(sizer);
+	layer->sizer().add_spacer(0,0,glm::uvec2(32,32));
+	layer->sizer().add_spacer(2,2,glm::uvec2(32,32));
 
 	OOBase::SharedPtr<UIButton::Style> button_style = OOBase::allocate_shared<UIButton::Style,OOBase::ThreadLocalAllocator>();
 	button_style->m_background.Image::load(static_resources(),"menu_border.png",4);
@@ -84,13 +82,13 @@ void Indigo::Application::splash()
 
 	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(layer.get(),button_style,"Hello there, very long text.  This is fun!",-1);
 	layer->add_widget(button,100);
-	sizer->add_widget(1,1,button);
+	layer->sizer().add_widget(1,1,button);
 
 	button_style->m_background.unload();
 
 	button->show();
 
-	sizer->size(layer->size());
+	layer->layout();
 
 	layer->show();
 #endif

@@ -45,6 +45,7 @@ namespace Indigo
 
 		glm::uvec2 size() const { return glm::uvec2(m_width,m_height); }
 		unsigned int components() const { return m_components; }
+		unsigned int valid_components() const { return m_valid_components; }
 
 		glm::vec4 pixel(const glm::uvec2& pos) const;
 
@@ -54,7 +55,10 @@ namespace Indigo
 		unsigned int m_width;
 		unsigned int m_height;
 		unsigned int m_components;
+		unsigned int m_valid_components;
 		void*        m_pixels;
+
+		mutable OOBase::WeakPtr<OOGL::Texture> m_texture;
 	};
 }
 

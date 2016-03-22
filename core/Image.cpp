@@ -97,6 +97,7 @@ bool Indigo::Image::load(const unsigned char* buffer, size_t len, int components
 		m_pixels = p;
 		m_width = x;
 		m_height = y;
+		m_valid_components = c;
 
 		if (!components)
 			m_components = c;
@@ -137,34 +138,40 @@ OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalForm
 {
 	OOBase::SharedPtr<OOGL::Texture> tex;
 	if (!m_pixels)
-		LOG_ERROR(("Invalid image for make_texture"));
-	else
+		LOG_ERROR_RETURN(("Invalid image for make_texture"),tex);
+
+	tex = m_texture.lock();
+	if (tex)
+		return tex;
+
+	GLenum format = 0;
+	switch (m_components)
 	{
-		GLenum format = 0;
-		switch (m_components)
-		{
-		case 1:
-			format = GL_RED;
-			break;
+	case 1:
+		format = GL_RED;
+		break;
 
-		case 2:
-			format = GL_RG;
-			break;
+	case 2:
+		format = GL_RG;
+		break;
 
-		case 3:
-			format = GL_RGB;
-			break;
+	case 3:
+		format = GL_RGB;
+		break;
 
-		case 4:
-			format = GL_RGBA;
-			break;
+	case 4:
+		format = GL_RGBA;
+		break;
 
-		default:
-			LOG_ERROR(("Invalid image for make_texture"));
-			return tex;
-		}
-
-		tex = OOBase::allocate_shared<OOGL::Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,levels,internalFormat,m_width,m_height,format,GL_UNSIGNED_BYTE,m_pixels);
+	default:
+		LOG_ERROR(("Invalid image for make_texture"));
+		return tex;
 	}
+
+	tex = OOBase::allocate_shared<OOGL::Texture,OOBase::ThreadLocalAllocator>(GL_TEXTURE_2D,levels,internalFormat,m_width,m_height,format,GL_UNSIGNED_BYTE,m_pixels);
+	if (!tex)
+		LOG_ERROR_RETURN(("Failed to allocate texture"),tex);
+
+	m_texture = tex;
 	return tex;
 }

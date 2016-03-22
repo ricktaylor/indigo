@@ -400,13 +400,13 @@ bool Indigo::NinePatch::pixel_cmp(int x, int y, bool black)
 
 	const char* p = static_cast<char*>(m_pixels) + ((y * m_width) + x) * m_components;
 
-	for (unsigned int c=0;c<m_components;++c)
+	for (unsigned int c=0;c<m_valid_components;++c)
 	{
 		if (p[c] == black_rgba[c])
 			comp_bits |= (1 << c);
 	}
 
-	return (black == (comp_bits == ((1 << m_components)-1)));
+	return (black == (comp_bits == ((1 << m_valid_components)-1)));
 }
 
 bool Indigo::NinePatch::scan_line(int line, glm::uvec2& span)
