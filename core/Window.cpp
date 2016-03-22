@@ -130,7 +130,11 @@ OOBase::WeakPtr<OOGL::Window> Indigo::Window::create()
 	if (!m_render_wnd)
 		LOG_ERROR_RETURN(("Failed to create window: %s",OOBase::system_error_text()),OOBase::WeakPtr<OOGL::Window>());
 
-	return m_render_wnd->create_window();
+	OOBase::WeakPtr<OOGL::Window> wnd = m_render_wnd->create_window();
+	if (!wnd)
+		m_render_wnd.reset();
+
+	return wnd;
 }
 
 void Indigo::Window::on_destroy()
@@ -140,11 +144,17 @@ void Indigo::Window::on_destroy()
 
 bool Indigo::Window::show(bool visible)
 {
+	if (!m_render_wnd)
+		LOG_ERROR_RETURN(("Failed to show: incomplete window"),false);
+
 	return render_pipe()->post(OOBase::make_delegate(m_render_wnd->m_wnd.get(),&OOGL::Window::show),visible);
 }
 
 bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, unsigned int zorder)
 {
+	if (!m_render_wnd)
+		LOG_ERROR_RETURN(("Failed to insert layer: incomplete window"),false);
+
 	if (!m_layers.insert(zorder,layer))
 		LOG_ERROR_RETURN(("Failed to insert layer: %s",OOBase::system_error_text()),false);
 

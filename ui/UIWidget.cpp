@@ -168,7 +168,7 @@ Indigo::UIGroup::UIGroup(UIGroup* parent, const glm::ivec2& position, const glm:
 bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder)
 {
 	if (!m_render_group)
-		return false;
+		LOG_ERROR_RETURN(("Failed to insert widget: incomplete parent"),false);
 
 	if (!m_children.insert(zorder,widget))
 		LOG_ERROR_RETURN(("Failed to insert widget: %s",OOBase::system_error_text()),false);
