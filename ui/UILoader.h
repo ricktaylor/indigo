@@ -62,6 +62,7 @@ namespace Indigo
 		bool type_name(const char*& p, const char* pe, OOBase::ScopedString& i);
 		bool parse_uint(const char*& p, const char* pe, unsigned int& u);
 		bool parse_uvec2(const char*& p, const char* pe, glm::uvec2& u);
+		bool parse_uvec4(const char*& p, const char* pe, glm::uvec4& u);
 		bool parse_int(const char*& p, const char* pe, int& i);
 		bool parse_ivec2(const char*& p, const char* pe, glm::ivec2& i);
 		bool parse_string(const char*& p, const char* pe, OOBase::ScopedString& s);

@@ -138,9 +138,18 @@ namespace Indigo
 	class UISizer
 	{
 	public:
-		virtual void size(const glm::uvec2& size) = 0;
-		virtual glm::uvec2 min_size() const = 0;
-		virtual glm::uvec2 ideal_size() const = 0;
+		virtual void fit(const glm::uvec2& size) = 0;
+		virtual glm::uvec2 min_fit() const = 0;
+		virtual glm::uvec2 ideal_fit() const = 0;
+
+		const glm::uvec4& margins() const { return m_margins; }
+		virtual void margins(const glm::uvec4& m) { m_margins = m; }
+
+	protected:
+		UISizer(const glm::uvec4& margins = glm::uvec4(0)) : m_margins(margins)
+		{}
+
+		glm::uvec4 m_margins;
 	};
 
 	class UIGroup : public UIWidget
@@ -162,6 +171,8 @@ namespace Indigo
 
 		const OOBase::SharedPtr<UISizer>& sizer() const { return m_sizer; }
 		void sizer(const OOBase::SharedPtr<UISizer>& s);
+
+		virtual void layout();
 
 	protected:
 		virtual glm::uvec2 min_size() const;

@@ -205,6 +205,38 @@ bool Indigo::UILoader::parse_uvec2(const char*& p, const char* pe, glm::uvec2& u
 	return true;
 }
 
+bool Indigo::UILoader::parse_uvec4(const char*& p, const char* pe, glm::uvec4& u)
+{
+	if (!character(p,pe,'('))
+		SYNTAX_ERROR_RETURN(("'(' expected"),false);
+
+	if (!parse_uint(p,pe,u.x))
+		SYNTAX_ERROR_RETURN(("Unsigned integer expected"),false);
+
+	if (!character(p,pe,','))
+		SYNTAX_ERROR_RETURN(("',' expected"),false);
+
+	if (!parse_uint(p,pe,u.y))
+		SYNTAX_ERROR_RETURN(("Unsigned integer expected"),false);
+
+	if (!character(p,pe,','))
+		SYNTAX_ERROR_RETURN(("',' expected"),false);
+
+	if (!parse_uint(p,pe,u.z))
+		SYNTAX_ERROR_RETURN(("Unsigned integer expected"),false);
+
+	if (!character(p,pe,','))
+		SYNTAX_ERROR_RETURN(("',' expected"),false);
+
+	if (!parse_uint(p,pe,u.w))
+		SYNTAX_ERROR_RETURN(("Unsigned integer expected"),false);
+
+	if (!character(p,pe,')'))
+		SYNTAX_ERROR_RETURN(("')' expected"),false);
+
+	return true;
+}
+
 bool Indigo::UILoader::parse_int(const char*& p, const char* pe, int& i)
 {
 	i = 0;
@@ -483,7 +515,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 	if (!m_wnd->add_layer(layer,zorder))
 		return OOBase::SharedPtr<UIWidget>();
 
-	bool visible = true;
+	bool visible = false;
 	bool sizer = false;
 	zorder = 0;
 	if (character(p,pe,'('))
@@ -502,7 +534,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 				}
 				else if (arg == "VISIBLE")
 				{
-
+					visible = true;
 				}
 				else
 					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in LAYER",arg.c_str()),OOBase::SharedPtr<UIWidget>());
@@ -523,7 +555,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 		return OOBase::SharedPtr<UIWidget>();
 	
 	if (sizer)
-		layer->sizer()->size(layer->size());
+		layer->layout();
 
 	layer->show(visible);
 
@@ -532,6 +564,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 
 bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, unsigned int& zorder)
 {
+	glm::uvec4 margins(0);
 	glm::uvec2 padding(0);
 	if (character(p,pe,'('))
 	{
@@ -540,7 +573,12 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 		{
 			for (;;)
 			{
-				if (arg == "PADDING")
+				if (arg == "MARGINS")
+				{
+					if (!parse_uvec4(p,pe,margins))
+						return false;
+				}
+				else if (arg == "PADDING")
 				{
 					if (!parse_uvec2(p,pe,padding))
 						return false;
@@ -560,7 +598,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 			SYNTAX_ERROR_RETURN(("')' expected"),false);
 	}
 
-	OOBase::SharedPtr<UIGridSizer> sizer = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>();
+	OOBase::SharedPtr<UIGridSizer> sizer = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>(margins,padding);
 	if (!sizer)
 		LOG_ERROR_RETURN(("Failed to allocate sizer: %s",OOBase::system_error_text()),false);
 	parent->sizer(sizer);

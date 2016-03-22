@@ -43,14 +43,14 @@ namespace Indigo
 			expand = expand_horiz | expand_vert
 		};
 
-		UIGridSizer(const glm::uvec2& padding = glm::uvec2(0));
+		UIGridSizer(const glm::uvec4& margins = glm::uvec4(0), const glm::uvec2& padding = glm::uvec2(0));
 		
 		const glm::uvec2& padding() const { return m_padding; }
 		void padding(const glm::uvec2& p);
 
-		virtual void size(const glm::uvec2& size);
-		virtual glm::uvec2 min_size() const;
-		virtual glm::uvec2 ideal_size() const;
+		virtual void fit(const glm::uvec2& size);
+		virtual glm::uvec2 min_fit() const;
+		virtual glm::uvec2 ideal_fit() const;
 
 		bool add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget, unsigned int layout_flags = (align_centre | expand), unsigned int proportion = 1);
 		bool add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size, unsigned int proportion = 0);

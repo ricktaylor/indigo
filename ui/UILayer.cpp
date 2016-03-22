@@ -212,17 +212,19 @@ bool Indigo::UIGroup::remove_widget(unsigned int zorder)
 void Indigo::UIGroup::sizer(const OOBase::SharedPtr<UISizer>& s)
 {
 	if (s != m_sizer)
-	{
 		m_sizer = s;
-		if (m_sizer)
-			m_sizer->size(m_size);
-	}
+}
+
+void Indigo::UIGroup::layout()
+{
+	if (m_sizer)
+		m_sizer->fit(m_size);
 }
 
 glm::uvec2 Indigo::UIGroup::min_size() const
 {
 	if (m_sizer)
-		return m_sizer->min_size();
+		return m_sizer->min_fit();
 
 	glm::uvec2 min(0);
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
@@ -241,7 +243,7 @@ glm::uvec2 Indigo::UIGroup::min_size() const
 glm::uvec2 Indigo::UIGroup::ideal_size() const
 {
 	if (m_sizer)
-		return m_sizer->ideal_size();
+		return m_sizer->ideal_fit();
 
 	glm::uvec2 ideal(0);
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
@@ -260,7 +262,7 @@ glm::uvec2 Indigo::UIGroup::ideal_size() const
 void Indigo::UIGroup::on_size(const glm::uvec2& sz)
 {
 	if (m_sizer)
-		m_sizer->size(sz);
+		m_sizer->fit(sz);
 }
 
 Indigo::UILayer::UILayer() : 

@@ -23,7 +23,8 @@
 
 #include "UISizer.h"
 
-Indigo::UIGridSizer::UIGridSizer(const glm::uvec2& padding) :
+Indigo::UIGridSizer::UIGridSizer(const glm::uvec4& margins, const glm::uvec2& padding) :
+	UISizer(margins),
 	m_padding(padding)
 {
 }
@@ -51,7 +52,7 @@ bool Indigo::UIGridSizer::remove_item(unsigned int row, unsigned int col)
 	return m_items.remove(OOBase::Pair<unsigned int,unsigned int>(row,col));
 }
 
-glm::uvec2 Indigo::UIGridSizer::min_size() const
+glm::uvec2 Indigo::UIGridSizer::min_fit() const
 {
 	OOBase::Vector<unsigned int,OOBase::ThreadLocalAllocator> widths;
 	OOBase::Vector<unsigned int,OOBase::ThreadLocalAllocator> heights;
@@ -92,18 +93,18 @@ glm::uvec2 Indigo::UIGridSizer::min_size() const
 		min_width += *i;
 
 	if (min_width)
-		min_width += m_padding.x;
+		min_width -= m_padding.x;
 
 	for (OOBase::Vector<unsigned int,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
 		min_height += *i;
 
 	if (min_height)
-		min_height += m_padding.y;
+		min_height -= m_padding.y;
 
-	return glm::uvec2(min_width,min_height);
+	return glm::uvec2(min_width + m_margins.x + m_margins.z,min_height + m_margins.y + m_margins.w);
 }
 
-glm::uvec2 Indigo::UIGridSizer::ideal_size() const
+glm::uvec2 Indigo::UIGridSizer::ideal_fit() const
 {
 	OOBase::Vector<unsigned int,OOBase::ThreadLocalAllocator> widths;
 	OOBase::Vector<unsigned int,OOBase::ThreadLocalAllocator> heights;
@@ -144,18 +145,18 @@ glm::uvec2 Indigo::UIGridSizer::ideal_size() const
 		ideal_width += *i;
 
 	if (ideal_width)
-		ideal_width += m_padding.x;
+		ideal_width -= m_padding.x;
 
 	for (OOBase::Vector<unsigned int,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
 		ideal_height += *i;
 
 	if (ideal_height)
-		ideal_height += m_padding.y;
+		ideal_height -= m_padding.y;
 
-	return glm::uvec2(ideal_width,ideal_height);
+	return glm::uvec2(ideal_width + m_margins.x + m_margins.z,ideal_height + m_margins.y + m_margins.w);
 }
 
-void Indigo::UIGridSizer::size(const glm::uvec2& size)
+void Indigo::UIGridSizer::fit(const glm::uvec2& outer_size)
 {
 	OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator> widths;
 	OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator> heights;
@@ -197,7 +198,7 @@ void Indigo::UIGridSizer::size(const glm::uvec2& size)
 		ideal_width.second += i->second;
 	}
 	if (ideal_width.first)
-		ideal_width.first += m_padding.x;
+		ideal_width.first -= m_padding.x;
 
 	for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
 	{
@@ -205,22 +206,23 @@ void Indigo::UIGridSizer::size(const glm::uvec2& size)
 		ideal_height.second += i->second;
 	}
 	if (ideal_height.first)
-		ideal_height.first += m_padding.y;
+		ideal_height.first -= m_padding.y;
 
 	// Adjust the widths and heights
+	glm::uvec2 size(outer_size.x - (m_margins.x + m_margins.z),outer_size.y - (m_margins.y + m_margins.w));
 	if (size.x != ideal_width.first && ideal_width.second)
 	{
 		float expand_x = (static_cast<float>(size.x) - ideal_width.first) / ideal_width.second;
 
 		for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
-			i->first += static_cast<unsigned int>(expand_x * i->second / ideal_width.second);
+			i->first += static_cast<unsigned int>(expand_x * i->second);
 	}
 	if (size.y != ideal_height.first && ideal_height.second)
 	{
 		float expand_y = (static_cast<float>(size.y) - ideal_height.first) / ideal_height.second;
 
 		for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
-			i->first += static_cast<unsigned int>(expand_y * i->second / ideal_height.second);
+			i->first += static_cast<unsigned int>(expand_y * i->second);
 	}
 
 	// Reset the widths and heights .second to the accumulated position
@@ -229,14 +231,14 @@ void Indigo::UIGridSizer::size(const glm::uvec2& size)
 		if (i != widths.begin())
 			i->second = (i-1)->first + (i-1)->second + m_padding.x;
 		else
-			i->second = m_padding.x;
+			i->second = m_margins.x;
 	}
 	for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
 	{
 		if (i != heights.begin())
 			i->second = (i-1)->first + (i-1)->second + m_padding.y;
 		else
-			i->second = m_padding.y;
+			i->second = m_margins.w;
 	}
 
 	// Loop through the grid resizing cells
@@ -248,7 +250,7 @@ void Indigo::UIGridSizer::size(const glm::uvec2& size)
 			if (widget && widget->visible())
 			{
 				glm::uvec2 cell_size(widths[i->first.first].first,heights[i->first.second].first);
-				glm::ivec2 cell_pos(widths[i->first.first].second,heights[i->first.first].second);
+				glm::ivec2 cell_pos(widths[i->first.first].second,heights[i->first.second].second);
 
 				glm::ivec2 item_pos(cell_pos);
 				glm::uvec2 item_size;
