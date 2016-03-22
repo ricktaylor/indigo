@@ -253,8 +253,9 @@ void NinePatchFactory::draw(OOGL::State& glState, const OOBase::SharedPtr<OOGL::
 	}
 }
 
-Indigo::Render::NinePatch::NinePatch(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info) :
+Indigo::Render::NinePatch::NinePatch(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info) :
 		UIDrawable(position),
+		m_texture(texture),
 		m_colour(colour),
 		m_patch(-1),
 		m_info(info)
@@ -341,21 +342,21 @@ void Indigo::Render::NinePatch::size(const glm::uvec2& size)
 
 void Indigo::Render::NinePatch::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	if (m_patch != GLsizei(-1) && m_info->m_texture && m_colour.a > 0.f)
+	if (m_patch != GLsizei(-1) && m_texture && m_colour.a > 0.f)
 	{
 		if (m_counts[0])
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(glState,m_info->m_texture,mvp,m_colour,m_firsts,m_counts,3);
+				NinePatchFactory_t::instance().draw(glState,m_texture,mvp,m_colour,m_firsts,m_counts,3);
 			else
-				NinePatchFactory_t::instance().draw(glState,m_info->m_texture,mvp,m_colour,m_firsts,m_counts,2);
+				NinePatchFactory_t::instance().draw(glState,m_texture,mvp,m_colour,m_firsts,m_counts,2);
 		}
 		else
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(glState,m_info->m_texture,mvp,m_colour,&m_firsts[1],&m_counts[1],2);
+				NinePatchFactory_t::instance().draw(glState,m_texture,mvp,m_colour,&m_firsts[1],&m_counts[1],2);
 			else
-				NinePatchFactory_t::instance().draw(glState,m_info->m_texture,mvp,m_colour,&m_firsts[1],&m_counts[1],1);
+				NinePatchFactory_t::instance().draw(glState,m_texture,mvp,m_colour,&m_firsts[1],&m_counts[1],1);
 		}
 	}
 }
@@ -508,19 +509,16 @@ OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(co
 	if (!m_info)
 		LOG_ERROR_RETURN(("NinePatch::make_drawbale called with no info!"),OOBase::SharedPtr<Indigo::Render::NinePatch>());
 
-	if (!m_info->m_texture)
-	{
-		m_info->m_texture = make_texture(GL_RGBA8,1);
-		if (!m_info->m_texture)
-			return OOBase::SharedPtr<Indigo::Render::NinePatch>();
+	OOBase::SharedPtr<OOGL::Texture> texture = make_texture(GL_RGBA8,1);
+	if (!texture)
+		return OOBase::SharedPtr<Indigo::Render::NinePatch>();
 
-		m_info->m_texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		m_info->m_texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-		m_info->m_texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-		m_info->m_texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-	}
+	texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 
-	return OOBase::allocate_shared<Render::NinePatch,OOBase::ThreadLocalAllocator>(position,size,colour,m_info);
+	return OOBase::allocate_shared<Render::NinePatch,OOBase::ThreadLocalAllocator>(position,size,colour,texture,m_info);
 }
 
 glm::uvec2 Indigo::NinePatch::min_size() const

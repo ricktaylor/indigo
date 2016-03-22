@@ -61,7 +61,6 @@ namespace Indigo
 		{
 			glm::uvec4 m_borders;
 			glm::uvec2 m_tex_size;
-			OOBase::SharedPtr<OOGL::Texture> m_texture;
 		};
 		OOBase::SharedPtr<Indigo::NinePatch::Info> m_info;
 	};
@@ -73,7 +72,7 @@ namespace Indigo
 			friend class Indigo::NinePatch;
 
 		public:
-			NinePatch(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info);
+			NinePatch(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info);
 			virtual ~NinePatch();
 
 			virtual bool valid() const;
@@ -83,6 +82,7 @@ namespace Indigo
 			void colour(const glm::vec4& colour) { m_colour = colour; }
 
 		private:
+			OOBase::SharedPtr<OOGL::Texture> m_texture;
 			glm::vec4  m_colour;
 			GLsizei    m_patch;
 			GLsizeiptr m_firsts[3];
