@@ -67,7 +67,10 @@ void Indigo::UILoader::syntax_error(const char* fmt, ...)
 const char*& Indigo::UILoader::inc_p(const char*& p, const char* pe)
 {
 	if (p != pe)
+	{
 		++p;
+		++m_error_pos.m_col;
+	}
 
 	if (p != pe && *p == '\n')
 	{
