@@ -91,8 +91,8 @@ namespace Indigo
 		/*bool enabled() const { return m_enabled; }
 		bool enable(bool enabled = true);
 
-		bool focused() const { return m_focused && enabled(); }
-		bool focus(bool focused = true);
+		bool active() const { return m_active && enabled(); }
+		bool activate(bool active = true);
 
 		bool hilighted() const { return m_hilighted && enabled(); }
 		bool hilight(bool hilighted = true);*/
@@ -119,7 +119,7 @@ namespace Indigo
 		virtual void on_size(const glm::uvec2& sz) { }
 
 		/*virtual bool can_enable(bool enabled) { return false; }
-		virtual bool can_focus(bool focused) { return false; }
+		virtual bool can_activate(bool active) { return false; }
 		virtual bool can_hilight(bool hilighted) { return false; }*/
 
 	private:
@@ -127,7 +127,7 @@ namespace Indigo
 		OOBase::SharedPtr<Indigo::Render::UIGroup> m_render_group;
 		bool m_visible;
 		/*bool m_enabled;
-		bool m_focused;
+		bool m_active;
 		bool m_hilighted;*/
 		glm::ivec2 m_position;
 		glm::uvec2 m_size;

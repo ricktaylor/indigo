@@ -80,7 +80,7 @@ Indigo::UIWidget::UIWidget(UIGroup* parent, const glm::ivec2& position, const gl
 		m_parent(parent),
 		m_visible(false),
 		/*m_enabled(true),
-		m_focused(false),
+		m_active(false),
 		m_hilighted(false),*/
 		m_position(position),
 		m_size(size)
@@ -110,14 +110,14 @@ void Indigo::UIWidget::show(bool visible)
 	return true;
 }
 
-bool Indigo::UIWidget::focus(bool focused)
+bool Indigo::UIWidget::activate(bool active)
 {
-	if (focused != m_focused)
+	if (active != m_active)
 	{
-		if (!enabled() || !can_focus(focused))
+		if (!enabled() || !can_activate(active))
 			return false;
 
-		m_focused = focused;
+		m_active = active;
 	}
 	return true;
 }
