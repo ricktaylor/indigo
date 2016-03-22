@@ -555,7 +555,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 	if (!m_wnd->add_layer(layer,zorder))
 		return OOBase::SharedPtr<UIWidget>();
 
-	if (!load_grid_sizer(p,pe,layer.get(),name.c_str(),layer->sizer()))
+	if (!load_grid_sizer(p,pe,layer.get(),name.c_str(),layer->sizer(),true))
 		return OOBase::SharedPtr<UIWidget>();
 
 	if (visible)
@@ -567,7 +567,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 	return layer;
 }
 
-bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, UIGridSizer& sizer)
+bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, UIGridSizer& sizer, bool add_loose)
 {
 	if (character(p,pe,'{'))
 	{
@@ -580,16 +580,16 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 				unsigned int row,col,proportion = -1;
 
 				if (!parse_uint(p,pe,row))
-					SYNTAX_ERROR_RETURN(("Missing row argument in SIZER"),false);
+					SYNTAX_ERROR_RETURN(("Missing row argument in layout"),false);
 
 				if (!character(p,pe,','))
 					SYNTAX_ERROR_RETURN(("',' expected"),false);
 
 				if (!parse_uint(p,pe,col))
-					SYNTAX_ERROR_RETURN(("Missing column argument in SIZER"),false);
+					SYNTAX_ERROR_RETURN(("Missing column argument in layout"),false);
 
 				if (character(p,pe,'/') && !parse_uint(p,pe,proportion))
-					SYNTAX_ERROR_RETURN(("Missing proportion argument in SIZER"),false);
+					SYNTAX_ERROR_RETURN(("Missing proportion argument in layout"),false);
 
 				if (!character(p,pe,']'))
 					SYNTAX_ERROR_RETURN(("']' expected"),false);
@@ -666,6 +666,53 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 						if (!sizer.add_spacer(row,col,size,proportion))
 							return false;
 					}
+					else if (type == "GRID_SIZER")
+					{
+						glm::uvec4 margins(0);
+						glm::uvec2 padding(0);
+
+						if (character(p,pe,'('))
+						{
+							OOBase::ScopedString arg;
+							if (type_name(p,pe,arg))
+							{
+								for (;;)
+								{
+									if (arg == "MARGINS")
+									{
+										if (!parse_uvec4(p,pe,margins))
+											return OOBase::SharedPtr<UIWidget>();
+									}
+									else if (arg == "PADDING")
+									{
+										if (!parse_uvec2(p,pe,padding))
+											return OOBase::SharedPtr<UIWidget>();
+									}
+									else
+										SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in GRID_SIZER",arg.c_str()),OOBase::SharedPtr<UIWidget>());
+
+									if (!character(p,pe,','))
+										break;
+
+									if (!type_name(p,pe,arg))
+										SYNTAX_ERROR_RETURN(("Argument expected"),OOBase::SharedPtr<UIWidget>());
+								}
+							}
+
+							if (!character(p,pe,')'))
+								SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
+						}
+
+						OOBase::SharedPtr<UIGridSizer> s = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>(margins,padding);
+						if (!s)
+							LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
+
+						// TODO - Add Sizer
+						return false;
+
+						if (!load_grid_sizer(p,pe,parent,parent_name,*s,false))
+							return false;
+					}
 					else
 					{
 						OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,parent_name,zorder++);
@@ -677,7 +724,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 					}
 				}
 			}
-			else if (type_name(p,pe,type))
+			else if (add_loose && type_name(p,pe,type))
 			{
 				OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,parent_name,zorder++);
 				if (!child)
@@ -685,7 +732,10 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 			}
 			else if (!first)
 			{
-				SYNTAX_ERROR_RETURN(("Type name or '[' expected"),false);
+				if (add_loose)
+					SYNTAX_ERROR_RETURN(("'[' or type name expected"),false);
+				else
+					SYNTAX_ERROR_RETURN(("'[' expected"),false);
 			}
 
 			if (!character(p,pe,','))
