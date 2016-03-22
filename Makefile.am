@@ -116,6 +116,7 @@ indigo_SOURCES = \
 	ui/NinePatch.cpp \
 	ui/Label.cpp \
 	ui/ImageLayer.cpp \
+	ui/UIWidget.cpp \
 	ui/UILayer.cpp \
 	ui/UIButton.cpp \
 	ui/UIImage.cpp \

@@ -74,7 +74,7 @@ namespace Indigo
 		bool load_children(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, unsigned int& zorder);
 		OOBase::SharedPtr<UIWidget> load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, const char* parent_name, unsigned int zorder);
 
-		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, unsigned int& zorder);
+		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, UIGridSizer& sizer);
 		OOBase::SharedPtr<UIWidget> load_uiimage(const char*& p, const char* pe, UIGroup* parent);
 		OOBase::SharedPtr<Image> load_image(const char*& p, const char* pe);
 	};

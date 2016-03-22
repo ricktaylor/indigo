@@ -22,10 +22,27 @@
 #ifndef INDIGO_SIZER_H_INCLUDED
 #define INDIGO_SIZER_H_INCLUDED
 
-#include "UILayer.h"
+#include "UIWidget.h"
 
 namespace Indigo
 {
+	class UISizer
+	{
+	public:
+		virtual void fit(const glm::uvec2& size) = 0;
+		virtual glm::uvec2 min_fit() const = 0;
+		virtual glm::uvec2 ideal_fit() const = 0;
+
+		const glm::uvec4& margins() const { return m_margins; }
+		virtual void margins(const glm::uvec4& m) { m_margins = m; }
+
+	protected:
+		UISizer(const glm::uvec4& margins = glm::uvec4(0)) : m_margins(margins)
+		{}
+
+		glm::uvec4 m_margins;
+	};
+
 	class UIGridSizer : public UISizer
 	{
 	public:

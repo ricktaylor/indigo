@@ -505,19 +505,10 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 	if (m_hashWidgets.find(name.c_str()))
 		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),OOBase::SharedPtr<UIWidget>());
 
-	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>();
-	if (!layer)
-		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
-
-	if (!m_hashWidgets.insert(name.c_str(),layer))
-		LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
-
-	if (!m_wnd->add_layer(layer,zorder))
-		return OOBase::SharedPtr<UIWidget>();
-
 	bool visible = false;
-	bool sizer = false;
-	zorder = 0;
+	glm::uvec4 margins(0);
+	glm::uvec2 padding(0);
+
 	if (character(p,pe,'('))
 	{
 		OOBase::ScopedString arg;
@@ -525,16 +516,19 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 		{
 			for (;;)
 			{
-				if (arg == "GRID_SIZER")
-				{
-					if (!load_grid_sizer(p,pe,layer.get(),name.c_str(),zorder))
-						return OOBase::SharedPtr<UIWidget>();
-
-					sizer = true;
-				}
-				else if (arg == "VISIBLE")
+				if (arg == "VISIBLE")
 				{
 					visible = true;
+				}
+				else if (arg == "MARGINS")
+				{
+					if (!parse_uvec4(p,pe,margins))
+						return OOBase::SharedPtr<UIWidget>();
+				}
+				else if (arg == "PADDING")
+				{
+					if (!parse_uvec2(p,pe,padding))
+						return OOBase::SharedPtr<UIWidget>();
 				}
 				else
 					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in LAYER",arg.c_str()),OOBase::SharedPtr<UIWidget>());
@@ -551,77 +545,51 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 			SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
 	}
 
-	if (!load_children(p,pe,layer.get(),name.c_str(),zorder))
-		return OOBase::SharedPtr<UIWidget>();
-	
-	if (sizer)
-		layer->layout();
+	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(margins,padding);
+	if (!layer)
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
-	layer->show(visible);
+	if (!m_hashWidgets.insert(name.c_str(),layer))
+		LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
+
+	if (!m_wnd->add_layer(layer,zorder))
+		return OOBase::SharedPtr<UIWidget>();
+
+	if (!load_grid_sizer(p,pe,layer.get(),name.c_str(),layer->sizer()))
+		return OOBase::SharedPtr<UIWidget>();
+
+	if (visible)
+	{
+		layer->layout();
+		layer->show();
+	}
 
 	return layer;
 }
 
-bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, unsigned int& zorder)
+bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, UIGridSizer& sizer)
 {
-	glm::uvec4 margins(0);
-	glm::uvec2 padding(0);
-	if (character(p,pe,'('))
-	{
-		OOBase::ScopedString arg;
-		if (type_name(p,pe,arg))
-		{
-			for (;;)
-			{
-				if (arg == "MARGINS")
-				{
-					if (!parse_uvec4(p,pe,margins))
-						return false;
-				}
-				else if (arg == "PADDING")
-				{
-					if (!parse_uvec2(p,pe,padding))
-						return false;
-				}
-				else
-					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in GRID_SIZER",arg.c_str()),false);
-
-				if (!character(p,pe,','))
-					break;
-
-				if (!type_name(p,pe,arg))
-					SYNTAX_ERROR_RETURN(("Argument expected"),false);
-			}
-		}
-
-		if (!character(p,pe,')'))
-			SYNTAX_ERROR_RETURN(("')' expected"),false);
-	}
-
-	OOBase::SharedPtr<UIGridSizer> sizer = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>(margins,padding);
-	if (!sizer)
-		LOG_ERROR_RETURN(("Failed to allocate sizer: %s",OOBase::system_error_text()),false);
-	parent->sizer(sizer);
-	
 	if (character(p,pe,'{'))
 	{
-		if (character(p,pe,'['))
+		unsigned int zorder = 0;
+		OOBase::ScopedString type;
+		for (bool first = true;;first = false)
 		{
-			for (OOBase::ScopedString type;;)
+			if (character(p,pe,'['))
 			{
 				unsigned int row,col,proportion = -1;
 
 				if (!parse_uint(p,pe,row))
-					SYNTAX_ERROR_RETURN(("Missing row argument in GRID_SIZER"),false);
+					SYNTAX_ERROR_RETURN(("Missing row argument in SIZER"),false);
 
 				if (!character(p,pe,','))
 					SYNTAX_ERROR_RETURN(("',' expected"),false);
 
 				if (!parse_uint(p,pe,col))
-					SYNTAX_ERROR_RETURN(("Missing column argument in GRID_SIZER"),false);
+					SYNTAX_ERROR_RETURN(("Missing column argument in SIZER"),false);
 
 				if (character(p,pe,'/') && !parse_uint(p,pe,proportion))
-					SYNTAX_ERROR_RETURN(("Missing proportion argument in GRID_SIZER"),false);
+					SYNTAX_ERROR_RETURN(("Missing proportion argument in SIZER"),false);
 
 				if (!character(p,pe,']'))
 					SYNTAX_ERROR_RETURN(("']' expected"),false);
@@ -678,7 +646,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 					if (!child)
 						return false;
 
-					if (!sizer->add_widget(row,col,child,flags,proportion))
+					if (!sizer.add_widget(row,col,child,flags,proportion))
 						return false;
 				}
 				else
@@ -695,7 +663,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 						if (!parse_uvec2(p,pe,size))
 							SYNTAX_ERROR_RETURN(("(width,height) expected"),false);
 
-						if (!sizer->add_spacer(row,col,size,proportion))
+						if (!sizer.add_spacer(row,col,size,proportion))
 							return false;
 					}
 					else
@@ -704,17 +672,24 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 						if (!child)
 							return false;
 
-						if (!sizer->add_widget(row,col,child))
+						if (!sizer.add_widget(row,col,child))
 							return false;
 					}
 				}
-
-				if (!character(p,pe,','))
-					break;
-
-				if (!character(p,pe,'['))
-					SYNTAX_ERROR_RETURN(("'[' expected"),false);
 			}
+			else if (type_name(p,pe,type))
+			{
+				OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,parent_name,zorder++);
+				if (!child)
+					return false;
+			}
+			else if (!first)
+			{
+				SYNTAX_ERROR_RETURN(("Type name or '[' expected"),false);
+			}
+
+			if (!character(p,pe,','))
+				break;
 		}
 
 		if (!character(p,pe,'}'))
