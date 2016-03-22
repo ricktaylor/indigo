@@ -35,7 +35,7 @@ namespace Indigo
 		UILoader(OOBase::SharedPtr<Window> wnd, ResourceBundle& resource) : m_wnd(wnd), m_resource(resource)
 		{}
 
-		bool load(const char* name, unsigned int& zorder, UIGroup* parent = NULL);
+		bool load(const char* resource_name, unsigned int& zorder, UIGroup* parent = NULL);
 		
 	private:
 		OOBase::SharedPtr<Window> m_wnd;
@@ -74,7 +74,7 @@ namespace Indigo
 		bool load_children(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, unsigned int& zorder);
 		OOBase::SharedPtr<UIWidget> load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, const char* parent_name, unsigned int zorder);
 
-		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, UIGridSizer& sizer, bool add_loose);
+		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, UIGridSizer& sizer, unsigned int& zorder, bool add_loose);
 		OOBase::SharedPtr<UIWidget> load_uiimage(const char*& p, const char* pe, UIGroup* parent);
 		OOBase::SharedPtr<Image> load_image(const char*& p, const char* pe);
 	};

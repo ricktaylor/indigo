@@ -38,6 +38,15 @@ bool Indigo::UIGridSizer::add_widget(unsigned int row, unsigned int col, const O
 	return m_items.insert(OOBase::Pair<unsigned int,unsigned int>(row,col),item);
 }
 
+bool Indigo::UIGridSizer::add_sizer(unsigned int row, unsigned int col, const OOBase::SharedPtr<UISizer>& sizer, unsigned int layout_flags, unsigned int proportion)
+{
+	struct Item item;
+	item.m_sizer = sizer;
+	item.m_flags = layout_flags;
+	item.m_proportion = proportion;
+	return m_items.insert(OOBase::Pair<unsigned int,unsigned int>(row,col),item);
+}
+
 bool Indigo::UIGridSizer::add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size, unsigned int proportion)
 {
 	struct Item item;
@@ -67,6 +76,10 @@ glm::uvec2 Indigo::UIGridSizer::min_fit() const
 			OOBase::SharedPtr<UIWidget> widget(i->second.m_widget.lock());
 			if (widget && widget->visible())
 				sz = widget->min_size() + m_padding;
+		}
+		else if (i->second.m_sizer)
+		{
+			sz = i->second.m_sizer->min_fit() + m_padding;
 		}
 		else
 			sz = i->second.m_size + m_padding;
@@ -120,6 +133,10 @@ glm::uvec2 Indigo::UIGridSizer::ideal_fit() const
 			if (widget && widget->visible())
 				sz = widget->ideal_size() + m_padding;
 		}
+		else if (i->second.m_sizer)
+		{
+			sz = i->second.m_sizer->ideal_fit() + m_padding;
+		}
 		else
 			sz = i->second.m_size + m_padding;
 
@@ -172,6 +189,10 @@ void Indigo::UIGridSizer::fit(const glm::uvec2& outer_size)
 			OOBase::SharedPtr<UIWidget> widget(i->second.m_widget.lock());
 			if (widget && widget->visible())
 				sz = widget->ideal_size() + m_padding;
+		}
+		else if (i->second.m_sizer)
+		{
+			sz = i->second.m_sizer->ideal_fit() + m_padding;
 		}
 		else
 			sz = i->second.m_size + m_padding;
@@ -231,14 +252,14 @@ void Indigo::UIGridSizer::fit(const glm::uvec2& outer_size)
 		if (i != widths.begin())
 			i->second = (i-1)->first + (i-1)->second + m_padding.x;
 		else
-			i->second = m_margins.x;
+			i->second = m_position.x + m_margins.x;
 	}
 	for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
 	{
 		if (i != heights.begin())
 			i->second = (i-1)->first + (i-1)->second + m_padding.y;
 		else
-			i->second = m_margins.w;
+			i->second = m_position.y + m_margins.w;
 	}
 
 	// Loop through the grid resizing cells
@@ -253,10 +274,10 @@ void Indigo::UIGridSizer::fit(const glm::uvec2& outer_size)
 				glm::ivec2 cell_pos(widths[i->first.first].second,heights[i->first.second].second);
 
 				glm::ivec2 item_pos(cell_pos);
-				glm::uvec2 item_size;
+				glm::uvec2 item_size(widget->size());
 
 				// Expand if required
-				if (item_size != cell_size && (i->second.m_flags & expand))
+				if (i->second.m_flags & expand)
 				{
 					if (i->second.m_flags & expand_horiz)
 						item_size.x = cell_size.x;
@@ -265,8 +286,6 @@ void Indigo::UIGridSizer::fit(const glm::uvec2& outer_size)
 
 					item_size = widget->size(item_size);
 				}
-				else
-					item_size = widget->size();
 				
 				// Align if required
 				if (i->second.m_flags & align_right)
@@ -281,6 +300,38 @@ void Indigo::UIGridSizer::fit(const glm::uvec2& outer_size)
 
 				widget->position(item_pos);
 			}
+		}
+		else if (i->second.m_sizer)
+		{
+			glm::uvec2 cell_size(widths[i->first.first].first,heights[i->first.second].first);
+			glm::ivec2 cell_pos(widths[i->first.first].second,heights[i->first.second].second);
+
+			glm::ivec2 item_pos(cell_pos);
+			glm::uvec2 item_size(i->second.m_sizer->ideal_fit());
+
+			// Expand if required
+			if (item_size != cell_size && (i->second.m_flags & expand))
+			{
+				if (i->second.m_flags & expand_horiz)
+					item_size.x = cell_size.x;
+				if (i->second.m_flags & expand_vert)
+					item_size.y = cell_size.y;
+
+				i->second.m_sizer->fit(item_size);
+			}
+
+			// Align if required
+			if (i->second.m_flags & align_right)
+				item_pos.x = cell_pos.x + static_cast<int>(cell_size.x) - static_cast<int>(item_size.x);
+			else if (i->second.m_flags & align_hcentre)
+				item_pos.x = cell_pos.x + (static_cast<int>(cell_size.x) - static_cast<int>(item_size.x))/2;
+
+			if (i->second.m_flags & align_top)
+				item_pos.y = cell_pos.y + static_cast<int>(cell_size.y) - static_cast<int>(item_size.y);
+			else if (i->second.m_flags & align_vcentre)
+				item_pos.y = cell_pos.y + (static_cast<int>(cell_size.y) - static_cast<int>(item_size.y))/2;
+
+			i->second.m_sizer->position(item_pos);
 		}
 	}
 }

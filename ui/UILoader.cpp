@@ -555,7 +555,8 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 	if (!m_wnd->add_layer(layer,zorder))
 		return OOBase::SharedPtr<UIWidget>();
 
-	if (!load_grid_sizer(p,pe,layer.get(),name.c_str(),layer->sizer(),true))
+	zorder = 0;
+	if (!load_grid_sizer(p,pe,layer.get(),name.c_str(),layer->sizer(),zorder,true))
 		return OOBase::SharedPtr<UIWidget>();
 
 	if (visible)
@@ -567,11 +568,10 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 	return layer;
 }
 
-bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, UIGridSizer& sizer, bool add_loose)
+bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, UIGridSizer& sizer, unsigned int& zorder, bool add_loose)
 {
 	if (character(p,pe,'{'))
 	{
-		unsigned int zorder = 0;
 		OOBase::ScopedString type;
 		for (bool first = true;;first = false)
 		{
@@ -642,31 +642,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 					if (!type_name(p,pe,type))
 						SYNTAX_ERROR_RETURN(("Type name expected"),false);
 
-					OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,parent_name,zorder++);
-					if (!child)
-						return false;
-
-					if (!sizer.add_widget(row,col,child,flags,proportion))
-						return false;
-				}
-				else
-				{
-					if (!type_name(p,pe,type))
-						SYNTAX_ERROR_RETURN(("Type name expected"),false);
-
-					if (type == "SPACER")
-					{
-						if (proportion == (unsigned int)-1)
-							proportion = 0;
-
-						glm::uvec2 size(0);
-						if (!parse_uvec2(p,pe,size))
-							SYNTAX_ERROR_RETURN(("(width,height) expected"),false);
-
-						if (!sizer.add_spacer(row,col,size,proportion))
-							return false;
-					}
-					else if (type == "GRID_SIZER")
+					if (type == "GRID_SIZER")
 					{
 						glm::uvec4 margins(0);
 						glm::uvec2 padding(0);
@@ -707,10 +683,37 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 						if (!s)
 							LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
-						// TODO - Add Sizer
-						return false;
+						if (!sizer.add_sizer(row,col,s,flags,proportion))
+							return false;
 
-						if (!load_grid_sizer(p,pe,parent,parent_name,*s,false))
+						if (!load_grid_sizer(p,pe,parent,parent_name,*s,zorder,false))
+							return false;
+					}
+					else
+					{
+						OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,parent_name,zorder++);
+						if (!child)
+							return false;
+
+						if (!sizer.add_widget(row,col,child,flags,proportion))
+							return false;
+					}
+				}
+				else
+				{
+					if (!type_name(p,pe,type))
+						SYNTAX_ERROR_RETURN(("Type name expected"),false);
+
+					if (type == "SPACER")
+					{
+						if (proportion == (unsigned int)-1)
+							proportion = 0;
+
+						glm::uvec2 size(0);
+						if (!parse_uvec2(p,pe,size))
+							SYNTAX_ERROR_RETURN(("(width,height) expected"),false);
+
+						if (!sizer.add_spacer(row,col,size,proportion))
 							return false;
 					}
 					else

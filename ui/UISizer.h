@@ -36,10 +36,16 @@ namespace Indigo
 		const glm::uvec4& margins() const { return m_margins; }
 		virtual void margins(const glm::uvec4& m) { m_margins = m; }
 
+		const glm::ivec2& position() const { return m_position; }
+		virtual void position(const glm::ivec2& p) { m_position = p; }
+
 	protected:
-		UISizer(const glm::uvec4& margins = glm::uvec4(0)) : m_margins(margins)
+		UISizer(const glm::uvec4& margins = glm::uvec4(0)) :
+			m_position(0),
+			m_margins(margins)
 		{}
 
+		glm::ivec2 m_position;
 		glm::uvec4 m_margins;
 	};
 
@@ -70,6 +76,7 @@ namespace Indigo
 		virtual glm::uvec2 ideal_fit() const;
 
 		bool add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget, unsigned int layout_flags = (align_centre | expand), unsigned int proportion = 1);
+		bool add_sizer(unsigned int row, unsigned int col, const OOBase::SharedPtr<UISizer>& sizer, unsigned int layout_flags = (align_centre | expand), unsigned int proportion = 1);
 		bool add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size, unsigned int proportion = 0);
 
 		bool remove_item(unsigned int row, unsigned int col);
@@ -79,10 +86,11 @@ namespace Indigo
 
 		struct Item
 		{
-			OOBase::WeakPtr<UIWidget> m_widget;
-			glm::uvec2                m_size;
-			unsigned int              m_flags;
-			unsigned int              m_proportion;
+			OOBase::WeakPtr<UIWidget>  m_widget;
+			OOBase::SharedPtr<UISizer> m_sizer;
+			glm::uvec2                 m_size;
+			unsigned int               m_flags;
+			unsigned int               m_proportion;
 		};
 
 		typedef OOBase::Table<OOBase::Pair<unsigned int,unsigned int>,Item,OOBase::Less<OOBase::Pair<unsigned int,unsigned int> >,OOBase::ThreadLocalAllocator> items_t;
