@@ -31,13 +31,13 @@ namespace Indigo
 		class Label : public Text, public UIDrawable
 		{
 		public:
-			Label(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::ivec2& position = glm::ivec2(0));
+			Label(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::ivec2& position = glm::ivec2(0));
 
 			void colour(const glm::vec4& colour) { m_colour = colour; }
 
 		protected:
 			glm::vec4 m_colour;
-			float m_scale;
+			unsigned int m_size;
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};
@@ -45,7 +45,7 @@ namespace Indigo
 		class ShadowLabel : public Label
 		{
 		public:
-			ShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, float scale = 0.f, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::vec4& shadow = glm::vec4(.5f), const glm::ivec2& position = glm::ivec2(0), const glm::ivec2& drop = glm::ivec2(0,-1));
+			ShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::vec4& shadow = glm::vec4(.5f), const glm::ivec2& position = glm::ivec2(0), const glm::ivec2& drop = glm::ivec2(0,-1));
 
 			void shadow(const glm::vec4& shadow) { m_shadow = shadow; }
 

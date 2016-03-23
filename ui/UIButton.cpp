@@ -45,6 +45,8 @@ Indigo::UIButton::UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& styl
 	if (!m_style)
 		LOG_ERROR(("Invalid style passed to UIButton constructor"));
 
+	update_sizes();
+
 	if (size == glm::uvec2(0))
 		this->size(ideal_size());
 }
@@ -59,6 +61,8 @@ Indigo::UIButton::UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& styl
 
 	if (!m_text.assign(sz,len))
 		LOG_ERROR(("Failed to assign text: %s",OOBase::system_error_text()));
+
+	update_sizes();
 
 	if (size == glm::uvec2(0))
 		this->size(ideal_size());
@@ -83,7 +87,7 @@ glm::uvec2 Indigo::UIButton::min_style_size(const StyleState& style) const
 
 	if (!m_text.empty() && style.m_font)
 	{
-		unsigned int height = style.m_font->line_height();
+		unsigned int height = style.m_font_size;
 		unsigned int width = static_cast<unsigned int>(ceil(height * style.m_font->measure_text(m_text.c_str(),m_text.length())));
 
 		text.x = width + margins.x + margins.z;
@@ -91,15 +95,6 @@ glm::uvec2 Indigo::UIButton::min_style_size(const StyleState& style) const
 	}
 
 	return glm::max(min_size,text);
-}
-
-glm::uvec2 Indigo::UIButton::min_size() const
-{
-	if (!m_style)
-		return glm::uvec2(0);
-
-	return glm::max(min_style_size(m_style->m_normal),
-			glm::max(min_style_size(m_style->m_active),min_style_size(m_style->m_pressed)));
 }
 
 glm::uvec2 Indigo::UIButton::ideal_style_size(const StyleState& style) const
@@ -116,7 +111,7 @@ glm::uvec2 Indigo::UIButton::ideal_style_size(const StyleState& style) const
 
 	if (!m_text.empty() && style.m_font)
 	{
-		unsigned int height = style.m_font->line_height();
+		unsigned int height = style.m_font_size;
 		unsigned int width = static_cast<unsigned int>(ceil(height * style.m_font->measure_text(m_text.c_str(),m_text.length())));
 
 		text.x = width + margins.x + margins.z + 2 * height;
@@ -126,23 +121,26 @@ glm::uvec2 Indigo::UIButton::ideal_style_size(const StyleState& style) const
 	return glm::max(min_size,text);
 }
 
-glm::uvec2 Indigo::UIButton::ideal_size() const
+void Indigo::UIButton::update_sizes()
 {
-	if (!m_style)
-		return glm::uvec2(0);
+	if (m_style)
+	{
+		m_min_size = glm::max(min_style_size(m_style->m_normal),
+					glm::max(min_style_size(m_style->m_active),min_style_size(m_style->m_pressed)));
 
-	return glm::max(ideal_style_size(m_style->m_normal),
-			glm::max(ideal_style_size(m_style->m_active),ideal_style_size(m_style->m_pressed)));
+		m_ideal_size = glm::max(ideal_style_size(m_style->m_normal),
+					glm::max(ideal_style_size(m_style->m_active),ideal_style_size(m_style->m_pressed)));
+	}
 }
 
-bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, const StyleState& style, RenderStyleState& rs)
+bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& style, RenderStyleState& rs)
 {
 	glm::uvec2 sz = size();
 	glm::uvec4 margins(0);
 
 	if (style.m_background)
 	{
-		rs.m_background = style.m_background->make_drawable(glm::ivec2(0),sz);
+		rs.m_background = style.m_background->make_drawable(glm::ivec2(0),sz,style.m_background_colour);
 		if (!rs.m_background)
 			return false;
 
@@ -156,19 +154,20 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, const StyleS
 
 	if (style.m_font)
 	{
-		unsigned int caption_height = style.m_font->line_height();
+		if (style.m_font_size == 0)
+			style.m_font_size = style.m_font->line_height();
+
+		unsigned int caption_height = style.m_font_size;
 		unsigned int caption_width = static_cast<unsigned int>(ceil(caption_height * style.m_font->measure_text(m_text.c_str(),m_text.length())));
 
 		glm::ivec2 pos((sz.x - caption_width) / 2 + margins.x,(sz.y - caption_height) / 2 + margins.w);
 
-		rs.m_caption = OOBase::allocate_shared<Render::ShadowLabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),0.f,style.m_colour,style.m_shadow,pos,style.m_drop);
+		rs.m_caption = OOBase::allocate_shared<Render::ShadowLabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,style.m_shadow,pos,style.m_drop);
 		if (!rs.m_caption)
 			LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 
 		if (!group->add_drawable(rs.m_caption,10))
 			return false;
-		
-
 	}
 
 	return true;
@@ -213,7 +212,7 @@ void Indigo::UIButton::do_style_size(const glm::uvec2& sz, const StyleState& sty
 
 		if (!m_text.empty() && style.m_font)
 		{
-			caption_height = style.m_font->line_height();
+			caption_height = style.m_font_size;
 			caption_width = static_cast<unsigned int>(ceil(caption_height * style.m_font->measure_text(m_text.c_str(),m_text.length())));
 		}
 

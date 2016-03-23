@@ -23,23 +23,24 @@
 
 #include "Label.h"
 
-Indigo::Render::Label::Label(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::ivec2& position) :
+Indigo::Render::Label::Label(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int size, const glm::vec4& colour, const glm::ivec2& position) :
 		Text(font,sz,len),
 		UIDrawable(position),
 		m_colour(colour),
-		m_scale(scale)
+		m_size(size)
 {
-	if (m_scale <= 0.f)
-		m_scale = font->line_height();
+	if (m_size == 0)
+		m_size = font->line_height();
 }
 
 void Indigo::Render::Label::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	Text::draw(glState,glm::scale(mvp,glm::vec3(m_scale)),m_colour);
+	if (m_colour.a > 0.0f)
+		Text::draw(glState,glm::scale(mvp,glm::vec3(m_size)),m_colour);
 }
 
-Indigo::Render::ShadowLabel::ShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, float scale, const glm::vec4& colour, const glm::vec4& shadow, const glm::ivec2& position, const glm::ivec2& drop) :
-		Label(font,sz,len,scale,colour,position),
+Indigo::Render::ShadowLabel::ShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int size, const glm::vec4& colour, const glm::vec4& shadow, const glm::ivec2& position, const glm::ivec2& drop) :
+		Label(font,sz,len,size,colour,position),
 		m_shadow(shadow),
 		m_drop(drop)
 {
@@ -48,8 +49,8 @@ Indigo::Render::ShadowLabel::ShadowLabel(const OOBase::SharedPtr<Font>& font, co
 void Indigo::Render::ShadowLabel::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	if (m_drop != glm::ivec2(0) && m_shadow.a > 0.f)
-		Text::draw(glState,glm::scale(glm::translate(mvp,glm::vec3(m_drop.x,m_drop.y,0.f)),glm::vec3(m_scale)),m_shadow);
+		Text::draw(glState,glm::scale(glm::translate(mvp,glm::vec3(m_drop.x,m_drop.y,0.f)),glm::vec3(m_size)),m_shadow);
 
-	Text::draw(glState,glm::scale(mvp,glm::vec3(m_scale)),m_colour);
+	if (m_colour.a > 0.0f)
+		Text::draw(glState,glm::scale(mvp,glm::vec3(m_size)),m_colour);
 }
-

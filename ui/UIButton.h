@@ -33,8 +33,10 @@ namespace Indigo
 		struct StyleState
 		{
 			OOBase::SharedPtr<Font> m_font;
+			unsigned int m_font_size;
 			OOBase::SharedPtr<NinePatch> m_background;
-			glm::vec4 m_colour;
+			glm::vec4 m_background_colour;
+			glm::vec4 m_text_colour;
 			glm::vec4 m_shadow;
 			glm::ivec2 m_drop;
 
@@ -56,8 +58,8 @@ namespace Indigo
 	protected:
 		virtual bool valid() const;
 
-		virtual glm::uvec2 min_size() const;
-		virtual glm::uvec2 ideal_size() const;
+		virtual glm::uvec2 min_size() const { return m_min_size; }
+		virtual glm::uvec2 ideal_size() const { return m_ideal_size; }
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group);
 		virtual void on_size(const glm::uvec2& sz);
@@ -80,10 +82,14 @@ namespace Indigo
 		RenderStyleState m_pressed;
 		RenderStyleState* m_current_style;
 
+		glm::uvec2 m_min_size;
+		glm::uvec2 m_ideal_size;
+
+		void update_sizes();
 		glm::uvec2 min_style_size(const StyleState& style) const;
 		glm::uvec2 ideal_style_size(const StyleState& style) const;
 		void do_size(glm::uvec2 sz);
-		bool style_create(Indigo::Render::UIGroup* group, const StyleState& style, RenderStyleState& rs);
+		bool style_create(Indigo::Render::UIGroup* group, StyleState& style, RenderStyleState& rs);
 		void do_style_size(const glm::uvec2& sz, const StyleState& style, RenderStyleState& rs);
 	};
 }

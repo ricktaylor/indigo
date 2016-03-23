@@ -27,6 +27,7 @@
 
 #include "UISizer.h"
 #include "UIImage.h"
+#include "UIButton.h"
 
 namespace
 {
@@ -51,13 +52,13 @@ void Indigo::UILoader::syntax_error(const char* fmt, ...)
 	va_list args;
 	va_start(args,fmt);
 
-	OOBase::ScopedArrayPtr<char> msg;
-	int err = OOBase::vprintf(msg,fmt,args);
+	OOBase::ScopedString msg;
+	int err = msg.vprintf(fmt,args);
 
 	va_end(args);
 
 	if (!err)
-		OOBase::Logger::log(OOBase::Logger::Error,"Syntax error: %s, at line %u, column %u",msg.get(),m_error_pos.m_line,m_error_pos.m_col);
+		OOBase::Logger::log(OOBase::Logger::Error,"Syntax error: %s, at line %u, column %u",msg.c_str(),m_error_pos.m_line,m_error_pos.m_col);
 	else
 		OOBase_CallCriticalFailure(err);
 }
@@ -292,49 +293,49 @@ bool Indigo::UILoader::parse_ivec2(const char*& p, const char* pe, glm::ivec2& i
 
 bool Indigo::UILoader::parse_string(const char*& p, const char* pe, OOBase::ScopedString& s)
 {
-	if (!character(p,pe,'"'))
-		SYNTAX_ERROR_RETURN(("'\"' expected"),false);
-
-	const char* start = p;
-	for (;p != pe;inc_p(p,pe))
+	if (character(p,pe,'"'))
 	{
-		if (*p == '"')
-			break;
-
-		if (*p == '\\')
+		const char* start = p;
+		for (;p != pe;inc_p(p,pe))
 		{
-			if (p == (pe-1) || (p[1] != '"' && p[1] != '\\'))
-				SYNTAX_ERROR_RETURN(("Invalid control character \\%c",p[1]),false);
+			if (*p == '"')
+				break;
 
-			inc_p(p,pe);
+			if (*p == '\\')
+			{
+				if (p == (pe-1) || (p[1] != '"' && p[1] != '\\'))
+					SYNTAX_ERROR_RETURN(("Invalid control character \\%c",p[1]),false);
+
+				inc_p(p,pe);
+			}
 		}
-	}
 
-	if (p == pe || *p != '"')
-		SYNTAX_ERROR_RETURN(("'\"' expected"),false);
+		if (p == pe || *p != '"')
+			SYNTAX_ERROR_RETURN(("'\"' expected"),false);
 
-	const char* end = p;
-	inc_p(p,pe);
+		const char* end = p;
+		inc_p(p,pe);
 
-	const char* q = start;
-	for (;q < end;++q)
-	{
-		if (*q == '\\')
+		const char* q = start;
+		for (;q < end;++q)
 		{
-			if (q > start && !s.append(start,q - start))
-				LOG_ERROR_RETURN(("Failed to append to string: %s",OOBase::system_error_text()),false);
+			if (*q == '\\')
+			{
+				if (q > start && !s.append(start,q - start))
+					LOG_ERROR_RETURN(("Failed to append to string: %s",OOBase::system_error_text()),false);
 
-			if (q[1] == '"' && !s.append('"'))
-				LOG_ERROR_RETURN(("Failed to append to string: %s",OOBase::system_error_text()),false);
-			else if (q[1] == '\\' && !s.append('\\'))
-				LOG_ERROR_RETURN(("Failed to append to string: %s",OOBase::system_error_text()),false);
+				if (q[1] == '"' && !s.append('"'))
+					LOG_ERROR_RETURN(("Failed to append to string: %s",OOBase::system_error_text()),false);
+				else if (q[1] == '\\' && !s.append('\\'))
+					LOG_ERROR_RETURN(("Failed to append to string: %s",OOBase::system_error_text()),false);
 
-			start = q + 1;
+				start = q + 1;
+			}
 		}
-	}
 
-	if (q > start && !s.append(start,q - start))
-		LOG_ERROR_RETURN(("Failed to append to string: %s",OOBase::system_error_text()),false);
+		if (q > start && !s.append(start,q - start))
+			LOG_ERROR_RETURN(("Failed to append to string: %s",OOBase::system_error_text()),false);
+	}
 
 	return true;
 }
@@ -455,9 +456,11 @@ bool Indigo::UILoader::parse_colour(const char*& p, const char* pe, glm::vec4& c
 			else if (p - start == 6)
 				return true;
 		}
+
+		SYNTAX_ERROR_RETURN(("Invalid colour value"),false);
 	}
 
-	SYNTAX_ERROR_RETURN(("Invalid colour value"),false);
+	return false;
 }
 
 bool Indigo::UILoader::load(const char* name, unsigned int& zorder, UIGroup* parent)
@@ -486,7 +489,7 @@ bool Indigo::UILoader::load(const char* name, unsigned int& zorder, UIGroup* par
 	return true;
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder)
+bool Indigo::UILoader::load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder)
 {
 	if (type == "LAYER")
 	{
@@ -495,18 +498,25 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_top_level(const char*
 
 		return load_layer(p,pe,zorder);
 	}
+	else if (type == "BUTTON_STYLE")
+	{
+		if (parent)
+			LOG_WARNING(("Loading BUTTON_STYLE with parent?"));
+
+		return load_button_style(p,pe);
+	}
 	
 	return load_child(p,pe,type,parent,NULL,zorder);
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int zorder)
+bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int zorder)
 {
-	OOBase::ScopedString name;
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> name;
 	if (!ident(p,pe,name))
-		SYNTAX_ERROR_RETURN(("Identifier expected"),OOBase::SharedPtr<UIWidget>());
+		SYNTAX_ERROR_RETURN(("Identifier expected"),false);
 
-	if (m_hashWidgets.find(name.c_str()))
-		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),OOBase::SharedPtr<UIWidget>());
+	if (m_hashWidgets.find(name))
+		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),false);
 
 	bool visible = false;
 	glm::uvec4 margins(0);
@@ -534,33 +544,33 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 						return OOBase::SharedPtr<UIWidget>();
 				}
 				else
-					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in LAYER",arg.c_str()),OOBase::SharedPtr<UIWidget>());
+					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in LAYER",arg.c_str()),false);
 
 				if (!character(p,pe,','))
 					break;
 
 				if (!type_name(p,pe,arg))
-					SYNTAX_ERROR_RETURN(("Argument expected"),OOBase::SharedPtr<UIWidget>());
+					SYNTAX_ERROR_RETURN(("Argument expected"),false);
 			}
 		}
 
 		if (!character(p,pe,')'))
-			SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
+			SYNTAX_ERROR_RETURN(("')' expected"),false);
 	}
 
 	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(margins,padding);
 	if (!layer)
-		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
-	if (!m_hashWidgets.insert(name.c_str(),layer))
-		LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
+	if (!m_hashWidgets.insert(name,layer))
+		LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),false);
 
 	if (!m_wnd->add_layer(layer,zorder))
-		return OOBase::SharedPtr<UIWidget>();
+		return false;
 
 	zorder = 0;
 	if (!load_grid_sizer(p,pe,layer.get(),name.c_str(),layer->sizer(),zorder,true))
-		return OOBase::SharedPtr<UIWidget>();
+		return false;
 
 	if (visible)
 	{
@@ -568,7 +578,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_layer(const char*& p,
 		layer->show();
 	}
 
-	return layer;
+	return true;
 }
 
 bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, UIGridSizer& sizer, unsigned int& zorder, bool add_loose)
@@ -786,7 +796,7 @@ bool Indigo::UILoader::load_children(const char*& p, const char* pe, UIGroup* pa
 OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, const char* parent_name, unsigned int zorder)
 {
 	OOBase::SharedPtr<UIWidget> ret;
-	OOBase::ScopedString fq_name;
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> fq_name;
 
 	OOBase::ScopedString name;
 	if (ident(p,pe,name))
@@ -797,13 +807,13 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_child(const char*& p,
 		if (!fq_name.append(name.c_str(),name.length()))
 			LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),ret);
 
-		if (m_hashWidgets.find(fq_name.c_str()))
+		if (m_hashWidgets.find(fq_name))
 			SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",fq_name.c_str()),ret);
 	}
 
 	if (type == "BUTTON")
 	{
-		// TODO
+		ret = load_button(p,pe,parent);
 	}
 	else if (type == "IMAGE")
 	{
@@ -816,14 +826,14 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_child(const char*& p,
 	{
 		if (!fq_name.empty())
 		{
-			if (!m_hashWidgets.insert(fq_name.c_str(),ret))
+			if (!m_hashWidgets.insert(fq_name,ret))
 				LOG_ERROR_RETURN(("Failed to insert widget into map: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 		}
 
 		if (parent && !parent->add_widget(ret,zorder))
 		{
 			if (!fq_name.empty())
-				m_hashWidgets.remove(fq_name.c_str());
+				m_hashWidgets.remove(fq_name);
 
 			return OOBase::SharedPtr<UIWidget>();
 		}
@@ -880,7 +890,14 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 			SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
 	}
 
-	OOBase::SharedPtr<Image> image = load_image(p,pe);
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> image_name;
+	if (!parse_string(p,pe,image_name))
+		return OOBase::SharedPtr<UIWidget>();
+
+	if (image_name.empty())
+		SYNTAX_ERROR_RETURN(("Image name expected"),OOBase::SharedPtr<UIWidget>());
+
+	OOBase::SharedPtr<Image> image = load_image(p,pe,image_name);
 	if (!image)
 		return OOBase::SharedPtr<UIWidget>();
 
@@ -893,18 +910,14 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 	return uiimage;
 }
 
-OOBase::SharedPtr<Indigo::Image> Indigo::UILoader::load_image(const char*& p, const char* pe)
+OOBase::SharedPtr<Indigo::Image> Indigo::UILoader::load_image(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& image_name)
 {
-	OOBase::ScopedString image_name;
-	if (!parse_string(p,pe,image_name))
-		return OOBase::SharedPtr<Image>();
-
-	if (image_name.empty())
-		SYNTAX_ERROR_RETURN(("Image name expected"),OOBase::SharedPtr<Image>());
-
 	image_hash_t::iterator i = m_hashImages.find(image_name.c_str());
 	if (i)
 		return i->second;
+
+	if (!m_resource.exists(image_name.c_str()))
+		SYNTAX_ERROR_RETURN(("Missing image resource '%s'",image_name.c_str()),OOBase::SharedPtr<Image>());
 
 	OOBase::SharedPtr<Image> image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
 	if (!image)
@@ -913,8 +926,307 @@ OOBase::SharedPtr<Indigo::Image> Indigo::UILoader::load_image(const char*& p, co
 	if (!image->load(m_resource,image_name.c_str(),4))
 		return OOBase::SharedPtr<Image>();
 
-	if (!m_hashImages.insert(image_name.c_str(),image))
+	if (!m_hashImages.insert(image_name,image))
 		LOG_WARNING(("Failed to cache image: %s",OOBase::system_error_text()));
 
 	return image;
+}
+
+OOBase::SharedPtr<Indigo::NinePatch> Indigo::UILoader::load_9patch(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& patch_name)
+{
+	ninepatch_hash_t::iterator i = m_hash9Patches.find(patch_name);
+	if (i)
+		return i->second;
+
+	if (!m_resource.exists(patch_name.c_str()))
+		SYNTAX_ERROR_RETURN(("Missing 9 patch resource '%s'",patch_name.c_str()),OOBase::SharedPtr<NinePatch>());
+
+	OOBase::SharedPtr<NinePatch> patch = OOBase::allocate_shared<NinePatch,OOBase::ThreadLocalAllocator>();
+	if (!patch)
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),patch);
+
+	if (!patch->Image::load(m_resource,patch_name.c_str(),4))
+		return OOBase::SharedPtr<NinePatch>();
+
+	if (!m_hash9Patches.insert(patch_name,patch))
+		LOG_WARNING(("Failed to cache 9 patch: %s",OOBase::system_error_text()));
+
+	return patch;
+}
+
+OOBase::SharedPtr<Indigo::Font> Indigo::UILoader::load_font(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& font_name)
+{
+	font_hash_t::iterator i = m_hashFonts.find(font_name);
+	if (i)
+		return i->second;
+
+	if (!m_resource.exists(font_name.c_str()))
+		SYNTAX_ERROR_RETURN(("Missing font resource '%s'",font_name.c_str()),OOBase::SharedPtr<Font>());
+
+	OOBase::SharedPtr<Font> font = OOBase::allocate_shared<Font,OOBase::ThreadLocalAllocator>();
+	if (!font)
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),font);
+
+	if (!font->load(m_resource,font_name.c_str()))
+		return OOBase::SharedPtr<Font>();
+
+	if (!m_hashFonts.insert(font_name,font))
+		LOG_WARNING(("Failed to cache font: %s",OOBase::system_error_text()));
+
+	return font;
+}
+
+bool Indigo::UILoader::load_button_style(const char*& p, const char* pe)
+{
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> name;
+	if (!ident(p,pe,name))
+		SYNTAX_ERROR_RETURN(("Identifier expected"),false);
+
+	if (m_hashButtonStyles.find(name))
+		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),false);
+
+	OOBase::SharedPtr<UIButton::Style> style = OOBase::allocate_shared<UIButton::Style,OOBase::ThreadLocalAllocator>();
+	if (!style)
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
+
+	UIButton::StyleState default_state;
+	default_state.m_font_size = 0;
+	default_state.m_background_colour = glm::vec4(1.f);
+	default_state.m_text_colour = glm::vec4(0.f,0.f,0.f,1.f);
+	default_state.m_shadow = glm::vec4(.5f);
+	default_state.m_drop = glm::ivec2(0);
+
+	if (!load_button_style_state(p,pe,default_state,style))
+		return false;
+
+	if (!m_hashButtonStyles.insert(name,style))
+		LOG_ERROR_RETURN(("Failed to cache button style: %s",OOBase::system_error_text()),false);
+
+	return true;
+}
+
+bool Indigo::UILoader::load_button_style_state(const char*& p, const char* pe, UIButton::StyleState& state, const OOBase::SharedPtr<UIButton::Style>& style)
+{
+	if (character(p,pe,'{'))
+	{
+		OOBase::ScopedString type;
+		if (type_name(p,pe,type))
+		{
+			for (;;)
+			{
+				if (type == "FONT")
+				{
+					if (character(p,pe,'('))
+					{
+						if (type_name(p,pe,type))
+						{
+							for (;;)
+							{
+								if (type == "SIZE")
+								{
+									if (!parse_uint(p,pe,state.m_font_size))
+										return false;
+								}
+								else if (type == "COLOUR")
+								{
+									if (!parse_colour(p,pe,state.m_text_colour))
+										return false;
+								}
+								else if (type == "SHADOW")
+								{
+									if (!parse_colour(p,pe,state.m_shadow))
+										return false;
+								}
+								else if (type == "DROP")
+								{
+									if (!parse_ivec2(p,pe,state.m_drop))
+										return false;
+								}
+								else
+									SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in FONT",type.c_str()),false);
+
+								if (!character(p,pe,','))
+									break;
+
+								if (!type_name(p,pe,type))
+									SYNTAX_ERROR_RETURN(("Argument expected"),false);
+							}
+						}
+
+						if (!character(p,pe,')'))
+							SYNTAX_ERROR_RETURN(("')' expected"),false);
+					}
+
+					OOBase::SharedString<OOBase::ThreadLocalAllocator> font_name;
+					if (!parse_string(p,pe,font_name))
+						return false;
+
+					if (font_name.empty())
+					{
+						if (style)
+							SYNTAX_ERROR_RETURN(("Font name required"),false);
+					}
+					else
+					{
+						state.m_font = load_font(p,pe,font_name);
+						if (!state.m_font)
+							return false;
+					}
+				}
+				else if (type == "BACKGROUND")
+				{
+					if (character(p,pe,'('))
+					{
+						if (type_name(p,pe,type))
+						{
+							for (;;)
+							{
+								if (type == "COLOUR")
+								{
+									if (!parse_colour(p,pe,state.m_background_colour))
+										return false;
+								}
+								else
+									SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in FONT",type.c_str()),false);
+
+								if (!character(p,pe,','))
+									break;
+
+								if (!type_name(p,pe,type))
+									SYNTAX_ERROR_RETURN(("Argument expected"),false);
+							}
+						}
+
+						if (!character(p,pe,')'))
+							SYNTAX_ERROR_RETURN(("')' expected"),false);
+					}
+
+					OOBase::SharedString<OOBase::ThreadLocalAllocator> patch_name;
+					if (!parse_string(p,pe,patch_name))
+						return false;
+
+					if (patch_name.empty())
+					{
+						if (style)
+							SYNTAX_ERROR_RETURN(("9 patch name expected"),OOBase::SharedPtr<NinePatch>());
+					}
+					else
+					{
+						state.m_background = load_9patch(p,pe,patch_name);
+						if (!state.m_background)
+							return false;
+					}
+				}
+				else if (style && type == "STATE")
+				{
+					OOBase::ScopedString name;
+					if (!ident(p,pe,name))
+						SYNTAX_ERROR_RETURN(("Identifier expected"),false);
+
+					if (name == "Normal")
+					{
+						style->m_normal = state;
+
+						if (!load_button_style_state(p,pe,style->m_normal,OOBase::SharedPtr<UIButton::Style>()))
+							return false;
+					}
+					else if (name == "Active")
+					{
+						style->m_active = state;
+
+						if (!load_button_style_state(p,pe,style->m_active,OOBase::SharedPtr<UIButton::Style>()))
+							return false;
+					}
+					else if (name == "Pressed")
+					{
+						style->m_pressed = state;
+
+						if (!load_button_style_state(p,pe,style->m_pressed,OOBase::SharedPtr<UIButton::Style>()))
+							return false;
+					}
+					else
+						SYNTAX_ERROR_RETURN(("Unknown BUTTON_STYLE state '%s'",name.c_str()),false);
+				}
+
+				if (!character(p,pe,','))
+					break;
+
+				if (!type_name(p,pe,type))
+					SYNTAX_ERROR_RETURN(("Type name expected"),false);
+			}
+		}
+
+		if (!character(p,pe,'}'))
+			SYNTAX_ERROR_RETURN(("'}' expected"),false);
+	}
+
+	return true;
+}
+
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p, const char* pe, UIGroup* parent)
+{
+	glm::ivec2 position(0);
+	glm::uvec2 size(0);
+	bool visible = false;
+	OOBase::ScopedString style_name;
+
+	if (character(p,pe,'('))
+	{
+		OOBase::ScopedString arg;
+		if (type_name(p,pe,arg))
+		{
+			for (;;)
+			{
+				if (arg == "VISIBLE")
+				{
+					visible = true;
+				}
+				else if (arg == "STYLE")
+				{
+					if (!ident(p,pe,style_name))
+						SYNTAX_ERROR_RETURN(("Expected style name"),OOBase::SharedPtr<UIWidget>());
+				}
+				else if (arg == "POSITION")
+				{
+					if (!parse_ivec2(p,pe,position))
+						return OOBase::SharedPtr<UIWidget>();
+				}
+				else if (arg == "SIZE")
+				{
+					if (!parse_uvec2(p,pe,size))
+						return OOBase::SharedPtr<UIWidget>();
+				}
+				else
+					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in BUTTON",arg.c_str()),OOBase::SharedPtr<UIWidget>());
+
+				if (!character(p,pe,','))
+					break;
+
+				if (!type_name(p,pe,arg))
+					SYNTAX_ERROR_RETURN(("Argument expected"),OOBase::SharedPtr<UIWidget>());
+			}
+		}
+
+		if (!character(p,pe,')'))
+			SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
+	}
+
+	OOBase::ScopedString caption;
+	if (!parse_string(p,pe,caption))
+		return OOBase::SharedPtr<UIWidget>();
+
+	if (style_name.empty())
+		SYNTAX_ERROR_RETURN(("No style for BUTTON"),OOBase::SharedPtr<UIWidget>());
+
+	button_style_hash_t::iterator i = m_hashButtonStyles.find(style_name.c_str());
+	if (!i)
+		SYNTAX_ERROR_RETURN(("Undefined style '%s' for BUTTON",style_name.c_str()),OOBase::SharedPtr<UIWidget>());
+
+	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(parent,i->second,caption.c_str(),caption.length(),position,size);
+	if (!button)
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
+
+	button->show(visible);
+
+	return button;
 }

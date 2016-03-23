@@ -54,46 +54,16 @@ void Indigo::Application::splash()
 	OOBase::SharedPtr<ImageLayer> img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(book_image);
 	m_wnd->add_layer(img_layer,50);
 	img_layer->show();
-
-#if 0
 	
 	ZipResource zip;
-	zip.open("test.zip");
+	if (zip.open("test.zip"))
+	{
+		UILoader loader(m_wnd,zip);
 
-	UILoader loader(m_wnd,zip);
-
-	unsigned int zorder = 100;
-	loader.load("ui.txt",zorder);
-
-#else
-
-	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>();
-	m_wnd->add_layer(layer,100);
-
-	layer->sizer().add_spacer(0,0,glm::uvec2(32,32));
-	layer->sizer().add_spacer(2,2,glm::uvec2(32,32));
-
-	OOBase::SharedPtr<UIButton::Style> button_style = OOBase::allocate_shared<UIButton::Style,OOBase::ThreadLocalAllocator>();
-	button_style->m_background.Image::load(static_resources(),"menu_border.png",4);
-	button_style->m_font.load(static_resources(),"BilboSwashCaps.fnt");
-	button_style->m_colour = glm::vec4(.0f,.0f,.0f,.95f);
-	button_style->m_shadow = glm::vec4(.0f,.0f,.0f,.75f);
-	button_style->m_drop = glm::ivec2(0,0);
-
-	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(layer.get(),button_style,"Hello there, very long text.  This is fun!",-1);
-	layer->add_widget(button,100);
-	layer->sizer().add_widget(1,1,button);
-
-	button_style->m_background.unload();
-
-	button->show();
-
-	layer->layout();
-
-	layer->show();
-#endif
-
-	m_wnd->show();
+		unsigned int zorder = 100;
+		if (loader.load("ui.txt",zorder))
+			m_wnd->show();
+	}
 }
 
 void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args)
