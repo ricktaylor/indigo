@@ -69,6 +69,9 @@ bool Indigo::UIGridSizer::measure(OOBase::Vector<OOBase::Pair<unsigned int,unsig
 		bool min_size) const
 {
 	// Find the rows and columns sizes and proportions
+	unsigned int max_var_width = 0;
+	unsigned int max_var_height = 0;
+
 	for (items_t::const_iterator i=m_items.begin();i;++i)
 	{
 		glm::uvec2 sz(0);
@@ -108,69 +111,49 @@ bool Indigo::UIGridSizer::measure(OOBase::Vector<OOBase::Pair<unsigned int,unsig
 		OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator p = widths.position(i->first.first);
 		if (sz.x > p->first)
 			p->first = sz.x;
+
 		p->second += i->second.m_proportion;
+
+		if (m_fixed && p->second && p->first > max_var_width)
+			max_var_width = p->first;
 
 		p = heights.position(i->first.second);
 		if (sz.y > p->first)
 			p->first = sz.y;
+
 		p->second += i->second.m_proportion;
+
+		if (m_fixed && p->second && p->first > max_var_height)
+			max_var_height = p->first;
 	}
 
-	unsigned int max_var_width = 0;
 	for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
 	{
 		if (m_fixed && i->second)
 		{
-			if (i->first > max_var_width)
-				max_var_width = i->first;
+			i->first = max_var_width;
+			cumulative_width.first += i->first;
 		}
 		else
 			cumulative_width.first += i->first;
 
 		cumulative_width.second += i->second;
 	}
-
-	if (m_fixed)
-	{
-		for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
-		{
-			if (i->second)
-			{
-				i->first = max_var_width;
-				cumulative_width.first += i->first;
-			}
-		}
-	}
-
 	if (cumulative_width.first)
 		cumulative_width.first -= m_padding.x;
 
-	unsigned int max_var_height = 0;
 	for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
 	{
 		if (m_fixed && i->second)
 		{
-			if (i->first > max_var_height)
-				max_var_height = i->first;
+			i->first = max_var_height;
+			cumulative_height.first += i->first;
 		}
 		else
 			cumulative_height.first += i->first;
 
 		cumulative_height.second += i->second;
 	}
-
-	if (m_fixed)
-	{
-		for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
-		{
-			if (i->second)
-			{
-				i->first = max_var_height;
-				cumulative_height.first += i->first;
-			}
-		}
-	}
-
 	if (cumulative_height.first)
 		cumulative_height.first -= m_padding.y;
 
