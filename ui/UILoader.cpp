@@ -519,6 +519,7 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),false);
 
 	bool visible = false;
+	bool fixed = false;
 	glm::uvec4 margins(0);
 	glm::uvec2 padding(0);
 
@@ -532,6 +533,10 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 				if (arg == "VISIBLE")
 				{
 					visible = true;
+				}
+				else if (arg == "FIXED")
+				{
+					fixed = true;
 				}
 				else if (arg == "MARGINS")
 				{
@@ -558,7 +563,7 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 			SYNTAX_ERROR_RETURN(("')' expected"),false);
 	}
 
-	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(margins,padding);
+	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(fixed,margins,padding);
 	if (!layer)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
@@ -657,6 +662,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 
 					if (type == "GRID_SIZER")
 					{
+						bool fixed = false;
 						glm::uvec4 margins(0);
 						glm::uvec2 padding(0);
 
@@ -667,7 +673,11 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 							{
 								for (;;)
 								{
-									if (arg == "MARGINS")
+									if (arg == "FIXED")
+									{
+										fixed = true;
+									}
+									else if (arg == "MARGINS")
 									{
 										if (!parse_uvec4(p,pe,margins))
 											return OOBase::SharedPtr<UIWidget>();
@@ -692,7 +702,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 								SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
 						}
 
-						OOBase::SharedPtr<UIGridSizer> s = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>(margins,padding);
+						OOBase::SharedPtr<UIGridSizer> s = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>(fixed,margins,padding);
 						if (!s)
 							LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 

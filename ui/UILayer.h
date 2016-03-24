@@ -31,7 +31,7 @@ namespace Indigo
 	class UILayer : public UIGroup, public Layer
 	{
 	public:
-		UILayer(const glm::uvec4& margins = glm::uvec4(0), const glm::uvec2& padding = glm::uvec2(0));
+		UILayer(bool fixed, const glm::uvec4& margins = glm::uvec4(0), const glm::uvec2& padding = glm::uvec2(0));
 
 		void show(bool visible = true);
 

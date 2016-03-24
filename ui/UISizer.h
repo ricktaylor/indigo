@@ -66,7 +66,7 @@ namespace Indigo
 			expand = expand_horiz | expand_vert
 		};
 
-		UIGridSizer(const glm::uvec4& margins = glm::uvec4(0), const glm::uvec2& padding = glm::uvec2(0));
+		UIGridSizer(bool fixed, const glm::uvec4& margins = glm::uvec4(0), const glm::uvec2& padding = glm::uvec2(0));
 		
 		const glm::uvec2& padding() const { return m_padding; }
 		void padding(const glm::uvec2& p);
@@ -82,6 +82,7 @@ namespace Indigo
 		bool remove_item(unsigned int row, unsigned int col);
 
 	private:
+		bool m_fixed;
 		glm::uvec2 m_padding;
 
 		struct Item
@@ -95,6 +96,12 @@ namespace Indigo
 
 		typedef OOBase::Table<OOBase::Pair<unsigned int,unsigned int>,Item,OOBase::Less<OOBase::Pair<unsigned int,unsigned int> >,OOBase::ThreadLocalAllocator> items_t;
 		items_t m_items;
+
+		bool measure(OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>& widths,
+				OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>& heights,
+				OOBase::Pair<unsigned int,unsigned int>& cumulative_width,
+				OOBase::Pair<unsigned int,unsigned int>& cumulative_height,
+				bool min_size) const;
 	};
 }
 
