@@ -24,7 +24,7 @@
 
 #include "../core/Image.h"
 
-#include "UILayer.h"
+#include "UIWidget.h"
 
 namespace Indigo
 {

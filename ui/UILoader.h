@@ -90,8 +90,9 @@ namespace Indigo
 		OOBase::SharedPtr<NinePatch> load_9patch(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& patch_name);
 		bool load_button_style(const char*& p, const char* pe);
 		bool load_button_style_state(const char*& p, const char* pe, UIButton::StyleState& state, const OOBase::SharedPtr<UIButton::Style>& style);
-		OOBase::SharedPtr<UIWidget> load_uiimage(const char*& p, const char* pe, UIGroup* parent);
-		OOBase::SharedPtr<UIWidget> load_button(const char*& p, const char* pe, UIGroup* parent);
+		OOBase::SharedPtr<UIWidget> load_uiimage(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder);
+		OOBase::SharedPtr<UIWidget> load_button(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder);
+		OOBase::SharedPtr<UIWidget> load_panel(const char*& p, const char* pe, UIGroup* parent, const char* name, unsigned int zorder);
 	};
 }
 

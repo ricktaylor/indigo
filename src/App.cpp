@@ -47,17 +47,20 @@ namespace Indigo
 
 void Indigo::Application::splash()
 {
-	// Add the book layer
-	OOBase::SharedPtr<Image> book_image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
-	book_image->load(static_resources(),"ui/book.png");
-
-	OOBase::SharedPtr<ImageLayer> img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(book_image);
-	m_wnd->add_layer(img_layer,50);
-	img_layer->show();
-	
 	ZipResource zip;
 	if (zip.open("test.zip"))
 	{
+		// Add the book layer
+		OOBase::SharedPtr<Image> book_image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
+		if (book_image)
+		{
+			book_image->load(zip,"book.png");
+
+			OOBase::SharedPtr<ImageLayer> img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(book_image);
+			if (img_layer && m_wnd->add_layer(img_layer,50))
+				img_layer->show();
+		}
+
 		UILoader loader(m_wnd,zip);
 
 		unsigned int zorder = 100;

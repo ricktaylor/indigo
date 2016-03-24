@@ -33,11 +33,8 @@ namespace Indigo
 		virtual glm::uvec2 min_fit() const = 0;
 		virtual glm::uvec2 ideal_fit() const = 0;
 
-		const glm::uvec4& margins() const { return m_margins; }
-		virtual void margins(const glm::uvec4& m) { m_margins = m; }
-
 		const glm::ivec2& position() const { return m_position; }
-		virtual void position(const glm::ivec2& p) { m_position = p; }
+		virtual void position(const glm::ivec2& p) = 0;
 
 	protected:
 		UISizer(const glm::uvec4& margins = glm::uvec4(0)) :
@@ -68,12 +65,11 @@ namespace Indigo
 
 		UIGridSizer(bool fixed, const glm::uvec4& margins = glm::uvec4(0), const glm::uvec2& padding = glm::uvec2(0));
 		
-		const glm::uvec2& padding() const { return m_padding; }
-		void padding(const glm::uvec2& p);
-
 		virtual void fit(const glm::uvec2& size);
 		virtual glm::uvec2 min_fit() const;
 		virtual glm::uvec2 ideal_fit() const;
+
+		void position(const glm::ivec2& p);
 
 		bool add_widget(unsigned int row, unsigned int col, const OOBase::SharedPtr<UIWidget>& widget, unsigned int layout_flags = (align_centre | expand), unsigned int proportion = 1);
 		bool add_sizer(unsigned int row, unsigned int col, const OOBase::SharedPtr<UISizer>& sizer, unsigned int layout_flags = (align_centre | expand), unsigned int proportion = 1);

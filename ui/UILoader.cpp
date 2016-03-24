@@ -28,6 +28,7 @@
 #include "UISizer.h"
 #include "UIImage.h"
 #include "UIButton.h"
+#include "UIPanel.h"
 
 namespace
 {
@@ -595,7 +596,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 		{
 			if (character(p,pe,'['))
 			{
-				unsigned int row,col,proportion = -1;
+				unsigned int row = 0,col = 0,proportion = -1;
 
 				if (!parse_uint(p,pe,row))
 					SYNTAX_ERROR_RETURN(("Missing row argument in layout"),false);
@@ -614,6 +615,8 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 
 				if (character(p,pe,'('))
 				{
+					// TODO - Make this cleaner...
+
 					unsigned int flags = UIGridSizer::align_centre | UIGridSizer::expand;
 					if (type_name(p,pe,type))
 					{
@@ -660,7 +663,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 					if (!type_name(p,pe,type))
 						SYNTAX_ERROR_RETURN(("Type name expected"),false);
 
-					if (type == "GRID_SIZER")
+					if (type == "GRID")
 					{
 						bool fixed = false;
 						glm::uvec4 margins(0);
@@ -688,7 +691,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 											return OOBase::SharedPtr<UIWidget>();
 									}
 									else
-										SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in GRID_SIZER",arg.c_str()),OOBase::SharedPtr<UIWidget>());
+										SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in GRID",arg.c_str()),OOBase::SharedPtr<UIWidget>());
 
 									if (!character(p,pe,','))
 										break;
@@ -823,36 +826,26 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_child(const char*& p,
 
 	if (type == "BUTTON")
 	{
-		ret = load_button(p,pe,parent);
+		ret = load_button(p,pe,parent,zorder);
 	}
 	else if (type == "IMAGE")
 	{
-		ret = load_uiimage(p,pe,parent);
+		ret = load_uiimage(p,pe,parent,zorder);
+	}
+	else if (type == "PANEL")
+	{
+		ret = load_panel(p,pe,parent,fq_name.c_str(),zorder);
 	}
 	else
 		SYNTAX_ERROR_RETURN(("Unknown type name '%s'",type.c_str()),ret);
 
-	if (ret)
-	{
-		if (!fq_name.empty())
-		{
-			if (!m_hashWidgets.insert(fq_name,ret))
-				LOG_ERROR_RETURN(("Failed to insert widget into map: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
-		}
-
-		if (parent && !parent->add_widget(ret,zorder))
-		{
-			if (!fq_name.empty())
-				m_hashWidgets.remove(fq_name);
-
-			return OOBase::SharedPtr<UIWidget>();
-		}
-	}
+	if (ret && !fq_name.empty() && !m_hashWidgets.insert(fq_name,ret))
+		LOG_ERROR_RETURN(("Failed to insert widget into map: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
 	return ret;
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& p, const char* pe, UIGroup* parent)
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder)
 {
 	glm::ivec2 position(0);
 	glm::uvec2 size(0);
@@ -914,6 +907,9 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 	OOBase::SharedPtr<UIImage> uiimage = OOBase::allocate_shared<UIImage,OOBase::ThreadLocalAllocator>(parent,image,position,size,colour);
 	if (!uiimage)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
+
+	if (!parent->add_widget(uiimage,zorder))
+		return OOBase::SharedPtr<UIWidget>();
 
 	uiimage->show(visible);
 
@@ -1173,7 +1169,7 @@ bool Indigo::UILoader::load_button_style_state(const char*& p, const char* pe, U
 	return true;
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p, const char* pe, UIGroup* parent)
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder)
 {
 	glm::ivec2 position(0);
 	glm::uvec2 size(0);
@@ -1236,7 +1232,97 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 	if (!button)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
+	if (!parent->add_widget(button,zorder))
+		return OOBase::SharedPtr<UIWidget>();
+
 	button->show(visible);
 
 	return button;
+}
+
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p, const char* pe, UIGroup* parent, const char* name, unsigned int zorder)
+{
+	glm::ivec2 position(0);
+	glm::uvec2 size(0);
+	bool visible = false;
+	glm::vec4 colour(1.f);
+	bool fixed = false;
+	glm::uvec2 padding(0);
+
+	if (character(p,pe,'('))
+	{
+		OOBase::ScopedString arg;
+		if (type_name(p,pe,arg))
+		{
+			for (;;)
+			{
+				if (arg == "FIXED")
+				{
+					fixed = true;
+				}
+				else if (arg == "COLOUR")
+				{
+					if (!parse_colour(p,pe,colour))
+						return OOBase::SharedPtr<UIWidget>();
+				}
+				else if (arg == "PADDING")
+				{
+					if (!parse_uvec2(p,pe,padding))
+						return OOBase::SharedPtr<UIWidget>();
+				}
+				else if (arg == "VISIBLE")
+				{
+					visible = true;
+				}
+				else if (arg == "POSITION")
+				{
+					if (!parse_ivec2(p,pe,position))
+						return OOBase::SharedPtr<UIWidget>();
+				}
+				else if (arg == "SIZE")
+				{
+					if (!parse_uvec2(p,pe,size))
+						return OOBase::SharedPtr<UIWidget>();
+				}
+				else
+					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in PANEL",arg.c_str()),OOBase::SharedPtr<UIWidget>());
+
+				if (!character(p,pe,','))
+					break;
+
+				if (!type_name(p,pe,arg))
+					SYNTAX_ERROR_RETURN(("Argument expected"),OOBase::SharedPtr<UIWidget>());
+			}
+		}
+
+		if (!character(p,pe,')'))
+			SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
+	}
+
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> patch_name;
+	if (!parse_string(p,pe,patch_name))
+		return OOBase::SharedPtr<UIWidget>();
+
+	if (patch_name.empty())
+		SYNTAX_ERROR_RETURN(("9 patch name expected"),OOBase::SharedPtr<UIWidget>());
+
+	OOBase::SharedPtr<NinePatch> background = load_9patch(p,pe,patch_name);
+	if (!background)
+		return OOBase::SharedPtr<UIWidget>();
+
+	OOBase::SharedPtr<UIPanel> panel = OOBase::allocate_shared<UIPanel,OOBase::ThreadLocalAllocator>(parent,background,colour,fixed,padding,position,size);
+	if (!panel)
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
+
+	if (!parent->add_widget(panel,zorder))
+		return OOBase::SharedPtr<UIWidget>();
+
+	zorder = 0;
+	if (!load_grid_sizer(p,pe,panel.get(),name,panel->sizer(),zorder,true))
+		return OOBase::SharedPtr<UIWidget>();
+
+	if (visible)
+		panel->show();
+
+	return panel;
 }

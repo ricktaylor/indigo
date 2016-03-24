@@ -60,11 +60,7 @@ namespace
 	{
 		{ "2d_colour.vert", IDR_2D_COLOUR_VS, RT_RCDATA, NULL, NULL, 0 },
 		{ "colour_blend.frag", IDR_COLOUR_BLEND_FS, RT_RCDATA, NULL, NULL, 0 },
-		{ "alpha_blend.frag", IDR_ALPHA_BLEND_FS, RT_RCDATA, NULL, NULL, 0 },
-		{ "BilboSwashCaps.fnt", IDR_FONT, RT_RCDATA, NULL, NULL, 0 },
-		{ "BilboSwashCaps_0.png", IDB_FONT, RT_RCDATA, NULL, NULL, 0 },
-		{ "menu_border.png", IDB_MENU_BORDER, RT_RCDATA, NULL, NULL, 0 },
-		{ "ui/book.png", IDB_BOOK, RT_RCDATA, NULL, NULL, 0 },
+		{ "alpha_blend.frag", IDR_ALPHA_BLEND_FS, RT_RCDATA, NULL, NULL, 0 }
 	};
 
 	const RES* find_resource(const char* name)
@@ -94,11 +90,6 @@ namespace
 	#include "./resources/2d_colour.vert.h"
 	#include "./resources/alpha_blend.frag.h"
 	#include "./resources/colour_blend.frag.h"
-	#include "./resources/BilboSwashCaps_0.png.h"
-	#include "./resources/BilboSwashCaps.fnt.h"
-	#include "./resources/menu_border.png.h"
-	#include "./resources/menu_border2.png.h"
-	#include "./resources/ui/book.png.h"
 
 	struct RES
 	{
@@ -110,12 +101,7 @@ namespace
 	{
 		{ "2d_colour.vert", s_2d_colour_vert, sizeof(s_2d_colour_vert) },
 		{ "alpha_blend.frag", s_alpha_blend_frag, sizeof(s_alpha_blend_frag) },
-		{ "colour_blend.frag", s_colour_blend_frag, sizeof(s_colour_blend_frag) },
-		{ "BilboSwashCaps.fnt", s_BilboSwashCaps_fnt, sizeof(s_BilboSwashCaps_fnt) },
-		{ "BilboSwashCaps_0.png", s_BilboSwashCaps_0_png, sizeof(s_BilboSwashCaps_0_png) },
-		{ "menu_border.png", s_menu_border_png, sizeof(s_menu_border_png) },
-		{ "menu_border2.png", s_menu_border2_png, sizeof(s_menu_border2_png) },
-		{ "ui/book.png", s_book_png, sizeof(s_book_png) },
+		{ "colour_blend.frag", s_colour_blend_frag, sizeof(s_colour_blend_frag) }
 	};
 
 	const RES* find_resource(const char* name)

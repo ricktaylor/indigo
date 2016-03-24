@@ -20,6 +20,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "../core/Common.h"
+#include "../core/Render.h"
+
 #include "UIImage.h"
 
 #include "Quad.h"

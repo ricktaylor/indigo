@@ -64,10 +64,6 @@ namespace Indigo
 		virtual bool on_render_create(Indigo::Render::UIGroup* group);
 		virtual void on_size(const glm::uvec2& sz);
 
-		virtual bool can_enable(bool enabled) { return true; }
-		virtual bool can_focus(bool focused) { return true; }
-		virtual bool can_hilight(bool hilighted) { return true; }
-
 	private:
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_text;
 		OOBase::SharedPtr<Style> m_style;

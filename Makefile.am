@@ -7,25 +7,6 @@ EXTRA_DIST = \
 	lgpl3_0.txt
 
 ####################################
-# Some helper targets
-
-reallyclean: maintainer-clean
-	rm -f @srcdir@/Makefile.in
-	rm -f @srcdir@/aclocal.m4
-	rm -f @srcdir@/configure
-	rm -f @srcdir@/autoheader_dummy.h.in
-	rm -f @srcdir@/autoheader_dummy.h.in~
-	rm -f @srcdir@/data/Makefile.in
-	rm -f @srcdir@/include/Makefile.in
-	rm -f @srcdir@/m4/argz.m4
-	rm -f @srcdir@/m4/libtool.m4
-	rm -f @srcdir@/m4/ltoptions.m4
-	rm -f @srcdir@/m4/ltsugar.m4
-	rm -f @srcdir@/m4/ltversion.m4
-	rm -f @srcdir@/m4/lt~obsolete.m4
-	rm -f @srcdir@/src/Makefile.in
-	
-####################################
 # Hook to make the ChangeLog
 dist-hook:
 	@if test -d "$(top_srcdir)/.git"; \
@@ -66,30 +47,10 @@ resources/%.h: resources/% bin2c
 	$(AM_V_GEN) mkdir -p $(@D)
 	$(AM_V_GEN) @top_builddir@/bin2c "$<" "$@" "$(*F)"
 	
-#%.png.h: ../resources/%.png bin2c
-#	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
-#	
-#%.fnt.h: ../resources/%.fnt bin2c
-#	$(AM_V_GEN)./bin2c "$<" "$@" "$*"
-#
-#%.vert.h: ../resources/%.vert bin2c
-#	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_vert"
-#
-#%.frag.h: ../resources/%.frag bin2c
-#	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_frag"
-#	
-#%.lua.h: ../resources/%.lua bin2c
-#	$(AM_V_GEN)./bin2c -t "$<" "$@" "$*_lua"
-	
 BUILT_SOURCES = \
 	resources/2d_colour.vert.h \
 	resources/alpha_blend.frag.h \
-	resources/colour_blend.frag.h \
-	resources/BilboSwashCaps_0.png.h \
-	resources/BilboSwashCaps.fnt.h \
-	resources/menu_border.png.h \
-	resources/menu_border2.png.h \
-	resources/ui/book.png.h
+	resources/colour_blend.frag.h
 	
 CLEANFILES = $(BUILT_SOURCES)
 	
@@ -121,21 +82,10 @@ indigo_SOURCES = \
 	ui/UIButton.cpp \
 	ui/UIImage.cpp \
 	ui/UISizer.cpp \
+	ui/UIPanel.cpp \
 	ui/UILoader.cpp \
 	src/App.cpp
-	
-	
-#	GUIStyle.cpp \
-#	GUIWidget.cpp \
-#	GUIPanel.cpp \
-#	GUILayer.cpp \
-#	GUILabel.cpp \
-#	GUISizer.cpp \
-#	GUIGridSizer.cpp \
-#	LuaAllocator.cpp \
-#	LuaResource.cpp \
-#	Splash.cpp
-		
+			
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \
 	@top_builddir@/3rdparty/glfw/src/libglfw3.a

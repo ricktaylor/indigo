@@ -23,6 +23,7 @@
 #define INDIGO_IMAGELAYER_H_INCLUDED
 
 #include "UILayer.h"
+
 #include "../core/Image.h"
 
 namespace Indigo

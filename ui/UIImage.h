@@ -22,9 +22,10 @@
 #ifndef INDIGO_UIImage_H_INCLUDED
 #define INDIGO_UIImage_H_INCLUDED
 
-#include "../core/Image.h"
-#include "UILayer.h"
+#include "UIWidget.h"
 #include "Quad.h"
+
+#include "../core/Image.h"
 
 namespace Indigo
 {

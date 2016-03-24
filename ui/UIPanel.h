@@ -19,35 +19,39 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_GUILABEL_H_INCLUDED
-#define INDIGO_GUILABEL_H_INCLUDED
+#ifndef INDIGO_UIPANEL_H_INCLUDED
+#define INDIGO_UIPANEL_H_INCLUDED
 
-#include "../old/GUIWidget.h"
+#include "NinePatch.h"
+#include "UISizer.h"
 
 namespace Indigo
 {
-	namespace GUI
+	class UIPanel : public UIGroup
 	{
-		class Label : public Widget
-		{
-		public:
-			Label();
+	public:
+		UIPanel(UIGroup* parent, const OOBase::SharedPtr<NinePatch>& background, const glm::vec4& colour = glm::vec4(1.f), bool fixed = false, const glm::uvec2& padding = glm::uvec2(0), const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
-			bool create(Widget* parent, const OOBase::String& text = OOBase::String(), const glm::u16vec2& min_size = glm::u16vec2(-1), const glm::i16vec2& pos = glm::i16vec2(0));
-			bool create(Widget* parent, const OOBase::SharedPtr<Style>& style, const OOBase::String& text = OOBase::String(), const glm::u16vec2& min_size = glm::u16vec2(-1), const glm::i16vec2& pos = glm::i16vec2(0));
+		UIGridSizer& sizer() { return m_sizer; }
 
-			const OOBase::String& text() const;
-			bool text(const OOBase::String& text);
+		virtual void layout();
 
-		private:
-			OOBase::String m_text;
+	protected:
+		virtual glm::uvec2 min_size() const;
+		virtual glm::uvec2 ideal_size() const;
 
-			bool common_create(const OOBase::String& text);
+		virtual bool on_render_create(Indigo::Render::UIGroup* group);
+		virtual void on_size(const glm::uvec2& sz);
 
-			OOBase::SharedPtr<Render::GUI::Widget> create_render_widget();
-			void set_text(bool* ret_val, const OOBase::String* text);
-		};
-	}
+	private:
+		UIGridSizer m_sizer;
+		OOBase::SharedPtr<NinePatch> m_background;
+		glm::vec4 m_colour;
+
+		OOBase::SharedPtr<Render::NinePatch> m_render_background;
+
+		void do_size(glm::uvec2 sz);
+	};
 }
 
-#endif // INDIGO_GUILABEL_H_INCLUDED
+#endif /* INDIGO_UIPANEL_H_INCLUDED */

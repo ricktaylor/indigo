@@ -214,19 +214,17 @@ void Indigo::UIGridSizer::fit(const glm::uvec2& outer_size)
 	}
 
 	// Reset the widths and heights .second to the accumulated final position
+	unsigned int prev = m_position.x + m_margins.x;
 	for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
 	{
-		if (i != widths.begin())
-			i->second = (i-1)->first + (i-1)->second + m_padding.x;
-		else
-			i->second = m_position.x + m_margins.x;
+		i->second = prev;
+		prev += i->first + m_padding.x;
 	}
+	prev = m_position.y + m_margins.w;
 	for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
 	{
-		if (i != heights.begin())
-			i->second = (i-1)->first + (i-1)->second + m_padding.y;
-		else
-			i->second = m_position.y + m_margins.w;
+		i->second = prev;
+		prev += i->first + m_padding.y;
 	}
 
 	// Loop through the grid moving and sizing cells
@@ -243,26 +241,23 @@ void Indigo::UIGridSizer::fit(const glm::uvec2& outer_size)
 				glm::ivec2 item_pos(cell_pos);
 				glm::uvec2 item_size(widget->size());
 
-				// Expand if required
-				if (i->second.m_flags & expand)
-				{
-					if (i->second.m_flags & expand_horiz)
-						item_size.x = cell_size.x;
-					if (i->second.m_flags & expand_vert)
-						item_size.y = cell_size.y;
+				if (cell_size.x < item_size.x || (i->second.m_flags & expand_horiz))
+					item_size.x = cell_size.x;
 
-					item_size = widget->size(item_size);
-				}
+				if (cell_size.y < item_size.y || (i->second.m_flags & expand_vert))
+					item_size.y = cell_size.y;
+
+				item_size = widget->size(item_size);
 				
 				// Align if required
-				if (i->second.m_flags & align_right)
+				if ((i->second.m_flags & (align_right | expand_horiz)) == align_right)
 					item_pos.x = cell_pos.x + static_cast<int>(cell_size.x) - static_cast<int>(item_size.x);
-				else if (i->second.m_flags & align_hcentre)
+				else if ((i->second.m_flags & (align_hcentre | expand_horiz)) == align_hcentre)
 					item_pos.x = cell_pos.x + (static_cast<int>(cell_size.x) - static_cast<int>(item_size.x))/2;
 
-				if (i->second.m_flags & align_top)
+				if ((i->second.m_flags & (align_top | expand_vert)) == align_top)
 					item_pos.y = cell_pos.y + static_cast<int>(cell_size.y) - static_cast<int>(item_size.y);
-				else if (i->second.m_flags & align_vcentre)
+				else if ((i->second.m_flags & (align_vcentre | expand_vert)) == align_vcentre)
 					item_pos.y = cell_pos.y + (static_cast<int>(cell_size.y) - static_cast<int>(item_size.y))/2;
 
 				widget->position(item_pos);
@@ -276,29 +271,50 @@ void Indigo::UIGridSizer::fit(const glm::uvec2& outer_size)
 			glm::ivec2 item_pos(cell_pos);
 			glm::uvec2 item_size(i->second.m_sizer->ideal_fit());
 
-			// Expand if required
-			if (item_size != cell_size && (i->second.m_flags & expand))
-			{
-				if (i->second.m_flags & expand_horiz)
-					item_size.x = cell_size.x;
-				if (i->second.m_flags & expand_vert)
-					item_size.y = cell_size.y;
+			if (cell_size.x < item_size.x || (i->second.m_flags & expand_horiz))
+				item_size.x = cell_size.x;
 
-				i->second.m_sizer->fit(item_size);
-			}
+			if (cell_size.y < item_size.y || (i->second.m_flags & expand_vert))
+				item_size.y = cell_size.y;
+
+			item_size = glm::max(item_size,i->second.m_sizer->min_fit());
+
+			i->second.m_sizer->fit(item_size);
 
 			// Align if required
-			if (i->second.m_flags & align_right)
+			if ((i->second.m_flags & (align_right | expand_horiz)) == align_right)
 				item_pos.x = cell_pos.x + static_cast<int>(cell_size.x) - static_cast<int>(item_size.x);
-			else if (i->second.m_flags & align_hcentre)
+			else if ((i->second.m_flags & (align_hcentre | expand_horiz)) == align_hcentre)
 				item_pos.x = cell_pos.x + (static_cast<int>(cell_size.x) - static_cast<int>(item_size.x))/2;
 
-			if (i->second.m_flags & align_top)
+			if ((i->second.m_flags & (align_top | expand_vert)) == align_top)
 				item_pos.y = cell_pos.y + static_cast<int>(cell_size.y) - static_cast<int>(item_size.y);
-			else if (i->second.m_flags & align_vcentre)
+			else if ((i->second.m_flags & (align_vcentre | expand_vert)) == align_vcentre)
 				item_pos.y = cell_pos.y + (static_cast<int>(cell_size.y) - static_cast<int>(item_size.y))/2;
 
 			i->second.m_sizer->position(item_pos);
 		}
+	}
+}
+
+void Indigo::UIGridSizer::position(const glm::ivec2& p)
+{
+	if (p != m_position)
+	{
+		glm::ivec2 offset = p - m_position;
+
+		for (items_t::iterator i = m_items.begin();i;++i)
+		{
+			if (i->second.m_widget)
+			{
+				OOBase::SharedPtr<UIWidget> widget(i->second.m_widget.lock());
+				if (widget && widget->visible())
+					widget->position(widget->position() + offset);
+			}
+			else if (i->second.m_sizer)
+				i->second.m_sizer->position(i->second.m_sizer->position() + offset);
+		}
+
+		m_position = p;
 	}
 }
