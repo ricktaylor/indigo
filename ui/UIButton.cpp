@@ -88,6 +88,8 @@ glm::uvec2 Indigo::UIButton::min_style_size(const StyleState& style) const
 	if (!m_text.empty() && style.m_font)
 	{
 		unsigned int height = style.m_font_size;
+		if (height == 0)
+			height = style.m_font->line_height();
 		unsigned int width = static_cast<unsigned int>(ceil(height * style.m_font->measure_text(m_text.c_str(),m_text.length())));
 
 		text.x = width + margins.x + margins.z;
@@ -112,6 +114,8 @@ glm::uvec2 Indigo::UIButton::ideal_style_size(const StyleState& style) const
 	if (!m_text.empty() && style.m_font)
 	{
 		unsigned int height = style.m_font_size;
+		if (height == 0)
+			height = style.m_font->line_height();
 		unsigned int width = static_cast<unsigned int>(ceil(height * style.m_font->measure_text(m_text.c_str(),m_text.length())));
 
 		text.x = width + margins.x + margins.z + 2 * height;
