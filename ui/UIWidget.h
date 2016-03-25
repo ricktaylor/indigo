@@ -43,6 +43,7 @@ namespace Indigo
 
 		protected:
 			UIDrawable(const glm::ivec2& position = glm::ivec2(0,0));
+			virtual ~UIDrawable() {}
 
 			bool m_visible;
 			glm::ivec2 m_position;
