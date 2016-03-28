@@ -109,6 +109,12 @@
     <ClInclude Include="..\ui\UILoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\ui\UIPanel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ui\UIWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\core\Font.cpp">
@@ -169,6 +175,12 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="..\ui\UILoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui\UIPanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ui\UIWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

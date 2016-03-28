@@ -27,10 +27,10 @@ Indigo::Render::Label::Label(const OOBase::SharedPtr<Font>& font, const char* sz
 		Text(font,sz,len),
 		UIDrawable(position),
 		m_colour(colour),
-		m_size(size)
+		m_size(static_cast<float>(size))
 {
-	if (m_size == 0)
-		m_size = font->line_height();
+	if (size == 0)
+		m_size = static_cast<float>(font->line_height());
 }
 
 void Indigo::Render::Label::on_draw(OOGL::State& glState, const glm::mat4& mvp) const

@@ -77,10 +77,12 @@
     <ClInclude Include="..\ui\NinePatch.h" />
     <ClInclude Include="..\ui\Quad.h" />
     <ClInclude Include="..\ui\UILoader.h" />
+    <ClInclude Include="..\ui\UIPanel.h" />
     <ClInclude Include="..\ui\UISizer.h" />
     <ClInclude Include="..\ui\UIButton.h" />
     <ClInclude Include="..\ui\UIImage.h" />
     <ClInclude Include="..\ui\UILayer.h" />
+    <ClInclude Include="..\ui\UIWidget.h" />
     <ClInclude Include="App.h" />
   </ItemGroup>
   <ItemGroup>
@@ -102,7 +104,9 @@
     <ClCompile Include="..\ui\UIImage.cpp" />
     <ClCompile Include="..\ui\UILayer.cpp" />
     <ClCompile Include="..\ui\UILoader.cpp" />
+    <ClCompile Include="..\ui\UIPanel.cpp" />
     <ClCompile Include="..\ui\UISizer.cpp" />
+    <ClCompile Include="..\ui\UIWidget.cpp" />
     <ClCompile Include="App.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

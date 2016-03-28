@@ -30,6 +30,8 @@
 #include "UIButton.h"
 #include "UIPanel.h"
 
+#include <stdlib.h>
+
 namespace
 {
 	bool is_whitespace(char c)

@@ -37,7 +37,7 @@ namespace Indigo
 
 		protected:
 			glm::vec4 m_colour;
-			unsigned int m_size;
+			float m_size;
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};
