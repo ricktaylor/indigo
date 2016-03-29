@@ -455,7 +455,8 @@ bool Indigo::NinePatch::scan_column(int column, glm::uvec2& span)
 
 bool Indigo::NinePatch::get_bounds()
 {
-	bool is_9 = false;
+	bool has_border = false;
+	bool has_margins = false;
 
 	glm::uvec2 span;
 	if (scan_line(0,span))
@@ -465,6 +466,8 @@ bool Indigo::NinePatch::get_bounds()
 
 		if (scan_column(0,span))
 		{
+			has_border = true;
+
 			m_info->m_borders.y = m_height - span.y;
 			m_info->m_borders.w = span.x;
 
@@ -475,7 +478,7 @@ bool Indigo::NinePatch::get_bounds()
 
 				if (scan_column(m_width-1,span))
 				{
-					is_9 = true;
+					has_margins = true;
 
 					m_margins.y = m_height - span.y;
 					m_margins.w = span.x;
@@ -484,7 +487,7 @@ bool Indigo::NinePatch::get_bounds()
 		}
 	}
 
-	if (is_9)
+	if (has_margins)
 	{
 		// Now swap out the pixels for a sub-image...
 		char* new_pixels = static_cast<char*>(OOBase::ThreadLocalAllocator::allocate((m_width-2)*(m_height-2)*m_components));
@@ -505,6 +508,28 @@ bool Indigo::NinePatch::get_bounds()
 		m_pixels = new_pixels;
 		m_height -= 2;
 		m_width -= 2;
+	}
+	else if (has_border)
+	{
+		// Now swap out the pixels for a sub-image...
+		char* new_pixels = static_cast<char*>(OOBase::ThreadLocalAllocator::allocate((m_width-1)*(m_height-1)*m_components));
+		if (!new_pixels)
+			LOG_ERROR_RETURN(("Failed to allocate 9-patch pixel data!"),false);
+
+		char* dest = new_pixels;
+		const char* src = static_cast<const char*>(m_pixels) + (m_width+1)*m_components;
+		for (unsigned int y=1;y<m_height;++y)
+		{
+			memcpy(dest,src,(m_width-1)*m_components);
+
+			src += m_width*m_components;
+			dest += (m_width-1)*m_components;
+		}
+
+		OOBase::ThreadLocalAllocator::free(m_pixels);
+		m_pixels = new_pixels;
+		m_height -= 1;
+		m_width -= 1;
 	}
 
 	m_info->m_tex_size = size();
