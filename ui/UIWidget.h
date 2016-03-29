@@ -79,6 +79,13 @@ namespace Indigo
 		friend class Render::UIGroup;
 
 	public:
+		enum State
+		{
+			eWS_visible = 0x1,
+			eWS_enabled = 0x2,
+			eWS_max = (eWS_visible | eWS_enabled)
+		};
+
 		virtual ~UIWidget()
 		{}
 
@@ -86,17 +93,14 @@ namespace Indigo
 
 		virtual bool valid() const { return m_parent != NULL && m_render_group; }
 
-		bool visible() const { return valid() && m_visible; }
+		bool visible() const { return valid() && (m_state & eWS_visible); }
 		void show(bool visible = true);
 
-		/*bool enabled() const { return m_enabled; }
-		bool enable(bool enabled = true);
+		bool enabled() const { return valid() && (m_state & eWS_enabled); }
+		void enable(bool enabled = true);
 
-		bool active() const { return m_active && enabled(); }
-		bool activate(bool active = true);
-
-		bool hilighted() const { return m_hilighted && enabled(); }
-		bool hilight(bool hilighted = true);*/
+		uint32_t state() const { return m_state; }
+		void state(uint32_t new_state);
 
 		const glm::ivec2& position() const { return m_position; }
 		void position(const glm::ivec2& pos);
@@ -108,7 +112,7 @@ namespace Indigo
 		virtual glm::uvec2 ideal_size() const = 0;
 
 	protected:
-		UIWidget(UIGroup* parent, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIWidget(UIGroup* parent, uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 		template <typename T>
 		OOBase::SharedPtr<T> render_group() const
@@ -118,18 +122,12 @@ namespace Indigo
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group) = 0;
 		virtual void on_size(const glm::uvec2& sz) { }
-
-		/*virtual bool can_enable(bool enabled) { return false; }
-		virtual bool can_activate(bool active) { return false; }
-		virtual bool can_hilight(bool hilighted) { return false; }*/
+		virtual void on_state(uint32_t new_state) { m_state = (new_state & eWS_max); }
 
 	private:
 		UIGroup* m_parent;
 		OOBase::SharedPtr<Indigo::Render::UIGroup> m_render_group;
-		bool m_visible;
-		/*bool m_enabled;
-		bool m_active;
-		bool m_hilighted;*/
+		uint32_t m_state;
 		glm::ivec2 m_position;
 		glm::uvec2 m_size;
 	};
@@ -137,7 +135,7 @@ namespace Indigo
 	class UIGroup : public UIWidget
 	{
 	public:
-		UIGroup(UIGroup* parent, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIGroup(UIGroup* parent, uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder);
 		bool remove_widget(unsigned int zorder);

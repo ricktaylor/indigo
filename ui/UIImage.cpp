@@ -40,8 +40,8 @@ void Indigo::Render::UIImage::on_draw(OOGL::State& glState, const glm::mat4& mvp
 	Quad::draw(glState,m_texture,mvp2,m_colour);
 }
 
-Indigo::UIImage::UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image, const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour) :
-		UIWidget(parent,position,size),
+Indigo::UIImage::UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image, const glm::vec4& colour, uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+		UIWidget(parent,state,position,size),
 		m_image(image),
 		m_colour(colour)
 {

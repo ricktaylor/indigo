@@ -76,12 +76,9 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder
 	}
 }
 
-Indigo::UIWidget::UIWidget(UIGroup* parent, const glm::ivec2& position, const glm::uvec2& size) :
+Indigo::UIWidget::UIWidget(UIGroup* parent, uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
 		m_parent(parent),
-		m_visible(false),
-		/*m_enabled(true),
-		m_active(false),
-		m_hilighted(false),*/
+		m_state(state),
 		m_position(position),
 		m_size(size)
 {
@@ -89,50 +86,37 @@ Indigo::UIWidget::UIWidget(UIGroup* parent, const glm::ivec2& position, const gl
 
 void Indigo::UIWidget::show(bool visible)
 {
-	if (visible != m_visible)
+	bool is_visible = (m_state & eWS_visible) == eWS_visible;
+	if (is_visible != visible)
 	{
-		m_visible = visible;
+		uint32_t new_state = m_state;
+		if (visible)
+			new_state |= eWS_visible;
+		else
+			new_state &= ~eWS_visible;
 
-		if (m_render_group)
+		on_state(new_state);
+
+		visible = (m_state & eWS_visible) == eWS_visible;
+		if (is_visible != visible && m_render_group)
 			render_pipe()->post(OOBase::make_delegate(render_group<Render::UIDrawable>().get(),&Render::UIDrawable::show),visible);
 	}
 }
 
-/*bool Indigo::UIWidget::enable(bool enable)
+void Indigo::UIWidget::enable(bool enable)
 {
-	if (enable != m_enabled)
+	bool is_enabled = (m_state & eWS_enabled) == eWS_enabled;
+	if (is_enabled != enable)
 	{
-		if (!can_enable(enable))
-			return false;
+		uint32_t new_state = m_state;
+		if (enable)
+			new_state |= eWS_enabled;
+		else
+			new_state &= ~eWS_enabled;
 
-		m_enabled = enable;
+		on_state(new_state);
 	}
-	return true;
 }
-
-bool Indigo::UIWidget::activate(bool active)
-{
-	if (active != m_active)
-	{
-		if (!enabled() || !can_activate(active))
-			return false;
-
-		m_active = active;
-	}
-	return true;
-}
-
-bool Indigo::UIWidget::hilight(bool hilighted)
-{
-	if (hilighted != m_hilighted)
-	{
-		if (!enabled() || !can_hilight(hilighted))
-			return false;
-
-		m_hilighted = hilighted;
-	}
-	return true;
-}*/
 
 void Indigo::UIWidget::position(const glm::ivec2& pos)
 {
@@ -160,8 +144,8 @@ glm::uvec2 Indigo::UIWidget::size(const glm::uvec2& sz)
 	return m_size;
 }
 
-Indigo::UIGroup::UIGroup(UIGroup* parent, const glm::ivec2& position, const glm::uvec2& size) :
-		UIWidget(parent,position,size)
+Indigo::UIGroup::UIGroup(UIGroup* parent, uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+		UIWidget(parent,state,position,size)
 {
 }
 

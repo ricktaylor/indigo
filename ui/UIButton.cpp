@@ -36,8 +36,8 @@ void Indigo::UIButton::Style::unload()
 	m_pressed.unload();
 }
 
-Indigo::UIButton::UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const glm::ivec2& position, const glm::uvec2& size) :
-		UIWidget(parent,position,size),
+Indigo::UIButton::UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+		UIWidget(parent,state,position,size),
 		m_text(caption),
 		m_style(style),
 		m_current_style(NULL)
@@ -51,8 +51,8 @@ Indigo::UIButton::UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& styl
 		this->size(ideal_size());
 }
 
-Indigo::UIButton::UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const char* sz, size_t len, const glm::ivec2& position, const glm::uvec2& size) :
-	UIWidget(parent,position,size),
+Indigo::UIButton::UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const char* sz, size_t len, uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+	UIWidget(parent,state,position,size),
 	m_style(style),
 	m_current_style(NULL)
 {
