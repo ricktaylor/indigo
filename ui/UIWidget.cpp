@@ -76,7 +76,7 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder
 	}
 }
 
-Indigo::UIWidget::UIWidget(UIGroup* parent, uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+Indigo::UIWidget::UIWidget(UIGroup* parent, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
 		m_parent(parent),
 		m_state(state),
 		m_position(position),
@@ -89,7 +89,7 @@ void Indigo::UIWidget::show(bool visible)
 	bool is_visible = (m_state & eWS_visible) == eWS_visible;
 	if (is_visible != visible)
 	{
-		uint32_t new_state = m_state;
+		OOBase::uint32_t new_state = m_state;
 		if (visible)
 			new_state |= eWS_visible;
 		else
@@ -108,7 +108,7 @@ void Indigo::UIWidget::enable(bool enable)
 	bool is_enabled = (m_state & eWS_enabled) == eWS_enabled;
 	if (is_enabled != enable)
 	{
-		uint32_t new_state = m_state;
+		OOBase::uint32_t new_state = m_state;
 		if (enable)
 			new_state |= eWS_enabled;
 		else
@@ -144,7 +144,7 @@ glm::uvec2 Indigo::UIWidget::size(const glm::uvec2& sz)
 	return m_size;
 }
 
-Indigo::UIGroup::UIGroup(UIGroup* parent, uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+Indigo::UIGroup::UIGroup(UIGroup* parent, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
 		UIWidget(parent,state,position,size)
 {
 }

@@ -24,7 +24,7 @@
 
 #include "UIPanel.h"
 
-Indigo::UIPanel::UIPanel(UIGroup* parent, const OOBase::SharedPtr<NinePatch>& background, const glm::vec4& colour, bool fixed, const glm::uvec2& padding, uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+Indigo::UIPanel::UIPanel(UIGroup* parent, const OOBase::SharedPtr<NinePatch>& background, const glm::vec4& colour, bool fixed, const glm::uvec2& padding, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
 		UIGroup(parent,state,position,size),
 		m_sizer(fixed,background ? background->margins() : glm::uvec4(0),padding),
 		m_background(background),

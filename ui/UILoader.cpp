@@ -49,7 +49,7 @@ namespace
 			return 10 + (c - 'a');
 	}
 
-	bool parse_state(const OOBase::ScopedString& arg, uint32_t& state)
+	bool parse_state(const OOBase::ScopedString& arg, OOBase::uint32_t& state)
 	{
 		if (arg == "VISIBLE")
 		{
@@ -537,7 +537,7 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 	if (m_hashWidgets.find(name))
 		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),false);
 
-	uint32_t state = 0;
+	OOBase::uint32_t state = 0;
 	bool fixed = false;
 	glm::uvec4 margins(0);
 	glm::uvec2 padding(0);
@@ -864,7 +864,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 	glm::ivec2 position(0);
 	glm::uvec2 size(0);
 	glm::vec4 colour(1.f);
-	uint32_t state = 0;
+	OOBase::uint32_t state = 0;
 
 	if (character(p,pe,'('))
 	{
@@ -1184,7 +1184,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 {
 	glm::ivec2 position(0);
 	glm::uvec2 size(0);
-	uint32_t state = 0;
+	OOBase::uint32_t state = 0;
 	OOBase::ScopedString style_name;
 
 	if (character(p,pe,'('))
@@ -1250,7 +1250,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 
 OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p, const char* pe, UIGroup* parent, const char* name, unsigned int zorder)
 {
-	uint32_t state = 0;
+	OOBase::uint32_t state = 0;
 	glm::ivec2 position(0);
 	glm::uvec2 size(0);
 	glm::vec4 colour(1.f);

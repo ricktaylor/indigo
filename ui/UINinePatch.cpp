@@ -581,7 +581,7 @@ glm::uvec2 Indigo::NinePatch::ideal_size() const
 	return min_size();
 }
 
-Indigo::UINinePatch::UINinePatch(UIGroup* parent, const OOBase::SharedPtr<NinePatch>& patch, const glm::vec4& colour, uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+Indigo::UINinePatch::UINinePatch(UIGroup* parent, const OOBase::SharedPtr<NinePatch>& patch, const glm::vec4& colour, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
 		UIWidget(parent,state,position,size),
 		m_9patch(patch),
 		m_colour(colour)
