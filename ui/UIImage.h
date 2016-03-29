@@ -36,8 +36,9 @@ namespace Indigo
 		public:
 			UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::uvec2& size, const glm::vec4& colour = glm::vec4(1.f), const glm::ivec2& position = glm::ivec2(0));
 
-			void colour(glm::vec4 colour) { m_colour = colour; }
-			void size(glm::uvec2 size) { m_size = glm::vec3(size.x,size.y,1.f); }
+			virtual bool valid() const { return UIDrawable::valid() && m_texture->valid(); }
+
+			virtual void size(glm::uvec2 size) { m_size = glm::vec3(size.x,size.y,1.f); }
 
 		protected:
 			OOBase::SharedPtr<OOGL::Texture> m_texture;

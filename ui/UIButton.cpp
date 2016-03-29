@@ -166,7 +166,10 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 
 		glm::ivec2 pos((sz.x - caption_width) / 2 + margins.x,(sz.y - caption_height) / 2 + margins.w);
 
-		rs.m_caption = OOBase::allocate_shared<Render::ShadowLabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,style.m_shadow,pos,style.m_drop);
+		if (style.m_drop.x && style.m_drop.y && style.m_shadow.a > 0.f)
+			rs.m_caption = OOBase::allocate_shared<Render::UIShadowLabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,style.m_shadow,pos,style.m_drop);
+		else
+			rs.m_caption = OOBase::allocate_shared<Render::UILabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,pos);
 		if (!rs.m_caption)
 			LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 

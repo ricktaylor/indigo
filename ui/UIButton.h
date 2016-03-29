@@ -22,8 +22,8 @@
 #ifndef INDIGO_UIBUTTON_H_INCLUDED
 #define INDIGO_UIBUTTON_H_INCLUDED
 
-#include "Label.h"
-#include "NinePatch.h"
+#include "UILabel.h"
+#include "UINinePatch.h"
 
 namespace Indigo
 {
@@ -70,8 +70,8 @@ namespace Indigo
 
 		struct RenderStyleState
 		{
-			OOBase::SharedPtr<Render::NinePatch> m_background;
-			OOBase::SharedPtr<Render::ShadowLabel> m_caption;
+			OOBase::SharedPtr<Render::UIDrawable> m_background;
+			OOBase::SharedPtr<Render::UIDrawable> m_caption;
 		};
 		RenderStyleState m_normal;
 		RenderStyleState m_active;

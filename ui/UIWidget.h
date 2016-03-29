@@ -38,8 +38,10 @@ namespace Indigo
 		public:
 			virtual bool valid() const { return true; }
 
-			void show(bool visible = true) { m_visible = visible; };
-			void position(glm::ivec2 pos) { m_position = pos; };
+			void show(bool visible = true) { m_visible = visible; }
+			void position(glm::ivec2 pos) { m_position = pos; }
+
+			virtual void size(glm::uvec2 sz) {}
 
 		protected:
 			UIDrawable(const glm::ivec2& position = glm::ivec2(0,0));

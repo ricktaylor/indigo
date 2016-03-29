@@ -30,12 +30,12 @@ namespace Indigo
 {
 	namespace Render
 	{
-		class NinePatch;
+		class UINinePatch;
 	}
 
 	class NinePatch : public Image
 	{
-		friend class Render::NinePatch;
+		friend class Render::UINinePatch;
 
 	public:
 		NinePatch();
@@ -47,7 +47,7 @@ namespace Indigo
 		
 		glm::uvec2 min_size() const;
 
-		OOBase::SharedPtr<Render::NinePatch> make_drawable(const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0), const glm::vec4& colour = glm::vec4(1.f)) const;
+		OOBase::SharedPtr<Render::UIDrawable> make_drawable(const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0), const glm::vec4& colour = glm::vec4(1.f)) const;
 
 	private:
 		bool pixel_cmp(int x, int y, bool black);
@@ -67,19 +67,17 @@ namespace Indigo
 
 	namespace Render
 	{
-		class NinePatch : public UIDrawable
+		class UINinePatch : public UIDrawable
 		{
 			friend class Indigo::NinePatch;
 
 		public:
-			NinePatch(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info);
-			virtual ~NinePatch();
+			UINinePatch(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info);
+			virtual ~UINinePatch();
 
 			virtual bool valid() const;
 
-			void size(const glm::uvec2& size);
-
-			void colour(const glm::vec4& colour) { m_colour = colour; }
+			virtual void size(glm::uvec2 size);
 
 		private:
 			OOBase::SharedPtr<OOGL::Texture> m_texture;

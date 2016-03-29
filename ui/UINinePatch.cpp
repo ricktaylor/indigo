@@ -22,7 +22,8 @@
 #include "../core/Common.h"
 #include "../core/ShaderPool.h"
 
-#include "NinePatch.h"
+#include "UINinePatch.h"
+#include "UIImage.h"
 
 #include "../oogl/BufferObject.h"
 #include "../oogl/Shader.h"
@@ -253,7 +254,7 @@ void NinePatchFactory::draw(OOGL::State& glState, const OOBase::SharedPtr<OOGL::
 	}
 }
 
-Indigo::Render::NinePatch::NinePatch(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info) :
+Indigo::Render::UINinePatch::UINinePatch(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info) :
 		UIDrawable(position),
 		m_texture(texture),
 		m_colour(colour),
@@ -263,18 +264,18 @@ Indigo::Render::NinePatch::NinePatch(const glm::ivec2& position, const glm::uvec
 	this->size(size);
 }
 
-Indigo::Render::NinePatch::~NinePatch()
+Indigo::Render::UINinePatch::~UINinePatch()
 {
 	if (m_patch != GLsizei(-1))
 		NinePatchFactory_t::instance().free_patch(m_patch);
 }
 
-bool Indigo::Render::NinePatch::valid() const
+bool Indigo::Render::UINinePatch::valid() const
 {
-	return m_patch != GLsizei(-1);
+	return UIDrawable::valid() && m_texture->valid() && m_patch != GLsizei(-1);
 }
 
-void Indigo::Render::NinePatch::size(const glm::uvec2& size)
+void Indigo::Render::UINinePatch::size(glm::uvec2 size)
 {
 	if (size.x && size.y && m_info->m_tex_size.x && m_info->m_tex_size.y)
 	{
@@ -340,7 +341,7 @@ void Indigo::Render::NinePatch::size(const glm::uvec2& size)
 	}
 }
 
-void Indigo::Render::NinePatch::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
+void Indigo::Render::UINinePatch::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	if (m_patch != GLsizei(-1) && m_texture && m_colour.a > 0.f)
 	{
@@ -454,71 +455,83 @@ bool Indigo::NinePatch::scan_column(int column, glm::uvec2& span)
 
 bool Indigo::NinePatch::get_bounds()
 {
+	bool is_9 = false;
+
 	glm::uvec2 span;
-	if (!scan_line(0,span))
-		LOG_ERROR_RETURN(("Bad top row in 9-patch!"),false);
-
-	m_info->m_borders.x = span.x;
-	m_info->m_borders.z = m_width - span.y;
-
-	if (!scan_column(0,span))
-		LOG_ERROR_RETURN(("Bad left column in 9-patch!"),false);
-
-	m_info->m_borders.y = m_height - span.y;
-	m_info->m_borders.w = span.x;
-
-	if (!scan_line(m_height-1,span))
-		LOG_ERROR_RETURN(("Bad bottom row in 9-patch!"),false);
-
-	m_margins.x = span.x;
-	m_margins.z = m_width  - span.y;
-
-	if (!scan_column(m_width-1,span))
-		LOG_ERROR_RETURN(("Bad right column in 9-patch!"),false);
-
-	m_margins.y = m_height - span.y;
-	m_margins.w = span.x;
-
-	// Now swap out the pixels for a sub-image...
-	char* new_pixels = static_cast<char*>(OOBase::ThreadLocalAllocator::allocate((m_width-2)*(m_height-2)*m_components));
-	if (!new_pixels)
-		LOG_ERROR_RETURN(("Failed to allocate 9-patch pixel data!"),false);
-
-	char* dest = new_pixels;
-	const char* src = static_cast<const char*>(m_pixels) + (m_width+1)*m_components;
-	for (unsigned int y=1;y<m_height-1;++y)
+	if (scan_line(0,span))
 	{
-		memcpy(dest,src,(m_width-2)*m_components);
+		m_info->m_borders.x = span.x;
+		m_info->m_borders.z = m_width - span.y;
 
-		src += m_width*m_components;
-		dest += (m_width-2)*m_components;
+		if (scan_column(0,span))
+		{
+			m_info->m_borders.y = m_height - span.y;
+			m_info->m_borders.w = span.x;
+
+			if (scan_line(m_height-1,span))
+			{
+				m_margins.x = span.x;
+				m_margins.z = m_width  - span.y;
+
+				if (scan_column(m_width-1,span))
+				{
+					is_9 = true;
+
+					m_margins.y = m_height - span.y;
+					m_margins.w = span.x;
+				}
+			}
+		}
 	}
 
-	OOBase::ThreadLocalAllocator::free(m_pixels);
-	m_pixels = new_pixels;
-	m_height -= 2;
-	m_width -= 2;
+	if (is_9)
+	{
+		// Now swap out the pixels for a sub-image...
+		char* new_pixels = static_cast<char*>(OOBase::ThreadLocalAllocator::allocate((m_width-2)*(m_height-2)*m_components));
+		if (!new_pixels)
+			LOG_ERROR_RETURN(("Failed to allocate 9-patch pixel data!"),false);
+
+		char* dest = new_pixels;
+		const char* src = static_cast<const char*>(m_pixels) + (m_width+1)*m_components;
+		for (unsigned int y=1;y<m_height-1;++y)
+		{
+			memcpy(dest,src,(m_width-2)*m_components);
+
+			src += m_width*m_components;
+			dest += (m_width-2)*m_components;
+		}
+
+		OOBase::ThreadLocalAllocator::free(m_pixels);
+		m_pixels = new_pixels;
+		m_height -= 2;
+		m_width -= 2;
+	}
 
 	m_info->m_tex_size = size();
 
 	return true;
 }
 
-OOBase::SharedPtr<Indigo::Render::NinePatch> Indigo::NinePatch::make_drawable(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour) const
+OOBase::SharedPtr<Indigo::Render::UIDrawable> Indigo::NinePatch::make_drawable(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour) const
 {
 	if (!m_info)
-		LOG_ERROR_RETURN(("NinePatch::make_drawbale called with no info!"),OOBase::SharedPtr<Indigo::Render::NinePatch>());
+		LOG_ERROR_RETURN(("NinePatch::make_drawable called with no info!"),OOBase::SharedPtr<Indigo::Render::UIDrawable>());
 
-	OOBase::SharedPtr<OOGL::Texture> texture = make_texture(GL_RGBA8,1);
+	bool is_9 = (m_info->m_borders != glm::uvec4(0));
+
+	OOBase::SharedPtr<OOGL::Texture> texture = make_texture(GL_RGBA8,is_9 ? 1 : 0);
 	if (!texture)
-		return OOBase::SharedPtr<Indigo::Render::NinePatch>();
+		return OOBase::SharedPtr<Indigo::Render::UIDrawable>();
 
 	texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	texture->parameter(GL_TEXTURE_MIN_FILTER,is_9 ? GL_LINEAR : GL_LINEAR_MIPMAP_LINEAR);
 	texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 	texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 
-	return OOBase::allocate_shared<Render::NinePatch,OOBase::ThreadLocalAllocator>(position,size,colour,texture,m_info);
+	if (is_9)
+		return OOBase::allocate_shared<Render::UINinePatch,OOBase::ThreadLocalAllocator>(position,size,colour,texture,m_info);
+	else
+		return OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,size,colour);
 }
 
 glm::uvec2 Indigo::NinePatch::min_size() const

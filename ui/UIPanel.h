@@ -22,7 +22,7 @@
 #ifndef INDIGO_UIPANEL_H_INCLUDED
 #define INDIGO_UIPANEL_H_INCLUDED
 
-#include "NinePatch.h"
+#include "UINinePatch.h"
 #include "UISizer.h"
 
 namespace Indigo
@@ -48,9 +48,7 @@ namespace Indigo
 		OOBase::SharedPtr<NinePatch> m_background;
 		glm::vec4 m_colour;
 
-		OOBase::SharedPtr<Render::NinePatch> m_render_background;
-
-		void do_size(glm::uvec2 sz);
+		OOBase::SharedPtr<Render::UIDrawable> m_render_background;
 	};
 }
 

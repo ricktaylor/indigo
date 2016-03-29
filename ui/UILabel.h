@@ -28,12 +28,10 @@ namespace Indigo
 {
 	namespace Render
 	{
-		class Label : public Text, public UIDrawable
+		class UILabel : public Text, public UIDrawable
 		{
 		public:
-			Label(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::ivec2& position = glm::ivec2(0));
-
-			void colour(const glm::vec4& colour) { m_colour = colour; }
+			UILabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::ivec2& position = glm::ivec2(0));
 
 		protected:
 			glm::vec4 m_colour;
@@ -42,12 +40,10 @@ namespace Indigo
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};
 
-		class ShadowLabel : public Label
+		class UIShadowLabel : public UILabel
 		{
 		public:
-			ShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::vec4& shadow = glm::vec4(.5f), const glm::ivec2& position = glm::ivec2(0), const glm::ivec2& drop = glm::ivec2(0,-1));
-
-			void shadow(const glm::vec4& shadow) { m_shadow = shadow; }
+			UIShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::vec4& shadow = glm::vec4(.5f), const glm::ivec2& drop = glm::ivec2(0,-1), const glm::ivec2& position = glm::ivec2(0));
 
 		private:
 			glm::vec4 m_shadow;

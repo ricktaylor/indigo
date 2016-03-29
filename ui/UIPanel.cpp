@@ -63,16 +63,10 @@ void Indigo::UIPanel::layout()
 	this->size(m_sizer.ideal_fit());
 }
 
-void Indigo::UIPanel::do_size(glm::uvec2 sz)
-{
-	if (m_render_background)
-		m_render_background->size(sz);
-}
-
 void Indigo::UIPanel::on_size(const glm::uvec2& sz)
 {
 	m_sizer.fit(sz);
 
 	if (valid() && m_render_background)
-		render_pipe()->post(OOBase::make_delegate(this,&UIPanel::do_size),sz);
+		render_pipe()->post(OOBase::make_delegate(m_render_background.get(),&Render::UIDrawable::size),glm::uvec2(sz));
 }

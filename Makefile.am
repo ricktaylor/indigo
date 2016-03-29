@@ -74,9 +74,9 @@ indigo_SOURCES = \
 	core/ZipResource.cpp \
 	resources/StaticResources.cpp \
 	ui/Quad.cpp \
-	ui/NinePatch.cpp \
-	ui/Label.cpp \
 	ui/ImageLayer.cpp \
+	ui/UILabel.cpp \
+	ui/UINinePatch.cpp \
 	ui/UIWidget.cpp \
 	ui/UILayer.cpp \
 	ui/UIButton.cpp \
