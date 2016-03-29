@@ -101,14 +101,14 @@ glm::uvec2 Indigo::UIButton::min_style_size(const StyleState& style) const
 
 glm::uvec2 Indigo::UIButton::ideal_style_size(const StyleState& style) const
 {
-	glm::uvec2 min_size(0);
+	glm::uvec2 back_size(0);
 	glm::uvec4 margins(0);
 	glm::uvec2 text(0);
 
 	if (style.m_background)
 	{
 		margins = style.m_background->margins();
-		min_size = style.m_background->min_size();
+		back_size = style.m_background->ideal_size();
 	}
 
 	if (!m_text.empty() && style.m_font)
@@ -122,7 +122,7 @@ glm::uvec2 Indigo::UIButton::ideal_style_size(const StyleState& style) const
 		text.y = height + margins.y + margins.w;
 	}
 
-	return glm::max(min_size,text);
+	return glm::max(back_size,text);
 }
 
 void Indigo::UIButton::update_sizes()

@@ -21,6 +21,7 @@
 
 #include "../core/Common.h"
 #include "../core/ShaderPool.h"
+#include "../core/Render.h"
 
 #include "UINinePatch.h"
 #include "UIImage.h"
@@ -570,4 +571,54 @@ glm::uvec2 Indigo::NinePatch::min_size() const
 	}
 
 	return glm::max(margins,borders);
+}
+
+glm::uvec2 Indigo::NinePatch::ideal_size() const
+{
+	if (m_info)
+		return m_info->m_tex_size;
+
+	return min_size();
+}
+
+Indigo::UINinePatch::UINinePatch(UIGroup* parent, const OOBase::SharedPtr<NinePatch>& patch, const glm::vec4& colour, uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+		UIWidget(parent,state,position,size),
+		m_9patch(patch),
+		m_colour(colour)
+{
+	if (size == glm::uvec2(0))
+		this->size(m_9patch->size());
+}
+
+glm::uvec2 Indigo::UINinePatch::min_size() const
+{
+	return m_9patch->min_size();
+}
+
+glm::uvec2 Indigo::UINinePatch::ideal_size() const
+{
+	return m_9patch->ideal_size();
+}
+
+void Indigo::UINinePatch::on_size(const glm::uvec2& sz)
+{
+	if (m_render_9patch)
+		render_pipe()->post(OOBase::make_delegate(m_render_9patch.get(),&Render::UIDrawable::size),sz);
+}
+
+bool Indigo::UINinePatch::on_render_create(Indigo::Render::UIGroup* group)
+{
+	if (!m_9patch)
+		return false;
+
+	m_render_9patch = m_9patch->make_drawable(glm::ivec2(0),size(),m_colour);
+	if (!m_render_9patch)
+		return false;
+
+	if (!group->add_drawable(m_render_9patch,0))
+		return false;
+
+	m_render_9patch->show();
+
+	return true;
 }

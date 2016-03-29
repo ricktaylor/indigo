@@ -45,6 +45,7 @@ namespace Indigo
 
 		const glm::uvec4& margins() const { return m_margins; }
 		
+		glm::uvec2 ideal_size() const;
 		glm::uvec2 min_size() const;
 
 		OOBase::SharedPtr<Render::UIDrawable> make_drawable(const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0), const glm::vec4& colour = glm::vec4(1.f)) const;
@@ -91,6 +92,26 @@ namespace Indigo
 			void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};
 	}
+
+	class UINinePatch : public UIWidget
+	{
+	public:
+		UINinePatch(UIGroup* parent, const OOBase::SharedPtr<NinePatch>& patch, const glm::vec4& colour = glm::vec4(1.f), uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+
+	protected:
+		virtual glm::uvec2 min_size() const;
+		virtual glm::uvec2 ideal_size() const;
+
+		virtual bool on_render_create(Indigo::Render::UIGroup* group);
+
+	private:
+		OOBase::SharedPtr<NinePatch> m_9patch;
+		OOBase::SharedPtr<Render::UIDrawable> m_render_9patch;
+
+		glm::vec4 m_colour;
+
+		void on_size(const glm::uvec2& sz);
+	};
 }
 
 #endif // INDIGO_FONT_H_INCLUDED
