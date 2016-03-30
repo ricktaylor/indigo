@@ -33,43 +33,6 @@
 #include "../ui/UISizer.h"
 #include "../ui/UILoader.h"
 
-/*namespace Indigo
-{
-	namespace Application
-	{
-		const OOBase::CmdArgs::options_t* m_options;
-		const OOBase::CmdArgs::arguments_t* m_args;
-		OOBase::SharedPtr<Window> m_wnd;
-
-		void splash();
-	}
-}
-
-void Indigo::Application::splash()
-{
-
-}
-
-void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args)
-{
-	m_options = options;
-	m_args = args;
-	m_wnd = wnd;
-
-	splash();
-}
-
-void Indigo::Application::on_quit()
-{
-	m_wnd.reset();
-}
-
-void Indigo::Application::stop()
-{
-	thread_pipe()->close();
-}
-*/
-
 void Indigo::Application::run()
 {
 	m_stop = false;
@@ -103,8 +66,6 @@ void Indigo::Application::run()
 
 	while (!m_stop)
 		thread_pipe()->get();
-
-	wnd->destroy();
 }
 
 void Indigo::Application::window_close(const Window& w)
