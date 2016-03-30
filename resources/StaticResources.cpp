@@ -37,7 +37,11 @@ namespace
 	public:
 		NullShare() : OOBase::detail::SharedCountBase() {}
 		void dispose() {}
-		void destroy() {}
+
+		void destroy()
+		{
+			OOBase::CrtAllocator::delete_free(this);
+		}
 	};
 }
 

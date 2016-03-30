@@ -133,7 +133,7 @@ namespace Indigo
 
 				bool enqueue(callback_t callback, void* param = NULL);
 
-				bool dequeue(bool call_blocked, const OOBase::Timeout& timeout = OOBase::Timeout());
+				bool dequeue(bool call_blocked, bool once, const OOBase::Timeout& timeout = OOBase::Timeout());
 
 				bool drain();
 
@@ -175,6 +175,7 @@ namespace Indigo
 		OOBase::SharedPtr<Pipe> open(const char* remote);
 
 		bool poll(const OOBase::Timeout& timeout = OOBase::Timeout());
+		bool get(const OOBase::Timeout& timeout = OOBase::Timeout());
 		bool drain();
 
 		void close();

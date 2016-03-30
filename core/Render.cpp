@@ -30,9 +30,11 @@
 
 namespace Indigo
 {
-	bool run_render_loop(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
+	//bool run_render_loop(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
 
 	void render_init(Pipe* pipe);
+
+	bool run(const char* name, void (*fn)(void*), void* param);
 }
 
 namespace
@@ -71,7 +73,7 @@ static void on_glfw_error(int code, const char* message)
 	OOBase::Logger::log(OOBase::Logger::Error,"GLFW error %d: %s",code,message);
 }
 
-static OOBase::SharedPtr<Indigo::Pipe> start_logic_thread(Indigo::Pipe& pipe, OOBase::WeakPtr<OOGL::Window>& main_wnd, const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
+/*static OOBase::SharedPtr<Indigo::Pipe> start_logic_thread(Indigo::Pipe& pipe, OOBase::WeakPtr<OOGL::Window>& main_wnd, const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args)
 {
 	OOBase::SharedPtr<Indigo::Pipe> logic_pipe;
 
@@ -158,4 +160,34 @@ bool Indigo::run_render_loop(const OOBase::CmdArgs::options_t& options, const OO
 	glfwTerminate();
 
 	return true;
+}*/
+
+bool Indigo::run(const char* name, void (*fn)(void*), void* param)
+{
+	// Create render comms pipe
+	Indigo::Pipe pipe("render");
+	render_init(&pipe);
+
+	// Not sure if we need to set this first...
+	glfwSetErrorCallback(&on_glfw_error);
+
+	if (!glfwInit())
+		LOG_ERROR_RETURN(("glfwInit failed"),false);
+
+	// Set defaults
+	glfwDefaultWindowHints();
+
+	bool ret = false;
+	OOBase::SharedPtr<OOBase::Thread> thread;
+	OOBase::SharedPtr<Indigo::Pipe> logic_pipe = Indigo::start_thread(name,thread);
+	if (logic_pipe)
+	{
+		ret = logic_pipe->call(OOBase::make_delegate(fn),param);
+		if (ret)
+			thread->join();
+	}
+
+	glfwTerminate();
+
+	return ret;
 }

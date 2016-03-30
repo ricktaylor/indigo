@@ -79,6 +79,12 @@ bool Indigo::detail::IPC::Queue::drain()
 	{
 		guard.release();
 
+		if (!item.m_callback)
+		{
+			m_queue.push(item);
+			return false;
+		}
+
 		if (!(*item.m_callback)(item.m_param))
 			return false;
 
@@ -88,9 +94,9 @@ bool Indigo::detail::IPC::Queue::drain()
 	return true;
 }
 
-bool Indigo::detail::IPC::Queue::dequeue(bool call_blocked, const OOBase::Timeout& timeout)
+bool Indigo::detail::IPC::Queue::dequeue(bool call_blocked, bool once, const OOBase::Timeout& timeout)
 {
-	for (;;)
+	do
 	{
 		OOBase::Guard<OOBase::Condition::Mutex> guard(m_lock,false);
 		if (!guard.acquire(timeout))
@@ -108,7 +114,13 @@ bool Indigo::detail::IPC::Queue::dequeue(bool call_blocked, const OOBase::Timeou
 			guard.release();
 
 			if (!item.m_callback)
-				return call_blocked;
+			{
+				if (call_blocked)
+					return true;
+
+				m_queue.push(item);
+				return false;
+			}
 
 			if (!(*item.m_callback)(item.m_param))
 				return false;
@@ -117,7 +129,9 @@ bool Indigo::detail::IPC::Queue::dequeue(bool call_blocked, const OOBase::Timeou
 				return true;
 		}
 	}
-	return false;
+	while (!once);
+
+	return once;
 }
 
 Indigo::Pipe::Pipe(const char* name)
@@ -177,7 +191,7 @@ bool Indigo::Pipe::call(void (*fn)(void*), void* param)
 	if (!m_send_queue->enqueue(&Pipe::make_call,&ci))
 		return false;
 
-	return m_recv_queue->dequeue(true);
+	return m_recv_queue->dequeue(true,false);
 }
 
 bool Indigo::Pipe::post_cleanup(void* param)
@@ -225,7 +239,12 @@ bool Indigo::Pipe::post(void (*fn)(void*), void* param, void (*fn_cleanup)(void*
 
 bool Indigo::Pipe::poll(const OOBase::Timeout& timeout)
 {
-	return m_recv_queue && m_recv_queue->dequeue(false,timeout);
+	return m_recv_queue && m_recv_queue->dequeue(false,false,timeout);
+}
+
+bool Indigo::Pipe::get(const OOBase::Timeout& timeout)
+{
+	return m_recv_queue && m_recv_queue->dequeue(false,true,timeout);
 }
 
 bool Indigo::Pipe::drain()

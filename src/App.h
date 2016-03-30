@@ -26,12 +26,18 @@
 
 namespace Indigo
 {
-	namespace Application
+	class Application
 	{
-		void start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args);
-		void stop();
+	public:
+		OOBase::CmdArgs::options_t m_options;
+		OOBase::CmdArgs::arguments_t m_args;
 
-		void on_quit();
+		void run();
+
+	private:
+		void window_close(const Window& w);
+
+		bool m_stop;
 	};
 }
 

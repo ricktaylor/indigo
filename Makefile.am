@@ -66,7 +66,6 @@ indigo_SOURCES = \
 	core/Pipe.cpp \
 	core/Thread.cpp \
 	core/Render.cpp \
-	core/Main.cpp \
 	core/Window.cpp \
 	core/Image.cpp \
 	core/Font.cpp \
@@ -84,6 +83,7 @@ indigo_SOURCES = \
 	ui/UISizer.cpp \
 	ui/UIPanel.cpp \
 	ui/UILoader.cpp \
+	src/Main.cpp \
 	src/App.cpp
 			
 indigo_LDADD = \

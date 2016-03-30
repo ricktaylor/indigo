@@ -33,7 +33,7 @@
 #include "../ui/UISizer.h"
 #include "../ui/UILoader.h"
 
-namespace Indigo
+/*namespace Indigo
 {
 	namespace Application
 	{
@@ -47,26 +47,7 @@ namespace Indigo
 
 void Indigo::Application::splash()
 {
-	ZipResource zip;
-	if (zip.open("test.zip"))
-	{
-		// Add the book layer
-		OOBase::SharedPtr<Image> book_image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
-		if (book_image)
-		{
-			book_image->load(zip,"book.png");
 
-			OOBase::SharedPtr<ImageLayer> img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(book_image);
-			if (img_layer && m_wnd->add_layer(img_layer,50))
-				img_layer->show();
-		}
-
-		UILoader loader(m_wnd,zip);
-
-		unsigned int zorder = 100;
-		if (loader.load("ui.txt",zorder))
-			m_wnd->show();
-	}
 }
 
 void Indigo::Application::start(OOBase::SharedPtr<Window> wnd, const OOBase::CmdArgs::options_t* options, const OOBase::CmdArgs::arguments_t* args)
@@ -86,4 +67,47 @@ void Indigo::Application::on_quit()
 void Indigo::Application::stop()
 {
 	thread_pipe()->close();
+}
+*/
+
+void Indigo::Application::run()
+{
+	m_stop = false;
+
+	OOBase::SharedPtr<Window> wnd = OOBase::allocate_shared<Window,OOBase::ThreadLocalAllocator>();
+	if (wnd && wnd->create())
+	{
+		wnd->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Application::window_close));
+
+		ZipResource zip;
+		if (zip.open("test.zip"))
+		{
+			// Add the book layer
+			OOBase::SharedPtr<Image> book_image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
+			if (book_image)
+			{
+				book_image->load(zip,"book.png");
+
+				OOBase::SharedPtr<ImageLayer> img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(book_image);
+				if (img_layer && wnd->add_layer(img_layer,50))
+					img_layer->show();
+			}
+
+			UILoader loader(wnd,zip);
+
+			unsigned int zorder = 100;
+			if (loader.load("ui.txt",zorder))
+				wnd->show();
+		}
+	}
+
+	while (!m_stop)
+		thread_pipe()->get();
+
+	wnd->destroy();
+}
+
+void Indigo::Application::window_close(const Window& w)
+{
+	m_stop = true;
 }

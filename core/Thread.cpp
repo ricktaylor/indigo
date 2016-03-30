@@ -58,12 +58,12 @@ static int thread_start(void* param)
 
 	ts->m_started.set();
 
-	pipe.poll();
+	pipe.get();
 
 	return 0;
 }
 
-OOBase::SharedPtr<Indigo::Pipe> Indigo::start_thread(const char* name)
+OOBase::SharedPtr<Indigo::Pipe> Indigo::start_thread(const char* name, OOBase::SharedPtr<OOBase::Thread>& thread)
 {
 	OOBase::SharedPtr<Indigo::Pipe> pipe;
 
@@ -71,7 +71,7 @@ OOBase::SharedPtr<Indigo::Pipe> Indigo::start_thread(const char* name)
 	ts.m_name = name;
 
 	int err = 0;
-	OOBase::SharedPtr<OOBase::Thread> thread = OOBase::Thread::run(&thread_start,&ts,err);
+	thread = OOBase::Thread::run(&thread_start,&ts,err);
 	if (!thread)
 		LOG_ERROR_RETURN(("Failed to start thread: %s",OOBase::system_error_text(err)),pipe);
 
@@ -83,4 +83,3 @@ OOBase::SharedPtr<Indigo::Pipe> Indigo::start_thread(const char* name)
 
 	return pipe;
 }
-

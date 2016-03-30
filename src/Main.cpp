@@ -19,7 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
+#include "../core/Common.h"
 
 #if defined(_WIN32)
 #include <shlwapi.h>
@@ -35,11 +35,15 @@
 //#include <OOBase/BTree.h>
 //#include <OOBase/Morton.h>
 
+#include "App.h"
+
 static bool s_is_debug = false;
 
 namespace Indigo
 {
-	bool run_render_loop(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
+	//bool run_render_loop(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
+
+	bool run(const char* name, void (*fn)(void*), void* param);
 }
 
 bool Indigo::is_debug()
@@ -157,12 +161,19 @@ static bool load_config(OOBase::CmdArgs::options_t& options)
 	return true;
 }
 
+static void logic_thunk(void* param)
+{
+	static_cast<Indigo::Application*>(param)->run();
+}
+
 #if defined(_WIN32)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #else
 int main(int argc, const char* argv[])
 #endif
 {
+	Indigo::Application theApp;
+
 	// Set critical failure handler
 	OOBase::SetCriticalFailure(&critical_failure);
 
@@ -183,28 +194,26 @@ int main(int argc, const char* argv[])
 #endif
 
 	// Parse command line
-	OOBase::CmdArgs::options_t options;
-	OOBase::CmdArgs::arguments_t args;
 #if defined(_WIN32)
-	int err = cmd_args.parse(options,args);
+	int err = cmd_args.parse(theApp.m_options,theApp.m_args);
 #else
-	int err = cmd_args.parse(argc,argv,options,args);
+	int err = cmd_args.parse(argc,argv,theApp.m_options,theApp.m_args);
 #endif
 	if (err	!= 0)
 	{
 		OOBase::String strErr;
-		if (options.find("missing",strErr))
+		if (theApp.m_options.find("missing",strErr))
 			return exit_failure("Missing value for option %s\n",strErr.c_str());
-		else if (options.find("unknown",strErr))
+		else if (theApp.m_options.find("unknown",strErr))
 			return exit_failure("Unknown option %s\n",strErr.c_str());
 		else
 			return exit_failure("Failed to parse command line: %s\n",OOBase::system_error_text(err));
 	}
 
-	if (options.exists("debug"))
+	if (theApp.m_options.exists("debug"))
 		s_is_debug = true;
 
-	if (options.exists("help"))
+	if (theApp.m_options.exists("help"))
 		return help();
 
 	// Start the logger
@@ -241,9 +250,10 @@ int main(int argc, const char* argv[])
 #endif
 
 	// Load up our global configuration arguments
-	if (!load_config(options))
+	if (!load_config(theApp.m_options))
 		return EXIT_FAILURE;
 
 	// Start our two main threads
-	return Indigo::run_render_loop(options,args) ? EXIT_SUCCESS : EXIT_FAILURE;
+	//return Indigo::run_render_loop(options,args) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return Indigo::run("logic",&logic_thunk,&theApp) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

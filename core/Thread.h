@@ -28,7 +28,7 @@ namespace Indigo
 {
 	Indigo::Pipe* const thread_pipe();
 
-	OOBase::SharedPtr<Indigo::Pipe> start_thread(const char* name);
+	OOBase::SharedPtr<Indigo::Pipe> start_thread(const char* name, OOBase::SharedPtr<OOBase::Thread>& thread);
 }
 
 #endif // INDIGO_THREAD_H_INCLUDED

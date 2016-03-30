@@ -22,8 +22,7 @@
 #include "Common.h"
 #include "Window.h"
 #include "Render.h"
-
-#include "../src/App.h"
+#include "Thread.h"
 
 void Indigo::Layer::show(bool visible)
 {
@@ -41,7 +40,7 @@ Indigo::Render::Window::Window(Indigo::Window* owner) :
 {
 }
 
-OOBase::WeakPtr<OOGL::Window> Indigo::Render::Window::create_window()
+bool Indigo::Render::Window::create_window()
 {
 	unsigned int style = OOGL::Window::eWSresizable | OOGL::Window::eWSdecorated;
 	if (Indigo::is_debug())
@@ -49,7 +48,7 @@ OOBase::WeakPtr<OOGL::Window> Indigo::Render::Window::create_window()
 
 	m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(800,600,"Indigo",style);
 	if (!m_wnd)
-		LOG_ERROR_RETURN(("Failed to create window: %s",OOBase::system_error_text()),OOBase::WeakPtr<OOGL::Window>());
+		LOG_ERROR_RETURN(("Failed to create window: %s",OOBase::system_error_text()),false);
 
 	if (!m_wnd->valid())
 		m_wnd.reset();
@@ -70,12 +69,12 @@ OOBase::WeakPtr<OOGL::Window> Indigo::Render::Window::create_window()
 		//glCullFace(GL_BACK);
 	}
 
-	return m_wnd;
+	return true;
 }
 
 void Indigo::Render::Window::on_close(const OOGL::Window& win)
 {
-	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_close));
+	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::call_on_close));
 }
 
 void Indigo::Render::Window::on_move(const OOGL::Window& win, const glm::ivec2& pos)
@@ -119,22 +118,94 @@ Indigo::Window::Window()
 
 Indigo::Window::~Window()
 {
+	destroy();
+}
+
+bool Indigo::Window::create()
+{
+	if (m_render_wnd)
+		LOG_ERROR_RETURN(("Failed to create window: Already exists"),false);
+
+	bool ret = false;
+	if (!render_pipe()->call(OOBase::make_delegate(this,&Window::on_create),&ret) || !ret)
+		return false;
+
+	return render_pipe()->post(OOBase::make_delegate(this,&Window::run));
+}
+
+void Indigo::Window::on_create(bool* ret)
+{
+	*ret = false;
+
+	m_render_wnd = OOBase::allocate_shared<Indigo::Render::Window,OOBase::ThreadLocalAllocator>(this);
+	if (!m_render_wnd)
+		LOG_ERROR(("Failed to create window: %s",OOBase::system_error_text()));
+	else
+	{
+		if (!m_render_wnd->create_window())
+			m_render_wnd.reset();
+		else
+			*ret = true;
+	}
+}
+
+void Indigo::Window::run()
+{
+	static const OOBase::uint64_t monitor_refresh = 1000000 / 60;
+
+	OOBase::WeakPtr<OOGL::Window> weak_wnd(m_render_wnd->m_wnd);
+
+	for (;;)
+	{
+		OOBase::Clock draw_clock;
+
+		// Scope wnd
+		{
+			OOBase::SharedPtr<OOGL::Window> wnd(weak_wnd.lock());
+			if (!wnd)
+				break;
+
+			if (wnd->visible() && !wnd->iconified())
+			{
+				// Update animations
+
+
+				// Draw window
+				wnd->draw();
+			}
+		}
+
+		// Poll for UI events
+		glfwPollEvents();
+
+		// Drain render commands
+		if (!thread_pipe()->drain())
+			return;
+
+		// If we have cycles spare, wait a bit
+		if (draw_clock.microseconds() < monitor_refresh - 5000)
+		{
+			OOBase::Timeout wait(0,static_cast<unsigned int>(monitor_refresh - draw_clock.microseconds()));
+			while (!wait.has_expired())
+			{
+				glfwPollEvents();
+
+				OOBase::Timeout wait2(0,1000);
+				if (wait < wait2)
+					wait2 = wait;
+
+				if (!thread_pipe()->poll(wait2))
+					return;
+			}
+		}
+	}
+}
+
+void Indigo::Window::destroy()
+{
 	m_layers.clear();
 
 	render_pipe()->call(OOBase::make_delegate(this,&Window::on_destroy));
-}
-
-OOBase::WeakPtr<OOGL::Window> Indigo::Window::create()
-{
-	m_render_wnd = OOBase::allocate_shared<Indigo::Render::Window,OOBase::ThreadLocalAllocator>(this);
-	if (!m_render_wnd)
-		LOG_ERROR_RETURN(("Failed to create window: %s",OOBase::system_error_text()),OOBase::WeakPtr<OOGL::Window>());
-
-	OOBase::WeakPtr<OOGL::Window> wnd = m_render_wnd->create_window();
-	if (!wnd)
-		m_render_wnd.reset();
-
-	return wnd;
 }
 
 void Indigo::Window::on_destroy()
@@ -175,14 +246,21 @@ unsigned int Indigo::Window::top_layer() const
 	return (i ? i->first : 0);
 }
 
-void Indigo::Window::on_close()
+void Indigo::Window::call_on_close()
 {
 	bool handled = false;
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
 		handled = i->second->on_quit();
 
-	if (!handled)
-		Application::on_quit();
+	if (!handled && m_on_close)
+		m_on_close.invoke(*this);
+}
+
+OOBase::Delegate1<void,const Indigo::Window&,OOBase::ThreadLocalAllocator> Indigo::Window::on_close(const OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator>& delegate)
+{
+	OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> prev = m_on_close;
+	m_on_close = delegate;
+	return prev;
 }
 
 void Indigo::Window::on_move(glm::ivec2 pos)

@@ -94,10 +94,7 @@ namespace Indigo
 			friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
 
 		public:
-			const OOBase::SharedPtr<OOGL::Window>& window() const
-			{
-				return m_wnd;
-			}
+			const OOBase::SharedPtr<OOGL::Window>& window() const { return m_wnd; }
 
 		private:
 			Window(Indigo::Window* owner);
@@ -105,7 +102,7 @@ namespace Indigo
 			OOBase::SharedPtr<OOGL::Window> m_wnd;
 			Indigo::Window* const m_owner;
 
-			OOBase::WeakPtr<OOGL::Window> create_window();
+			bool create_window();
 
 			OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_layers;
 
@@ -127,7 +124,8 @@ namespace Indigo
 		Window();
 		~Window();
 
-		OOBase::WeakPtr<OOGL::Window> create();
+		bool create();
+		void destroy();
 
 		bool show(bool visible = true);
 
@@ -145,12 +143,18 @@ namespace Indigo
 
 		unsigned int top_layer() const;
 
+		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> on_close(const OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator>& delegate);
+
 	private:
 		OOBase::SharedPtr<Indigo::Render::Window> m_render_wnd;
 		OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_layers;
 
+		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> m_on_close;
+
+		void run();
+		void on_create(bool* ret);
 		void on_destroy();
-		void on_close();
+		void call_on_close();
 		void on_move(glm::ivec2 pos);
 		void on_size(glm::uvec2 sz);
 	};
