@@ -52,8 +52,7 @@ namespace
 		if (l)
 		{
 			for (;l > 0 && (str[l-1] == '\n' || str[l-1] == '\r' || str[l-1] == '\0');)
-				--l;
-			str.assign(str.c_str(),l);
+				str[--l] = '\0';
 		}
 
 		OOBase::Logger::Priority p = OOBase::Logger::Information;
