@@ -58,9 +58,7 @@ static int thread_start(void* param)
 
 	ts->m_started.set();
 
-	pipe.get();
-
-	return 0;
+	return pipe.get() ? 0 : -1;
 }
 
 OOBase::SharedPtr<Indigo::Pipe> Indigo::start_thread(const char* name, OOBase::SharedPtr<OOBase::Thread>& thread)
@@ -77,7 +75,7 @@ OOBase::SharedPtr<Indigo::Pipe> Indigo::start_thread(const char* name, OOBase::S
 
 	ts.m_started.wait();
 
-	pipe = THREAD_PIPE::instance()->open("logic");
+	pipe = THREAD_PIPE::instance()->open(name);
 	if (!pipe)
 		thread->abort();
 
