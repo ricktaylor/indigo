@@ -203,7 +203,7 @@ glm::uvec2 Indigo::UIGroup::ideal_size() const
 
 bool Indigo::UIGroup::on_mousemove(const glm::ivec2& pos)
 {
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i;++i)
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_children.back();i;--i)
 	{
 		if (i->second->visible())
 		{
