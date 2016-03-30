@@ -60,12 +60,14 @@ void Indigo::Application::run()
 
 			unsigned int zorder = 100;
 			if (loader.load("ui.txt",zorder))
+			{
 				wnd->show();
+
+				while (!m_stop)
+					thread_pipe()->get();
+			}
 		}
 	}
-
-	while (!m_stop)
-		thread_pipe()->get();
 }
 
 void Indigo::Application::window_close(const Window& w)
