@@ -78,6 +78,7 @@ namespace Indigo
 		virtual bool on_quit() { return false; }
 		virtual void on_move(const glm::ivec2& sz) {}
 		virtual void on_size(const glm::uvec2& sz) {}
+		virtual bool on_mousemove(double screen_x, double screen_y) { return false; }
 
 	private:
 		OOBase::SharedPtr<Render::Layer> m_render_layer;
@@ -110,6 +111,7 @@ namespace Indigo
 			void on_draw(const OOGL::Window& win, OOGL::State& glState);
 			void on_move(const OOGL::Window& win, const glm::ivec2& pos);
 			void on_size(const OOGL::Window& win, const glm::uvec2& sz);
+			void on_mousemove(const OOGL::Window& win, double screen_x, double screen_y);
 
 			void add_render_layer(Indigo::Layer* layer, unsigned int zorder, bool* ret);
 		};
@@ -157,6 +159,7 @@ namespace Indigo
 		void call_on_close();
 		void on_move(glm::ivec2 pos);
 		void on_size(glm::uvec2 sz);
+		void on_mousemove(double screen_x, double screen_y);
 	};
 }
 

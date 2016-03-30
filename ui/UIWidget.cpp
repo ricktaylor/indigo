@@ -200,3 +200,22 @@ glm::uvec2 Indigo::UIGroup::ideal_size() const
 
 	return ideal;
 }
+
+bool Indigo::UIGroup::on_mousemove(const glm::ivec2& pos)
+{
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i;++i)
+	{
+		if (i->second->visible())
+		{
+			glm::ivec2 child_pos = i->second->position();
+			if (pos.x >= child_pos.x && pos.y >= child_pos.y)
+			{
+				glm::ivec2 child_size = i->second->size();
+				if (pos.x < child_pos.x + child_size.x && pos.y < child_pos.y + child_size.y)
+					return i->second->on_mousemove(pos - child_pos);
+			}
+		}
+	}
+
+	return false;
+}

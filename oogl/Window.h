@@ -107,6 +107,8 @@ namespace OOGL
 		static void cb_on_cursor_enter(GLFWwindow* window, int entered);
 		static void cb_on_cursor_pos(GLFWwindow* window, double xpos, double ypos);
 		static void cb_on_mouse_btn(GLFWwindow* window, int button, int action, int mods);
+
+		void screen_to_fb(double& xpos, double& ypos);
 	};
 }
 

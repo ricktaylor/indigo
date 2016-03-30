@@ -125,6 +125,7 @@ namespace Indigo
 		virtual bool on_render_create(Indigo::Render::UIGroup* group) = 0;
 		virtual void on_size(const glm::uvec2& sz) { }
 		virtual void on_state(OOBase::uint32_t new_state) { m_state = (new_state & eWS_max); }
+		virtual bool on_mousemove(const glm::ivec2& pos) { return false; }
 
 	private:
 		UIGroup* m_parent;
@@ -154,6 +155,8 @@ namespace Indigo
 	protected:
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;
+
+		virtual bool on_mousemove(const glm::ivec2& pos);
 
 	private:
 		OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_children;

@@ -193,11 +193,30 @@ void OOGL::Window::cb_on_cursor_enter(GLFWwindow* window, int entered)
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 }
 
+void OOGL::Window::screen_to_fb(double& xpos, double& ypos)
+{
+	// Reverse y direction
+	int width,height;
+	glfwGetWindowSize(m_glfw_window,&width,&height);
+	ypos = height - ypos;
+
+	// Scale to frame buffer size
+	int fb_width,fb_height;
+	glfwGetFramebufferSize(m_glfw_window,&fb_width,&fb_height);
+
+	xpos = xpos * fb_width / width;
+	ypos = ypos * fb_height / height;
+}
+
 void OOGL::Window::cb_on_cursor_pos(GLFWwindow* window, double xpos, double ypos)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_mousemove)
+	{
+		pThis->screen_to_fb(xpos,ypos);
+
 		pThis->m_on_mousemove.invoke(*pThis,xpos,ypos);
+	}
 }
 
 void OOGL::Window::cb_on_mouse_btn(GLFWwindow* window, int button, int action, int mods)

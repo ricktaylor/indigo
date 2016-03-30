@@ -58,6 +58,7 @@ bool Indigo::Render::Window::create_window()
 		m_wnd->on_moved(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_move));
 		m_wnd->on_sized(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_size));
 		m_wnd->on_draw(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_draw));
+		m_wnd->on_mousemove(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_mousemove));
 
 		if (Indigo::is_debug())
 			OOGL::StateFns::get_current()->enable_logging();
@@ -94,6 +95,11 @@ void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glSta
 		if (i->second->m_visible)
 			i->second->on_draw(glState);
 	}
+}
+
+void Indigo::Render::Window::on_mousemove(const OOGL::Window& win, double screen_x, double screen_y)
+{
+	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_mousemove),screen_x,screen_y);
 }
 
 void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, unsigned int zorder, bool* ret)
@@ -273,4 +279,11 @@ void Indigo::Window::on_size(glm::uvec2 sz)
 {
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
 		i->second->on_size(sz);
+}
+
+void Indigo::Window::on_mousemove(double screen_x, double screen_y)
+{
+	bool handled = false;
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
+		handled = i->second->on_mousemove(screen_x,screen_y);
 }
