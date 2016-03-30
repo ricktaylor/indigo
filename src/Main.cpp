@@ -41,8 +41,6 @@ static bool s_is_debug = false;
 
 namespace Indigo
 {
-	//bool run_render_loop(const OOBase::CmdArgs::options_t& options, const OOBase::CmdArgs::arguments_t& args);
-
 	bool run(const char* name, void (*fn)(void*), void* param);
 }
 
