@@ -148,12 +148,12 @@ void OOGL::Window::cb_on_close(GLFWwindow* window)
 
 void OOGL::Window::cb_on_focus(GLFWwindow* window, int focused)
 {
-	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 }
 
 void OOGL::Window::cb_on_iconify(GLFWwindow* window, int iconified)
 {
-	//RenderWindow* pThis = static_cast<RenderWindow*>(glfwGetWindowUserPointer(window));
+	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 }
 
 void OOGL::Window::cb_on_refresh(GLFWwindow* window)
@@ -196,6 +196,8 @@ void OOGL::Window::cb_on_cursor_enter(GLFWwindow* window, int entered)
 void OOGL::Window::cb_on_cursor_pos(GLFWwindow* window, double xpos, double ypos)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (pThis && pThis->m_on_mousemove)
+		pThis->m_on_mousemove.invoke(*pThis,xpos,ypos);
 }
 
 void OOGL::Window::cb_on_mouse_btn(GLFWwindow* window, int button, int action, int mods)
@@ -338,5 +340,12 @@ OOBase::Delegate2<void,const OOGL::Window&,const OOGL::Window::key_stroke_t&,OOB
 {
 	OOBase::Delegate2<void,const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator> prev = m_on_keystroke;
 	m_on_keystroke = delegate;
+	return prev;
+}
+
+OOBase::Delegate3<void,const OOGL::Window&,double,double,OOBase::ThreadLocalAllocator> OOGL::Window:: on_mousemove(const OOBase::Delegate3<void,const Window&,double,double,OOBase::ThreadLocalAllocator>& delegate)
+{
+	OOBase::Delegate3<void,const Window&,double,double,OOBase::ThreadLocalAllocator> prev = m_on_mousemove;
+	m_on_mousemove = delegate;
 	return prev;
 }
