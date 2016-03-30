@@ -239,3 +239,8 @@ void Indigo::UIButton::on_size(const glm::uvec2& sz)
 	if (valid())
 		render_pipe()->post(OOBase::make_delegate(this,&UIButton::do_size),sz);
 }
+
+void Indigo::UIButton::on_mouseenter(bool enter)
+{
+	LOG_DEBUG(("Button %p %s",this,enter ? "enter" : "leave"));
+}

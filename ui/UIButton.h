@@ -63,6 +63,7 @@ namespace Indigo
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group);
 		virtual void on_size(const glm::uvec2& sz);
+		virtual void on_mouseenter(bool enter);
 
 	private:
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_text;

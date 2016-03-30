@@ -39,7 +39,7 @@ namespace Indigo
 			friend class Window;
 
 		public:
-			void show(bool visible) { m_visible = visible; };
+			void show(bool visible);
 
 		protected:
 			Layer(Window* window) : m_window(window), m_visible(false)

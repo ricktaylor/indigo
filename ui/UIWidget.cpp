@@ -212,10 +212,28 @@ bool Indigo::UIGroup::on_mousemove(const glm::ivec2& pos)
 			{
 				glm::ivec2 child_size = i->second->size();
 				if (pos.x < child_pos.x + child_size.x && pos.y < child_pos.y + child_size.y)
+				{
+					OOBase::SharedPtr<UIWidget> mouse_child = m_mouse_child.lock();
+					if (mouse_child != i->second)
+					{
+						if (mouse_child)
+							mouse_child->on_mouseenter(false);
+
+						m_mouse_child = i->second;
+						i->second->on_mouseenter(true);
+					}
+
 					return i->second->on_mousemove(pos - child_pos);
+				}
 			}
 		}
 	}
+
+	OOBase::SharedPtr<UIWidget> mouse_child = m_mouse_child.lock();
+	if (mouse_child)
+		mouse_child->on_mouseenter(false);
+
+	m_mouse_child.reset();
 
 	return false;
 }

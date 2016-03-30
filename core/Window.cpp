@@ -24,6 +24,19 @@
 #include "Render.h"
 #include "Thread.h"
 
+void Indigo::Render::Layer::show(bool visible)
+{
+	if (m_visible != visible)
+	{
+		m_visible = visible;
+
+		if (visible)
+		{
+			// TODO: Fake a mouse move to init any cursor stuff here
+		}
+	}
+}
+
 void Indigo::Layer::show(bool visible)
 {
 	if (visible != m_visible)
