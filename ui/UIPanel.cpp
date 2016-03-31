@@ -70,3 +70,11 @@ void Indigo::UIPanel::on_size(const glm::uvec2& sz)
 	if (valid() && m_render_background)
 		render_pipe()->post(OOBase::make_delegate(m_render_background.get(),&Render::UIDrawable::size),sz);
 }
+
+bool Indigo::UIPanel::on_mousemove(const glm::ivec2& pos)
+{
+	UIGroup::on_mousemove(pos);
+
+	// Always eat the message
+	return true;
+}

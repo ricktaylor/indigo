@@ -42,6 +42,7 @@ namespace Indigo
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group);
 		virtual void on_size(const glm::uvec2& sz);
+		virtual bool on_mousemove(const glm::ivec2& pos);
 
 	private:
 		UIGridSizer m_sizer;
