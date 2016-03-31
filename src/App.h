@@ -29,15 +29,40 @@ namespace Indigo
 	class Application
 	{
 	public:
+		Application();
+
 		OOBase::CmdArgs::options_t m_options;
 		OOBase::CmdArgs::arguments_t m_args;
 
 		void run();
 
 	private:
-		void window_close(const Window& w);
+		enum Events
+		{
+			eAE_WndCreated = 0,
+			eAE_Max
+		};
 
+		enum States
+		{
+			eAS_Init = 0,
+			eAS_Create,
+			eAS_MainPage,
+
+			eAS_Max
+		};
+
+		bool handle_event(enum Events event);
+
+		void window_close(const Window& w);
+		bool create_window();
+		bool wnd_created();
+		bool start_screen();
+
+		enum States m_state;
 		bool m_stop;
+		bool m_video_changed;
+		OOBase::SharedPtr<Window> m_wnd;
 	};
 }
 

@@ -33,44 +33,95 @@
 #include "../ui/UISizer.h"
 #include "../ui/UILoader.h"
 
+Indigo::Application::Application() :
+	m_state(eAS_Init),
+	m_stop(false),
+	m_video_changed(false)
+{
+}
+
 void Indigo::Application::run()
 {
-	m_stop = false;
-
-	OOBase::SharedPtr<Window> wnd = OOBase::allocate_shared<Window,OOBase::ThreadLocalAllocator>();
-	if (wnd && wnd->create())
+	if (create_window())
 	{
-		wnd->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Application::window_close));
-
-		ZipResource zip;
-		if (zip.open("test.zip"))
-		{
-			// Add the book layer
-			OOBase::SharedPtr<Image> book_image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
-			if (book_image)
-			{
-				book_image->load(zip,"book.png");
-
-				OOBase::SharedPtr<ImageLayer> img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(book_image);
-				if (img_layer && wnd->add_layer(img_layer,50))
-					img_layer->show();
-			}
-
-			UILoader loader(wnd,zip);
-
-			unsigned int zorder = 100;
-			if (loader.load("ui.txt",zorder))
-			{
-				wnd->show();
-
-				while (!m_stop)
-					thread_pipe()->get();
-			}
-		}
+		while (!m_stop)
+			thread_pipe()->get();
 	}
+
+	m_wnd.reset();
+}
+
+bool Indigo::Application::handle_event(enum Events event)
+{
+	static const struct Transition
+	{
+		bool (Application::*m_fn)();
+		enum States m_next;
+	}
+	s_transitions[eAS_Max][eAE_Max] =
+	{
+		{ // eAS_Init
+			{ &Application::start_screen,eAS_MainPage } // eAE_WndCreated
+		},
+		{ // eAS_MainPage
+			{ NULL }  // eAE_Start
+		}
+	};
+
+	const struct Transition* trans = &s_transitions[m_state][event];
+	if (trans->m_fn)
+	{
+		m_state = trans->m_next;
+
+		if (!(this->*(trans->m_fn))())
+			return false;
+	}
+
+	return true;
 }
 
 void Indigo::Application::window_close(const Window& w)
 {
-	m_stop = true;
+	if (m_wnd.get() == &w)
+		m_stop = true;
+}
+
+bool Indigo::Application::create_window()
+{
+	OOBase::SharedPtr<Window> wnd = OOBase::allocate_shared<Window,OOBase::ThreadLocalAllocator>();
+	if (!wnd || !wnd->create())
+		return false;
+
+	wnd->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Application::window_close));
+
+	m_wnd.swap(wnd);
+
+	if (!handle_event(eAE_WndCreated))
+		m_wnd.swap(wnd);
+
+	return m_wnd->show();
+}
+
+bool Indigo::Application::start_screen()
+{
+	ZipResource zip;
+	if (!zip.open("test.zip"))
+		return false;
+
+	// Add the book layer
+	OOBase::SharedPtr<Image> book_image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
+	if (!book_image)
+		return false;
+
+	if (!book_image->load(zip,"book.png"))
+		return false;
+
+	OOBase::SharedPtr<ImageLayer> img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(book_image);
+	if (!img_layer || !m_wnd->add_layer(img_layer,50))
+		return false;
+
+	img_layer->show();
+
+	unsigned int zorder = 100;
+	return UILoader(m_wnd,zip).load("ui.txt",zorder);
 }
