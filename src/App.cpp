@@ -111,7 +111,7 @@ bool Indigo::Application::start_screen()
 	if (!book_image)
 		return false;
 
-	if (!book_image->load(zip,"book.png"))
+	if (!book_image->load(zip,"main.png"))
 		return false;
 
 	OOBase::SharedPtr<ImageLayer> img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(book_image);
