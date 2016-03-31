@@ -267,11 +267,7 @@ unsigned int Indigo::Window::top_layer() const
 
 void Indigo::Window::call_on_close()
 {
-	bool handled = false;
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
-		handled = i->second->on_quit();
-
-	if (!handled && m_on_close)
+	if (m_on_close)
 		m_on_close.invoke(*this);
 }
 
