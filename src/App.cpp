@@ -34,9 +34,7 @@
 #include "../ui/UILoader.h"
 
 Indigo::Application::Application() :
-	m_state(eAS_Init),
-	m_stop(false),
-	m_video_changed(false)
+	m_state(eAS_None)
 {
 }
 
@@ -44,14 +42,14 @@ void Indigo::Application::run()
 {
 	if (create_window())
 	{
-		while (!m_stop)
+		while (m_state != eAS_Quit)
 			thread_pipe()->get();
 	}
 
 	m_wnd.reset();
 }
 
-bool Indigo::Application::handle_event(enum Events event)
+bool Indigo::Application::raise_event(enum Events event)
 {
 	static const struct Transition
 	{
@@ -60,30 +58,30 @@ bool Indigo::Application::handle_event(enum Events event)
 	}
 	s_transitions[eAS_Max][eAE_Max] =
 	{
-		{ // eAS_Init
+		{ // eAS_None
 			{ &Application::start_screen,eAS_MainPage } // eAE_WndCreated
 		},
 		{ // eAS_MainPage
-			{ NULL }  // eAE_Start
+			{ NULL },  // eAE_WndCreated
+			{ NULL,eAS_QuitPrompt } // eAE_WndClose
+		},
+		{ // eAS_QuitPrompt
+			{ NULL },  // eAE_WndCreated
+			{ NULL,eAS_Quit } // eAE_WndClose
 		}
 	};
 
 	const struct Transition* trans = &s_transitions[m_state][event];
-	if (trans->m_fn)
-	{
+	if (trans->m_next != 0)
 		m_state = trans->m_next;
 
-		if (!(this->*(trans->m_fn))())
-			return false;
-	}
-
-	return true;
+	return !trans->m_fn || (this->*(trans->m_fn))();
 }
 
 void Indigo::Application::window_close(const Window& w)
 {
 	if (m_wnd.get() == &w)
-		m_stop = true;
+		raise_event(eAE_WndClose);
 }
 
 bool Indigo::Application::create_window()
@@ -96,7 +94,7 @@ bool Indigo::Application::create_window()
 
 	m_wnd.swap(wnd);
 
-	if (!handle_event(eAE_WndCreated))
+	if (!raise_event(eAE_WndCreated))
 		m_wnd.swap(wnd);
 
 	return m_wnd->show();

@@ -36,33 +36,32 @@ namespace Indigo
 
 		void run();
 
-	private:
 		enum Events
 		{
 			eAE_WndCreated = 0,
+			eAE_WndClose,
+
 			eAE_Max
 		};
 
+		bool raise_event(enum Events event);
+
+	private:
+		OOBase::SharedPtr<Window> m_wnd;
+
 		enum States
 		{
-			eAS_Init = 0,
-			eAS_Create,
+			eAS_None = 0,
 			eAS_MainPage,
+			eAS_QuitPrompt,
 
+			eAS_Quit,
 			eAS_Max
-		};
-
-		bool handle_event(enum Events event);
+		} m_state;
 
 		void window_close(const Window& w);
 		bool create_window();
-		bool wnd_created();
 		bool start_screen();
-
-		enum States m_state;
-		bool m_stop;
-		bool m_video_changed;
-		OOBase::SharedPtr<Window> m_wnd;
 	};
 }
 
