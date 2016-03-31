@@ -220,7 +220,7 @@ int main(int argc, const char* argv[])
 	if (s_is_debug)
 	{
 		OOBase::Logger::connect_debug_log();
-		if (options.exists("console") && AllocConsole())
+		if (theApp.m_options.exists("console") && AllocConsole())
 		{
 			OOBase::Logger::connect_stderr_log();
 			OOBase::Logger::connect_stdout_log();

@@ -88,7 +88,6 @@
   <ItemGroup>
     <ClCompile Include="..\core\Font.cpp" />
     <ClCompile Include="..\core\Image.cpp" />
-    <ClCompile Include="..\core\Main.cpp" />
     <ClCompile Include="..\core\Pipe.cpp" />
     <ClCompile Include="..\core\Render.cpp" />
     <ClCompile Include="..\core\ShaderPool.cpp" />
@@ -108,6 +107,7 @@
     <ClCompile Include="..\ui\UISizer.cpp" />
     <ClCompile Include="..\ui\UIWidget.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{45062950-051B-42F7-A502-3F0F39282C22}</ProjectGuid>
