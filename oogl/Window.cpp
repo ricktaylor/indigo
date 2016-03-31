@@ -144,6 +144,8 @@ void OOGL::Window::cb_on_close(GLFWwindow* window)
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (pThis && pThis->m_on_close)
 		pThis->m_on_close.invoke(*pThis);
+
+	glfwSetWindowShouldClose(window,GL_FALSE);
 }
 
 void OOGL::Window::cb_on_focus(GLFWwindow* window, int focused)
