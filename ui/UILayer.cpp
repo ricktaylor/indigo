@@ -35,6 +35,7 @@ namespace
 }
 
 ::UILayer::UILayer(Indigo::Render::Window* window) :
+		Indigo::Render::UIGroup(true),
 		Indigo::Render::Layer(window)
 {
 }
@@ -49,14 +50,13 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 }
 
 Indigo::UILayer::UILayer(bool fixed, const glm::uvec4& margins, const glm::uvec2& padding) :
-		UIGroup(NULL),
+		UIGroup(NULL,eWS_visible),
 		m_sizer(fixed,margins,padding)
 {
 }
 
 void Indigo::UILayer::show(bool visible)
 {
-	UIGroup::show(visible);
 	Layer::show(visible);
 }
 
@@ -88,6 +88,7 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 	else
 	{
 		m_render_group = OOBase::static_pointer_cast<Render::UIGroup>(group);
+		
 		m_size = window->window()->size();
 	}
 

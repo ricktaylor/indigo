@@ -33,6 +33,8 @@ namespace Indigo
 	public:
 		UILayer(bool fixed, const glm::uvec4& margins = glm::uvec4(0), const glm::uvec2& padding = glm::uvec2(0));
 
+		bool valid() const { return m_render_group; }
+
 		void show(bool visible = true);
 
 		UIGridSizer& sizer() { return m_sizer; }

@@ -24,8 +24,8 @@
 
 #include "UIWidget.h"
 
-Indigo::Render::UIDrawable::UIDrawable(const glm::ivec2& position) :
-		m_visible(false),
+Indigo::Render::UIDrawable::UIDrawable(bool visible, const glm::ivec2& position) :
+		m_visible(visible),
 		m_position(position)
 {
 }
@@ -54,7 +54,7 @@ bool Indigo::Render::UIGroup::remove_drawable(unsigned int zorder)
 void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder, bool* ret)
 {
 	*ret = false;
-	widget->m_render_group = OOBase::allocate_shared<Render::UIGroup,OOBase::ThreadLocalAllocator>(widget->position());
+	widget->m_render_group = OOBase::allocate_shared<Render::UIGroup,OOBase::ThreadLocalAllocator>((widget->state() & Indigo::UIWidget::eWS_visible) != 0,widget->position());
 	if (!widget->m_render_group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
 	else if (!m_children.insert(zorder,widget->m_render_group))
@@ -68,12 +68,7 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder
 		widget->m_render_group.reset();
 	}
 	else
-	{
-		if (widget->visible())
-			widget->m_render_group->show(true);
-
 		*ret = true;
-	}
 }
 
 Indigo::UIWidget::UIWidget(UIGroup* parent, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :

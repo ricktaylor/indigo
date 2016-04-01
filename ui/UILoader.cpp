@@ -597,7 +597,7 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 		layer->layout();
 		layer->show();
 	}
-
+	
 	return true;
 }
 
@@ -921,9 +921,6 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 	if (!parent->add_widget(uiimage,zorder))
 		return OOBase::SharedPtr<UIWidget>();
 
-	if (state & UIWidget::eWS_visible)
-		uiimage->show();
-
 	return uiimage;
 }
 
@@ -1242,9 +1239,6 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 	if (!parent->add_widget(button,zorder))
 		return OOBase::SharedPtr<UIWidget>();
 
-	if (state & UIWidget::eWS_visible)
-		button->show();
-
 	return button;
 }
 
@@ -1324,9 +1318,6 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p,
 	zorder = 0;
 	if (!load_grid_sizer(p,pe,panel.get(),name,panel->sizer(),zorder,true))
 		return OOBase::SharedPtr<UIWidget>();
-
-	if (state & UIWidget::eWS_visible)
-		panel->show();
 
 	return panel;
 }

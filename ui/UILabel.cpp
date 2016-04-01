@@ -23,9 +23,9 @@
 
 #include "UILabel.h"
 
-Indigo::Render::UILabel::UILabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int size, const glm::vec4& colour, const glm::ivec2& position) :
+Indigo::Render::UILabel::UILabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int size, const glm::vec4& colour, bool visible, const glm::ivec2& position) :
 		Text(font,sz,len),
-		UIDrawable(position),
+		UIDrawable(visible,position),
 		m_colour(colour),
 		m_size(static_cast<float>(size))
 {
@@ -39,8 +39,8 @@ void Indigo::Render::UILabel::on_draw(OOGL::State& glState, const glm::mat4& mvp
 		Text::draw(glState,glm::scale(mvp,glm::vec3(m_size)),m_colour);
 }
 
-Indigo::Render::UIShadowLabel::UIShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int size, const glm::vec4& colour, const glm::vec4& shadow, const glm::ivec2& drop, const glm::ivec2& position) :
-		UILabel(font,sz,len,size,colour,position),
+Indigo::Render::UIShadowLabel::UIShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int size, const glm::vec4& colour, const glm::vec4& shadow, const glm::ivec2& drop, bool visible, const glm::ivec2& position) :
+		UILabel(font,sz,len,size,colour,visible,position),
 		m_shadow(shadow),
 		m_drop(drop)
 {

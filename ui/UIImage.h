@@ -34,7 +34,7 @@ namespace Indigo
 		class UIImage : public UIDrawable
 		{
 		public:
-			UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::uvec2& size, const glm::vec4& colour = glm::vec4(1.f), const glm::ivec2& position = glm::ivec2(0));
+			UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::uvec2& size, const glm::vec4& colour = glm::vec4(1.f), bool visible = true, const glm::ivec2& position = glm::ivec2(0));
 
 			virtual bool valid() const { return UIDrawable::valid() && m_texture->valid(); }
 

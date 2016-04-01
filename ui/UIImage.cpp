@@ -26,8 +26,8 @@
 
 #include "Quad.h"
 
-Indigo::Render::UIImage::UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::uvec2& size, const glm::vec4& colour, const glm::ivec2& position) :
-		UIDrawable(position),
+Indigo::Render::UIImage::UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::uvec2& size, const glm::vec4& colour, bool visible, const glm::ivec2& position) :
+		UIDrawable(visible,position),
 		m_texture(texture),
 		m_colour(colour),
 		m_size(size.x,size.y,1.f)
@@ -71,14 +71,9 @@ bool Indigo::UIImage::on_render_create(Indigo::Render::UIGroup* group)
 	texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 	texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 
-	m_render_image = OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,size(),m_colour);
+	m_render_image = OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,size(),m_colour,true);
 	if (!m_render_image)
 		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 
-	if (!group->add_drawable(m_render_image,0))
-		return false;
-
-	m_render_image->show();
-
-	return true;
+	return group->add_drawable(m_render_image,0);
 }

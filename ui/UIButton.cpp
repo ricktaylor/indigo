@@ -137,14 +137,14 @@ void Indigo::UIButton::update_sizes()
 	}
 }
 
-bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& style, RenderStyleState& rs)
+bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& style, RenderStyleState& rs, bool visible)
 {
 	glm::uvec2 sz = size();
 	glm::uvec4 margins(0);
 
 	if (style.m_background)
 	{
-		rs.m_background = style.m_background->make_drawable(glm::ivec2(0),sz,style.m_background_colour);
+		rs.m_background = style.m_background->make_drawable(visible,glm::ivec2(0),sz,style.m_background_colour);
 		if (!rs.m_background)
 			return false;
 
@@ -167,9 +167,9 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 		glm::ivec2 pos((sz.x - caption_width) / 2 + margins.x,(sz.y - caption_height) / 2 + margins.w);
 
 		if (style.m_drop.x && style.m_drop.y && style.m_shadow.a > 0.f)
-			rs.m_caption = OOBase::allocate_shared<Render::UIShadowLabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,style.m_shadow,pos,style.m_drop);
+			rs.m_caption = OOBase::allocate_shared<Render::UIShadowLabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,style.m_shadow,style.m_drop,visible,pos);
 		else
-			rs.m_caption = OOBase::allocate_shared<Render::UILabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,pos);
+			rs.m_caption = OOBase::allocate_shared<Render::UILabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,visible,pos);
 		if (!rs.m_caption)
 			LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 
@@ -185,18 +185,12 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 	if (!m_style)
 		LOG_ERROR_RETURN(("Invalid style passed to UIButton constructor"),false);
 
-	if (!style_create(group,m_style->m_normal,m_normal) ||
-		!style_create(group,m_style->m_active,m_active) ||
-		!style_create(group,m_style->m_pressed,m_pressed))
+	if (!style_create(group,m_style->m_normal,m_normal,true) ||
+		!style_create(group,m_style->m_active,m_active,false) ||
+		!style_create(group,m_style->m_pressed,m_pressed,false))
 	{
 		return false;
 	}
-
-	if (m_normal.m_background)
-		m_normal.m_background->show();
-
-	if (m_normal.m_caption)
-		m_normal.m_caption->show();
 
 	return true;
 }

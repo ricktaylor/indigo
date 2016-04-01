@@ -36,14 +36,12 @@ bool Indigo::UIPanel::on_render_create(Indigo::Render::UIGroup* group)
 {
 	if (m_background)
 	{
-		m_render_background = m_background->make_drawable(glm::ivec2(0),size(),m_colour);
+		m_render_background = m_background->make_drawable(true,glm::ivec2(0),size(),m_colour);
 		if (!m_render_background)
 			return false;
 
 		if (!group->add_drawable(m_render_background,0))
 			return false;
-
-		m_render_background->show();
 	}
 
 	return true;

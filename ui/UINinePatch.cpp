@@ -255,8 +255,8 @@ void NinePatchFactory::draw(OOGL::State& glState, const OOBase::SharedPtr<OOGL::
 	}
 }
 
-Indigo::Render::UINinePatch::UINinePatch(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info) :
-		UIDrawable(position),
+Indigo::Render::UINinePatch::UINinePatch(const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info, bool visible, const glm::ivec2& position) :
+		UIDrawable(visible,position),
 		m_texture(texture),
 		m_colour(colour),
 		m_patch(-1),
@@ -538,7 +538,7 @@ bool Indigo::NinePatch::get_bounds()
 	return true;
 }
 
-OOBase::SharedPtr<Indigo::Render::UIDrawable> Indigo::NinePatch::make_drawable(const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour) const
+OOBase::SharedPtr<Indigo::Render::UIDrawable> Indigo::NinePatch::make_drawable(bool visible, const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour) const
 {
 	if (!m_info)
 		LOG_ERROR_RETURN(("NinePatch::make_drawable called with no info!"),OOBase::SharedPtr<Indigo::Render::UIDrawable>());
@@ -555,7 +555,7 @@ OOBase::SharedPtr<Indigo::Render::UIDrawable> Indigo::NinePatch::make_drawable(c
 	texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 
 	if (is_9)
-		return OOBase::allocate_shared<Render::UINinePatch,OOBase::ThreadLocalAllocator>(position,size,colour,texture,m_info);
+		return OOBase::allocate_shared<Render::UINinePatch,OOBase::ThreadLocalAllocator>(size,colour,texture,m_info,visible,position);
 	else
 		return OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,size,colour);
 }
@@ -611,14 +611,9 @@ bool Indigo::UINinePatch::on_render_create(Indigo::Render::UIGroup* group)
 	if (!m_9patch)
 		return false;
 
-	m_render_9patch = m_9patch->make_drawable(glm::ivec2(0),size(),m_colour);
+	m_render_9patch = m_9patch->make_drawable(true,glm::ivec2(0),size(),m_colour);
 	if (!m_render_9patch)
 		return false;
 
-	if (!group->add_drawable(m_render_9patch,0))
-		return false;
-
-	m_render_9patch->show();
-
-	return true;
+	return group->add_drawable(m_render_9patch,0);
 }

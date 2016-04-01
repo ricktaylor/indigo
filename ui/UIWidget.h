@@ -44,7 +44,7 @@ namespace Indigo
 			virtual void size(glm::uvec2 sz) {}
 
 		protected:
-			UIDrawable(const glm::ivec2& position = glm::ivec2(0,0));
+			UIDrawable(bool visible = true, const glm::ivec2& position = glm::ivec2(0,0));
 			virtual ~UIDrawable() {}
 
 			bool m_visible;
@@ -58,7 +58,7 @@ namespace Indigo
 			friend class Indigo::UIGroup;
 
 		public:
-			UIGroup(const glm::ivec2& position = glm::ivec2(0,0)) : UIDrawable(position)
+			UIGroup(bool visible = true, const glm::ivec2& position = glm::ivec2(0,0)) : UIDrawable(visible,position)
 			{}
 
 			bool add_drawable(const OOBase::SharedPtr<UIDrawable>& drawable, unsigned int zorder);
