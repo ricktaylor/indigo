@@ -278,10 +278,13 @@ bool Indigo::Render::UINinePatch::valid() const
 
 void Indigo::Render::UINinePatch::size(glm::uvec2 size)
 {
-	if (size.x && size.y && m_info->m_tex_size.x && m_info->m_tex_size.y)
+	if (m_info->m_tex_size.x && m_info->m_tex_size.y)
 	{
 		if (m_patch == GLsizei(-1))
-			m_patch = NinePatchFactory_t::instance().alloc_patch(size,m_info->m_borders,m_info->m_tex_size);
+		{
+			 if (size.x && size.y)
+				m_patch = NinePatchFactory_t::instance().alloc_patch(size,m_info->m_borders,m_info->m_tex_size);
+		}
 		else
 			NinePatchFactory_t::instance().layout_patch(m_patch,size,m_info->m_borders,m_info->m_tex_size);
 	}
