@@ -81,20 +81,20 @@ bool Indigo::UIGridSizer::measure(OOBase::Vector<OOBase::Pair<unsigned int,unsig
 			if (widget && widget->visible())
 			{
 				if (min_size)
-					sz = widget->min_size() + m_padding;
+					sz = widget->min_size();
 				else
-					sz = widget->ideal_size() + m_padding;
+					sz = widget->ideal_size();
 			}
 		}
 		else if (i->second.m_sizer)
 		{
 			if (min_size)
-				sz = i->second.m_sizer->min_fit() + m_padding;
+				sz = i->second.m_sizer->min_fit();
 			else
-				sz = i->second.m_sizer->ideal_fit() + m_padding;
+				sz = i->second.m_sizer->ideal_fit();
 		}
 		else
-			sz = i->second.m_size + m_padding;
+			sz = i->second.m_size;
 
 		while (widths.size() <= i->first.first)
 		{
@@ -130,13 +130,9 @@ bool Indigo::UIGridSizer::measure(OOBase::Vector<OOBase::Pair<unsigned int,unsig
 	for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=widths.begin();i;++i)
 	{
 		if (m_fixed && i->second)
-		{
 			i->first = max_var_width;
-			cumulative_width.first += i->first;
-		}
-		else
-			cumulative_width.first += i->first;
 
+		cumulative_width.first += i->first + m_padding.x;
 		cumulative_width.second += i->second;
 	}
 	if (cumulative_width.first)
@@ -145,13 +141,9 @@ bool Indigo::UIGridSizer::measure(OOBase::Vector<OOBase::Pair<unsigned int,unsig
 	for (OOBase::Vector<OOBase::Pair<unsigned int,unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=heights.begin();i;++i)
 	{
 		if (m_fixed && i->second)
-		{
 			i->first = max_var_height;
-			cumulative_height.first += i->first;
-		}
-		else
-			cumulative_height.first += i->first;
 
+		cumulative_height.first += i->first + m_padding.y;
 		cumulative_height.second += i->second;
 	}
 	if (cumulative_height.first)
