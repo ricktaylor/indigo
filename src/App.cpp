@@ -95,7 +95,10 @@ bool Indigo::Application::create_window()
 	m_wnd.swap(wnd);
 
 	if (!raise_event(eAE_WndCreated))
+	{
 		m_wnd.swap(wnd);
+		return false;
+	}
 
 	return m_wnd->show();
 }
