@@ -299,7 +299,7 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 
 	if (!found)
 	{
-		GLsizei new_size = 8;
+		GLsizei new_size = 32;
 		while (new_size < m_allocated + len)
 			new_size *= 2;
 
