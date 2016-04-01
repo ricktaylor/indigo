@@ -239,7 +239,7 @@ void Indigo::UIGridSizer::fit(const glm::uvec2& outer_size)
 				glm::ivec2 cell_pos(widths[i->first.first].second,heights[i->first.second].second);
 
 				glm::ivec2 item_pos(cell_pos);
-				glm::uvec2 item_size(widget->size());
+				glm::uvec2 item_size(widget->ideal_size());
 
 				if (cell_size.x < item_size.x || (i->second.m_flags & expand_horiz))
 					item_size.x = cell_size.x;
