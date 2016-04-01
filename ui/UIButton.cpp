@@ -137,7 +137,7 @@ void Indigo::UIButton::update_sizes()
 	}
 }
 
-bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& style, RenderStyleState& rs, bool visible)
+bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& style, RenderStyleState& rs, bool visible, unsigned int& zorder)
 {
 	glm::uvec2 sz = size();
 	glm::uvec4 margins(0);
@@ -148,7 +148,7 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 		if (!rs.m_background)
 			return false;
 
-		if (!group->add_drawable(rs.m_background,0))
+		if (!group->add_drawable(rs.m_background,zorder++))
 			return false;
 
 		margins = style.m_background->margins();
@@ -173,7 +173,7 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 		if (!rs.m_caption)
 			LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 
-		if (!group->add_drawable(rs.m_caption,10))
+		if (!group->add_drawable(rs.m_caption,zorder++))
 			return false;
 	}
 
@@ -185,9 +185,10 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 	if (!m_style)
 		LOG_ERROR_RETURN(("Invalid style passed to UIButton constructor"),false);
 
-	if (!style_create(group,m_style->m_normal,m_normal,true) ||
-		!style_create(group,m_style->m_active,m_active,false) ||
-		!style_create(group,m_style->m_pressed,m_pressed,false))
+	unsigned int zorder = 0;
+	if (!style_create(group,m_style->m_normal,m_normal,true,zorder) ||
+		!style_create(group,m_style->m_active,m_active,false,zorder) ||
+		!style_create(group,m_style->m_pressed,m_pressed,false,zorder))
 	{
 		return false;
 	}
