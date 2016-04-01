@@ -294,5 +294,8 @@ void Indigo::Window::on_mousemove(double screen_x, double screen_y)
 {
 	bool handled = false;
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
-		handled = i->second->on_mousemove(screen_x,screen_y);
+	{
+		if (i->second->visible())
+			handled = i->second->on_mousemove(screen_x,screen_y);
+	}
 }
