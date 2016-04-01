@@ -34,8 +34,6 @@ namespace Indigo
 
 		UIGridSizer& sizer() { return m_sizer; }
 
-		virtual void layout();
-
 	protected:
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;
