@@ -34,16 +34,25 @@ Indigo::UIPanel::UIPanel(UIGroup* parent, const OOBase::SharedPtr<NinePatch>& ba
 
 bool Indigo::UIPanel::on_render_create(Indigo::Render::UIGroup* group)
 {
+	unsigned int zorder = 0;
 	if (m_background)
 	{
 		m_render_background = m_background->make_drawable(true,glm::ivec2(0),size(),m_colour);
 		if (!m_render_background)
 			return false;
 
-		if (!group->add_drawable(m_render_background,0))
+		if (!group->add_drawable(m_render_background,zorder++))
 			return false;
 	}
 
+	OOBase::SharedPtr<Indigo::Render::UIGroup> subgroup = OOBase::allocate_shared<Indigo::Render::UIGroup,OOBase::ThreadLocalAllocator>() ;
+	if (!subgroup)
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
+
+	if (!group->add_drawable(subgroup,zorder++))
+		return false;
+
+	m_render_parent.swap(subgroup);
 	return true;
 }
 

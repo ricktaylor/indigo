@@ -54,21 +54,18 @@ bool Indigo::Render::UIGroup::remove_drawable(unsigned int zorder)
 void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder, bool* ret)
 {
 	*ret = false;
-	widget->m_render_group = OOBase::allocate_shared<Render::UIGroup,OOBase::ThreadLocalAllocator>((widget->state() & Indigo::UIWidget::eWS_visible) != 0,widget->position());
-	if (!widget->m_render_group)
+	OOBase::SharedPtr<Render::UIGroup> group = OOBase::allocate_shared<Render::UIGroup,OOBase::ThreadLocalAllocator>((widget->state() & Indigo::UIWidget::eWS_visible) != 0,widget->position());
+	if (!group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
-	else if (!m_children.insert(zorder,widget->m_render_group))
-	{
+	else if (!m_children.insert(zorder,group))
 		LOG_ERROR(("Failed to insert group: %s",OOBase::system_error_text()));
-		widget->m_render_group.reset();
-	}
-	else if (!widget->on_render_create(widget->m_render_group.get()))
-	{
+	else if (!widget->on_render_create(group.get()))
 		m_children.remove(zorder);
-		widget->m_render_group.reset();
-	}
 	else
+	{
+		widget->m_render_group.swap(group);
 		*ret = true;
+	}
 }
 
 Indigo::UIWidget::UIWidget(UIGroup* parent, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
@@ -94,7 +91,7 @@ void Indigo::UIWidget::show(bool visible)
 
 		visible = (m_state & eWS_visible) == eWS_visible;
 		if (is_visible != visible && m_render_group)
-			render_pipe()->post(OOBase::make_delegate(render_group<Render::UIDrawable>().get(),&Render::UIDrawable::show),visible);
+			render_pipe()->post(OOBase::make_delegate(static_cast<Render::UIDrawable*>(m_render_group.get()),&Render::UIDrawable::show),visible);
 	}
 }
 
@@ -120,7 +117,7 @@ void Indigo::UIWidget::position(const glm::ivec2& pos)
 		m_position = pos;
 
 		if (m_render_group)
-			render_pipe()->post(OOBase::make_delegate(render_group<Render::UIDrawable>().get(),&Render::UIDrawable::position),pos);
+			render_pipe()->post(OOBase::make_delegate(static_cast<Render::UIDrawable*>(m_render_group.get()),&Render::UIDrawable::position),pos);
 	}
 }
 
@@ -149,11 +146,14 @@ bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsi
 	if (!m_render_group)
 		LOG_ERROR_RETURN(("Failed to insert widget: incomplete parent"),false);
 
+	if (!m_render_parent)
+		m_render_parent = m_render_group;
+
 	if (!m_children.insert(zorder,widget))
 		LOG_ERROR_RETURN(("Failed to insert widget: %s",OOBase::system_error_text()),false);
 
 	bool ret = false;
-	if (!render_pipe()->call(OOBase::make_delegate(m_render_group.get(),&Render::UIGroup::add_subgroup),widget.get(),zorder,&ret) || !ret)
+	if (!render_pipe()->call(OOBase::make_delegate(m_render_parent.get(),&Render::UIGroup::add_subgroup),widget.get(),zorder,&ret) || !ret)
 		m_children.remove(zorder);
 
 	return ret;

@@ -116,12 +116,6 @@ namespace Indigo
 	protected:
 		UIWidget(UIGroup* parent, OOBase::uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
-		template <typename T>
-		OOBase::SharedPtr<T> render_group() const
-		{
-			return OOBase::static_pointer_cast<T>(m_render_group);
-		}
-
 		virtual bool on_render_create(Indigo::Render::UIGroup* group) = 0;
 		virtual void on_size(const glm::uvec2& sz) { }
 		virtual void on_state(OOBase::uint32_t new_state) { m_state = (new_state & eWS_max); }
@@ -154,6 +148,8 @@ namespace Indigo
 		}
 
 	protected:
+		OOBase::SharedPtr<Indigo::Render::UIGroup> m_render_parent;
+
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;
 
