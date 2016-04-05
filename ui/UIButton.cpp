@@ -142,7 +142,27 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 	glm::uvec2 sz = size();
 	glm::uvec4 margins(0);
 
-	if (style.m_background)
+	if (style.m_font && style.m_font_size == 0)
+		style.m_font_size = style.m_font->line_height();
+
+	StyleState* styles[] = { &m_style->m_normal, &m_style->m_active, &m_style->m_pressed, &m_style->m_disabled };
+	RenderStyleState* render_styles[] = { &m_normal, &m_active, &m_pressed, &m_disabled };
+	for (size_t i = 0; i < sizeof(styles)/sizeof(styles[0]); ++i)
+	{
+		if (styles[i] != &style)
+		{
+			if (!rs.m_background && styles[i]->m_background == style.m_background)
+				rs.m_background = render_styles[i]->m_background;
+
+			if (!rs.m_caption && styles[i]->m_font == style.m_font && styles[i]->m_font_size == style.m_font_size)
+				rs.m_caption = render_styles[i]->m_caption;
+
+			if (styles[i] > &style)
+				break;
+		}
+	}
+
+	if (!rs.m_background && style.m_background)
 	{
 		rs.m_background = style.m_background->make_drawable(visible,glm::ivec2(0),sz,style.m_background_colour);
 		if (!rs.m_background)
@@ -156,11 +176,8 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 		sz.y -= margins.y + margins.w;
 	}
 
-	if (style.m_font)
+	if (!rs.m_caption && style.m_font)
 	{
-		if (style.m_font_size == 0)
-			style.m_font_size = style.m_font->line_height();
-
 		unsigned int caption_height = style.m_font_size;
 		unsigned int caption_width = static_cast<unsigned int>(ceil(caption_height * style.m_font->measure_text(m_text.c_str(),m_text.length())));
 
@@ -185,15 +202,24 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 	if (!m_style)
 		LOG_ERROR_RETURN(("Invalid style passed to UIButton constructor"),false);
 
-	unsigned int zorder = 0;
-	if (!style_create(group,m_style->m_normal,m_normal,true,zorder) ||
-		!style_create(group,m_style->m_active,m_active,false,zorder) ||
-		!style_create(group,m_style->m_pressed,m_pressed,false,zorder))
-	{
-		return false;
-	}
+	bool normal = false;
+	bool active = false;
+	bool pressed = false;
+	bool disabled = false;
 
-	return true;
+	OOBase::uint32_t state = this->state();
+	if (!(state & eWS_enabled))
+		disabled = true;
+	else if (state & eBS_pressed)
+		pressed = true;
+	else
+		normal = true;
+
+	unsigned int zorder = 0;
+	return (style_create(group,m_style->m_normal,m_normal,normal,zorder) &&
+		style_create(group,m_style->m_active,m_active,active,zorder) &&
+		style_create(group,m_style->m_pressed,m_pressed,pressed,zorder) &&
+		style_create(group,m_style->m_disabled,m_disabled,disabled,zorder));
 }
 
 void Indigo::UIButton::do_style_size(const glm::uvec2& sz, const StyleState& style, RenderStyleState& rs)
@@ -233,6 +259,16 @@ void Indigo::UIButton::on_size(const glm::uvec2& sz)
 {
 	if (valid())
 		render_pipe()->post(OOBase::make_delegate(this,&UIButton::do_size),sz);
+}
+
+void Indigo::UIButton::do_style_change(RenderStyleState* new_style)
+{
+
+}
+
+void Indigo::UIButton::check_style()
+{
+
 }
 
 void Indigo::UIButton::on_mouseenter(bool enter)

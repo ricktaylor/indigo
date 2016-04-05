@@ -48,8 +48,14 @@ namespace Indigo
 			StyleState m_normal;
 			StyleState m_active;
 			StyleState m_pressed;
+			StyleState m_disabled;
 
 			void unload();
+		};
+
+		enum State
+		{
+			eBS_pressed = 0x4
 		};
 
 		UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, OOBase::uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
@@ -77,6 +83,7 @@ namespace Indigo
 		RenderStyleState m_normal;
 		RenderStyleState m_active;
 		RenderStyleState m_pressed;
+		RenderStyleState m_disabled;
 		RenderStyleState* m_current_style;
 
 		glm::uvec2 m_min_size;
@@ -88,6 +95,8 @@ namespace Indigo
 		void do_size(glm::uvec2 sz);
 		bool style_create(Indigo::Render::UIGroup* group, StyleState& style, RenderStyleState& rs, bool visible, unsigned int& zorder);
 		void do_style_size(const glm::uvec2& sz, const StyleState& style, RenderStyleState& rs);
+		void do_style_change(RenderStyleState* new_style);
+		void check_style();
 	};
 }
 
