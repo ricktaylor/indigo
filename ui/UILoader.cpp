@@ -61,6 +61,11 @@ namespace
 			state |= Indigo::UIWidget::eWS_enabled;
 			return true;
 		}
+		else if (arg == "DISABLED")
+		{
+			state &= ~Indigo::UIWidget::eWS_enabled;
+			return true;
+		}
 
 		return false;
 	}
@@ -1158,6 +1163,13 @@ bool Indigo::UILoader::load_button_style_state(const char*& p, const char* pe, U
 						if (!load_button_style_state(p,pe,style->m_pressed,OOBase::SharedPtr<UIButton::Style>()))
 							return false;
 					}
+					else if (name == "Disabled")
+					{
+						style->m_disabled = state;
+
+						if (!load_button_style_state(p,pe,style->m_disabled,OOBase::SharedPtr<UIButton::Style>()))
+							return false;
+					}
 					else
 						SYNTAX_ERROR_RETURN(("Unknown BUTTON_STYLE state '%s'",name.c_str()),false);
 				}
@@ -1181,7 +1193,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 {
 	glm::ivec2 position(0);
 	glm::uvec2 size(0);
-	OOBase::uint32_t state = 0;
+	OOBase::uint32_t state = UIWidget::eWS_enabled;
 	OOBase::ScopedString style_name;
 
 	if (character(p,pe,'('))

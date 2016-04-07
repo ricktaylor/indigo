@@ -207,7 +207,7 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 	bool pressed = false;
 	bool disabled = false;
 
-	OOBase::uint32_t state = this->state();
+	OOBase::uint32_t state = UIWidget::state();
 	if (!(state & eWS_enabled))
 		disabled = true;
 	else if (state & eBS_pressed)
@@ -263,15 +263,56 @@ void Indigo::UIButton::on_size(const glm::uvec2& sz)
 
 void Indigo::UIButton::do_style_change(RenderStyleState* new_style)
 {
+	if (m_current_style != new_style)
+	{
+		if (m_current_style)
+		{
+			if (m_current_style->m_background)
+				m_current_style->m_background->show(false);
 
+			if (m_current_style->m_caption)
+				m_current_style->m_caption->show(false);
+		}
+
+		m_current_style = new_style;
+
+		if (m_current_style)
+		{
+			if (m_current_style->m_background)
+				m_current_style->m_background->show(true);
+
+			if (m_current_style->m_caption)
+				m_current_style->m_caption->show(true);
+		}
+	}
 }
 
-void Indigo::UIButton::check_style()
+void Indigo::UIButton::on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask)
 {
+	if (change_mask & (eWS_enabled | eBS_pressed | eBS_mouseover))
+	{
+		bool enabled = (state & eWS_enabled) == eWS_enabled;
+		bool pressed = (state & eBS_pressed) == eBS_pressed;
+		bool mouseover = (state & eBS_mouseover) == eBS_mouseover;
 
+		RenderStyleState* new_style = NULL;
+		if (!enabled)
+			new_style = &m_disabled;
+		else if (pressed)
+			new_style = &m_pressed;
+		else if (mouseover)
+			new_style = &m_active;
+		else
+			new_style = &m_normal;
+
+		if (valid())
+			render_pipe()->post(OOBase::make_delegate(this,&UIButton::do_style_change),new_style);
+	}
+
+	UIWidget::on_state_change(state,change_mask);
 }
 
 void Indigo::UIButton::on_mouseenter(bool enter)
 {
-	LOG_DEBUG(("Button %p %s",this,enter ? "enter" : "leave"));
+	toggle_state(enter,eBS_mouseover);
 }

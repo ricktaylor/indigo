@@ -84,8 +84,7 @@ namespace Indigo
 		enum State
 		{
 			eWS_visible = 0x1,
-			eWS_enabled = 0x2,
-			eWS_max = (eWS_visible | eWS_enabled)
+			eWS_enabled = 0x2
 		};
 
 		virtual ~UIWidget()
@@ -102,7 +101,8 @@ namespace Indigo
 		void enable(bool enabled = true);
 
 		OOBase::uint32_t state() const { return m_state; }
-		void state(OOBase::uint32_t new_state);
+		void toggle_state(OOBase::uint32_t new_state, OOBase::uint32_t mask);
+		void toggle_state(bool on, OOBase::uint32_t mask) { toggle_state(on ? mask : 0,mask); }
 
 		const glm::ivec2& position() const { return m_position; }
 		void position(const glm::ivec2& pos);
@@ -118,7 +118,7 @@ namespace Indigo
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group) = 0;
 		virtual void on_size(const glm::uvec2& sz) { }
-		virtual void on_state(OOBase::uint32_t new_state) { m_state = (new_state & eWS_max); }
+		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual void on_mouseenter(bool enter) { }
 		virtual bool on_mousemove(const glm::ivec2& pos) { return false; }
 

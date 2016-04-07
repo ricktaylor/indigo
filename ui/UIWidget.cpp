@@ -76,38 +76,35 @@ Indigo::UIWidget::UIWidget(UIGroup* parent, OOBase::uint32_t state, const glm::i
 {
 }
 
-void Indigo::UIWidget::show(bool visible)
+void Indigo::UIWidget::toggle_state(OOBase::uint32_t new_state, OOBase::uint32_t mask)
 {
-	bool is_visible = (m_state & eWS_visible) == eWS_visible;
-	if (is_visible != visible)
+	OOBase::uint32_t change_mask = (m_state ^ new_state) & mask;
+	if (change_mask)
 	{
-		OOBase::uint32_t new_state = m_state;
-		if (visible)
-			new_state |= eWS_visible;
-		else
-			new_state &= ~eWS_visible;
+		m_state = (m_state & ~mask) | (new_state & mask);
 
-		on_state(new_state);
+		on_state_change(m_state,change_mask);
+	}
+}
 
-		visible = (m_state & eWS_visible) == eWS_visible;
-		if (is_visible != visible && m_render_group)
+void Indigo::UIWidget::on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask)
+{
+	if (change_mask & eWS_visible)
+	{
+		bool visible = (state & eWS_visible) == eWS_visible;
+		if (m_render_group)
 			render_pipe()->post(OOBase::make_delegate(static_cast<Render::UIDrawable*>(m_render_group.get()),&Render::UIDrawable::show),visible);
 	}
 }
 
+void Indigo::UIWidget::show(bool visible)
+{
+	toggle_state(visible,eWS_visible);
+}
+
 void Indigo::UIWidget::enable(bool enable)
 {
-	bool is_enabled = (m_state & eWS_enabled) == eWS_enabled;
-	if (is_enabled != enable)
-	{
-		OOBase::uint32_t new_state = m_state;
-		if (enable)
-			new_state |= eWS_enabled;
-		else
-			new_state &= ~eWS_enabled;
-
-		on_state(new_state);
-	}
+	toggle_state(enable,eWS_enabled);
 }
 
 void Indigo::UIWidget::position(const glm::ivec2& pos)

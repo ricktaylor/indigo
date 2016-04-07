@@ -55,11 +55,12 @@ namespace Indigo
 
 		enum State
 		{
-			eBS_pressed = 0x4
+			eBS_pressed = 0x4,
+			eBS_mouseover = 0x8
 		};
 
-		UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, OOBase::uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
-		UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const char* sz, size_t len = -1, OOBase::uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, OOBase::uint32_t state = UIWidget::eWS_enabled, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const char* sz, size_t len = -1, OOBase::uint32_t state = UIWidget::eWS_enabled, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
 	protected:
 		virtual bool valid() const;
@@ -69,6 +70,7 @@ namespace Indigo
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group);
 		virtual void on_size(const glm::uvec2& sz);
+		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual void on_mouseenter(bool enter);
 
 	private:
@@ -96,7 +98,6 @@ namespace Indigo
 		bool style_create(Indigo::Render::UIGroup* group, StyleState& style, RenderStyleState& rs, bool visible, unsigned int& zorder);
 		void do_style_size(const glm::uvec2& sz, const StyleState& style, RenderStyleState& rs);
 		void do_style_change(RenderStyleState* new_style);
-		void check_style();
 	};
 }
 
