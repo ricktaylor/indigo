@@ -314,7 +314,7 @@ void Indigo::UIButton::on_state_change(OOBase::uint32_t state, OOBase::uint32_t 
 
 void Indigo::UIButton::on_mouseenter(bool enter)
 {
-	toggle_state(enter,eBS_mouseover);
+	toggle_state(OOBase::uint32_t(enter ? eBS_mouseover : 0),eBS_mouseover | eBS_pressed);
 }
 
 bool Indigo::UIButton::on_mousebutton(const OOGL::Window::mouse_click_t& click)
