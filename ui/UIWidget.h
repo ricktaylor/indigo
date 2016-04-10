@@ -22,6 +22,8 @@
 #ifndef INDIGO_UIWIDGET_H_INCLUDED
 #define INDIGO_UIWIDGET_H_INCLUDED
 
+#include "../oogl/Window.h"
+
 namespace Indigo
 {
 	class UIWidget;
@@ -121,6 +123,7 @@ namespace Indigo
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual void on_mouseenter(bool enter) { }
 		virtual bool on_mousemove(const glm::ivec2& pos) { return false; }
+		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
 
 	private:
 		UIGroup* m_parent;
@@ -154,6 +157,7 @@ namespace Indigo
 		virtual glm::uvec2 ideal_size() const;
 
 		virtual bool on_mousemove(const glm::ivec2& pos);
+		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 
 	private:
 		OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_children;

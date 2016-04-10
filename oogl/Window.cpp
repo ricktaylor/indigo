@@ -224,6 +224,12 @@ void OOGL::Window::cb_on_cursor_pos(GLFWwindow* window, double xpos, double ypos
 void OOGL::Window::cb_on_mouse_btn(GLFWwindow* window, int button, int action, int mods)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (pThis && pThis->m_on_mousebutton)
+	{
+		mouse_click_t click = { static_cast<unsigned int>(button), action == GLFW_PRESS, mods};
+
+		pThis->m_on_mousebutton.invoke(*pThis,click);
+	}
 }
 
 bool OOGL::Window::valid() const
@@ -368,5 +374,12 @@ OOBase::Delegate3<void,const OOGL::Window&,double,double,OOBase::ThreadLocalAllo
 {
 	OOBase::Delegate3<void,const Window&,double,double,OOBase::ThreadLocalAllocator> prev = m_on_mousemove;
 	m_on_mousemove = delegate;
+	return prev;
+}
+
+OOBase::Delegate2<void,const OOGL::Window&,const OOGL::Window::mouse_click_t&,OOBase::ThreadLocalAllocator> OOGL::Window::on_mousebutton(const OOBase::Delegate2<void,const Window&,const mouse_click_t&,OOBase::ThreadLocalAllocator>& delegate)
+{
+	OOBase::Delegate2<void,const Window&,const mouse_click_t&,OOBase::ThreadLocalAllocator> prev = m_on_mousebutton;
+	m_on_mousebutton = delegate;
 	return prev;
 }

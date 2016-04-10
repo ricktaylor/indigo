@@ -316,3 +316,21 @@ void Indigo::UIButton::on_mouseenter(bool enter)
 {
 	toggle_state(enter,eBS_mouseover);
 }
+
+bool Indigo::UIButton::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+{
+	if (click.button == GLFW_MOUSE_BUTTON_LEFT)
+	{
+		OOBase::uint32_t curr_state = state();
+		if (!click.down && (curr_state & eBS_pressed))
+		{
+			LOG_DEBUG(("Button %p clicked!",this));
+		}
+
+		toggle_state(click.down,eBS_pressed);
+
+		return true;
+	}
+
+	return UIWidget::on_mousebutton(click);
+}

@@ -95,10 +95,15 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 	return OOBase::static_pointer_cast<Indigo::Render::Layer>(group);
 }
 
-bool Indigo::UILayer::on_mousemove(double screen_x, double screen_y)
+bool Indigo::UILayer::on_mousemove(const double& screen_x, const double& screen_y)
 {
 	if (!m_size.x || !m_size.y)
 		return false;
 
 	return UIGroup::on_mousemove(glm::clamp(glm::ivec2(floor(screen_x),floor(screen_y)),glm::ivec2(0),glm::ivec2(m_size.x-1,m_size.y-1)));
+}
+
+bool Indigo::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+{
+	return UIGroup::on_mousebutton(click);
 }

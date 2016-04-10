@@ -72,6 +72,7 @@ bool Indigo::Render::Window::create_window()
 		m_wnd->on_sized(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_size));
 		m_wnd->on_draw(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_draw));
 		m_wnd->on_mousemove(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_mousemove));
+		m_wnd->on_mousebutton(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_mousebutton));
 
 		if (Indigo::is_debug())
 			OOGL::StateFns::get_current()->enable_logging();
@@ -113,6 +114,11 @@ void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glSta
 void Indigo::Render::Window::on_mousemove(const OOGL::Window& win, double screen_x, double screen_y)
 {
 	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_mousemove),screen_x,screen_y);
+}
+
+void Indigo::Render::Window::on_mousebutton(const OOGL::Window& win, const OOGL::Window::mouse_click_t& click)
+{
+	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_mousebutton),click);
 }
 
 void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, unsigned int zorder, bool* ret)
@@ -297,5 +303,15 @@ void Indigo::Window::on_mousemove(double screen_x, double screen_y)
 	{
 		if (i->second->visible())
 			handled = i->second->on_mousemove(screen_x,screen_y);
+	}
+}
+
+void Indigo::Window::on_mousebutton(OOGL::Window::mouse_click_t click)
+{
+	bool handled = false;
+	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
+	{
+		if (i->second->visible())
+			handled = i->second->on_mousebutton(click);
 	}
 }

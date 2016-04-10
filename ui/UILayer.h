@@ -46,7 +46,8 @@ namespace Indigo
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group) { return true; }
 		virtual void on_size(const glm::uvec2& sz);
-		virtual bool on_mousemove(double screen_x, double screen_y);
+		virtual bool on_mousemove(const double& screen_x, const double& screen_y);
+		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;

@@ -229,3 +229,14 @@ bool Indigo::UIGroup::on_mousemove(const glm::ivec2& pos)
 
 	return false;
 }
+
+bool Indigo::UIGroup::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+{
+	OOBase::SharedPtr<UIWidget> mouse_child = m_mouse_child.lock();
+	if (mouse_child && mouse_child->visible())
+		return mouse_child->on_mousebutton(click);
+
+	m_mouse_child.reset();
+
+	return false;
+}

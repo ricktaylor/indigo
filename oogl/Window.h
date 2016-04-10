@@ -78,6 +78,14 @@ namespace OOGL
 		};
 		OOBase::Delegate2<void,const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator> on_keystroke(const OOBase::Delegate2<void,const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator>& delegate);
 
+		struct mouse_click_t
+		{
+			unsigned int button;
+			bool down;
+			int mods;
+		};
+		OOBase::Delegate2<void,const Window&,const mouse_click_t&,OOBase::ThreadLocalAllocator> on_mousebutton(const OOBase::Delegate2<void,const Window&,const mouse_click_t&,OOBase::ThreadLocalAllocator>& delegate);
+
 	private:
 		GLFWwindow* m_glfw_window;
 
@@ -92,6 +100,7 @@ namespace OOGL
 		OOBase::Delegate3<void,const Window&,unsigned int,int,OOBase::ThreadLocalAllocator> m_on_character;
 		OOBase::Delegate2<void,const Window&,const key_stroke_t&,OOBase::ThreadLocalAllocator> m_on_keystroke;
 		OOBase::Delegate3<void,const Window&,double,double,OOBase::ThreadLocalAllocator> m_on_mousemove;
+		OOBase::Delegate2<void,const Window&,const mouse_click_t&,OOBase::ThreadLocalAllocator> m_on_mousebutton;
 
 		GLFWmonitor* monitor() const;
 

@@ -72,6 +72,7 @@ namespace Indigo
 		virtual void on_size(const glm::uvec2& sz);
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual void on_mouseenter(bool enter);
+		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 
 	private:
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_text;
