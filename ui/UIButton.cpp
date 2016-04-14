@@ -155,6 +155,9 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 					styles[i]->m_background_colour == style.m_background_colour)
 			{
 				rs.m_background = render_styles[i]->m_background;
+
+				if (visible)
+					rs.m_background->show(true);
 			}
 
 			if (!rs.m_caption && styles[i]->m_font == style.m_font &&
@@ -164,6 +167,9 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 					styles[i]->m_text_colour == style.m_text_colour)
 			{
 				rs.m_caption = render_styles[i]->m_caption;
+
+				if (visible)
+					rs.m_caption->show(true);
 			}
 
 			if (styles[i] > &style)
@@ -203,6 +209,9 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 			return false;
 	}
 
+	if (visible)
+		m_current_style = &rs;
+
 	return true;
 }
 
@@ -212,7 +221,6 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 		LOG_ERROR_RETURN(("Invalid style passed to UIButton constructor"),false);
 
 	bool normal = false;
-	bool active = false;
 	bool pressed = false;
 	bool disabled = false;
 
@@ -226,7 +234,7 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 
 	unsigned int zorder = 0;
 	return (style_create(group,m_style->m_normal,m_normal,normal,zorder) &&
-		style_create(group,m_style->m_active,m_active,active,zorder) &&
+		style_create(group,m_style->m_active,m_active,false,zorder) &&
 		style_create(group,m_style->m_pressed,m_pressed,pressed,zorder) &&
 		style_create(group,m_style->m_disabled,m_disabled,disabled,zorder));
 }
@@ -273,45 +281,28 @@ void Indigo::UIButton::on_size(const glm::uvec2& sz)
 
 void Indigo::UIButton::do_style_change(RenderStyleState* new_style)
 {
-	if (m_current_style != new_style)
+	if (m_current_style && new_style && m_current_style != new_style)
 	{
-		OOBase::SharedPtr<Render::UIDrawable> curr_background;
-		OOBase::SharedPtr<Render::UIDrawable> curr_caption;
-		OOBase::SharedPtr<Render::UIDrawable> new_background;
-		OOBase::SharedPtr<Render::UIDrawable> new_caption;
-
-		if (m_current_style)
+		if (m_current_style->m_background != new_style->m_background)
 		{
-			curr_background = m_current_style->m_background;
-			curr_caption = m_current_style->m_caption;
+			if (m_current_style->m_background)
+				m_current_style->m_background->show(false);
+
+			if (new_style->m_background)
+				new_style->m_background->show(true);
 		}
 
-		if (new_style)
+		if (m_current_style->m_caption != new_style->m_caption)
 		{
-			new_background = new_style->m_background;
-			new_caption = new_style->m_caption;
+			if (m_current_style->m_caption)
+				m_current_style->m_caption->show(false);
+
+			if (new_style->m_caption)
+				new_style->m_caption->show(true);
 		}
-
-		if (curr_background != new_background)
-		{
-			if (curr_background)
-				curr_background->show(false);
-
-			if (new_background)
-				new_background->show(true);
-		}
-
-		if (curr_caption != new_caption)
-		{
-			if (curr_caption)
-				curr_caption->show(false);
-
-			if (new_caption)
-				new_caption->show(true);
-		}
-
-		m_current_style = new_style;
 	}
+
+	m_current_style = new_style;
 }
 
 void Indigo::UIButton::on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask)
@@ -332,7 +323,7 @@ void Indigo::UIButton::on_state_change(OOBase::uint32_t state, OOBase::uint32_t 
 		else
 			new_style = &m_normal;
 
-		if (valid())
+		if (valid() && new_style)
 			render_pipe()->post(OOBase::make_delegate(this,&UIButton::do_style_change),new_style);
 	}
 
