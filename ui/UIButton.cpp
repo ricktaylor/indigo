@@ -151,11 +151,20 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 	{
 		if (styles[i] != &style)
 		{
-			if (!rs.m_background && styles[i]->m_background == style.m_background)
+			if (!rs.m_background && styles[i]->m_background == style.m_background &&
+					styles[i]->m_background_colour == style.m_background_colour)
+			{
 				rs.m_background = render_styles[i]->m_background;
+			}
 
-			if (!rs.m_caption && styles[i]->m_font == style.m_font && styles[i]->m_font_size == style.m_font_size)
+			if (!rs.m_caption && styles[i]->m_font == style.m_font &&
+					styles[i]->m_font_size == style.m_font_size &&
+					styles[i]->m_drop == style.m_drop &&
+					styles[i]->m_shadow == style.m_shadow &&
+					styles[i]->m_text_colour == style.m_text_colour)
+			{
 				rs.m_caption = render_styles[i]->m_caption;
+			}
 
 			if (styles[i] > &style)
 				break;
@@ -253,6 +262,7 @@ void Indigo::UIButton::do_size(glm::uvec2 sz)
 	do_style_size(sz,m_style->m_normal,m_normal);
 	do_style_size(sz,m_style->m_active,m_active);
 	do_style_size(sz,m_style->m_pressed,m_pressed);
+	do_style_size(sz,m_style->m_disabled,m_disabled);
 }
 
 void Indigo::UIButton::on_size(const glm::uvec2& sz)
@@ -265,25 +275,42 @@ void Indigo::UIButton::do_style_change(RenderStyleState* new_style)
 {
 	if (m_current_style != new_style)
 	{
+		OOBase::SharedPtr<Render::UIDrawable> curr_background;
+		OOBase::SharedPtr<Render::UIDrawable> curr_caption;
+		OOBase::SharedPtr<Render::UIDrawable> new_background;
+		OOBase::SharedPtr<Render::UIDrawable> new_caption;
+
 		if (m_current_style)
 		{
-			if (m_current_style->m_background)
-				m_current_style->m_background->show(false);
+			curr_background = m_current_style->m_background;
+			curr_caption = m_current_style->m_caption;
+		}
 
-			if (m_current_style->m_caption)
-				m_current_style->m_caption->show(false);
+		if (new_style)
+		{
+			new_background = new_style->m_background;
+			new_caption = new_style->m_caption;
+		}
+
+		if (curr_background != new_background)
+		{
+			if (curr_background)
+				curr_background->show(false);
+
+			if (new_background)
+				new_background->show(true);
+		}
+
+		if (curr_caption != new_caption)
+		{
+			if (curr_caption)
+				curr_caption->show(false);
+
+			if (new_caption)
+				new_caption->show(true);
 		}
 
 		m_current_style = new_style;
-
-		if (m_current_style)
-		{
-			if (m_current_style->m_background)
-				m_current_style->m_background->show(true);
-
-			if (m_current_style->m_caption)
-				m_current_style->m_caption->show(true);
-		}
 	}
 }
 
