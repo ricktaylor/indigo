@@ -46,6 +46,7 @@ void Indigo::Application::run()
 			thread_pipe()->get();
 	}
 
+	m_loader.reset();
 	m_wnd.reset();
 }
 
@@ -87,15 +88,25 @@ void Indigo::Application::window_close(const Window& w)
 bool Indigo::Application::create_window()
 {
 	OOBase::SharedPtr<Window> wnd = OOBase::allocate_shared<Window,OOBase::ThreadLocalAllocator>();
-	if (!wnd || !wnd->create())
+	if (!wnd)
+		LOG_ERROR_RETURN(("Failed to allocate main window: %s",OOBase::system_error_text()),false);
+
+	if (!wnd->create())
 		return false;
 
 	wnd->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Application::window_close));
 
 	m_wnd.swap(wnd);
 
+	OOBase::SharedPtr<UILoader> loader = OOBase::allocate_shared<UILoader,OOBase::ThreadLocalAllocator>(m_wnd);
+	if (!loader)
+		LOG_ERROR_RETURN(("Failed to allocate UILoader: %s",OOBase::system_error_text()),false);
+
+	m_loader.swap(loader);
+
 	if (!raise_event(eAE_WndCreated))
 	{
+		m_loader.swap(loader);
 		m_wnd.swap(wnd);
 		return false;
 	}
@@ -112,17 +123,23 @@ bool Indigo::Application::start_screen()
 	// Add the book layer
 	OOBase::SharedPtr<Image> book_image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
 	if (!book_image)
-		return false;
+		LOG_ERROR_RETURN(("Failed to allocate image: %s",OOBase::system_error_text()),false);
 
 	if (!book_image->load(zip,"main.png"))
 		return false;
 
 	OOBase::SharedPtr<ImageLayer> img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(book_image);
-	if (!img_layer || !m_wnd->add_layer(img_layer,50))
+	if (!img_layer)
+		LOG_ERROR_RETURN(("Failed to allocate image layer: %s",OOBase::system_error_text()),false);
+
+	if (!m_wnd->add_layer(img_layer,50))
 		return false;
 
 	img_layer->show();
 
 	unsigned int zorder = 100;
-	return UILoader(m_wnd,zip).load("ui.txt",zorder);
+	if (!m_loader->load(zip,"ui.txt",zorder))
+		return false;
+
+	return true;
 }

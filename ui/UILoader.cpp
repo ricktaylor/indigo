@@ -487,30 +487,35 @@ bool Indigo::UILoader::parse_colour(const char*& p, const char* pe, glm::vec4& c
 	return false;
 }
 
-bool Indigo::UILoader::load(const char* name, unsigned int& zorder, UIGroup* parent)
+bool Indigo::UILoader::load(ResourceBundle& resource, const char* name, unsigned int& zorder, UIGroup* parent)
 {
-	OOBase::SharedPtr<const char> res = m_resource.load<const char>(name);
+	OOBase::SharedPtr<const char> res = resource.load<const char>(name);
 	if (!res)
 		LOG_ERROR_RETURN(("UIResource '%s' does not exist in bundle",name),false);
 
+	m_resource = &resource;
 	m_error_pos.m_line = 1;
 	m_error_pos.m_col = 1;
 
 	const char* p = res.get();
-	const char* pe = p + m_resource.size(name);
+	const char* pe = p + m_resource->size(name);
+	bool ok = true;
 
-	for (OOBase::ScopedString type;p != pe;)
+	for (OOBase::ScopedString type;ok && p != pe;)
 	{
 		if (type_name(p,pe,type))
 		{
-			if (!load_top_level(p,pe,type,parent,zorder++))
-				return false;
+			ok = load_top_level(p,pe,type,parent,zorder++);
 		}
 		else if (p != pe)
-			SYNTAX_ERROR_RETURN(("Type name expected"),false);
+		{
+			syntax_error("Type name expected");
+			ok = false;
+		}
 	}
 
-	return true;
+	m_resource = NULL;
+	return ok;
 }
 
 bool Indigo::UILoader::load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder)
@@ -939,14 +944,14 @@ OOBase::SharedPtr<Indigo::Image> Indigo::UILoader::load_image(const char*& p, co
 	if (i)
 		return i->second;
 
-	if (!m_resource.exists(image_name.c_str()))
+	if (!m_resource->exists(image_name.c_str()))
 		SYNTAX_ERROR_RETURN(("Missing image resource '%s'",image_name.c_str()),OOBase::SharedPtr<Image>());
 
 	OOBase::SharedPtr<Image> image = OOBase::allocate_shared<Image,OOBase::ThreadLocalAllocator>();
 	if (!image)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),image);
 
-	if (!image->load(m_resource,image_name.c_str(),4))
+	if (!image->load(*m_resource,image_name.c_str(),4))
 		return OOBase::SharedPtr<Image>();
 
 	if (!m_hashImages.insert(image_name,image))
@@ -961,14 +966,14 @@ OOBase::SharedPtr<Indigo::NinePatch> Indigo::UILoader::load_9patch(const char*& 
 	if (i)
 		return i->second;
 
-	if (!m_resource.exists(patch_name.c_str()))
+	if (!m_resource->exists(patch_name.c_str()))
 		SYNTAX_ERROR_RETURN(("Missing 9 patch resource '%s'",patch_name.c_str()),OOBase::SharedPtr<NinePatch>());
 
 	OOBase::SharedPtr<NinePatch> patch = OOBase::allocate_shared<NinePatch,OOBase::ThreadLocalAllocator>();
 	if (!patch)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),patch);
 
-	if (!patch->Image::load(m_resource,patch_name.c_str(),4))
+	if (!patch->Image::load(*m_resource,patch_name.c_str(),4))
 		return OOBase::SharedPtr<NinePatch>();
 
 	if (!m_hash9Patches.insert(patch_name,patch))
@@ -983,14 +988,14 @@ OOBase::SharedPtr<Indigo::Font> Indigo::UILoader::load_font(const char*& p, cons
 	if (i)
 		return i->second;
 
-	if (!m_resource.exists(font_name.c_str()))
+	if (!m_resource->exists(font_name.c_str()))
 		SYNTAX_ERROR_RETURN(("Missing font resource '%s'",font_name.c_str()),OOBase::SharedPtr<Font>());
 
 	OOBase::SharedPtr<Font> font = OOBase::allocate_shared<Font,OOBase::ThreadLocalAllocator>();
 	if (!font)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),font);
 
-	if (!font->load(m_resource,font_name.c_str()))
+	if (!font->load(*m_resource,font_name.c_str()))
 		return OOBase::SharedPtr<Font>();
 
 	if (!m_hashFonts.insert(font_name,font))

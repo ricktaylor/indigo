@@ -34,14 +34,14 @@ namespace Indigo
 	class UILoader
 	{
 	public:
-		UILoader(OOBase::SharedPtr<Window> wnd, ResourceBundle& resource) : m_wnd(wnd), m_resource(resource)
+		UILoader(OOBase::SharedPtr<Window> wnd) : m_wnd(wnd), m_resource(NULL)
 		{}
 
-		bool load(const char* resource_name, unsigned int& zorder, UIGroup* parent = NULL);
+		bool load(ResourceBundle& resource, const char* resource_name, unsigned int& zorder, UIGroup* parent = NULL);
 		
 	private:
 		OOBase::SharedPtr<Window> m_wnd;
-		ResourceBundle& m_resource;
+		ResourceBundle* m_resource;
 
 		struct error_pos_t
 		{

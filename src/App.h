@@ -26,6 +26,8 @@
 
 namespace Indigo
 {
+	class UILoader;
+
 	class Application
 	{
 	public:
@@ -48,6 +50,7 @@ namespace Indigo
 
 	private:
 		OOBase::SharedPtr<Window> m_wnd;
+		OOBase::SharedPtr<UILoader> m_loader;
 
 		enum States
 		{
