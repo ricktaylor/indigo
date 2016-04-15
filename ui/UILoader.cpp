@@ -1018,6 +1018,7 @@ bool Indigo::UILoader::load_button_style(const char*& p, const char* pe)
 	default_state.m_text_colour = glm::vec4(0.f,0.f,0.f,1.f);
 	default_state.m_shadow = glm::vec4(.5f);
 	default_state.m_drop = glm::ivec2(0);
+	default_state.m_style_flags = UIButton::align_centre;
 
 	if (!load_button_style_state(p,pe,default_state,style))
 		return false;
@@ -1140,6 +1141,20 @@ bool Indigo::UILoader::load_button_style_state(const char*& p, const char* pe, U
 							return false;
 					}
 				}
+				else if (type == "ALIGN_LEFT")
+					state.m_style_flags = (state.m_style_flags & 0xc) | UIButton::align_left;
+				else if (type == "ALIGN_RIGHT")
+					state.m_style_flags = (state.m_style_flags & 0xc) | UIButton::align_right;
+				else if (type == "ALIGN_HCENTRE")
+					state.m_style_flags = (state.m_style_flags & 0xc) | UIButton::align_hcentre;
+				else if (type == "ALIGN_BOTTOM")
+					state.m_style_flags = (state.m_style_flags & 0x3) | UIButton::align_bottom;
+				else if (type == "ALIGN_TOP")
+					state.m_style_flags = (state.m_style_flags & 0x3) | UIButton::align_top;
+				else if (type == "ALIGN_VCENTRE")
+					state.m_style_flags = (state.m_style_flags & 0x3) | UIButton::align_vcentre;
+				else if (type == "ALIGN_CENTRE")
+					state.m_style_flags = UILabel::align_centre;
 				else if (style && type == "STATE")
 				{
 					OOBase::ScopedString name;
@@ -1320,21 +1335,19 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p,
 						return OOBase::SharedPtr<UIWidget>();
 				}
 				else if (arg == "ALIGN_LEFT")
-					style = (style & 0x1c) | UILabel::align_left;
+					style = (style & 0xc) | UILabel::align_left;
 				else if (arg == "ALIGN_RIGHT")
-					style = (style & 0x1c) | UILabel::align_right;
+					style = (style & 0xc) | UILabel::align_right;
 				else if (arg == "ALIGN_HCENTRE")
-					style = (style & 0x1c) | UILabel::align_hcentre;
+					style = (style & 0xc) | UILabel::align_hcentre;
 				else if (arg == "ALIGN_BOTTOM")
-					style = (style & 0x13) | UILabel::align_bottom;
+					style = (style & 0x3) | UILabel::align_bottom;
 				else if (arg == "ALIGN_TOP")
-					style = (style & 0x13) | UILabel::align_top;
+					style = (style & 0x3) | UILabel::align_top;
 				else if (arg == "ALIGN_VCENTRE")
-					style = (style & 0x13) | UILabel::align_vcentre;
+					style = (style & 0x3) | UILabel::align_vcentre;
 				else if (arg == "ALIGN_CENTRE")
-					style = (style & 0x10) | UILabel::align_centre;
-				else if (arg == "MULTILINE")
-					style = (style & 0x0F) | UILabel::multiline;
+					style = UILabel::align_centre;
 				else if (arg == "POSITION")
 				{
 					if (!parse_ivec2(p,pe,position))

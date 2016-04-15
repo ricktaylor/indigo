@@ -30,15 +30,31 @@ namespace Indigo
 	class UIButton : public UIWidget
 	{
 	public:
+		enum eStyleFlags
+		{
+			align_left = 0,
+			align_right = 1,
+			align_hcentre = 2,
+			align_bottom = 0,
+			align_top = 1 << 2,
+			align_vcentre = 2 << 2,
+			align_centre = align_hcentre | align_vcentre
+		};
+
 		struct StyleState
 		{
 			OOBase::SharedPtr<Font> m_font;
+			unsigned int m_style_flags;
 			unsigned int m_font_size;
 			OOBase::SharedPtr<NinePatch> m_background;
 			glm::vec4 m_background_colour;
 			glm::vec4 m_text_colour;
 			glm::vec4 m_shadow;
 			glm::ivec2 m_drop;
+
+			StyleState() :
+				m_style_flags(UIButton::align_centre)
+			{}
 
 			void unload();
 		};

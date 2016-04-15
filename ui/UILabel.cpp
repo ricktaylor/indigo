@@ -93,24 +93,27 @@ Indigo::UILabel::UILabel(UIGroup* parent, const OOBase::SharedPtr<Font>& font, c
 
 bool Indigo::UILabel::on_render_create(Indigo::Render::UIGroup* group)
 {
-	unsigned int caption_height = m_font_size;
-	unsigned int caption_width = static_cast<unsigned int>(ceil(caption_height * m_font->measure_text(m_text.c_str(),m_text.length())));
+	unsigned int caption_height = 0;
+	unsigned int caption_width = 0;
+
+	if (!m_text.empty())
+	{
+		caption_height = m_font_size;
+		caption_width = static_cast<unsigned int>(ceil(caption_height * m_font->measure_text(m_text.c_str(),m_text.length())));
+	}
 
 	glm::uvec2 sz = size();
 	glm::ivec2 pos(0);
 
 	if (m_style & UILabel::align_right)
 		pos.x = sz.x - caption_width;
-	else if (m_style & UILabel::align_centre)
+	else if (m_style & UILabel::align_hcentre)
 		pos.x = (sz.x - caption_width) / 2;
 
 	if (m_style & UILabel::align_top)
 		pos.y = sz.y - caption_height;
 	else if (m_style & UILabel::align_vcentre)
 		pos.y = (sz.y - caption_height) / 2;
-
-	if (m_style & UILabel::multiline)
-		LOG_ERROR_RETURN(("No support for multiline... yet!"),false);
 
 	m_caption = OOBase::allocate_shared<Render::UILabel,OOBase::ThreadLocalAllocator>(m_font->render_font(),m_text.c_str(),m_text.length(),m_font_size,m_colour,true,pos);
 	if (!m_caption)
@@ -121,22 +124,33 @@ bool Indigo::UILabel::on_render_create(Indigo::Render::UIGroup* group)
 
 glm::uvec2 Indigo::UILabel::ideal_size() const
 {
-	unsigned int caption_height = m_font_size;
-	unsigned int caption_width = static_cast<unsigned int>(ceil(caption_height * m_font->measure_text(m_text.c_str(),m_text.length())));
+	unsigned int caption_height = 0;
+	unsigned int caption_width = 0;
+
+	if (!m_text.empty())
+	{
+		caption_height = m_font_size;
+		caption_width = static_cast<unsigned int>(ceil(caption_height * m_font->measure_text(m_text.c_str(),m_text.length())));
+	}
 
 	return glm::uvec2(caption_width,caption_height);
 }
 
 void Indigo::UILabel::on_size(const glm::uvec2& sz)
 {
-	unsigned int caption_height = m_font_size;
-	unsigned int caption_width = static_cast<unsigned int>(ceil(caption_height * m_font->measure_text(m_text.c_str(),m_text.length())));
+	unsigned int caption_height = 0;
+	unsigned int caption_width = 0;
+
+	if (!m_text.empty())
+	{
+		caption_height = m_font_size;
+		caption_width = static_cast<unsigned int>(ceil(caption_height * m_font->measure_text(m_text.c_str(),m_text.length())));
+	}
 
 	glm::ivec2 pos(0);
-
 	if (m_style & UILabel::align_right)
 		pos.x = sz.x - caption_width;
-	else if (m_style & UILabel::align_centre)
+	else if (m_style & UILabel::align_hcentre)
 		pos.x = (sz.x - caption_width) / 2;
 
 	if (m_style & UILabel::align_top)

@@ -193,10 +193,25 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 
 	if (!rs.m_caption && style.m_font)
 	{
-		unsigned int caption_height = style.m_font_size;
-		unsigned int caption_width = static_cast<unsigned int>(ceil(caption_height * style.m_font->measure_text(m_text.c_str(),m_text.length())));
+		unsigned int caption_height = 0;
+		unsigned int caption_width = 0;
 
-		glm::ivec2 pos((sz.x - caption_width) / 2 + margins.x,(sz.y - caption_height) / 2 + margins.w);
+		if (!m_text.empty() && style.m_font)
+		{
+			caption_height = style.m_font_size;
+			caption_width = static_cast<unsigned int>(ceil(caption_height * style.m_font->measure_text(m_text.c_str(),m_text.length())));
+		}
+
+		glm::ivec2 pos(margins.x,margins.w);
+		if (style.m_style_flags & UIButton::align_right)
+			pos.x += sz.x - caption_width;
+		else if (style.m_style_flags & UIButton::align_hcentre)
+			pos.x += (sz.x - caption_width) / 2;
+
+		if (style.m_style_flags & UIButton::align_top)
+			pos.y += sz.y - caption_height;
+		else if (style.m_style_flags & UIButton::align_vcentre)
+			pos.y += (sz.y - caption_height) / 2;
 
 		if (style.m_drop.x && style.m_drop.y && style.m_shadow.a > 0.f)
 			rs.m_caption = OOBase::allocate_shared<Render::UIShadowLabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,style.m_shadow,style.m_drop,visible,pos);
@@ -261,7 +276,18 @@ void Indigo::UIButton::do_style_size(const glm::uvec2& sz, const StyleState& sty
 			caption_width = static_cast<unsigned int>(ceil(caption_height * style.m_font->measure_text(m_text.c_str(),m_text.length())));
 		}
 
-		rs.m_caption->position(glm::ivec2((cap_size.x - caption_width) / 2 + margins.x,(cap_size.y - caption_height) / 2 + margins.w));
+		glm::ivec2 pos(margins.x,margins.w);
+		if (style.m_style_flags & UIButton::align_right)
+			pos.x += cap_size.x - caption_width;
+		else if (style.m_style_flags & UIButton::align_hcentre)
+			pos.x += (cap_size.x - caption_width) / 2;
+
+		if (style.m_style_flags & UIButton::align_top)
+			pos.y += cap_size.y - caption_height;
+		else if (style.m_style_flags & UIButton::align_vcentre)
+			pos.y += (cap_size.y - caption_height) / 2;
+
+		rs.m_caption->position(pos);
 	}
 }
 

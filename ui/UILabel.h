@@ -65,8 +65,7 @@ namespace Indigo
 			align_bottom = 0,
 			align_top = 1 << 2,
 			align_vcentre = 2 << 2,
-			align_centre = align_hcentre | align_vcentre,
-			multiline = 1 << 4,
+			align_centre = align_hcentre | align_vcentre
 		};
 
 		UILabel(UIGroup* parent, const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, unsigned int style = (align_left | align_vcentre), unsigned int font_size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), OOBase::uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
