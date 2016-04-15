@@ -92,6 +92,7 @@ namespace Indigo
 		bool load_button_style_state(const char*& p, const char* pe, UIButton::StyleState& state, const OOBase::SharedPtr<UIButton::Style>& style);
 		OOBase::SharedPtr<UIWidget> load_uiimage(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder);
 		OOBase::SharedPtr<UIWidget> load_button(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder);
+		OOBase::SharedPtr<UIWidget> load_label(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder);
 		OOBase::SharedPtr<UIWidget> load_panel(const char*& p, const char* pe, UIGroup* parent, const char* name, unsigned int zorder);
 	};
 }

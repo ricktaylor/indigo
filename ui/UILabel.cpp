@@ -54,3 +54,96 @@ void Indigo::Render::UIShadowLabel::on_draw(OOGL::State& glState, const glm::mat
 	if (m_colour.a > 0.0f)
 		Text::draw(glState,glm::scale(mvp,glm::vec3(m_size)),m_colour);
 }
+
+Indigo::UILabel::UILabel(UIGroup* parent, const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, unsigned int style, unsigned int font_size, const glm::vec4& colour, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+		UIWidget(parent,state,position,size),
+		m_font(font),
+		m_text(caption),
+		m_style(style),
+		m_font_size(font_size),
+		m_colour(colour)
+{
+	if (!font)
+		LOG_ERROR(("Invalid font passed to UILabel constructor"));
+	else if (!m_font_size)
+		m_font_size = font->line_height();
+
+	if (size == glm::uvec2(0))
+		this->size(ideal_size());
+}
+
+Indigo::UILabel::UILabel(UIGroup* parent, const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int style, unsigned int font_size, const glm::vec4& colour, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+		UIWidget(parent,state,position,size),
+		m_font(font),
+		m_style(style),
+		m_font_size(font_size),
+		m_colour(colour)
+{
+	if (!font)
+		LOG_ERROR(("Invalid font passed to UILabel constructor"));
+	else if (!m_font_size)
+		m_font_size = font->line_height();
+
+	if (!m_text.assign(sz,len))
+		LOG_ERROR(("Failed to assign text: %s",OOBase::system_error_text()));
+
+	if (size == glm::uvec2(0))
+		this->size(ideal_size());
+}
+
+bool Indigo::UILabel::on_render_create(Indigo::Render::UIGroup* group)
+{
+	unsigned int caption_height = m_font_size;
+	unsigned int caption_width = static_cast<unsigned int>(ceil(caption_height * m_font->measure_text(m_text.c_str(),m_text.length())));
+
+	glm::uvec2 sz = size();
+	glm::ivec2 pos(0);
+
+	if (m_style & UILabel::align_right)
+		pos.x = sz.x - caption_width;
+	else if (m_style & UILabel::align_centre)
+		pos.x = (sz.x - caption_width) / 2;
+
+	if (m_style & UILabel::align_top)
+		pos.y = sz.y - caption_height;
+	else if (m_style & UILabel::align_vcentre)
+		pos.y = (sz.y - caption_height) / 2;
+
+	if (m_style & UILabel::multiline)
+		LOG_ERROR_RETURN(("No support for multiline... yet!"),false);
+
+	m_caption = OOBase::allocate_shared<Render::UILabel,OOBase::ThreadLocalAllocator>(m_font->render_font(),m_text.c_str(),m_text.length(),m_font_size,m_colour,true,pos);
+	if (!m_caption)
+		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
+
+	return group->add_drawable(m_caption,0);
+}
+
+glm::uvec2 Indigo::UILabel::ideal_size() const
+{
+	unsigned int caption_height = m_font_size;
+	unsigned int caption_width = static_cast<unsigned int>(ceil(caption_height * m_font->measure_text(m_text.c_str(),m_text.length())));
+
+	return glm::uvec2(caption_width,caption_height);
+}
+
+void Indigo::UILabel::on_size(const glm::uvec2& sz)
+{
+	unsigned int caption_height = m_font_size;
+	unsigned int caption_width = static_cast<unsigned int>(ceil(caption_height * m_font->measure_text(m_text.c_str(),m_text.length())));
+
+	glm::ivec2 pos(0);
+
+	if (m_style & UILabel::align_right)
+		pos.x = sz.x - caption_width;
+	else if (m_style & UILabel::align_centre)
+		pos.x = (sz.x - caption_width) / 2;
+
+	if (m_style & UILabel::align_top)
+		pos.y = sz.y - caption_height;
+	else if (m_style & UILabel::align_vcentre)
+		pos.y = (sz.y - caption_height) / 2;
+
+	if (m_caption)
+		render_pipe()->post(OOBase::make_delegate(static_cast<Render::UIDrawable*>(m_caption.get()),&Render::UIDrawable::position),pos);
+}

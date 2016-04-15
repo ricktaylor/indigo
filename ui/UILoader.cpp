@@ -665,7 +665,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 							else
 								SYNTAX_ERROR_RETURN(("Unexpected layout argument '%s'",type.c_str()),false);
 
-							if (!character(p,pe,'|'))
+							if (!character(p,pe,','))
 								break;
 
 							if (!type_name(p,pe,type))
@@ -850,6 +850,10 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_child(const char*& p,
 	else if (type == "IMAGE")
 	{
 		ret = load_uiimage(p,pe,parent,zorder);
+	}
+	else if (type == "LABEL")
+	{
+		ret = load_label(p,pe,parent,zorder);
 	}
 	else if (type == "PANEL")
 	{
@@ -1233,7 +1237,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 			SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
 	}
 
-	OOBase::ScopedString caption;
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> caption;
 	if (!parse_string(p,pe,caption))
 		return OOBase::SharedPtr<UIWidget>();
 
@@ -1244,7 +1248,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 	if (!i)
 		SYNTAX_ERROR_RETURN(("Undefined style '%s' for BUTTON",style_name.c_str()),OOBase::SharedPtr<UIWidget>());
 
-	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(parent,i->second,caption.c_str(),caption.length(),state,position,size);
+	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(parent,i->second,caption,state,position,size);
 	if (!button)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
@@ -1252,6 +1256,125 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 		return OOBase::SharedPtr<UIWidget>();
 
 	return button;
+}
+
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder)
+{
+	glm::ivec2 position(0);
+	glm::uvec2 size(0);
+	OOBase::uint32_t state = 0;
+	unsigned int style = (UILabel::align_left | UILabel::align_vcentre);
+	unsigned int font_size = 0;
+	glm::vec4 colour(0.f,0.f,0.f,1.f);
+	OOBase::SharedPtr<Indigo::Font> font;
+
+	if (character(p,pe,'('))
+	{
+		OOBase::ScopedString arg;
+		if (type_name(p,pe,arg))
+		{
+			for (;;)
+			{
+				if (arg == "FONT")
+				{
+					if (character(p,pe,'('))
+					{
+						if (type_name(p,pe,arg))
+						{
+							for (;;)
+							{
+								if (arg == "SIZE")
+								{
+									if (!parse_uint(p,pe,font_size))
+										return OOBase::SharedPtr<UIWidget>();
+								}
+								else if (arg == "COLOUR")
+								{
+									if (!parse_colour(p,pe,colour))
+										return OOBase::SharedPtr<UIWidget>();
+								}
+								else
+									SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in FONT",arg.c_str()),OOBase::SharedPtr<UIWidget>());
+
+								if (!character(p,pe,','))
+									break;
+
+								if (!type_name(p,pe,arg))
+									SYNTAX_ERROR_RETURN(("Argument expected"),OOBase::SharedPtr<UIWidget>());
+							}
+						}
+
+						if (!character(p,pe,')'))
+							SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
+					}
+
+					OOBase::SharedString<OOBase::ThreadLocalAllocator> font_name;
+					if (!parse_string(p,pe,font_name))
+						return OOBase::SharedPtr<UIWidget>();
+
+					if (font_name.empty())
+						SYNTAX_ERROR_RETURN(("Font name required"),OOBase::SharedPtr<UIWidget>());
+
+					font = load_font(p,pe,font_name);
+					if (!font)
+						return OOBase::SharedPtr<UIWidget>();
+				}
+				else if (arg == "ALIGN_LEFT")
+					style = (style & 0x1c) | UILabel::align_left;
+				else if (arg == "ALIGN_RIGHT")
+					style = (style & 0x1c) | UILabel::align_right;
+				else if (arg == "ALIGN_HCENTRE")
+					style = (style & 0x1c) | UILabel::align_hcentre;
+				else if (arg == "ALIGN_BOTTOM")
+					style = (style & 0x13) | UILabel::align_bottom;
+				else if (arg == "ALIGN_TOP")
+					style = (style & 0x13) | UILabel::align_top;
+				else if (arg == "ALIGN_VCENTRE")
+					style = (style & 0x13) | UILabel::align_vcentre;
+				else if (arg == "ALIGN_CENTRE")
+					style = (style & 0x10) | UILabel::align_centre;
+				else if (arg == "MULTILINE")
+					style = (style & 0x0F) | UILabel::multiline;
+				else if (arg == "POSITION")
+				{
+					if (!parse_ivec2(p,pe,position))
+						return OOBase::SharedPtr<UIWidget>();
+				}
+				else if (arg == "SIZE")
+				{
+					if (!parse_uvec2(p,pe,size))
+						return OOBase::SharedPtr<UIWidget>();
+				}
+				else if (!parse_state(arg,state))
+					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in LABEL",arg.c_str()),OOBase::SharedPtr<UIWidget>());
+
+				if (!character(p,pe,','))
+					break;
+
+				if (!type_name(p,pe,arg))
+					SYNTAX_ERROR_RETURN(("Argument expected"),OOBase::SharedPtr<UIWidget>());
+			}
+		}
+
+		if (!character(p,pe,')'))
+			SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
+	}
+
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> caption;
+	if (!parse_string(p,pe,caption))
+		return OOBase::SharedPtr<UIWidget>();
+
+	if (!font)
+		SYNTAX_ERROR_RETURN(("No font for LABEL"),OOBase::SharedPtr<UIWidget>());
+
+	OOBase::SharedPtr<UILabel> label = OOBase::allocate_shared<UILabel,OOBase::ThreadLocalAllocator>(parent,font,caption,style,font_size,colour,state,position,size);
+	if (!label)
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
+
+	if (!parent->add_widget(label,zorder))
+		return OOBase::SharedPtr<UIWidget>();
+
+	return label;
 }
 
 OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p, const char* pe, UIGroup* parent, const char* name, unsigned int zorder)

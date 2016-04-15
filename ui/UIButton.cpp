@@ -342,6 +342,9 @@ bool Indigo::UIButton::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 		OOBase::uint32_t curr_state = state();
 		if (!click.down && (curr_state & eBS_pressed))
 		{
+			if (m_on_click)
+				m_on_click.invoke();
+
 			LOG_DEBUG(("Button %p clicked!",this));
 		}
 
@@ -351,4 +354,11 @@ bool Indigo::UIButton::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 	}
 
 	return UIWidget::on_mousebutton(click);
+}
+
+OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> Indigo::UIButton::on_click(const OOBase::Delegate0<void,OOBase::ThreadLocalAllocator>& delegate)
+{
+	OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> prev = m_on_click;
+	m_on_click = delegate;
+	return prev;
 }

@@ -62,6 +62,8 @@ namespace Indigo
 		UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, OOBase::uint32_t state = UIWidget::eWS_enabled, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 		UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const char* sz, size_t len = -1, OOBase::uint32_t state = UIWidget::eWS_enabled, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
 
+		OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> on_click(const OOBase::Delegate0<void,OOBase::ThreadLocalAllocator>& delegate);
+
 	protected:
 		virtual bool valid() const;
 
@@ -77,6 +79,7 @@ namespace Indigo
 	private:
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_text;
 		OOBase::SharedPtr<Style> m_style;
+		OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> m_on_click;
 
 		struct RenderStyleState
 		{
