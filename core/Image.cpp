@@ -85,27 +85,59 @@ bool Indigo::Image::load(const unsigned char* buffer, size_t len, int components
 		m_width = 0;
 		m_height = 0;
 		m_components = 0;
+		m_valid_components = 0;
 		m_pixels = 0;
 	}
 	
 	int x,y,c = 0;
 	void* p = stbi_load_from_memory(buffer,(int)len,&x,&y,&c,components);
 	if (!p)
-		LOG_ERROR(("Failed to load image: %s",stbi_failure_reason()));
-	else
-	{
-		m_pixels = p;
-		m_width = x;
-		m_height = y;
-		m_valid_components = c;
+		LOG_ERROR_RETURN(("Failed to load image: %s",stbi_failure_reason()),false);
 
-		if (!components)
-			m_components = c;
-		else
-			m_components = components;
+	m_pixels = p;
+	m_width = x;
+	m_height = y;
+	m_valid_components = c;
+
+	if (!components)
+		m_components = c;
+	else
+		m_components = components;
+
+	return true;
+}
+
+bool Indigo::Image::create(const glm::vec4& colour)
+{
+	if (m_pixels)
+	{
+		stbi_image_free(m_pixels);
+
+		m_width = 0;
+		m_height = 0;
+		m_components = 0;
+		m_valid_components = 0;
+		m_pixels = 0;
 	}
 
-	return (p != NULL);
+	void* p = wrap_malloc(4);
+	if (!p)
+		LOG_ERROR_RETURN(("Failed to allocate image: %s",OOBase::system_error_text()),false);
+
+	char* rgba = static_cast<char*>(p);
+	glm::vec4 col = glm::clamp(colour,glm::vec4(0.f),glm::vec4(1.f)) * 256.f;
+	rgba[0] = col.r;
+	rgba[1] = col.g;
+	rgba[2] = col.b;
+	rgba[3] = col.a;
+
+	m_width = 1;
+	m_height = 1;
+	m_components = 4;
+	m_valid_components = 4;
+	m_pixels = p;
+
+	return true;
 }
 
 glm::vec4 Indigo::Image::pixel(const glm::uvec2& pos) const
@@ -114,13 +146,13 @@ glm::vec4 Indigo::Image::pixel(const glm::uvec2& pos) const
 	if (m_pixels)
 	{
 		const char* p = static_cast<const char*>(m_pixels) + (m_width * pos.y + pos.x) * m_components;
-		pixel.r = p[0]/256.f;
+		pixel.r = p[0]/255.f;
 		if (m_components > 1)
-			pixel.g = p[1]/256.f;
+			pixel.g = p[1]/255.f;
 		if (m_components > 2)
-			pixel.b = p[2]/256.f;
+			pixel.b = p[2]/255.f;
 		if (m_components > 3)
-			pixel.a = p[3]/256.f;
+			pixel.a = p[3]/255.f;
 	}
 	return pixel;
 }

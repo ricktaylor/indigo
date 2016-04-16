@@ -41,6 +41,8 @@ namespace Indigo
 		bool load(const ResourceBundle& resource, const char* name, int components = 0);
 		virtual bool load(const unsigned char* buffer, size_t len, int components = 0);
 
+		bool create(const glm::vec4& colour);
+
 		virtual void unload();
 
 		glm::uvec2 size() const { return glm::uvec2(m_width,m_height); }
