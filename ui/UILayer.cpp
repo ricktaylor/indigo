@@ -49,15 +49,24 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 	Indigo::Render::UIGroup::on_draw(glState,glm::ortho(0.f,sz.x,0.f,sz.y));
 }
 
-Indigo::UILayer::UILayer(bool fixed, const glm::uvec4& margins, const glm::uvec2& padding) :
-		UIGroup(NULL,eWS_visible),
+Indigo::UILayer::UILayer(bool fixed, const glm::uvec4& margins, const glm::uvec2& padding, OOBase::uint32_t state) :
+		UIGroup(NULL,state),
 		m_sizer(fixed,margins,padding)
 {
 }
 
-void Indigo::UILayer::show(bool visible)
+void Indigo::UILayer::on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask)
 {
-	Layer::show(visible);
+	UIGroup::on_state_change(state,change_mask);
+
+	if (change_mask & UIWidget::eWS_visible)
+	{
+		bool visible = (state & eWS_visible) == eWS_visible;
+		if (visible)
+			m_sizer.fit(m_size);
+
+		Layer::show(visible);
+	}
 }
 
 void Indigo::UILayer::on_size(const glm::uvec2& sz)
@@ -73,11 +82,6 @@ glm::uvec2 Indigo::UILayer::min_size() const
 glm::uvec2 Indigo::UILayer::ideal_size() const
 {
 	return m_sizer.ideal_fit();
-}
-
-void Indigo::UILayer::layout()
-{
-	m_sizer.fit(m_size);
 }
 
 OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(Indigo::Render::Window* window)

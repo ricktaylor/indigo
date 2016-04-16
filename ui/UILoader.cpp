@@ -487,6 +487,24 @@ bool Indigo::UILoader::parse_colour(const char*& p, const char* pe, glm::vec4& c
 	return false;
 }
 
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::widget(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const
+{
+	OOBase::SharedPtr<UIWidget> ret;
+	widget_hash_t::const_iterator i = m_hashWidgets.find(name);
+	if (i)
+		ret = i->second;
+	return ret;
+}
+
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::widget(const char* name, size_t len) const
+{
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> str;
+	if (!str.assign(name,len))
+		LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
+
+	return widget(str);
+}
+
 bool Indigo::UILoader::load(ResourceBundle& resource, const char* name, unsigned int& zorder, UIGroup* parent)
 {
 	OOBase::SharedPtr<const char> res = resource.load<const char>(name);
@@ -588,7 +606,7 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 			SYNTAX_ERROR_RETURN(("')' expected"),false);
 	}
 
-	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(fixed,margins,padding);
+	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(fixed,margins,padding,state);
 	if (!layer)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
@@ -602,12 +620,6 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 	if (!load_grid_sizer(p,pe,layer.get(),name.c_str(),layer->sizer(),zorder,true))
 		return false;
 
-	if (state & UIWidget::eWS_visible)
-	{
-		layer->layout();
-		layer->show();
-	}
-	
 	return true;
 }
 

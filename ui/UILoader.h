@@ -39,6 +39,9 @@ namespace Indigo
 
 		bool load(ResourceBundle& resource, const char* resource_name, unsigned int& zorder, UIGroup* parent = NULL);
 		
+		OOBase::SharedPtr<UIWidget> widget(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const;
+		OOBase::SharedPtr<UIWidget> widget(const char* name, size_t len = -1) const;
+
 	private:
 		OOBase::SharedPtr<Window> m_wnd;
 		ResourceBundle* m_resource;

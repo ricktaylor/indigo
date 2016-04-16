@@ -31,21 +31,18 @@ namespace Indigo
 	class UILayer : public UIGroup, public Layer
 	{
 	public:
-		UILayer(bool fixed, const glm::uvec4& margins = glm::uvec4(0), const glm::uvec2& padding = glm::uvec2(0));
+		UILayer(bool fixed, const glm::uvec4& margins = glm::uvec4(0), const glm::uvec2& padding = glm::uvec2(0), OOBase::uint32_t state = 0);
 
 		bool valid() const { return m_render_group; }
 
-		void show(bool visible = true);
-
 		UIGridSizer& sizer() { return m_sizer; }
-
-		virtual void layout();
 
 	protected:
 		OOBase::SharedPtr<Render::Layer> create_render_layer(Indigo::Render::Window* window);
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group) { return true; }
 		virtual void on_size(const glm::uvec2& sz);
+		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual bool on_mousemove(const double& screen_x, const double& screen_y);
 		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 
