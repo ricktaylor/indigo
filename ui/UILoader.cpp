@@ -649,11 +649,10 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 				if (!character(p,pe,']'))
 					SYNTAX_ERROR_RETURN(("']' expected"),false);
 
-				if (character(p,pe,'('))
+				unsigned int flags = UIGridSizer::align_centre | UIGridSizer::expand;
+				bool parens = character(p,pe,'(');
+				if (parens)
 				{
-					// TODO - Make this cleaner...
-
-					unsigned int flags = UIGridSizer::align_centre | UIGridSizer::expand;
 					if (type_name(p,pe,type))
 					{
 						flags = 0;
@@ -692,101 +691,89 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 
 					if (!character(p,pe,')'))
 						SYNTAX_ERROR_RETURN(("')' expected"),false);
+				}
+
+				if (!type_name(p,pe,type))
+					SYNTAX_ERROR_RETURN(("Type name expected"),false);
+
+				if (type == "GRID")
+				{
+					bool fixed = false;
+					glm::uvec4 margins(0);
+					glm::uvec2 padding(0);
+
+					if (character(p,pe,'('))
+					{
+						OOBase::ScopedString arg;
+						if (type_name(p,pe,arg))
+						{
+							for (;;)
+							{
+								if (arg == "FIXED")
+								{
+									fixed = true;
+								}
+								else if (arg == "MARGINS")
+								{
+									if (!parse_uvec4(p,pe,margins))
+										return OOBase::SharedPtr<UIWidget>();
+								}
+								else if (arg == "PADDING")
+								{
+									if (!parse_uvec2(p,pe,padding))
+										return OOBase::SharedPtr<UIWidget>();
+								}
+								else
+									SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in GRID",arg.c_str()),OOBase::SharedPtr<UIWidget>());
+
+								if (!character(p,pe,','))
+									break;
+
+								if (!type_name(p,pe,arg))
+									SYNTAX_ERROR_RETURN(("Argument expected"),OOBase::SharedPtr<UIWidget>());
+							}
+						}
+
+						if (!character(p,pe,')'))
+							SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
+					}
+
+					OOBase::SharedPtr<UIGridSizer> s = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>(fixed,margins,padding);
+					if (!s)
+						LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
 					if (proportion == (unsigned int)-1)
 						proportion = 1;
 
-					if (!type_name(p,pe,type))
-						SYNTAX_ERROR_RETURN(("Type name expected"),false);
+					if (!sizer.add_sizer(row,col,s,flags,proportion))
+						return false;
 
-					if (type == "GRID")
-					{
-						bool fixed = false;
-						glm::uvec4 margins(0);
-						glm::uvec2 padding(0);
+					if (!load_grid_sizer(p,pe,parent,parent_name,*s,zorder,false))
+						return false;
+				}
+				else if (!parens && type == "SPACER")
+				{
+					glm::uvec2 size(0);
+					if (!parse_uvec2(p,pe,size))
+						SYNTAX_ERROR_RETURN(("(width,height) expected"),false);
 
-						if (character(p,pe,'('))
-						{
-							OOBase::ScopedString arg;
-							if (type_name(p,pe,arg))
-							{
-								for (;;)
-								{
-									if (arg == "FIXED")
-									{
-										fixed = true;
-									}
-									else if (arg == "MARGINS")
-									{
-										if (!parse_uvec4(p,pe,margins))
-											return OOBase::SharedPtr<UIWidget>();
-									}
-									else if (arg == "PADDING")
-									{
-										if (!parse_uvec2(p,pe,padding))
-											return OOBase::SharedPtr<UIWidget>();
-									}
-									else
-										SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in GRID",arg.c_str()),OOBase::SharedPtr<UIWidget>());
+					if (proportion == (unsigned int)-1)
+						proportion = 0;
 
-									if (!character(p,pe,','))
-										break;
-
-									if (!type_name(p,pe,arg))
-										SYNTAX_ERROR_RETURN(("Argument expected"),OOBase::SharedPtr<UIWidget>());
-								}
-							}
-
-							if (!character(p,pe,')'))
-								SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
-						}
-
-						OOBase::SharedPtr<UIGridSizer> s = OOBase::allocate_shared<UIGridSizer,OOBase::ThreadLocalAllocator>(fixed,margins,padding);
-						if (!s)
-							LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
-
-						if (!sizer.add_sizer(row,col,s,flags,proportion))
-							return false;
-
-						if (!load_grid_sizer(p,pe,parent,parent_name,*s,zorder,false))
-							return false;
-					}
-					else
-					{
-						OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,parent_name,zorder++);
-						if (!child)
-							return false;
-
-						if (!sizer.add_widget(row,col,child,flags,proportion))
-							return false;
-					}
+					if (!sizer.add_spacer(row,col,size,proportion))
+						return false;
 				}
 				else
 				{
-					if (!type_name(p,pe,type))
-						SYNTAX_ERROR_RETURN(("Type name expected"),false);
+					OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,parent_name,zorder++);
+					if (!child)
+						return false;
 
-					if (type == "SPACER")
-					{
-						if (proportion == (unsigned int)-1)
-							proportion = 0;
+					if (proportion == (unsigned int)-1)
+						proportion = 1;
 
-						glm::uvec2 size(0);
-						if (!parse_uvec2(p,pe,size))
-							SYNTAX_ERROR_RETURN(("(width,height) expected"),false);
-
-						if (!sizer.add_spacer(row,col,size,proportion))
-							return false;
-					}
-					else
-					{
-						OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,parent_name,zorder++);
-						if (!child)
-							return false;
-
-						if (!sizer.add_widget(row,col,child))
-							return false;
-					}
+					if (!sizer.add_widget(row,col,child,flags,proportion))
+						return false;
 				}
 			}
 			else if (add_loose && type_name(p,pe,type))
