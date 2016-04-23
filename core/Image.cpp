@@ -124,12 +124,12 @@ bool Indigo::Image::create(const glm::vec4& colour)
 	if (!p)
 		LOG_ERROR_RETURN(("Failed to allocate image: %s",OOBase::system_error_text()),false);
 
-	char* rgba = static_cast<char*>(p);
+	unsigned char* rgba = static_cast<unsigned char*>(p);
 	glm::vec4 col = glm::clamp(colour,glm::vec4(0.f),glm::vec4(1.f)) * 256.f;
-	rgba[0] = col.r;
-	rgba[1] = col.g;
-	rgba[2] = col.b;
-	rgba[3] = col.a;
+	rgba[0] = static_cast<unsigned char>(col.r);
+	rgba[1] = static_cast<unsigned char>(col.g);
+	rgba[2] = static_cast<unsigned char>(col.b);
+	rgba[3] = static_cast<unsigned char>(col.a);
 
 	m_width = 1;
 	m_height = 1;
