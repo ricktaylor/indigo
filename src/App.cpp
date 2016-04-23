@@ -141,5 +141,11 @@ bool Indigo::Application::start_screen()
 	if (!m_loader->load(zip,"ui.txt",zorder))
 		return false;
 
+	OOBase::SharedPtr<UIWidget> w = m_loader->widget("splash");
+	if (!w)
+		return false;
+
+	w->show();
+
 	return true;
 }
