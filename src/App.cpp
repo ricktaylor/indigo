@@ -64,7 +64,7 @@ bool Indigo::Application::raise_event(enum Events event)
 		},
 		{ // eAS_MainPage
 			{ NULL },  // eAE_WndCreated
-			{ NULL,eAS_QuitPrompt } // eAE_WndClose
+			{ &Application::quit_prompt,eAS_QuitPrompt } // eAE_WndClose
 		},
 		{ // eAS_QuitPrompt
 			{ NULL },  // eAE_WndCreated
@@ -142,6 +142,17 @@ bool Indigo::Application::start_screen()
 		return false;
 
 	OOBase::SharedPtr<UIWidget> w = m_loader->widget("splash");
+	if (!w)
+		return false;
+
+	w->show();
+
+	return true;
+}
+
+bool Indigo::Application::quit_prompt()
+{
+	OOBase::SharedPtr<UIWidget> w = m_loader->widget("quit");
 	if (!w)
 		return false;
 

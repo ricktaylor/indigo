@@ -65,6 +65,7 @@ namespace Indigo
 		void window_close(const Window& w);
 		bool create_window();
 		bool start_screen();
+		bool quit_prompt();
 	};
 }
 
