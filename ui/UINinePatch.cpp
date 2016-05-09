@@ -584,12 +584,15 @@ glm::uvec2 Indigo::NinePatch::ideal_size() const
 	return min_size();
 }
 
-Indigo::UINinePatch::UINinePatch(UIGroup* parent, const OOBase::SharedPtr<NinePatch>& patch, const glm::vec4& colour, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
-		UIWidget(parent,state,position,size),
-		m_9patch(patch),
-		m_colour(colour)
+Indigo::UINinePatch::UINinePatch(UIGroup* parent, const CreateParams& params) :
+		UIWidget(parent,params),
+		m_9patch(params.m_patch),
+		m_colour(params.m_colour)
 {
-	if (size == glm::uvec2(0))
+	if (!m_9patch || !m_9patch->valid())
+		LOG_ERROR(("Invalid 9 patch passed to UINinePatch constructor"));
+
+	if (params.m_size == glm::uvec2(0))
 		this->size(m_9patch->size());
 }
 

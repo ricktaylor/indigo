@@ -53,7 +53,8 @@ namespace Indigo
 			glm::ivec2 m_drop;
 
 			StyleState() :
-				m_style_flags(UIButton::align_centre)
+				m_style_flags(UIButton::align_centre),
+				m_font_size(0)
 			{}
 
 			void unload();
@@ -75,8 +76,22 @@ namespace Indigo
 			eBS_mouseover = 0x8
 		};
 
-		UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, OOBase::uint32_t state = UIWidget::eWS_enabled, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
-		UIButton(UIGroup* parent, const OOBase::SharedPtr<Style>& style, const char* sz, size_t len = -1, OOBase::uint32_t state = UIWidget::eWS_enabled, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		struct CreateParams : UIWidget::CreateParams
+		{
+			CreateParams(OOBase::uint32_t state = UIWidget::eWS_enabled,
+					const glm::ivec2& position = glm::ivec2(0),
+					const glm::uvec2& size = glm::uvec2(0),
+					const OOBase::SharedPtr<Style>& style = OOBase::SharedPtr<Style>()
+			) :
+				UIWidget::CreateParams(state,position,size),
+				m_style(style)
+			{}
+
+			OOBase::SharedPtr<Style> m_style;
+		};
+
+		UIButton(UIGroup* parent, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const CreateParams& params = CreateParams());
+		UIButton(UIGroup* parent, const char* sz, size_t len = -1, const CreateParams& params = CreateParams());
 
 		OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> on_click(const OOBase::Delegate0<void,OOBase::ThreadLocalAllocator>& delegate);
 

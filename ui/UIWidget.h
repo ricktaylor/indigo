@@ -89,6 +89,22 @@ namespace Indigo
 			eWS_enabled = 0x2
 		};
 
+		struct CreateParams
+		{
+			CreateParams(OOBase::uint32_t state = 0,
+					const glm::ivec2& position = glm::ivec2(0),
+					const glm::uvec2& size = glm::uvec2(0)
+			) :
+				m_state(state),
+				m_position(position),
+				m_size(size)
+			{}
+
+			OOBase::uint32_t m_state;
+			glm::ivec2       m_position;
+			glm::uvec2       m_size;
+		};
+
 		virtual ~UIWidget()
 		{}
 
@@ -116,7 +132,7 @@ namespace Indigo
 		virtual glm::uvec2 ideal_size() const = 0;
 
 	protected:
-		UIWidget(UIGroup* parent, OOBase::uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIWidget(UIGroup* parent, const CreateParams& params = CreateParams());
 
 		virtual bool on_render_create(Indigo::Render::UIGroup* group) = 0;
 		virtual void on_size(const glm::uvec2& sz) { }
@@ -136,7 +152,7 @@ namespace Indigo
 	class UIGroup : public UIWidget
 	{
 	public:
-		UIGroup(UIGroup* parent, OOBase::uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		UIGroup(UIGroup* parent, const CreateParams& params = CreateParams());
 
 		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder);
 		bool remove_widget(unsigned int zorder);

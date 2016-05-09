@@ -82,6 +82,7 @@ namespace Indigo
 		bool parse_string(const char*& p, const char* pe, OOBase::ScopedString& s);
 		bool parse_float(const char*& p, const char* pe, float& i);
 		bool parse_colour(const char*& p, const char* pe, glm::vec4& c);
+		bool parse_create_params(const OOBase::ScopedString& arg, const char*& p, const char* pe, UIWidget::CreateParams& params);
 
 		bool load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder);
 		bool load_layer(const char*& p, const char* pe, unsigned int zorder);

@@ -40,12 +40,15 @@ void Indigo::Render::UIImage::on_draw(OOGL::State& glState, const glm::mat4& mvp
 	Quad::draw(glState,m_texture,mvp2,m_colour);
 }
 
-Indigo::UIImage::UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image, const glm::vec4& colour, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
-		UIWidget(parent,state,position,size),
+Indigo::UIImage::UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image, const CreateParams& params) :
+		UIWidget(parent,params),
 		m_image(image),
-		m_colour(colour)
+		m_colour(params.m_colour)
 {
-	if (size == glm::uvec2(0))
+	if (!m_image || !m_image->valid())
+		LOG_ERROR(("Invalid image passed to UINinePatch constructor"));
+
+	if (params.m_size == glm::uvec2(0))
 		this->size(m_image->size());
 }
 

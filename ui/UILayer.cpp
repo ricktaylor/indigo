@@ -49,9 +49,9 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 	Indigo::Render::UIGroup::on_draw(glState,glm::ortho(0.f,sz.x,0.f,sz.y));
 }
 
-Indigo::UILayer::UILayer(bool fixed, const glm::uvec4& margins, const glm::uvec2& padding, OOBase::uint32_t state) :
-		UIGroup(NULL,state),
-		m_sizer(fixed,margins,padding)
+Indigo::UILayer::UILayer(const CreateParams& params) :
+		UIGroup(NULL,params),
+		m_sizer(params.m_fixed,params.m_margins,params.m_padding)
 {
 }
 

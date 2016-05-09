@@ -68,8 +68,31 @@ namespace Indigo
 			align_centre = align_hcentre | align_vcentre
 		};
 
-		UILabel(UIGroup* parent, const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, unsigned int style = (align_left | align_vcentre), unsigned int font_size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), OOBase::uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
-		UILabel(UIGroup* parent, const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int style = (align_left | align_vcentre), unsigned int font_size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), OOBase::uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		struct CreateParams : UIWidget::CreateParams
+		{
+			CreateParams(OOBase::uint32_t state = 0,
+					const glm::ivec2& position = glm::ivec2(0),
+					const glm::uvec2& size = glm::uvec2(0),
+					const OOBase::SharedPtr<Font>& font = OOBase::SharedPtr<Font>(),
+					unsigned int font_size = 0,
+					unsigned int style = (align_left | align_vcentre),
+					const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f)
+			) :
+				UIWidget::CreateParams(state,position,size),
+				m_font(font),
+				m_font_size(font_size),
+				m_style(style),
+				m_colour(colour)
+			{}
+
+			OOBase::SharedPtr<Font> m_font;
+			unsigned int            m_font_size;
+			unsigned int            m_style;
+			glm::vec4               m_colour;
+		};
+
+		UILabel(UIGroup* parent, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const CreateParams& params = CreateParams());
+		UILabel(UIGroup* parent, const char* sz, size_t len = -1, const CreateParams& params = CreateParams());
 
 	protected:
 		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
@@ -78,12 +101,11 @@ namespace Indigo
 		virtual bool on_render_create(Indigo::Render::UIGroup* group);
 
 	private:
-		OOBase::SharedPtr<Font> m_font;
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_text;
-		unsigned int m_style;
+		OOBase::SharedPtr<Font> m_font;
 		unsigned int m_font_size;
+		unsigned int m_style;
 		glm::vec4 m_colour;
-
 		OOBase::SharedPtr<Render::UIDrawable> m_caption;
 
 		void on_size(const glm::uvec2& sz);

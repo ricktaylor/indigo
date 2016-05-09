@@ -55,39 +55,39 @@ void Indigo::Render::UIShadowLabel::on_draw(OOGL::State& glState, const glm::mat
 		Text::draw(glState,glm::scale(mvp,glm::vec3(m_size)),m_colour);
 }
 
-Indigo::UILabel::UILabel(UIGroup* parent, const OOBase::SharedPtr<Font>& font, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, unsigned int style, unsigned int font_size, const glm::vec4& colour, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
-		UIWidget(parent,state,position,size),
-		m_font(font),
+Indigo::UILabel::UILabel(UIGroup* parent, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const CreateParams& params) :
+		UIWidget(parent,params),
 		m_text(caption),
-		m_style(style),
-		m_font_size(font_size),
-		m_colour(colour)
+		m_font(params.m_font),
+		m_font_size(params.m_font_size),
+		m_style(params.m_style),
+		m_colour(params.m_colour)
 {
-	if (!font)
+	if (!m_font || !m_font->valid())
 		LOG_ERROR(("Invalid font passed to UILabel constructor"));
 	else if (!m_font_size)
-		m_font_size = font->line_height();
+		m_font_size = m_font->line_height();
 
-	if (size == glm::uvec2(0))
+	if (params.m_size == glm::uvec2(0))
 		this->size(ideal_size());
 }
 
-Indigo::UILabel::UILabel(UIGroup* parent, const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int style, unsigned int font_size, const glm::vec4& colour, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
-		UIWidget(parent,state,position,size),
-		m_font(font),
-		m_style(style),
-		m_font_size(font_size),
-		m_colour(colour)
+Indigo::UILabel::UILabel(UIGroup* parent, const char* sz, size_t len, const CreateParams& params) :
+		UIWidget(parent,params),
+		m_font(params.m_font),
+		m_font_size(params.m_font_size),
+		m_style(params.m_style),
+		m_colour(params.m_colour)
 {
-	if (!font)
+	if (!m_font || !m_font->valid())
 		LOG_ERROR(("Invalid font passed to UILabel constructor"));
 	else if (!m_font_size)
-		m_font_size = font->line_height();
+		m_font_size = m_font->line_height();
 
 	if (!m_text.assign(sz,len))
 		LOG_ERROR(("Failed to assign text: %s",OOBase::system_error_text()));
 
-	if (size == glm::uvec2(0))
+	if (params.m_size == glm::uvec2(0))
 		this->size(ideal_size());
 }
 

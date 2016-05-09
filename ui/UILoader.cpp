@@ -48,27 +48,6 @@ namespace
 		else
 			return 10 + (c - 'a');
 	}
-
-	bool parse_state(const OOBase::ScopedString& arg, OOBase::uint32_t& state)
-	{
-		if (arg == "VISIBLE")
-		{
-			state |= Indigo::UIWidget::eWS_visible;
-			return true;
-		}
-		else if (arg == "ENABLED")
-		{
-			state |= Indigo::UIWidget::eWS_enabled;
-			return true;
-		}
-		else if (arg == "DISABLED")
-		{
-			state &= ~Indigo::UIWidget::eWS_enabled;
-			return true;
-		}
-
-		return false;
-	}
 }
 
 void Indigo::UILoader::syntax_error(const char* fmt, ...)
@@ -487,6 +466,35 @@ bool Indigo::UILoader::parse_colour(const char*& p, const char* pe, glm::vec4& c
 	return false;
 }
 
+bool Indigo::UILoader::parse_create_params(const OOBase::ScopedString& arg, const char*& p, const char* pe, UIWidget::CreateParams& params)
+{
+	if (arg == "POSITION")
+		return parse_ivec2(p,pe,params.m_position);
+
+	if (arg == "SIZE")
+		return parse_uvec2(p,pe,params.m_size);
+
+	if (arg == "VISIBLE")
+	{
+		params.m_state |= Indigo::UIWidget::eWS_visible;
+		return true;
+	}
+
+	if (arg == "ENABLED")
+	{
+		params.m_state |= Indigo::UIWidget::eWS_enabled;
+		return true;
+	}
+
+	if (arg == "DISABLED")
+	{
+		params.m_state &= ~Indigo::UIWidget::eWS_enabled;
+		return true;
+	}
+
+	return false;
+}
+
 OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::widget(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const
 {
 	OOBase::SharedPtr<UIWidget> ret;
@@ -565,10 +573,7 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 	if (m_hashWidgets.find(name))
 		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),false);
 
-	OOBase::uint32_t state = 0;
-	bool fixed = false;
-	glm::uvec4 margins(0);
-	glm::uvec2 padding(0);
+	UILayer::CreateParams params;
 
 	if (character(p,pe,'('))
 	{
@@ -579,19 +584,19 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 			{
 				if (arg == "FIXED")
 				{
-					fixed = true;
+					params.m_fixed = true;
 				}
 				else if (arg == "MARGINS")
 				{
-					if (!parse_uvec4(p,pe,margins))
+					if (!parse_uvec4(p,pe,params.m_margins))
 						return OOBase::SharedPtr<UIWidget>();
 				}
 				else if (arg == "PADDING")
 				{
-					if (!parse_uvec2(p,pe,padding))
+					if (!parse_uvec2(p,pe,params.m_padding))
 						return OOBase::SharedPtr<UIWidget>();
 				}
-				else if (!parse_state(arg,state))
+				else if (!parse_create_params(arg,p,pe,params))
 					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in LAYER",arg.c_str()),false);
 
 				if (!character(p,pe,','))
@@ -606,7 +611,7 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 			SYNTAX_ERROR_RETURN(("')' expected"),false);
 	}
 
-	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(fixed,margins,padding,state);
+	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(params);
 	if (!layer)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
@@ -874,10 +879,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_child(const char*& p,
 
 OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder)
 {
-	glm::ivec2 position(0);
-	glm::uvec2 size(0);
-	glm::vec4 colour(1.f);
-	OOBase::uint32_t state = 0;
+	UIImage::CreateParams params;
 
 	if (character(p,pe,'('))
 	{
@@ -888,20 +890,10 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 			{
 				if (arg == "COLOUR")
 				{
-					if (!parse_colour(p,pe,colour))
+					if (!parse_colour(p,pe,params.m_colour))
 						return OOBase::SharedPtr<UIWidget>();
 				}
-				else if (arg == "POSITION")
-				{
-					if (!parse_ivec2(p,pe,position))
-						return OOBase::SharedPtr<UIWidget>();
-				}
-				else if (arg == "SIZE")
-				{
-					if (!parse_uvec2(p,pe,size))
-						return OOBase::SharedPtr<UIWidget>();
-				}
-				else if (!parse_state(arg,state))
+				else if (!parse_create_params(arg,p,pe,params))
 					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in IMAGE",arg.c_str()),OOBase::SharedPtr<UIWidget>());
 
 				if (!character(p,pe,','))
@@ -927,7 +919,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 	if (!image)
 		return OOBase::SharedPtr<UIWidget>();
 
-	OOBase::SharedPtr<UIImage> uiimage = OOBase::allocate_shared<UIImage,OOBase::ThreadLocalAllocator>(parent,image,colour,state,position,size);
+	OOBase::SharedPtr<UIImage> uiimage = OOBase::allocate_shared<UIImage,OOBase::ThreadLocalAllocator>(parent,image,params);
 	if (!uiimage)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
@@ -1214,9 +1206,7 @@ bool Indigo::UILoader::load_button_style_state(const char*& p, const char* pe, U
 
 OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder)
 {
-	glm::ivec2 position(0);
-	glm::uvec2 size(0);
-	OOBase::uint32_t state = UIWidget::eWS_enabled;
+	UIButton::CreateParams params;
 	OOBase::ScopedString style_name;
 
 	if (character(p,pe,'('))
@@ -1231,17 +1221,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 					if (!ident(p,pe,style_name))
 						SYNTAX_ERROR_RETURN(("Expected style name"),OOBase::SharedPtr<UIWidget>());
 				}
-				else if (arg == "POSITION")
-				{
-					if (!parse_ivec2(p,pe,position))
-						return OOBase::SharedPtr<UIWidget>();
-				}
-				else if (arg == "SIZE")
-				{
-					if (!parse_uvec2(p,pe,size))
-						return OOBase::SharedPtr<UIWidget>();
-				}
-				else if (!parse_state(arg,state))
+				else if (!parse_create_params(arg,p,pe,params))
 					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in BUTTON",arg.c_str()),OOBase::SharedPtr<UIWidget>());
 
 				if (!character(p,pe,','))
@@ -1267,7 +1247,9 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 	if (!i)
 		SYNTAX_ERROR_RETURN(("Undefined style '%s' for BUTTON",style_name.c_str()),OOBase::SharedPtr<UIWidget>());
 
-	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(parent,i->second,caption,state,position,size);
+	params.m_style = i->second;
+
+	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(parent,caption,params);
 	if (!button)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
@@ -1279,13 +1261,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 
 OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder)
 {
-	glm::ivec2 position(0);
-	glm::uvec2 size(0);
-	OOBase::uint32_t state = 0;
-	unsigned int style = (UILabel::align_left | UILabel::align_vcentre);
-	unsigned int font_size = 0;
-	glm::vec4 colour(0.f,0.f,0.f,1.f);
-	OOBase::SharedPtr<Indigo::Font> font;
+	UILabel::CreateParams params;
 
 	if (character(p,pe,'('))
 	{
@@ -1304,12 +1280,12 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p,
 							{
 								if (arg == "SIZE")
 								{
-									if (!parse_uint(p,pe,font_size))
+									if (!parse_uint(p,pe,params.m_font_size))
 										return OOBase::SharedPtr<UIWidget>();
 								}
 								else if (arg == "COLOUR")
 								{
-									if (!parse_colour(p,pe,colour))
+									if (!parse_colour(p,pe,params.m_colour))
 										return OOBase::SharedPtr<UIWidget>();
 								}
 								else
@@ -1334,35 +1310,25 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p,
 					if (font_name.empty())
 						SYNTAX_ERROR_RETURN(("Font name required"),OOBase::SharedPtr<UIWidget>());
 
-					font = load_font(p,pe,font_name);
-					if (!font)
+					params.m_font = load_font(p,pe,font_name);
+					if (!params.m_font)
 						return OOBase::SharedPtr<UIWidget>();
 				}
 				else if (arg == "ALIGN_LEFT")
-					style = (style & 0xc) | UILabel::align_left;
+					params.m_style = (params.m_style & 0xc) | UILabel::align_left;
 				else if (arg == "ALIGN_RIGHT")
-					style = (style & 0xc) | UILabel::align_right;
+					params.m_style = (params.m_style & 0xc) | UILabel::align_right;
 				else if (arg == "ALIGN_HCENTRE")
-					style = (style & 0xc) | UILabel::align_hcentre;
+					params.m_style = (params.m_style & 0xc) | UILabel::align_hcentre;
 				else if (arg == "ALIGN_BOTTOM")
-					style = (style & 0x3) | UILabel::align_bottom;
+					params.m_style = (params.m_style & 0x3) | UILabel::align_bottom;
 				else if (arg == "ALIGN_TOP")
-					style = (style & 0x3) | UILabel::align_top;
+					params.m_style = (params.m_style & 0x3) | UILabel::align_top;
 				else if (arg == "ALIGN_VCENTRE")
-					style = (style & 0x3) | UILabel::align_vcentre;
+					params.m_style = (params.m_style & 0x3) | UILabel::align_vcentre;
 				else if (arg == "ALIGN_CENTRE")
-					style = UILabel::align_centre;
-				else if (arg == "POSITION")
-				{
-					if (!parse_ivec2(p,pe,position))
-						return OOBase::SharedPtr<UIWidget>();
-				}
-				else if (arg == "SIZE")
-				{
-					if (!parse_uvec2(p,pe,size))
-						return OOBase::SharedPtr<UIWidget>();
-				}
-				else if (!parse_state(arg,state))
+					params.m_style = UILabel::align_centre;
+				else if (!parse_create_params(arg,p,pe,params))
 					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in LABEL",arg.c_str()),OOBase::SharedPtr<UIWidget>());
 
 				if (!character(p,pe,','))
@@ -1381,10 +1347,10 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p,
 	if (!parse_string(p,pe,caption))
 		return OOBase::SharedPtr<UIWidget>();
 
-	if (!font)
+	if (!params.m_font)
 		SYNTAX_ERROR_RETURN(("No font for LABEL"),OOBase::SharedPtr<UIWidget>());
 
-	OOBase::SharedPtr<UILabel> label = OOBase::allocate_shared<UILabel,OOBase::ThreadLocalAllocator>(parent,font,caption,style,font_size,colour,state,position,size);
+	OOBase::SharedPtr<UILabel> label = OOBase::allocate_shared<UILabel,OOBase::ThreadLocalAllocator>(parent,caption,params);
 	if (!label)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
@@ -1396,12 +1362,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p,
 
 OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p, const char* pe, UIGroup* parent, const char* name, unsigned int zorder)
 {
-	OOBase::uint32_t state = 0;
-	glm::ivec2 position(0);
-	glm::uvec2 size(0);
-	glm::vec4 colour(1.f);
-	bool fixed = false;
-	glm::uvec2 padding(0);
+	UIPanel::CreateParams params;
 
 	if (character(p,pe,'('))
 	{
@@ -1412,29 +1373,19 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p,
 			{
 				if (arg == "FIXED")
 				{
-					fixed = true;
+					params.m_fixed = true;
 				}
 				else if (arg == "COLOUR")
 				{
-					if (!parse_colour(p,pe,colour))
+					if (!parse_colour(p,pe,params.m_colour))
 						return OOBase::SharedPtr<UIWidget>();
 				}
 				else if (arg == "PADDING")
 				{
-					if (!parse_uvec2(p,pe,padding))
+					if (!parse_uvec2(p,pe,params.m_padding))
 						return OOBase::SharedPtr<UIWidget>();
 				}
-				else if (arg == "POSITION")
-				{
-					if (!parse_ivec2(p,pe,position))
-						return OOBase::SharedPtr<UIWidget>();
-				}
-				else if (arg == "SIZE")
-				{
-					if (!parse_uvec2(p,pe,size))
-						return OOBase::SharedPtr<UIWidget>();
-				}
-				else if (!parse_state(arg,state))
+				else if (!parse_create_params(arg,p,pe,params))
 					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in PANEL",arg.c_str()),OOBase::SharedPtr<UIWidget>());
 
 				if (!character(p,pe,','))
@@ -1456,11 +1407,11 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p,
 	if (patch_name.empty())
 		SYNTAX_ERROR_RETURN(("9 patch name expected"),OOBase::SharedPtr<UIWidget>());
 
-	OOBase::SharedPtr<NinePatch> background = load_9patch(p,pe,patch_name);
-	if (!background)
+	params.m_background = load_9patch(p,pe,patch_name);
+	if (!params.m_background)
 		return OOBase::SharedPtr<UIWidget>();
 
-	OOBase::SharedPtr<UIPanel> panel = OOBase::allocate_shared<UIPanel,OOBase::ThreadLocalAllocator>(parent,background,colour,fixed,padding,state,position,size);
+	OOBase::SharedPtr<UIPanel> panel = OOBase::allocate_shared<UIPanel,OOBase::ThreadLocalAllocator>(parent,params);
 	if (!panel)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 

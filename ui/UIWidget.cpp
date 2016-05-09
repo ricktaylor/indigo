@@ -68,11 +68,11 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder
 	}
 }
 
-Indigo::UIWidget::UIWidget(UIGroup* parent, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
+Indigo::UIWidget::UIWidget(UIGroup* parent, const CreateParams& params) :
 		m_parent(parent),
-		m_state(state),
-		m_position(position),
-		m_size(size)
+		m_state(params.m_state),
+		m_position(params.m_position),
+		m_size(params.m_size)
 {
 }
 
@@ -133,8 +133,8 @@ glm::uvec2 Indigo::UIWidget::size(const glm::uvec2& sz)
 	return m_size;
 }
 
-Indigo::UIGroup::UIGroup(UIGroup* parent, OOBase::uint32_t state, const glm::ivec2& position, const glm::uvec2& size) :
-		UIWidget(parent,state,position,size)
+Indigo::UIGroup::UIGroup(UIGroup* parent, const CreateParams& params) :
+		UIWidget(parent,params)
 {
 }
 

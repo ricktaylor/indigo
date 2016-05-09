@@ -31,7 +31,24 @@ namespace Indigo
 	class UILayer : public UIGroup, public Layer
 	{
 	public:
-		UILayer(bool fixed, const glm::uvec4& margins = glm::uvec4(0), const glm::uvec2& padding = glm::uvec2(0), OOBase::uint32_t state = 0);
+		struct CreateParams : UIWidget::CreateParams
+		{
+			CreateParams(OOBase::uint32_t state = 0,
+					bool fixed = false,
+					const glm::uvec4& margins = glm::uvec4(0),
+					const glm::uvec2& padding = glm::uvec2(0)
+			) :
+				UIWidget::CreateParams(state,glm::ivec2(0),glm::uvec2(0)),
+				m_fixed(fixed),
+				m_padding(padding)
+			{}
+
+			bool                         m_fixed;
+			glm::uvec4                   m_margins;
+			glm::uvec2                   m_padding;
+		};
+
+		UILayer(const CreateParams& params = CreateParams());
 
 		bool valid() const { return m_render_group; }
 

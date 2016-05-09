@@ -96,7 +96,24 @@ namespace Indigo
 	class UINinePatch : public UIWidget
 	{
 	public:
-		UINinePatch(UIGroup* parent, const OOBase::SharedPtr<NinePatch>& patch, const glm::vec4& colour = glm::vec4(1.f), OOBase::uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		struct CreateParams : UIWidget::CreateParams
+		{
+			CreateParams(OOBase::uint32_t state = 0,
+					const glm::ivec2& position = glm::ivec2(0),
+					const glm::uvec2& size = glm::uvec2(0),
+					const OOBase::SharedPtr<NinePatch>& patch = OOBase::SharedPtr<NinePatch>(),
+					const glm::vec4& colour = glm::vec4(1.f)
+			) :
+				UIWidget::CreateParams(state,position,size),
+				m_patch(patch),
+				m_colour(colour)
+			{}
+
+			OOBase::SharedPtr<NinePatch> m_patch;
+			glm::vec4                    m_colour;
+		};
+
+		UINinePatch(UIGroup* parent, const CreateParams& params = CreateParams());
 
 	protected:
 		virtual glm::uvec2 min_size() const;

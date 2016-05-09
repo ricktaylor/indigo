@@ -30,7 +30,30 @@ namespace Indigo
 	class UIPanel : public UIGroup
 	{
 	public:
-		UIPanel(UIGroup* parent, const OOBase::SharedPtr<NinePatch>& background, const glm::vec4& colour = glm::vec4(1.f), bool fixed = false, const glm::uvec2& padding = glm::uvec2(0), OOBase::uint32_t state = 0, const glm::ivec2& position = glm::ivec2(0), const glm::uvec2& size = glm::uvec2(0));
+		struct CreateParams : UIWidget::CreateParams
+		{
+			CreateParams(OOBase::uint32_t state = 0,
+					const glm::ivec2& position = glm::ivec2(0),
+					const glm::uvec2& size = glm::uvec2(0),
+					const OOBase::SharedPtr<NinePatch>& background = OOBase::SharedPtr<NinePatch>(),
+					const glm::vec4& colour = glm::vec4(1.f),
+					bool fixed = false,
+					const glm::uvec2& padding = glm::uvec2(0)
+			) :
+				UIWidget::CreateParams(state,position,size),
+				m_background(background),
+				m_colour(colour),
+				m_fixed(fixed),
+				m_padding(padding)
+			{}
+
+			OOBase::SharedPtr<NinePatch> m_background;
+			glm::vec4                    m_colour;
+			bool                         m_fixed;
+			glm::uvec2                   m_padding;
+		};
+
+		UIPanel(UIGroup* parent, const CreateParams& params = CreateParams());
 
 		UIGridSizer& sizer() { return m_sizer; }
 
