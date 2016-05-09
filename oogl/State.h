@@ -128,7 +128,7 @@ namespace OOGL
 		static T* instance_ptr()
 		{
 			void* inst = NULL;
-			if (!State::get_current()->get_singleton(&s_sentinal,&inst))
+			if (!State::get_current()->get_singleton(&ContextSingleton<T>::init,&inst))
 				inst = init();
 
 			return static_cast<T*>(inst);
@@ -144,8 +144,6 @@ namespace OOGL
 		}
 
 	private:
-		static const int s_sentinal;
-
 		static void* init()
 		{
 			// We do this long-hand so T can friend us
@@ -154,7 +152,7 @@ namespace OOGL
 				OOBase_CallCriticalFailure(ERROR_OUTOFMEMORY);
 
 			// Add destructor before calling constructor
-			if (!State::get_current()->set_singleton(&s_sentinal,t,&destroy))
+			if (!State::get_current()->set_singleton(&ContextSingleton<T>::init,t,&destroy))
 			{
 				OOBase::ThreadLocalAllocator::free(t);
 				OOBase_CallCriticalFailure(ERROR_OUTOFMEMORY);
@@ -182,9 +180,6 @@ namespace OOGL
 				OOBase::ThreadLocalAllocator::delete_free(static_cast<T*>(p));
 		}
 	};
-
-	template <typename T>
-	const int ContextSingleton<T>::s_sentinal = 1;
 
 	void glCheckError(const char* fn, const char* file, unsigned int line);
 }
