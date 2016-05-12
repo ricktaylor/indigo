@@ -128,7 +128,7 @@ namespace OOGL
 		static T* instance_ptr()
 		{
 			void* inst = NULL;
-			if (!State::get_current()->get_singleton(&ContextSingleton<T>::init,&inst))
+			if (!State::get_current()->get_singleton(reinterpret_cast<void*>(&ContextSingleton<T>::init),&inst))
 				inst = init();
 
 			return static_cast<T*>(inst);
@@ -152,7 +152,7 @@ namespace OOGL
 				OOBase_CallCriticalFailure(ERROR_OUTOFMEMORY);
 
 			// Add destructor before calling constructor
-			if (!State::get_current()->set_singleton(&ContextSingleton<T>::init,t,&destroy))
+			if (!State::get_current()->set_singleton(reinterpret_cast<void*>(&ContextSingleton<T>::init),t,&destroy))
 			{
 				OOBase::ThreadLocalAllocator::free(t);
 				OOBase_CallCriticalFailure(ERROR_OUTOFMEMORY);
