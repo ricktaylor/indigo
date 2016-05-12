@@ -282,65 +282,64 @@ void Indigo::Render::UINinePatch::size(glm::uvec2 size)
 	{
 		if (m_patch == GLsizei(-1))
 		{
-			 if (size.x && size.y)
+			if (size.x && size.y)
+			{
 				m_patch = NinePatchFactory_t::instance().alloc_patch(size,m_info->m_borders,m_info->m_tex_size);
-		}
-		else
-			NinePatchFactory_t::instance().layout_patch(m_patch,size,m_info->m_borders,m_info->m_tex_size);
-	}
+				if (m_patch != GLsizei(-1))
+				{
+					// Set up draw call
+					GLsizei patch = m_patch * elements_per_patch;
 
-	if (m_patch != GLsizei(-1))
-	{
-		// Set up draw call
-		GLsizei patch = m_patch * elements_per_patch;
+					m_firsts[0] = 0;
+					m_counts[0] = 0;
 
-		m_firsts[0] = 0;
-		m_counts[0] = 0;
+					if (m_info->m_borders.y)
+					{
+						if (!m_info->m_borders.x)
+						{
+							m_firsts[0] = 2;
+							m_counts[0] = 6;
+						}
+						else
+							m_counts[0] = 8;
 
-		if (m_info->m_borders.y)
-		{
-			if (!m_info->m_borders.x)
-			{
-				m_firsts[0] = 2;
-				m_counts[0] = 6;
+						if (!m_info->m_borders.z)
+							m_counts[0] -= 2;
+
+						m_firsts[0] = (patch + m_firsts[0]) * sizeof(GLuint);
+					}
+
+					m_firsts[1] = 8;
+					m_counts[1] = 8;
+					if (!m_info->m_borders.x)
+					{
+						m_firsts[1] = 10;
+						m_counts[1] = 6;
+					}
+					if (!m_info->m_borders.z)
+						m_counts[1] -= 2;
+
+					m_firsts[1] = (patch + m_firsts[1]) * sizeof(GLuint);
+
+					m_firsts[2] = 16;
+					m_counts[2] = 0;
+					if (m_info->m_borders.w)
+					{
+						if (!m_info->m_borders.x)
+						{
+							m_firsts[2] = 18;
+							m_counts[2] = 6;
+						}
+						else
+							m_counts[2] = 8;
+
+						if (!m_info->m_borders.z)
+							m_counts[2] -= 2;
+
+						m_firsts[2] = (patch + m_firsts[2]) * sizeof(GLuint);
+					}
+				}
 			}
-			else
-				m_counts[0] = 8;
-
-			if (!m_info->m_borders.z)
-				m_counts[0] -= 2;
-
-			m_firsts[0] = (patch + m_firsts[0]) * sizeof(GLuint);
-		}
-
-		m_firsts[1] = 8;
-		m_counts[1] = 8;
-		if (!m_info->m_borders.x)
-		{
-			m_firsts[1] = 10;
-			m_counts[1] = 6;
-		}
-		if (!m_info->m_borders.z)
-			m_counts[1] -= 2;
-
-		m_firsts[1] = (patch + m_firsts[1]) * sizeof(GLuint);
-
-		m_firsts[2] = 16;
-		m_counts[2] = 0;
-		if (m_info->m_borders.w)
-		{
-			if (!m_info->m_borders.x)
-			{
-				m_firsts[2] = 18;
-				m_counts[2] = 6;
-			}
-			else
-				m_counts[2] = 8;
-
-			if (!m_info->m_borders.z)
-				m_counts[2] -= 2;
-
-			m_firsts[2] = (patch + m_firsts[2]) * sizeof(GLuint);
 		}
 	}
 }
