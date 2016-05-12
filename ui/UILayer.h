@@ -35,6 +35,7 @@ namespace Indigo
 		{
 			CreateParams(OOBase::uint32_t state = 0,
 					bool fixed = false,
+					bool modal = true,
 					const glm::uvec4& margins = glm::uvec4(0),
 					const glm::uvec2& padding = glm::uvec2(0)
 			) :
@@ -44,6 +45,7 @@ namespace Indigo
 			{}
 
 			bool                         m_fixed;
+			bool                         m_modal;
 			glm::uvec4                   m_margins;
 			glm::uvec2                   m_padding;
 		};
@@ -68,6 +70,7 @@ namespace Indigo
 
 	private:
 		UIGridSizer m_sizer;
+		bool        m_modal;
 	};
 }
 

@@ -51,7 +51,8 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 
 Indigo::UILayer::UILayer(const CreateParams& params) :
 		UIGroup(NULL,params),
-		m_sizer(params.m_fixed,params.m_margins,params.m_padding)
+		m_sizer(params.m_fixed,params.m_margins,params.m_padding),
+		m_modal(params.m_modal)
 {
 }
 
@@ -104,10 +105,12 @@ bool Indigo::UILayer::on_mousemove(const double& screen_x, const double& screen_
 	if (!m_size.x || !m_size.y)
 		return false;
 
-	return UIGroup::on_mousemove(glm::clamp(glm::ivec2(floor(screen_x),floor(screen_y)),glm::ivec2(0),glm::ivec2(m_size.x-1,m_size.y-1)));
+	bool ret = UIGroup::on_mousemove(glm::clamp(glm::ivec2(floor(screen_x),floor(screen_y)),glm::ivec2(0),glm::ivec2(m_size.x-1,m_size.y-1)));
+	return m_modal || ret;
 }
 
 bool Indigo::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 {
-	return UIGroup::on_mousebutton(click);
+	bool ret = UIGroup::on_mousebutton(click);
+	return m_modal || ret;
 }

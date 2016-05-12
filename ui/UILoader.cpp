@@ -586,6 +586,10 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 				{
 					params.m_fixed = true;
 				}
+				else if (arg == "MODAL")
+				{
+					params.m_modal = true;
+				}
 				else if (arg == "MARGINS")
 				{
 					if (!parse_uvec4(p,pe,params.m_margins))
