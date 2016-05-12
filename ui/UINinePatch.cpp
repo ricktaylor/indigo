@@ -287,7 +287,6 @@ void Indigo::Render::UINinePatch::size(glm::uvec2 size)
 				m_patch = NinePatchFactory_t::instance().alloc_patch(size,m_info->m_borders,m_info->m_tex_size);
 				if (m_patch != GLsizei(-1))
 				{
-					// Set up draw call
 					GLsizei patch = m_patch * elements_per_patch;
 
 					m_firsts[0] = 0;
@@ -341,6 +340,8 @@ void Indigo::Render::UINinePatch::size(glm::uvec2 size)
 				}
 			}
 		}
+		else
+			NinePatchFactory_t::instance().layout_patch(m_patch,size,m_info->m_borders,m_info->m_tex_size);
 	}
 }
 
