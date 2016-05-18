@@ -41,6 +41,7 @@ namespace Indigo
 			) :
 				UIWidget::CreateParams(state,glm::ivec2(0),glm::uvec2(0)),
 				m_fixed(fixed),
+				m_modal(modal),
 				m_padding(padding)
 			{}
 
