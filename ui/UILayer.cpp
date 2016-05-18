@@ -54,6 +54,8 @@ Indigo::UILayer::UILayer(const CreateParams& params) :
 		m_sizer(params.m_fixed,params.m_margins,params.m_padding),
 		m_modal(params.m_modal)
 {
+	if (params.m_size == glm::uvec2(0))
+		this->size(ideal_size());
 }
 
 void Indigo::UILayer::on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask)

@@ -30,6 +30,8 @@ Indigo::UIPanel::UIPanel(UIGroup* parent, const CreateParams& params) :
 		m_background(params.m_background),
 		m_colour(params.m_colour)
 {
+	if (params.m_size == glm::uvec2(0))
+		this->size(ideal_size());
 }
 
 bool Indigo::UIPanel::on_render_create(Indigo::Render::UIGroup* group)

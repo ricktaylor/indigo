@@ -49,7 +49,7 @@ Indigo::UIImage::UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image,
 		LOG_ERROR(("Invalid image passed to UINinePatch constructor"));
 
 	if (params.m_size == glm::uvec2(0))
-		this->size(m_image->size());
+		this->size(ideal_size());
 }
 
 glm::uvec2 Indigo::UIImage::ideal_size() const
