@@ -40,6 +40,8 @@ namespace Indigo
 	public:
 		NinePatch();
 		virtual ~NinePatch();
+
+		virtual bool valid() const;
 				
 		virtual bool load(const unsigned char* buffer, size_t len, int components = 0);
 

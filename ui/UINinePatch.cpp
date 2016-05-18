@@ -94,7 +94,7 @@ bool NinePatchFactory::create_program()
 
 GLsizei NinePatchFactory::alloc_patch(const glm::uvec2& size, const glm::uvec4& borders, const glm::uvec2& tex_size)
 {
-	GLsizei patch = GLsizei(-1);
+	GLsizei patch = -1;
 
 	for (free_list_t::iterator i=m_listFree.begin(); i; ++i)
 	{
@@ -113,9 +113,9 @@ GLsizei NinePatchFactory::alloc_patch(const glm::uvec2& size, const glm::uvec4& 
 		}
 	}
 
-	if (patch == GLsizei(-1))
+	if (patch == -1)
 	{
-		GLsizei new_size = 8;
+		GLsizei new_size = 16;
 		while (new_size < m_allocated + 1)
 			new_size *= 2;
 
@@ -262,92 +262,85 @@ Indigo::Render::UINinePatch::UINinePatch(const glm::uvec2& size, const glm::vec4
 		m_patch(-1),
 		m_info(info)
 {
-	this->size(size);
+	m_patch = NinePatchFactory_t::instance().alloc_patch(size,m_info->m_borders,m_info->m_tex_size);
+	if (m_patch != -1)
+	{
+		GLsizei patch = m_patch * elements_per_patch;
+
+		m_firsts[0] = 0;
+		m_counts[0] = 0;
+
+		if (m_info->m_borders.y)
+		{
+			if (!m_info->m_borders.x)
+			{
+				m_firsts[0] = 2;
+				m_counts[0] = 6;
+			}
+			else
+				m_counts[0] = 8;
+
+			if (!m_info->m_borders.z)
+				m_counts[0] -= 2;
+
+			m_firsts[0] = (patch + m_firsts[0]) * sizeof(GLuint);
+		}
+
+		m_firsts[1] = 8;
+		m_counts[1] = 8;
+		if (!m_info->m_borders.x)
+		{
+			m_firsts[1] = 10;
+			m_counts[1] = 6;
+		}
+		if (!m_info->m_borders.z)
+			m_counts[1] -= 2;
+
+		m_firsts[1] = (patch + m_firsts[1]) * sizeof(GLuint);
+
+		m_firsts[2] = 16;
+		m_counts[2] = 0;
+		if (m_info->m_borders.w)
+		{
+			if (!m_info->m_borders.x)
+			{
+				m_firsts[2] = 18;
+				m_counts[2] = 6;
+			}
+			else
+				m_counts[2] = 8;
+
+			if (!m_info->m_borders.z)
+				m_counts[2] -= 2;
+
+			m_firsts[2] = (patch + m_firsts[2]) * sizeof(GLuint);
+		}
+	}
+
+	if (size.x == 0)
+		LOG_DEBUG(("New Render::UINinePatch %p { patch %d, size (%u,%u) }",this,m_patch,size.x,size.y));
 }
 
 Indigo::Render::UINinePatch::~UINinePatch()
 {
-	if (m_patch != GLsizei(-1))
+	if (m_patch != -1)
 		NinePatchFactory_t::instance().free_patch(m_patch);
 }
 
 bool Indigo::Render::UINinePatch::valid() const
 {
-	return UIDrawable::valid() && m_texture->valid() && m_patch != GLsizei(-1);
+	return m_patch != -1 && m_info && m_texture->valid() && UIDrawable::valid();
 }
 
 void Indigo::Render::UINinePatch::size(glm::uvec2 size)
 {
-	if (m_info->m_tex_size.x && m_info->m_tex_size.y)
-	{
-		if (m_patch == GLsizei(-1))
-		{
-			if (size.x && size.y)
-			{
-				m_patch = NinePatchFactory_t::instance().alloc_patch(size,m_info->m_borders,m_info->m_tex_size);
-				if (m_patch != GLsizei(-1))
-				{
-					GLsizei patch = m_patch * elements_per_patch;
-
-					m_firsts[0] = 0;
-					m_counts[0] = 0;
-
-					if (m_info->m_borders.y)
-					{
-						if (!m_info->m_borders.x)
-						{
-							m_firsts[0] = 2;
-							m_counts[0] = 6;
-						}
-						else
-							m_counts[0] = 8;
-
-						if (!m_info->m_borders.z)
-							m_counts[0] -= 2;
-
-						m_firsts[0] = (patch + m_firsts[0]) * sizeof(GLuint);
-					}
-
-					m_firsts[1] = 8;
-					m_counts[1] = 8;
-					if (!m_info->m_borders.x)
-					{
-						m_firsts[1] = 10;
-						m_counts[1] = 6;
-					}
-					if (!m_info->m_borders.z)
-						m_counts[1] -= 2;
-
-					m_firsts[1] = (patch + m_firsts[1]) * sizeof(GLuint);
-
-					m_firsts[2] = 16;
-					m_counts[2] = 0;
-					if (m_info->m_borders.w)
-					{
-						if (!m_info->m_borders.x)
-						{
-							m_firsts[2] = 18;
-							m_counts[2] = 6;
-						}
-						else
-							m_counts[2] = 8;
-
-						if (!m_info->m_borders.z)
-							m_counts[2] -= 2;
-
-						m_firsts[2] = (patch + m_firsts[2]) * sizeof(GLuint);
-					}
-				}
-			}
-		}
-		else
-			NinePatchFactory_t::instance().layout_patch(m_patch,size,m_info->m_borders,m_info->m_tex_size);
-	}
+	if (valid())
+		NinePatchFactory_t::instance().layout_patch(m_patch,size,m_info->m_borders,m_info->m_tex_size);
 }
 
 void Indigo::Render::UINinePatch::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	if (m_patch != GLsizei(-1) && m_texture && m_colour.a > 0.f)
+	if (valid() && m_colour.a > 0)
 	{
 		if (m_counts[0])
 		{
@@ -376,6 +369,11 @@ Indigo::NinePatch::~NinePatch()
 	unload();
 }
 
+bool Indigo::NinePatch::valid() const
+{
+	return Image::valid() && m_info;
+}
+
 bool Indigo::NinePatch::load(const unsigned char* buffer, size_t len, int components)
 {
 	if (!Image::load(buffer,len,components))
@@ -394,7 +392,10 @@ bool Indigo::NinePatch::load(const unsigned char* buffer, size_t len, int compon
 	}
 
 	if (!ret)
+	{
 		unload();
+		m_info.reset();
+	}
 
 	return ret;
 }
@@ -543,8 +544,8 @@ bool Indigo::NinePatch::get_bounds()
 
 OOBase::SharedPtr<Indigo::Render::UIDrawable> Indigo::NinePatch::make_drawable(bool visible, const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour) const
 {
-	if (!m_info)
-		LOG_ERROR_RETURN(("NinePatch::make_drawable called with no info!"),OOBase::SharedPtr<Indigo::Render::UIDrawable>());
+	if (!valid())
+		LOG_ERROR_RETURN(("NinePatch::make_drawable called when invalid!"),OOBase::SharedPtr<Indigo::Render::UIDrawable>());
 
 	bool is_9 = (m_info->m_borders != glm::uvec4(0));
 	bool cached = true;
@@ -570,22 +571,14 @@ OOBase::SharedPtr<Indigo::Render::UIDrawable> Indigo::NinePatch::make_drawable(b
 glm::uvec2 Indigo::NinePatch::min_size() const
 {
 	glm::uvec2 margins(m_margins.x + m_margins.z,m_margins.y + m_margins.w);
-	glm::uvec2 borders(0);
-	if (m_info)
-	{
-		borders.x = m_info->m_borders.x + m_info->m_borders.z;
-		borders.y = m_info->m_borders.y + m_info->m_borders.w;
-	}
+	glm::uvec2 borders(m_info->m_borders.x + m_info->m_borders.z,m_info->m_borders.y + m_info->m_borders.w);
 
 	return glm::max(margins,borders);
 }
 
 glm::uvec2 Indigo::NinePatch::ideal_size() const
 {
-	if (m_info)
-		return m_info->m_tex_size;
-
-	return min_size();
+	return glm::max(min_size(),m_info->m_tex_size);
 }
 
 Indigo::UINinePatch::UINinePatch(UIGroup* parent, const CreateParams& params) :
@@ -597,7 +590,7 @@ Indigo::UINinePatch::UINinePatch(UIGroup* parent, const CreateParams& params) :
 		LOG_ERROR(("Invalid 9 patch passed to UINinePatch constructor"));
 
 	if (params.m_size == glm::uvec2(0))
-		this->size(m_9patch->size());
+		this->size(ideal_size());
 }
 
 glm::uvec2 Indigo::UINinePatch::min_size() const
