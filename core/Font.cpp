@@ -493,7 +493,7 @@ void Indigo::Render::Text::draw(OOGL::State& state, const glm::mat4& mvp, const 
 	if (start > m_glyph_len)
 		start = m_glyph_len;
 
-	if (length == GLsizei(-1))
+	if (length == -1)
 		length = m_glyph_len - start;
 
 	if (start + length > m_glyph_len)
