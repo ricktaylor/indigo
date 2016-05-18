@@ -64,7 +64,7 @@ Indigo::Image::~Image()
 
 bool Indigo::Image::valid() const
 {
-	return m_pixels != NULL;
+	return m_pixels && m_width && m_height && m_valid_components;
 }
 
 bool Indigo::Image::load(const ResourceBundle& resource, const char* name, int components)
@@ -166,15 +166,20 @@ void Indigo::Image::unload()
 	}
 }
 
-OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalFormat, GLsizei levels) const
+OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalFormat, bool& cached, GLsizei levels) const
 {
 	OOBase::SharedPtr<OOGL::Texture> tex;
 	if (!m_pixels)
 		LOG_ERROR_RETURN(("Invalid image for make_texture"),tex);
 
-	tex = m_texture.lock();
-	if (tex)
-		return tex;
+	if (cached)
+	{
+		tex = m_texture.lock();
+		if (tex)
+			return tex;
+
+		cached = false;
+	}
 
 	GLenum format = 0;
 	switch (m_components)

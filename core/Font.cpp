@@ -224,6 +224,7 @@ Indigo::Render::Font::~Font()
 
 bool Indigo::Render::Font::load(const OOBase::SharedPtr<Indigo::Image>* pages, size_t page_count)
 {
+	bool cached = true;
 	if (page_count > 1)
 	{
 		if (!OOGL::StateFns::get_current()->check_glTextureArray())
@@ -234,15 +235,18 @@ bool Indigo::Render::Font::load(const OOBase::SharedPtr<Indigo::Image>* pages, s
 	}
 	else
 	{
-		m_ptrTexture = pages[0]->make_texture(GL_R8,1);
+		m_ptrTexture = pages[0]->make_texture(GL_R8,cached,1);
 		if (!m_ptrTexture)
 			LOG_ERROR_RETURN(("Failed to load font texture"),false);
 	}
 
-	m_ptrTexture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	m_ptrTexture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	m_ptrTexture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	m_ptrTexture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	if (!cached)
+	{
+		m_ptrTexture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+		m_ptrTexture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+		m_ptrTexture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+		m_ptrTexture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	}
 
 	return true;
 }

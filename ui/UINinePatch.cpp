@@ -547,15 +547,19 @@ OOBase::SharedPtr<Indigo::Render::UIDrawable> Indigo::NinePatch::make_drawable(b
 		LOG_ERROR_RETURN(("NinePatch::make_drawable called with no info!"),OOBase::SharedPtr<Indigo::Render::UIDrawable>());
 
 	bool is_9 = (m_info->m_borders != glm::uvec4(0));
+	bool cached = true;
 
-	OOBase::SharedPtr<OOGL::Texture> texture = make_texture(GL_RGBA8,is_9 ? 1 : 0);
+	OOBase::SharedPtr<OOGL::Texture> texture = make_texture(GL_RGBA8,cached,is_9 ? 1 : 0);
 	if (!texture)
 		return OOBase::SharedPtr<Indigo::Render::UIDrawable>();
 
-	texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	texture->parameter(GL_TEXTURE_MIN_FILTER,is_9 ? GL_LINEAR : GL_LINEAR_MIPMAP_LINEAR);
-	texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	if (cached)
+	{
+		texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+		texture->parameter(GL_TEXTURE_MIN_FILTER,is_9 ? GL_LINEAR : GL_LINEAR_MIPMAP_LINEAR);
+		texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+		texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	}
 
 	if (is_9)
 		return OOBase::allocate_shared<Render::UINinePatch,OOBase::ThreadLocalAllocator>(size,colour,texture,m_info,visible,position);

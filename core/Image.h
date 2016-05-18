@@ -36,7 +36,7 @@ namespace Indigo
 		Image();
 		virtual ~Image();
 
-		bool valid() const;
+		virtual bool valid() const;
 
 		bool load(const ResourceBundle& resource, const char* name, int components = 0);
 		virtual bool load(const unsigned char* buffer, size_t len, int components = 0);
@@ -51,7 +51,7 @@ namespace Indigo
 
 		glm::vec4 pixel(const glm::uvec2& pos) const;
 
-		OOBase::SharedPtr<OOGL::Texture> make_texture(GLenum internalFormat, GLsizei levels = 0) const;
+		OOBase::SharedPtr<OOGL::Texture> make_texture(GLenum internalFormat, bool& cached, GLsizei levels = 0) const;
 		
 	protected:
 		unsigned int m_width;

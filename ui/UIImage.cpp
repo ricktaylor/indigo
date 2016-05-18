@@ -65,14 +65,18 @@ void Indigo::UIImage::on_size(const glm::uvec2& sz)
 
 bool Indigo::UIImage::on_render_create(Indigo::Render::UIGroup* group)
 {
-	OOBase::SharedPtr<OOGL::Texture> texture = m_image->make_texture(GL_RGBA8);
+	bool cached = true;
+	OOBase::SharedPtr<OOGL::Texture> texture = m_image->make_texture(GL_RGBA8,cached);
 	if (!texture)
 		return false;
 
-	texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-	texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-	texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	if (!cached)
+	{
+		texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+		texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+		texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+		texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	}
 
 	m_render_image = OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,size(),m_colour,true);
 	if (!m_render_image)
