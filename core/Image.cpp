@@ -53,6 +53,7 @@ Indigo::Image::Image() :
 		m_width(0),
 		m_height(0),
 		m_components(0),
+		m_valid_components(0),
 		m_pixels(NULL)
 {
 }
