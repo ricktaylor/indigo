@@ -93,7 +93,7 @@ glm::vec4 Indigo::ImageLayer::colour(const glm::vec4& colour)
 	glm::vec4 prev_colour = m_colour;
 	if (colour != prev_colour)
 	{
-		OOBase::SharedPtr< ::ImageLayer> layer = render_layer< ::ImageLayer>();
+		OOBase::SharedPtr< ::ImageLayer> layer = OOBase::static_pointer_cast< ::ImageLayer>(render_layer());
 		if (layer)
 			render_pipe()->post(OOBase::make_delegate(layer.get(),&::ImageLayer::colour),colour);
 	}

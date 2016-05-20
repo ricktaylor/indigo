@@ -76,6 +76,11 @@ Indigo::UIWidget::UIWidget(UIGroup* parent, const CreateParams& params) :
 {
 }
 
+OOBase::SharedPtr<Indigo::Window> Indigo::UIWidget::window() const
+{
+	return m_parent->window();
+}
+
 void Indigo::UIWidget::toggle_state(OOBase::uint32_t new_state, OOBase::uint32_t mask)
 {
 	OOBase::uint32_t change_mask = (m_state ^ new_state) & mask;
@@ -138,7 +143,16 @@ Indigo::UIGroup::UIGroup(UIGroup* parent, const CreateParams& params) :
 {
 }
 
-bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder)
+bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder, const char* name, size_t len)
+{
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> str;
+	if (!str.assign(name,len))
+		LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),false);
+
+	return add_widget(widget,zorder,str);
+}
+
+bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name)
 {
 	if (!m_render_group)
 		LOG_ERROR_RETURN(("Failed to insert widget: incomplete parent"),false);
@@ -149,11 +163,30 @@ bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsi
 	if (!m_children.insert(zorder,widget))
 		LOG_ERROR_RETURN(("Failed to insert widget: %s",OOBase::system_error_text()),false);
 
+	if (!name.empty() && !add_named_widget(widget,name))
+	{
+		m_children.remove(zorder);
+		return false;
+	}
+
 	bool ret = false;
 	if (!render_pipe()->call(OOBase::make_delegate(m_render_parent.get(),&Render::UIGroup::add_subgroup),widget.get(),zorder,&ret) || !ret)
 		m_children.remove(zorder);
 
 	return ret;
+}
+
+bool Indigo::UIGroup::add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name)
+{
+	return m_parent->add_named_widget(widget,name);
+}
+
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UIGroup::get_widget(unsigned int zorder) const
+{
+	OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i = m_children.find(zorder);
+	if (i == m_children.end())
+		return OOBase::SharedPtr<Indigo::UIWidget>();
+	return i->second;
 }
 
 bool Indigo::UIGroup::remove_widget(unsigned int zorder)

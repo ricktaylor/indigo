@@ -26,6 +26,7 @@
 
 namespace Indigo
 {
+	class Window;
 	class UIWidget;
 	class UIGroup;
 
@@ -79,7 +80,7 @@ namespace Indigo
 	class UIWidget : public OOBase::NonCopyable
 	{
 		friend class UIGroup;
-		friend class UILayer;
+		friend class UIDialog;
 		friend class Render::UIGroup;
 
 	public:
@@ -113,7 +114,7 @@ namespace Indigo
 		virtual bool valid() const { return m_parent != NULL && m_render_group; }
 
 		bool visible() const { return valid() && (m_state & eWS_visible); }
-		void show(bool visible = true);
+		virtual void show(bool visible = true);
 
 		bool enabled() const { return valid() && (m_state & eWS_enabled); }
 		void enable(bool enabled = true);
@@ -130,6 +131,8 @@ namespace Indigo
 
 		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
 		virtual glm::uvec2 ideal_size() const = 0;
+
+		virtual OOBase::SharedPtr<Window> window() const;
 
 	protected:
 		UIWidget(UIGroup* parent, const CreateParams& params = CreateParams());
@@ -154,17 +157,12 @@ namespace Indigo
 	public:
 		UIGroup(UIGroup* parent, const CreateParams& params = CreateParams());
 
-		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder);
+		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name = OOBase::SharedString<OOBase::ThreadLocalAllocator>());
+		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder, const char* name, size_t len = -1);
+
 		bool remove_widget(unsigned int zorder);
 
-		template <typename Widget>
-		OOBase::SharedPtr<Widget> get_widget(unsigned int zorder) const
-		{
-			OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i = m_children.find(zorder);
-			if (i == m_children.end())
-				return OOBase::SharedPtr<Widget>();
-			return OOBase::static_pointer_cast<Widget>(i->second);
-		}
+		OOBase::SharedPtr<UIWidget> get_widget(unsigned int zorder) const;
 
 	protected:
 		OOBase::SharedPtr<Indigo::Render::UIGroup> m_render_parent;
@@ -174,6 +172,8 @@ namespace Indigo
 
 		virtual bool on_mousemove(const glm::ivec2& pos);
 		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
+
+		virtual bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name);
 
 	private:
 		OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_children;

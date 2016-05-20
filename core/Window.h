@@ -60,18 +60,14 @@ namespace Indigo
 	public:
 		virtual bool valid() const { return m_render_layer; }
 		
-		void show(bool visible = true);
+		virtual void show(bool visible = true);
 		bool visible() const { return m_visible; }
 
 	protected:
 		Layer() : m_visible(false)
 		{}
 
-		template <typename RenderLayer>
-		OOBase::SharedPtr<RenderLayer> render_layer() const
-		{
-			return OOBase::static_pointer_cast<RenderLayer>(m_render_layer);
-		}
+		OOBase::SharedPtr<Render::Layer> render_layer() const { return m_render_layer; }
 
 		virtual OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window) = 0;
 
@@ -133,16 +129,8 @@ namespace Indigo
 		bool show(bool visible = true);
 
 		bool add_layer(const OOBase::SharedPtr<Layer>& layer, unsigned int zorder);
+		OOBase::SharedPtr<Layer> get_layer(unsigned int zorder) const;
 		bool remove_layer(unsigned int zorder);
-
-		template <typename Layer>
-		OOBase::SharedPtr<Layer> get_layer(unsigned int zorder) const
-		{
-			OOBase::Table<unsigned int,OOBase::SharedPtr<Indigo::Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i = m_layers.find(zorder);
-			if (i == m_layers.end())
-				return OOBase::SharedPtr<Layer>();
-			return OOBase::static_pointer_cast<Layer>(i->second);
-		}
 
 		unsigned int top_layer() const;
 

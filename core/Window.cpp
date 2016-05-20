@@ -260,6 +260,14 @@ bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, unsigned i
 	return ret;
 }
 
+OOBase::SharedPtr<Indigo::Layer> Indigo::Window::get_layer(unsigned int zorder) const
+{
+	OOBase::Table<unsigned int,OOBase::SharedPtr<Indigo::Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i = m_layers.find(zorder);
+	if (i == m_layers.end())
+		return OOBase::SharedPtr<Layer>();
+	return i->second;
+}
+
 bool Indigo::Window::remove_layer(unsigned int zorder)
 {
 	return m_layers.remove(zorder);

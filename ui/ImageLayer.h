@@ -22,9 +22,8 @@
 #ifndef INDIGO_IMAGELAYER_H_INCLUDED
 #define INDIGO_IMAGELAYER_H_INCLUDED
 
-#include "UILayer.h"
-
 #include "../core/Image.h"
+#include "UIDialog.h"
 
 namespace Indigo
 {

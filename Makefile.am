@@ -77,14 +77,16 @@ indigo_SOURCES = \
 	ui/UILabel.cpp \
 	ui/UINinePatch.cpp \
 	ui/UIWidget.cpp \
-	ui/UILayer.cpp \
+	ui/UIDialog.cpp \
 	ui/UIButton.cpp \
 	ui/UIImage.cpp \
 	ui/UISizer.cpp \
 	ui/UIPanel.cpp \
 	ui/UILoader.cpp \
 	src/Main.cpp \
-	src/App.cpp
+	src/App.cpp \
+	src/QuitDlg.cpp \
+	src/StartDlg.cpp
 			
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \

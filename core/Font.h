@@ -26,10 +26,10 @@
 #include "../oogl/BufferObject.h"
 #include "../oogl/Texture.h"
 #include "../oogl/VertexArrayObject.h"
+#include "../ui/UIDialog.h"
 
 #include "Resource.h"
 
-#include "../ui/UILayer.h"
 
 namespace Indigo
 {

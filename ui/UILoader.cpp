@@ -495,22 +495,22 @@ bool Indigo::UILoader::parse_create_params(const OOBase::ScopedString& arg, cons
 	return false;
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::widget(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const
+OOBase::SharedPtr<Indigo::UIDialog> Indigo::UILoader::find_dialog(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const
 {
-	OOBase::SharedPtr<UIWidget> ret;
-	widget_hash_t::const_iterator i = m_hashWidgets.find(name);
+	OOBase::SharedPtr<UIDialog> ret;
+	dialog_hash_t::const_iterator i = m_hashDialogs.find(name);
 	if (i)
 		ret = i->second;
 	return ret;
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::widget(const char* name, size_t len) const
+OOBase::SharedPtr<Indigo::UIDialog> Indigo::UILoader::find_dialog(const char* name, size_t len) const
 {
 	OOBase::SharedString<OOBase::ThreadLocalAllocator> str;
 	if (!str.assign(name,len))
-		LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
+		LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIDialog>());
 
-	return widget(str);
+	return find_dialog(str);
 }
 
 bool Indigo::UILoader::load(ResourceBundle& resource, const char* name, unsigned int& zorder, UIGroup* parent)
@@ -546,12 +546,12 @@ bool Indigo::UILoader::load(ResourceBundle& resource, const char* name, unsigned
 
 bool Indigo::UILoader::load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder)
 {
-	if (type == "LAYER")
+	if (type == "DIALOG")
 	{
 		if (parent)
-			LOG_WARNING(("Loading LAYER with parent?"));
+			LOG_WARNING(("Loading DIALOG with parent?"));
 
-		return load_layer(p,pe,zorder);
+		return load_dialog(p,pe,zorder);
 	}
 	else if (type == "BUTTON_STYLE")
 	{
@@ -561,19 +561,19 @@ bool Indigo::UILoader::load_top_level(const char*& p, const char* pe, const OOBa
 		return load_button_style(p,pe);
 	}
 	
-	return load_child(p,pe,type,parent,NULL,zorder);
+	return load_child(p,pe,type,parent,zorder);
 }
 
-bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int zorder)
+bool Indigo::UILoader::load_dialog(const char*& p, const char* pe, unsigned int zorder)
 {
 	OOBase::SharedString<OOBase::ThreadLocalAllocator> name;
 	if (!ident(p,pe,name))
 		SYNTAX_ERROR_RETURN(("Identifier expected"),false);
 
-	if (m_hashWidgets.find(name))
+	if (m_hashDialogs.find(name))
 		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),false);
 
-	UILayer::CreateParams params;
+	UIDialog::CreateParams params;
 
 	if (character(p,pe,'('))
 	{
@@ -601,7 +601,7 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 						return OOBase::SharedPtr<UIWidget>();
 				}
 				else if (!parse_create_params(arg,p,pe,params))
-					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in LAYER",arg.c_str()),false);
+					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in DIALOG",arg.c_str()),false);
 
 				if (!character(p,pe,','))
 					break;
@@ -615,24 +615,24 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe, unsigned int z
 			SYNTAX_ERROR_RETURN(("')' expected"),false);
 	}
 
-	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(params);
-	if (!layer)
+	OOBase::SharedPtr<UIDialog> dialog = OOBase::allocate_shared<UIDialog,OOBase::ThreadLocalAllocator>(m_wnd,params);
+	if (!dialog)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
-	if (!m_hashWidgets.insert(name,layer))
-		LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),false);
+	if (!m_hashDialogs.insert(name,dialog))
+		LOG_ERROR_RETURN(("Failed to insert dialog into map: %s",OOBase::system_error_text()),false);
 
-	if (!m_wnd->add_layer(layer,zorder))
+	if (!m_wnd->add_layer(dialog,zorder))
 		return false;
 
 	zorder = 0;
-	if (!load_grid_sizer(p,pe,layer.get(),name.c_str(),layer->sizer(),zorder,true))
+	if (!load_grid_sizer(p,pe,dialog.get(),dialog->sizer(),zorder,true))
 		return false;
 
 	return true;
 }
 
-bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, UIGridSizer& sizer, unsigned int& zorder, bool add_loose)
+bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, UIGridSizer& sizer, unsigned int& zorder, bool add_loose)
 {
 	if (character(p,pe,'{'))
 	{
@@ -757,7 +757,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 					if (!sizer.add_sizer(row,col,s,flags,proportion))
 						return false;
 
-					if (!load_grid_sizer(p,pe,parent,parent_name,*s,zorder,false))
+					if (!load_grid_sizer(p,pe,parent,*s,zorder,false))
 						return false;
 				}
 				else if (!parens && type == "SPACER")
@@ -774,7 +774,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 				}
 				else
 				{
-					OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,parent_name,zorder++);
+					OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,zorder++);
 					if (!child)
 						return false;
 
@@ -787,7 +787,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 			}
 			else if (add_loose && type_name(p,pe,type))
 			{
-				OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,parent_name,zorder++);
+				OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,zorder++);
 				if (!child)
 					return false;
 			}
@@ -810,7 +810,7 @@ bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* 
 	return true;
 }
 
-bool Indigo::UILoader::load_children(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, unsigned int& zorder)
+bool Indigo::UILoader::load_children(const char*& p, const char* pe, UIGroup* parent, unsigned int& zorder)
 {
 	if (character(p,pe,'{'))
 	{
@@ -819,7 +819,7 @@ bool Indigo::UILoader::load_children(const char*& p, const char* pe, UIGroup* pa
 		{
 			for (;;)
 			{
-				OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,parent_name,zorder++);
+				OOBase::SharedPtr<UIWidget> child = load_child(p,pe,type,parent,zorder++);
 				if (!child)
 					return false;
 
@@ -838,50 +838,36 @@ bool Indigo::UILoader::load_children(const char*& p, const char* pe, UIGroup* pa
 	return true;
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, const char* parent_name, unsigned int zorder)
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder)
 {
 	OOBase::SharedPtr<UIWidget> ret;
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> fq_name;
 
 	OOBase::ScopedString name;
-	if (ident(p,pe,name))
-	{
-		if (parent_name && (!fq_name.assign(parent_name) || !fq_name.append('.')))
-			LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),ret);
-		
-		if (!fq_name.append(name.c_str(),name.length()))
-			LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),ret);
-
-		if (m_hashWidgets.find(fq_name))
-			SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",fq_name.c_str()),ret);
-	}
+	ident(p,pe,name);
 
 	if (type == "BUTTON")
 	{
-		ret = load_button(p,pe,parent,zorder);
+		ret = load_button(p,pe,parent,name,zorder);
 	}
 	else if (type == "IMAGE")
 	{
-		ret = load_uiimage(p,pe,parent,zorder);
+		ret = load_uiimage(p,pe,parent,name,zorder);
 	}
 	else if (type == "LABEL")
 	{
-		ret = load_label(p,pe,parent,zorder);
+		ret = load_label(p,pe,parent,name,zorder);
 	}
 	else if (type == "PANEL")
 	{
-		ret = load_panel(p,pe,parent,fq_name.c_str(),zorder);
+		ret = load_panel(p,pe,parent,name,zorder);
 	}
 	else
 		SYNTAX_ERROR_RETURN(("Unknown type name '%s'",type.c_str()),ret);
 
-	if (ret && !fq_name.empty() && !m_hashWidgets.insert(fq_name,ret))
-		LOG_ERROR_RETURN(("Failed to insert widget into map: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
-
 	return ret;
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder)
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder)
 {
 	UIImage::CreateParams params;
 
@@ -927,7 +913,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 	if (!uiimage)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
-	if (!parent->add_widget(uiimage,zorder))
+	if (!parent->add_widget(uiimage,zorder,name.c_str(),name.length()))
 		return OOBase::SharedPtr<UIWidget>();
 
 	return uiimage;
@@ -1208,7 +1194,7 @@ bool Indigo::UILoader::load_button_style_state(const char*& p, const char* pe, U
 	return true;
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder)
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder)
 {
 	UIButton::CreateParams params;
 	OOBase::ScopedString style_name;
@@ -1257,13 +1243,13 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 	if (!button)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
-	if (!parent->add_widget(button,zorder))
+	if (!parent->add_widget(button,zorder,name.c_str(),name.length()))
 		return OOBase::SharedPtr<UIWidget>();
 
 	return button;
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder)
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder)
 {
 	UILabel::CreateParams params;
 
@@ -1358,13 +1344,13 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p,
 	if (!label)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
-	if (!parent->add_widget(label,zorder))
+	if (!parent->add_widget(label,zorder,name.c_str(),name.length()))
 		return OOBase::SharedPtr<UIWidget>();
 
 	return label;
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p, const char* pe, UIGroup* parent, const char* name, unsigned int zorder)
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder)
 {
 	UIPanel::CreateParams params;
 
@@ -1419,11 +1405,11 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p,
 	if (!panel)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
 
-	if (!parent->add_widget(panel,zorder))
+	if (!parent->add_widget(panel,zorder,name.c_str(),name.length()))
 		return OOBase::SharedPtr<UIWidget>();
 
 	zorder = 0;
-	if (!load_grid_sizer(p,pe,panel.get(),name,panel->sizer(),zorder,true))
+	if (!load_grid_sizer(p,pe,panel.get(),panel->sizer(),zorder,true))
 		return OOBase::SharedPtr<UIWidget>();
 
 	return panel;

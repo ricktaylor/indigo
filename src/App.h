@@ -38,34 +38,10 @@ namespace Indigo
 
 		void run();
 
-		enum Events
-		{
-			eAE_WndCreated = 0,
-			eAE_WndClose,
-
-			eAE_Max
-		};
-
-		bool raise_event(enum Events event);
-
 	private:
 		OOBase::SharedPtr<Window> m_wnd;
-		OOBase::SharedPtr<UILoader> m_loader;
 
-		enum States
-		{
-			eAS_None = 0,
-			eAS_MainPage,
-			eAS_QuitPrompt,
-
-			eAS_Quit,
-			eAS_Max
-		} m_state;
-
-		void window_close(const Window& w);
 		bool create_window();
-		bool start_screen();
-		bool quit_prompt();
 	};
 }
 

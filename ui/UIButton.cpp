@@ -370,8 +370,6 @@ bool Indigo::UIButton::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 		{
 			if (m_on_click)
 				m_on_click.invoke();
-
-			LOG_DEBUG(("Button %p clicked!",this));
 		}
 
 		toggle_state(click.down,eBS_pressed);

@@ -22,8 +22,8 @@
 #ifndef INDIGO_UILOADER_H_INCLUDED
 #define INDIGO_UILOADER_H_INCLUDED
 
-#include "UILayer.h"
 #include "UIButton.h"
+#include "UIDialog.h"
 
 namespace Indigo
 {
@@ -39,8 +39,10 @@ namespace Indigo
 
 		bool load(ResourceBundle& resource, const char* resource_name, unsigned int& zorder, UIGroup* parent = NULL);
 		
-		OOBase::SharedPtr<UIWidget> widget(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const;
-		OOBase::SharedPtr<UIWidget> widget(const char* name, size_t len = -1) const;
+		OOBase::SharedPtr<UIDialog> find_dialog(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const;
+		OOBase::SharedPtr<UIDialog> find_dialog(const char* name, size_t len = -1) const;
+
+		OOBase::SharedPtr<Window> window() const { return m_wnd; }
 
 	private:
 		OOBase::SharedPtr<Window> m_wnd;
@@ -52,8 +54,8 @@ namespace Indigo
 			unsigned int m_col;
 		} m_error_pos;
 
-		typedef OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::SharedPtr<UIWidget>,OOBase::ThreadLocalAllocator> widget_hash_t;
-		widget_hash_t m_hashWidgets;
+		typedef OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::SharedPtr<UIDialog>,OOBase::ThreadLocalAllocator> dialog_hash_t;
+		dialog_hash_t m_hashDialogs;
 
 		typedef OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator> image_hash_t;
 		image_hash_t m_hashImages;
@@ -85,19 +87,19 @@ namespace Indigo
 		bool parse_create_params(const OOBase::ScopedString& arg, const char*& p, const char* pe, UIWidget::CreateParams& params);
 
 		bool load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder);
-		bool load_layer(const char*& p, const char* pe, unsigned int zorder);
-		bool load_children(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, unsigned int& zorder);
-		OOBase::SharedPtr<UIWidget> load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, const char* parent_name, unsigned int zorder);
-		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, const char* parent_name, UIGridSizer& sizer, unsigned int& zorder, bool add_loose);
+		bool load_dialog(const char*& p, const char* pe, unsigned int zorder);
+		bool load_children(const char*& p, const char* pe, UIGroup* parent, unsigned int& zorder);
+		OOBase::SharedPtr<UIWidget> load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder);
+		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, UIGridSizer& sizer, unsigned int& zorder, bool add_loose);
 		OOBase::SharedPtr<Image> load_image(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& image_name);
 		OOBase::SharedPtr<Font> load_font(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& font_name);
 		OOBase::SharedPtr<NinePatch> load_9patch(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& patch_name);
 		bool load_button_style(const char*& p, const char* pe);
 		bool load_button_style_state(const char*& p, const char* pe, UIButton::StyleState& state, const OOBase::SharedPtr<UIButton::Style>& style);
-		OOBase::SharedPtr<UIWidget> load_uiimage(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder);
-		OOBase::SharedPtr<UIWidget> load_button(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder);
-		OOBase::SharedPtr<UIWidget> load_label(const char*& p, const char* pe, UIGroup* parent, unsigned int zorder);
-		OOBase::SharedPtr<UIWidget> load_panel(const char*& p, const char* pe, UIGroup* parent, const char* name, unsigned int zorder);
+		OOBase::SharedPtr<UIWidget> load_uiimage(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder);
+		OOBase::SharedPtr<UIWidget> load_button(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder);
+		OOBase::SharedPtr<UIWidget> load_label(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder);
+		OOBase::SharedPtr<UIWidget> load_panel(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder);
 	};
 }
 
