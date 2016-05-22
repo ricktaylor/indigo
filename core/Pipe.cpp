@@ -211,29 +211,47 @@ bool Indigo::Pipe::do_post(void* param)
 
 	(*ci->m_fn)(ci->m_param);
 
-	return ci->m_reply->enqueue(&Pipe::post_cleanup,ci);
+	if (ci->m_reply)
+		return ci->m_reply->enqueue(&Pipe::post_cleanup,ci);
+	else
+		return Pipe::post_cleanup(ci);
 }
 
 bool Indigo::Pipe::post(void (*fn)(void*), void* param, void (*fn_cleanup)(void*))
 {
-	if (!m_send_queue || !m_recv_queue)
+	if (!m_recv_queue)
+		return false;
+
+	if (!m_send_queue && this != thread_pipe())
 		return false;
 
 	CallInfo* ci;
 	if (!OOBase::ThreadLocalAllocator::allocate_new(ci))
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
-	ci->m_reply = m_recv_queue;
 	ci->m_fn = fn;
 	ci->m_fn_cleanup = fn_cleanup;
 	ci->m_param = param;
 
-	if (!m_send_queue->enqueue(&Pipe::do_post,ci))
+	if (m_send_queue)
 	{
-		OOBase::ThreadLocalAllocator::delete_free(ci);
-		return false;
-	}
+		ci->m_reply = m_recv_queue;
 
+		if (!m_send_queue->enqueue(&Pipe::do_post,ci))
+		{
+			OOBase::ThreadLocalAllocator::delete_free(ci);
+			return false;
+		}
+	}
+	else
+	{
+		if (!m_recv_queue->enqueue(&Pipe::do_post,ci))
+		{
+			OOBase::ThreadLocalAllocator::delete_free(ci);
+			return false;
+		}
+	}
+	
 	return true;
 }
 

@@ -23,6 +23,8 @@
 
 #include "UIButton.h"
 
+#include "../core/Thread.h"
+
 void Indigo::UIButton::StyleState::unload()
 {
 	if (m_background)
@@ -369,7 +371,7 @@ bool Indigo::UIButton::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 		if (!click.down && (curr_state & eBS_pressed))
 		{
 			if (m_on_click)
-				m_on_click.invoke();
+				thread_pipe()->post(m_on_click);
 		}
 
 		toggle_state(click.down,eBS_pressed);

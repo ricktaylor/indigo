@@ -431,6 +431,8 @@ namespace Indigo
 		static bool do_post(void* param);
 		static bool post_cleanup(void* param);
 	};
+
+	Pipe* const thread_pipe();
 }
 
 #endif // INDIGO_PIPE_H_INCLUDED
