@@ -74,6 +74,7 @@
     <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="..\ui\ImageLayer.h" />
     <ClInclude Include="..\ui\Quad.h" />
+    <ClInclude Include="..\ui\UIDialog.h" />
     <ClInclude Include="..\ui\UILabel.h" />
     <ClInclude Include="..\ui\UILoader.h" />
     <ClInclude Include="..\ui\UINinePatch.h" />
@@ -81,9 +82,11 @@
     <ClInclude Include="..\ui\UISizer.h" />
     <ClInclude Include="..\ui\UIButton.h" />
     <ClInclude Include="..\ui\UIImage.h" />
-    <ClInclude Include="..\ui\UILayer.h" />
     <ClInclude Include="..\ui\UIWidget.h" />
     <ClInclude Include="App.h" />
+    <ClInclude Include="QuitDlg.h" />
+    <ClInclude Include="StartDlg.h" />
+    <ClInclude Include="WindowChangeDlg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\core\Font.cpp" />
@@ -98,9 +101,9 @@
     <ClCompile Include="..\ui\ImageLayer.cpp" />
     <ClCompile Include="..\ui\Quad.cpp" />
     <ClCompile Include="..\ui\UIButton.cpp" />
+    <ClCompile Include="..\ui\UIDialog.cpp" />
     <ClCompile Include="..\ui\UIImage.cpp" />
     <ClCompile Include="..\ui\UILabel.cpp" />
-    <ClCompile Include="..\ui\UILayer.cpp" />
     <ClCompile Include="..\ui\UILoader.cpp" />
     <ClCompile Include="..\ui\UINinePatch.cpp" />
     <ClCompile Include="..\ui\UIPanel.cpp" />
@@ -108,6 +111,9 @@
     <ClCompile Include="..\ui\UIWidget.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="QuitDlg.cpp" />
+    <ClCompile Include="StartDlg.cpp" />
+    <ClCompile Include="WindowChangeDlg.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{45062950-051B-42F7-A502-3F0F39282C22}</ProjectGuid>
