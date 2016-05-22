@@ -82,39 +82,6 @@ namespace Indigo
 		bool m_visible;
 	};
 
-	class Window;
-
-	namespace Render
-	{
-		class Window
-		{
-			friend class Indigo::Window;
-			friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
-
-		public:
-			const OOBase::SharedPtr<OOGL::Window>& window() const { return m_wnd; }
-
-		private:
-			Window(Indigo::Window* owner);
-
-			OOBase::SharedPtr<OOGL::Window> m_wnd;
-			Indigo::Window* const m_owner;
-
-			bool create_window();
-
-			OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_layers;
-
-			void on_close(const OOGL::Window& win);
-			void on_draw(const OOGL::Window& win, OOGL::State& glState);
-			void on_move(const OOGL::Window& win, const glm::ivec2& pos);
-			void on_size(const OOGL::Window& win, const glm::uvec2& sz);
-			void on_mousemove(const OOGL::Window& win, double screen_x, double screen_y);
-			void on_mousebutton(const OOGL::Window& win, const OOGL::Window::mouse_click_t& click);
-
-			void add_render_layer(Indigo::Layer* layer, unsigned int zorder, bool* ret);
-		};
-	}
-
 	class Window : public OOBase::NonCopyable
 	{
 		friend class Render::Window;
@@ -124,7 +91,30 @@ namespace Indigo
 		Window();
 		~Window();
 
-		bool create();
+		struct CreateParams
+		{
+			CreateParams(
+					unsigned int width = 0, 
+					unsigned int height = 0,
+					bool fullscreen = false,
+					const char* title = NULL,
+					unsigned int style = OOGL::Window::eWSresizable | OOGL::Window::eWSdecorated
+			) :
+				m_width(width),
+				m_height(height),
+				m_fullscreen(fullscreen),
+				m_title(title),
+				m_style(style)
+			{}
+
+			unsigned int m_width;
+			unsigned int m_height;
+			bool         m_fullscreen;
+			const char*  m_title;
+			unsigned int m_style; // From OOGL::Window::Style
+		};
+
+		bool create(const CreateParams& params = CreateParams());
 		void destroy();
 
 		bool show(bool visible = true);
@@ -144,7 +134,7 @@ namespace Indigo
 		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> m_on_close;
 
 		void run();
-		void on_create(bool* ret);
+		void on_create(const CreateParams* params, bool* ret);
 		void on_destroy();
 		void call_on_close();
 		void on_move(glm::ivec2 pos);
@@ -152,6 +142,37 @@ namespace Indigo
 		void on_mousemove(double screen_x, double screen_y);
 		void on_mousebutton(OOGL::Window::mouse_click_t click);
 	};
+
+	namespace Render
+	{
+		class Window
+		{
+			friend class Indigo::Window;
+			friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
+
+		public:
+			const OOBase::SharedPtr<OOGL::Window>& window() const { return m_wnd; }
+
+		private:
+			Window(Indigo::Window* owner);
+
+			OOBase::SharedPtr<OOGL::Window> m_wnd;
+			Indigo::Window* const m_owner;
+
+			bool create_window(const Indigo::Window::CreateParams& params);
+
+			OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_layers;
+
+			void on_close(const OOGL::Window& win);
+			void on_draw(const OOGL::Window& win, OOGL::State& glState);
+			void on_move(const OOGL::Window& win, const glm::ivec2& pos);
+			void on_size(const OOGL::Window& win, const glm::uvec2& sz);
+			void on_mousemove(const OOGL::Window& win, double screen_x, double screen_y);
+			void on_mousebutton(const OOGL::Window& win, const OOGL::Window::mouse_click_t& click);
+
+			void add_render_layer(Indigo::Layer* layer, unsigned int zorder, bool* ret);
+		};
+	}
 }
 
 #endif // INDIGO_Window_H_INCLUDED

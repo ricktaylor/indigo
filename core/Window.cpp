@@ -53,13 +53,21 @@ Indigo::Render::Window::Window(Indigo::Window* owner) :
 {
 }
 
-bool Indigo::Render::Window::create_window()
+bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& params)
 {
-	unsigned int style = OOGL::Window::eWSresizable | OOGL::Window::eWSdecorated;
+	GLFWmonitor* monitor = NULL;
+	if (params.m_fullscreen || !params.m_height || !params.m_width)
+		monitor = glfwGetPrimaryMonitor();
+
+	const char* title = params.m_title;
+	if (!title)
+		title = "Indigo";
+
+	unsigned int style = params.m_style;
 	if (Indigo::is_debug())
 		style |= OOGL::Window::eWSdebug_context;
 
-	m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(800,600,"Indigo",style);
+	m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(params.m_width,params.m_height,title,style,monitor);
 	if (!m_wnd)
 		LOG_ERROR_RETURN(("Failed to create window: %s",OOBase::system_error_text()),false);
 
@@ -76,12 +84,6 @@ bool Indigo::Render::Window::create_window()
 
 		if (Indigo::is_debug())
 			OOGL::StateFns::get_current()->enable_logging();
-
-		//glClearColor(0.f,0.f,0.f,0.f);
-		//glEnable(GL_BLEND);
-
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
 	}
 
 	return true;
@@ -101,6 +103,7 @@ void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& 
 {
 	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
 		i->second->on_size(sz);
+
 	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_size),sz);
 }
 
@@ -148,19 +151,19 @@ Indigo::Window::~Window()
 	destroy();
 }
 
-bool Indigo::Window::create()
+bool Indigo::Window::create(const CreateParams& params)
 {
 	if (m_render_wnd)
 		LOG_ERROR_RETURN(("Failed to create window: Already exists"),false);
 
 	bool ret = false;
-	if (!render_pipe()->call(OOBase::make_delegate(this,&Window::on_create),&ret) || !ret)
+	if (!render_pipe()->call(OOBase::make_delegate(this,&Window::on_create),&params,&ret) || !ret)
 		return false;
 
 	return render_pipe()->post(OOBase::make_delegate(this,&Window::run));
 }
 
-void Indigo::Window::on_create(bool* ret)
+void Indigo::Window::on_create(const CreateParams* params, bool* ret)
 {
 	*ret = false;
 
@@ -169,7 +172,7 @@ void Indigo::Window::on_create(bool* ret)
 		LOG_ERROR(("Failed to create window: %s",OOBase::system_error_text()));
 	else
 	{
-		if (!m_render_wnd->create_window())
+		if (!m_render_wnd->create_window(*params))
 			m_render_wnd.reset();
 		else
 			*ret = true;

@@ -33,12 +33,17 @@ namespace Indigo
 	public:
 		enum Result
 		{
+			new_game,
+			load_game,
+			reinit,
 			quit
 		};
 
 		StartDlg(UILoader& loader);
 
-		enum Result do_modal();
+		enum Result do_modal(const Window::CreateParams& window_params);
+
+		Window::CreateParams        m_window_params;
 
 	private:
 		UILoader&                   m_loader;
@@ -47,6 +52,7 @@ namespace Indigo
 
 		void window_close(const Window& w);
 		void on_quit();
+		void on_config();
 	};
 }
 

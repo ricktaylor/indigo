@@ -21,38 +21,38 @@
 
 #include "../core/Common.h"
 
-#include "QuitDlg.h"
+#include "WindowChangeDlg.h"
 
 #include "../core/Thread.h"
 
-Indigo::QuitDlg::QuitDlg(const OOBase::SharedPtr<UIDialog>& dialog) :
+Indigo::WindowChangeDlg::WindowChangeDlg(const OOBase::SharedPtr<UIDialog>& dialog) :
 		m_dialog(dialog),
 		m_live(false),
-		m_result(true)
+		m_result(false)
 {
 	if (!m_dialog)
-		LOG_WARNING(("No dialog assigned to quit dialog"));
+		LOG_WARNING(("No dialog assigned to window change dialog"));
 	else
 	{
-		OOBase::SharedPtr<UIButton> btn = OOBase::static_pointer_cast<UIButton>(m_dialog->find_widget("quit"));
+		OOBase::SharedPtr<UIButton> btn = OOBase::static_pointer_cast<UIButton>(m_dialog->find_widget("yes"));
 		if (!btn)
-			LOG_WARNING(("No quit button in quit dialog"));
+			LOG_WARNING(("No yes button in window change dialog"));
 		else
-			btn->on_click(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&QuitDlg::on_quit));
+			btn->on_click(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&WindowChangeDlg::on_yes));
 
-		btn = OOBase::static_pointer_cast<UIButton>(m_dialog->find_widget("cancel"));
+		btn = OOBase::static_pointer_cast<UIButton>(m_dialog->find_widget("no"));
 		if (!btn)
-			LOG_WARNING(("No cancel button in quit dialog"));
+			LOG_WARNING(("No no button in window change dialog"));
 		else
-			btn->on_click(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&QuitDlg::on_cancel));
+			btn->on_click(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&WindowChangeDlg::on_no));
 	}
 }
 
-bool Indigo::QuitDlg::do_modal()
+bool Indigo::WindowChangeDlg::do_modal()
 {
 	if (m_dialog)
 	{
-		OOBase::Delegate1<void,const Indigo::Window&,OOBase::ThreadLocalAllocator> prev_close = m_dialog->window()->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&QuitDlg::window_close));
+		OOBase::Delegate1<void,const Indigo::Window&,OOBase::ThreadLocalAllocator> prev_close = m_dialog->window()->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&WindowChangeDlg::window_close));
 
 		m_dialog->show();
 
@@ -67,21 +67,21 @@ bool Indigo::QuitDlg::do_modal()
 	return m_result;
 }
 
-void Indigo::QuitDlg::window_close(const Window& w)
+void Indigo::WindowChangeDlg::window_close(const Window& w)
 {
-	on_quit();
+	on_no();
 }
 
-void Indigo::QuitDlg::on_quit()
-{
-	if (m_live)
-		m_result = true;
-	m_live = false;
-}
-
-void Indigo::QuitDlg::on_cancel()
+void Indigo::WindowChangeDlg::on_no()
 {
 	if (m_live)
 		m_result = false;
+	m_live = false;
+}
+
+void Indigo::WindowChangeDlg::on_yes()
+{
+	if (m_live)
+		m_result = true;
 	m_live = false;
 }

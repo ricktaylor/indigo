@@ -33,8 +33,10 @@ Indigo::StartDlg::StartDlg(UILoader& loader) :
 {
 }
 
-Indigo::StartDlg::Result Indigo::StartDlg::do_modal()
+Indigo::StartDlg::Result Indigo::StartDlg::do_modal(const Window::CreateParams& window_params)
 {
+	m_window_params = window_params;
+
 	OOBase::SharedPtr<UIDialog> dialog = m_loader.find_dialog("start");
 	if (!dialog)
 		LOG_WARNING_RETURN(("No dialog assigned to quit dialog"),StartDlg::quit);
@@ -46,6 +48,10 @@ Indigo::StartDlg::Result Indigo::StartDlg::do_modal()
 		LOG_WARNING(("No quit button in quit dialog"));
 	else
 		btn->on_click(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&StartDlg::on_quit));
+	
+	btn = OOBase::static_pointer_cast<UIButton>(dialog->find_widget("config"));
+	if (btn)
+		btn->on_click(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&StartDlg::on_config));
 
 	dialog->show();
 
@@ -70,7 +76,7 @@ void Indigo::StartDlg::on_quit()
 	{
 		QuitDlg dlg(OOBase::static_pointer_cast<UIDialog>(m_loader.find_dialog("quit")));
 
-		if (dlg.do_modal() == QuitDlg::quit)
+		if (dlg.do_modal())
 		{
 			m_result = StartDlg::quit;
 			m_live = false;
@@ -78,3 +84,13 @@ void Indigo::StartDlg::on_quit()
 	}
 }
 
+void Indigo::StartDlg::on_config()
+{
+	if (m_live)
+	{
+		m_window_params = Window::CreateParams();
+
+		m_result = StartDlg::reinit;
+		m_live = false;
+	}
+}

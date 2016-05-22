@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2014 Rick Taylor
+// Copyright (C) 2016 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,33 +19,29 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_APP_H_INCLUDED
-#define INDIGO_APP_H_INCLUDED
+#ifndef INDIGO_WND_CHANGE_DLG_H_INCLUDED
+#define INDIGO_WND_CHANGE_DLG_H_INCLUDED
 
-#include "../core/Window.h"
-
-#include "StartDlg.h"
+#include "../ui/UILoader.h"
 
 namespace Indigo
 {
-	class UILoader;
-	class ImageLayer;
-
-	class Application
+	class WindowChangeDlg
 	{
 	public:
-		Application();
+		WindowChangeDlg(const OOBase::SharedPtr<UIDialog>& dialog);
 
-		OOBase::CmdArgs::options_t m_options;
-		OOBase::CmdArgs::arguments_t m_args;
-
-		void run();
+		bool do_modal();
 
 	private:
-		OOBase::SharedPtr<Window> m_wnd;
+		OOBase::SharedPtr<UIDialog> m_dialog;
+		bool                        m_live;
+		bool                        m_result;
 
-		StartDlg::Result show_start_dlg(ResourceBundle& res, Window::CreateParams orig_params);
+		void window_close(const Window& w);
+		void on_yes();
+		void on_no();
 	};
 }
 
-#endif // INDIGO_APP_H_INCLUDED
+#endif // INDIGO_WND_CHANGE_DLG_H_INCLUDED

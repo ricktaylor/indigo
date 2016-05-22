@@ -26,9 +26,24 @@
 OOGL::Window::Window(int width, int height, const char* title, unsigned int style, GLFWmonitor* monitor) :
 		m_glfw_window(NULL)
 {
+	if (!width || !height)
+	{
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+		width = mode->width;
+		height = mode->height;
+	}
+
 	glfwWindowHint(GLFW_VISIBLE,(style & eWSvisible) ? GL_TRUE : GL_FALSE);
-	glfwWindowHint(GLFW_RESIZABLE,(style & eWSresizable) ? GL_TRUE : GL_FALSE);
-	glfwWindowHint(GLFW_DECORATED,(style & eWSdecorated) ? GL_TRUE : GL_FALSE);
+	if (!monitor)
+	{
+		glfwWindowHint(GLFW_RESIZABLE,(style & eWSresizable) ? GL_TRUE : GL_FALSE);
+		glfwWindowHint(GLFW_DECORATED,(style & eWSdecorated) ? GL_TRUE : GL_FALSE);
+	}
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT,(style & eWSdebug_context) ? GL_TRUE : GL_FALSE);
 
 	// Now try to create the window
@@ -127,7 +142,7 @@ void OOGL::Window::cb_on_move(GLFWwindow* window, int left, int top)
 void OOGL::Window::cb_on_size(GLFWwindow* window, int width, int height)
 {
 	Window* pThis = static_cast<Window*>(glfwGetWindowUserPointer(window));
-	if (pThis)
+	if (pThis && !pThis->iconified())
 	{
 		glfwMakeContextCurrent(window);
 

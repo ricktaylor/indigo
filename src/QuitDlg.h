@@ -29,20 +29,14 @@ namespace Indigo
 	class QuitDlg
 	{
 	public:
-		enum Result
-		{
-			cancel,
-			quit
-		};
-
 		QuitDlg(const OOBase::SharedPtr<UIDialog>& dialog);
 
-		enum Result do_modal();
+		bool do_modal();
 
 	private:
 		OOBase::SharedPtr<UIDialog> m_dialog;
 		bool                        m_live;
-		Result                      m_result;
+		bool                        m_result;
 
 		void window_close(const Window& w);
 		void on_quit();
