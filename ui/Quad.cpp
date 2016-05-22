@@ -142,7 +142,7 @@ void QuadFactory::draw(OOGL::State& glState, const OOBase::SharedPtr<OOGL::Textu
 	}
 }
 
-void Indigo::Render::Quad::draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, glm::mat4& mvp, const glm::vec4& colour)
+void Indigo::Render::Quad::draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp, const glm::vec4& colour)
 {
 	if (texture && colour.a > 0.f)
 		OOGL::ContextSingleton<QuadFactory>::instance().draw(state,texture,mvp,colour);

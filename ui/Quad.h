@@ -30,7 +30,7 @@ namespace Indigo
 	{
 		namespace Quad
 		{
-			void draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, glm::mat4& mvp, const glm::vec4& colour);
+			void draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp, const glm::vec4& colour);
 		}
 	}
 }

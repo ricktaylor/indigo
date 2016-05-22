@@ -37,13 +37,16 @@ namespace
 
 		OOBase::SharedPtr<OOGL::Texture> m_texture;
 		glm::vec4 m_colour;
+
+		glm::mat4 m_mvp;
 	};
 }
 
 ::ImageLayer::ImageLayer(const OOBase::SharedPtr<OOGL::Texture>& texture, Indigo::Render::Window* window, const glm::vec4& colour) :
 		Indigo::Render::Layer(window),
 		m_texture(texture),
-		m_colour(colour)
+		m_colour(colour),
+		m_mvp(2.f,0.f,0.f,0.f,0.f,2.f,0.f,0.f,0.f,0.f,-1.f,0.f,-1.f,-1.f,0.f,1.f)
 {
 }
 
@@ -54,8 +57,7 @@ void ::ImageLayer::on_draw(OOGL::State& glState) const
 		glState.enable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-		glm::mat4x4 mvp(2.f,0.f,0.f,0.f,0.f,2.f,0.f,0.f,0.f,0.f,-1.f,0.f,-1.f,-1.f,0.f,1.f);
-		Indigo::Render::Quad::draw(glState,m_texture,mvp,m_colour);
+		Indigo::Render::Quad::draw(glState,m_texture,m_mvp,m_colour);
 	}
 }
 
@@ -69,14 +71,14 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::ImageLayer::create_render_layer
 {
 	OOBase::SharedPtr< ::ImageLayer> layer;
 	bool cached = true;
-	OOBase::SharedPtr<OOGL::Texture> texture = m_image->make_texture(GL_RGBA8,cached);
+	OOBase::SharedPtr<OOGL::Texture> texture = m_image->make_texture(GL_RGBA8,cached,1);
 	if (!texture)
 		return layer;
 
 	if (!cached)
 	{
 		texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+		texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 		texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 		texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	}
