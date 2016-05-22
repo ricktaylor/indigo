@@ -46,6 +46,7 @@ namespace Indigo
 			{}
 
 			virtual void on_draw(OOGL::State& glState) const = 0;
+			virtual void on_size(const glm::uvec2& sz) {};
 
 			Window* const m_window;
 			bool m_visible;

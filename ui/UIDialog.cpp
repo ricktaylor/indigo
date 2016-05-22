@@ -31,6 +31,9 @@ namespace
 		UIDialog(Indigo::Render::Window* window);
 
 		void on_draw(OOGL::State& glState) const;
+		void on_size(const glm::uvec2& sz);
+
+		glm::mat4 m_mvp;
 	};
 }
 
@@ -38,15 +41,22 @@ namespace
 		Indigo::Render::UIGroup(true),
 		Indigo::Render::Layer(window)
 {
+	glm::vec2 sz = window->window()->size();
+	m_mvp = glm::ortho(0.f,sz.x,0.f,sz.y);
 }
 
 void ::UIDialog::on_draw(OOGL::State& glState) const
 {
 	glState.enable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+		
+	Indigo::Render::UIGroup::on_draw(glState,m_mvp);
+}
 
-	glm::vec2 sz = m_window->window()->size();
-	Indigo::Render::UIGroup::on_draw(glState,glm::ortho(0.f,sz.x,0.f,sz.y));
+void ::UIDialog::on_size(const glm::uvec2& sz)
+{
+	glm::vec2 sz2 = sz;
+	m_mvp = glm::ortho(0.f,sz2.x,0.f,sz2.y);
 }
 
 Indigo::UIDialog::UIDialog(const OOBase::SharedPtr<Window>& wnd, const CreateParams& params) :
