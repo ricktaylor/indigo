@@ -374,6 +374,15 @@ bool Indigo::NinePatch::valid() const
 	return Image::valid() && m_info;
 }
 
+bool Indigo::NinePatch::load(const ResourceBundle& resource, const char* name, int components)
+{
+	OOBase::SharedPtr<const unsigned char> buffer = resource.load<unsigned char>(name);
+	if (!buffer)
+		return false;
+
+	return this->load(buffer.get(),resource.size(name),components);
+}
+
 bool Indigo::NinePatch::load(const unsigned char* buffer, size_t len, int components)
 {
 	if (!Image::load(buffer,len,components))
@@ -383,14 +392,9 @@ bool Indigo::NinePatch::load(const unsigned char* buffer, size_t len, int compon
 	m_info = OOBase::allocate_shared<Indigo::NinePatch::Info>();
 	if (!m_info)
 		LOG_ERROR(("Failed to allocate 9-patch info block: %s",OOBase::system_error_text()));
-	else
-	{
-		if (m_width <= 2 || m_height <= 2)
-			LOG_ERROR(("Image too small for a 9-patch!"));
-
+	else if (m_width > 2 && m_height > 2)
 		ret = get_bounds();
-	}
-
+	
 	if (!ret)
 	{
 		unload();

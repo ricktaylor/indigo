@@ -954,7 +954,7 @@ OOBase::SharedPtr<Indigo::NinePatch> Indigo::UILoader::load_9patch(const char*& 
 	if (!patch)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),patch);
 
-	if (!patch->Image::load(*m_resource,patch_name.c_str(),4))
+	if (!patch->load(*m_resource,patch_name.c_str(),4))
 		return OOBase::SharedPtr<NinePatch>();
 
 	if (!m_hash9Patches.insert(patch_name,patch))

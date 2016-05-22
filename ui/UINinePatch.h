@@ -43,6 +43,7 @@ namespace Indigo
 
 		virtual bool valid() const;
 				
+		bool load(const ResourceBundle& resource, const char* name, int components = 0);
 		virtual bool load(const unsigned char* buffer, size_t len, int components = 0);
 
 		const glm::uvec4& margins() const { return m_margins; }
