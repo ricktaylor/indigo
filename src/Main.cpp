@@ -31,10 +31,6 @@
 #include <signal.h>
 #endif
 
-//#include <limits.h>
-//#include <OOBase/BTree.h>
-//#include <OOBase/Morton.h>
-
 #include "App.h"
 
 static bool s_is_debug = false;
