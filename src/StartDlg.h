@@ -39,14 +39,13 @@ namespace Indigo
 			quit
 		};
 
-		StartDlg(UILoader& loader);
+		StartDlg(UILoader& loader, Window::CreateParams& window_params);
 
-		enum Result do_modal(const Window::CreateParams& window_params);
-
-		Window::CreateParams        m_window_params;
+		enum Result do_modal();
 
 	private:
 		UILoader&                   m_loader;
+		Window::CreateParams&       m_window_params;
 		bool                        m_live;
 		Result                      m_result;
 

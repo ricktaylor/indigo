@@ -26,17 +26,16 @@
 
 #include "../core/Thread.h"
 
-Indigo::StartDlg::StartDlg(UILoader& loader) :
+Indigo::StartDlg::StartDlg(UILoader& loader, Window::CreateParams& window_params) :
 		m_loader(loader),
+		m_window_params(window_params),
 		m_live(false),
 		m_result(StartDlg::quit)
 {
 }
 
-Indigo::StartDlg::Result Indigo::StartDlg::do_modal(const Window::CreateParams& window_params)
+Indigo::StartDlg::Result Indigo::StartDlg::do_modal()
 {
-	m_window_params = window_params;
-
 	OOBase::SharedPtr<UIDialog> dialog = m_loader.find_dialog("start");
 	if (!dialog)
 		LOG_WARNING_RETURN(("No dialog assigned to quit dialog"),StartDlg::quit);
@@ -89,7 +88,7 @@ void Indigo::StartDlg::on_config()
 {
 	if (m_live)
 	{
-		m_window_params = Window::CreateParams();
+		m_window_params.m_fullscreen = !m_window_params.m_fullscreen;
 
 		m_result = StartDlg::reinit;
 		m_live = false;

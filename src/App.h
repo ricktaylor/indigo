@@ -24,12 +24,9 @@
 
 #include "../core/Window.h"
 
-#include "StartDlg.h"
-
 namespace Indigo
 {
-	class UILoader;
-	class ImageLayer;
+	class ResourceBundle;
 
 	class Application
 	{
@@ -44,7 +41,7 @@ namespace Indigo
 	private:
 		OOBase::SharedPtr<Window> m_wnd;
 
-		StartDlg::Result show_start_dlg(ResourceBundle& res, Window::CreateParams orig_params);
+		bool show_start_dlg(ResourceBundle& res, Window::CreateParams orig_params);
 	};
 }
 

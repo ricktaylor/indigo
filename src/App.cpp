@@ -22,17 +22,12 @@
 #include "../core/Common.h"
 
 #include "App.h"
+#include "StartDlg.h"
 #include "WindowChangeDlg.h"
 
-//#include "../core/Thread.h"
 #include "../core/ZipResource.h"
 
-//#include "../ui/UIDialog.h"
-//#include "../ui/UIButton.h"
-//#include "../ui/UIImage.h"
 #include "../ui/ImageLayer.h"
-//#include "../ui/UISizer.h"
-//#include "../ui/UILoader.h"
 
 Indigo::Application::Application()
 {
@@ -40,6 +35,8 @@ Indigo::Application::Application()
 
 void Indigo::Application::run()
 {
+	const Window::CreateParams default_window_params(1024,768,false,"The House");
+
 	m_wnd = OOBase::allocate_shared<Window,OOBase::ThreadLocalAllocator>();
 	if (!m_wnd)
 	{
@@ -48,45 +45,40 @@ void Indigo::Application::run()
 		return;
 	}
 
+	Window::CreateParams window_params(default_window_params);
 	// TODO Load window params settings
-	Window::CreateParams window_params(1024,768);
-	if (!m_wnd->create(window_params) &&!m_wnd->create())
+
+	if (!m_wnd->create(window_params))
 	{
-		OOBase_CallCriticalFailure("Failed to create main window with safe defaults");
-		return;
+		// Reset window params to sensible defaults
+		window_params = default_window_params;
+		if (!m_wnd->create(window_params))
+		{
+			OOBase_CallCriticalFailure("Failed to create main window with safe defaults");
+			return;
+		}
 	}
 	
 	ZipResource zip;
 	if (!zip.open("test.zip"))
 	{
-		// TODO Error msg
+		// TODO Error Message
 	}
 	else
 	{
 		// This is where the credits movie goes - ;)
 
-		for (;;)
+		while (show_start_dlg(zip,window_params))
 		{
-			Indigo::StartDlg::Result res = show_start_dlg(zip,window_params);
-			if (res == StartDlg::quit)
-				break;
 
-			if (res == StartDlg::new_game)
-			{
 
-			}
-
-			if (res == StartDlg::load_game)
-			{
-
-			}
 		}
 	}
 	
 	m_wnd.reset();
 }
 
-Indigo::StartDlg::Result Indigo::Application::show_start_dlg(ResourceBundle& res, Window::CreateParams orig_params)
+bool Indigo::Application::show_start_dlg(ResourceBundle& res, Window::CreateParams orig_params)
 {
 	Window::CreateParams new_params;
 	for (bool reinit = false;;)
@@ -115,7 +107,10 @@ Indigo::StartDlg::Result Indigo::Application::show_start_dlg(ResourceBundle& res
 			UILoader loader(m_wnd);
 			unsigned int zorder = 100;
 			if (!loader.load(res,"ui.txt",zorder))
-				return StartDlg::quit;
+			{
+				// TODO Error Message
+				return false;
+			}
 
 			if (img_layer)
 				img_layer->show();
@@ -140,16 +135,20 @@ Indigo::StartDlg::Result Indigo::Application::show_start_dlg(ResourceBundle& res
 
 			if (!reset)
 			{
-				StartDlg dlg(loader);
+				new_params = orig_params;
+
+				StartDlg dlg(loader,new_params);
 
 				m_wnd->show();
 
-				Indigo::StartDlg::Result ret = dlg.do_modal(orig_params);
+				Indigo::StartDlg::Result ret = dlg.do_modal();
+				if (ret == StartDlg::quit)
+					return false;
+
 				if (ret != StartDlg::reinit)
-					return ret;
+					return true;
 
 				reinit = true;
-				new_params = dlg.m_window_params;
 			}
 		}
 
@@ -166,9 +165,12 @@ Indigo::StartDlg::Result Indigo::Application::show_start_dlg(ResourceBundle& res
 			m_wnd->destroy();
 			
 			if (!m_wnd->create(orig_params))
-				LOG_ERROR_RETURN(("Failed to recreate main window with original parameters!"),StartDlg::quit);
+			{
+				LOG_ERROR(("Failed to recreate main window with original parameters!"));
+				break;
+			}
 		}
 	}
 	
-	return StartDlg::quit;
+	return false;
 }
