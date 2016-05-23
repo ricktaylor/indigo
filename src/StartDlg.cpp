@@ -67,7 +67,8 @@ Indigo::StartDlg::Result Indigo::StartDlg::do_modal(const Window::CreateParams& 
 
 void Indigo::StartDlg::window_close(const Window& w)
 {
-	on_quit();
+	if (m_loader.find_dialog("start")->window().get() == &w)
+		on_quit();
 }
 
 void Indigo::StartDlg::on_quit()

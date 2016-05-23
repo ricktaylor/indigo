@@ -76,7 +76,8 @@ bool Indigo::WindowChangeDlg::do_modal()
 
 void Indigo::WindowChangeDlg::window_close(const Window& w)
 {
-	on_no();
+	if (m_dialog->window().get() == &w)
+		on_no();
 }
 
 void Indigo::WindowChangeDlg::on_no()

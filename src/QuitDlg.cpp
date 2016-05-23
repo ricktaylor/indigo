@@ -69,7 +69,8 @@ bool Indigo::QuitDlg::do_modal()
 
 void Indigo::QuitDlg::window_close(const Window& w)
 {
-	on_quit();
+	if (m_dialog->window().get() == &w)
+		on_quit();
 }
 
 void Indigo::QuitDlg::on_quit()
