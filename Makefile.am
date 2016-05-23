@@ -86,7 +86,8 @@ indigo_SOURCES = \
 	src/Main.cpp \
 	src/App.cpp \
 	src/QuitDlg.cpp \
-	src/StartDlg.cpp
+	src/StartDlg.cpp \
+	src/WindowChangeDlg.cpp
 			
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \
