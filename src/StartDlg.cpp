@@ -75,7 +75,7 @@ void Indigo::StartDlg::on_quit()
 {
 	if (m_live)
 	{
-		QuitDlg dlg(OOBase::static_pointer_cast<UIDialog>(m_loader.find_dialog("quit")));
+		QuitDlg dlg(m_loader.find_dialog("quit"));
 
 		if (dlg.do_modal())
 		{

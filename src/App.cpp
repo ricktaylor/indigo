@@ -122,7 +122,7 @@ Indigo::StartDlg::Result Indigo::Application::show_start_dlg(ResourceBundle& res
 
 			if (reinit)
 			{
-				WindowChangeDlg dlg(OOBase::static_pointer_cast<UIDialog>(loader.find_dialog("window_change")));
+				WindowChangeDlg dlg(loader.find_dialog("window_change"));
 
 				m_wnd->show();
 
