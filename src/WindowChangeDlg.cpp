@@ -56,8 +56,15 @@ bool Indigo::WindowChangeDlg::do_modal()
 
 		m_dialog->show();
 
+		OOBase::Timeout timeout(10,0);
+
 		for (m_live = true;m_live;)
+		{
 			thread_pipe()->get();
+
+			if (timeout.has_expired())
+				on_no();
+		}
 
 		m_dialog->window()->on_close(prev_close);
 
