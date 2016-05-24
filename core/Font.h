@@ -53,7 +53,7 @@ namespace Indigo
 		bool load(const ResourceBundle& resource, const char* name);
 		bool load(const ResourceBundle& resource, const unsigned char* buffer, size_t len);
 
-		float measure_text(const char* sz, size_t len = -1);
+		float measure_text(const char* sz, size_t len = -1)  const;
 
 		OOBase::uint16_t line_height() const { return m_info->m_line_height; }
 		OOBase::uint16_t base_height() const { return m_info->m_base_height; }

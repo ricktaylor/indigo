@@ -688,7 +688,7 @@ const OOBase::SharedPtr<Indigo::Render::Font>& Indigo::Font::render_font() const
 	return m_render_font;
 }
 
-float Indigo::Font::measure_text(const char* sz, size_t s_len)
+float Indigo::Font::measure_text(const char* sz, size_t s_len) const
 {
 	float result = 0.f;
 	if (s_len == size_t(-1))
