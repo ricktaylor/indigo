@@ -59,8 +59,19 @@ void Indigo::Application::run()
 		}
 	}
 	
+	// Load resources
+	OOBase::String resources;
 	ZipResource zip;
-	if (!zip.open("test.zip"))
+	if (m_args.size() > 1)
+		resources = m_args[0];
+	else
+	{
+		OOBase::CmdArgs::options_t::const_iterator i=m_options.find("data_file");
+		if (i)
+			resources = i->second;
+	}
+
+	if (resources.empty() || !zip.open(resources.c_str()))
 	{
 		// TODO Error Message
 	}
@@ -68,8 +79,10 @@ void Indigo::Application::run()
 	{
 		// This is where the credits movie goes - ;)
 
-		while (show_start_dlg(zip,window_params))
+		for (;;)
 		{
+			if (!show_start_dlg(zip,window_params))
+				break;
 
 
 		}
@@ -93,11 +106,11 @@ bool Indigo::Application::show_start_dlg(ResourceBundle& res, Window::CreatePara
 				LOG_ERROR(("Failed to allocate image: %s",OOBase::system_error_text()));
 			else
 			{
-				if (image->load(res,"main.png"))
+				if (image->load(res,"start.png"))
 				{
 					img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(image);
 					if (!img_layer)
-						LOG_ERROR(("Failed to allocate image layer: %s",OOBase::system_error_text()));
+						LOG_ERROR(("Failed to allocate image layer 'start.png': %s",OOBase::system_error_text()));
 					else if (!m_wnd->add_layer(img_layer,50))
 						img_layer.reset();
 				}
@@ -106,7 +119,7 @@ bool Indigo::Application::show_start_dlg(ResourceBundle& res, Window::CreatePara
 							
 			UILoader loader(m_wnd);
 			unsigned int zorder = 100;
-			if (!loader.load(res,"ui.txt",zorder))
+			if (!loader.load(res,"start.ui",zorder))
 			{
 				// TODO Error Message
 				return false;

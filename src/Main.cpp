@@ -98,9 +98,9 @@ static bool load_config(OOBase::CmdArgs::options_t& options)
 	if (!options.find("config-file",strFile))
 	{
 #if defined(HAVE_UNISTD_H)
-		if (access(".indigo.conf",F_OK) == 0)
+		if (access("indigo.conf",F_OK) == 0)
 		{
-			if (!strFile.assign(".indigo.conf"))
+			if (!strFile.assign("indigo.conf"))
 				LOG_ERROR_RETURN(("Failed assign string"),false);
 		}
 		else
@@ -116,12 +116,12 @@ static bool load_config(OOBase::CmdArgs::options_t& options)
 					strFile.clear();
 			}
 
-			if (strFile.empty())
+			/*if (strFile.empty())
 			{
 				if (access("/etc/indigo.conf",F_OK) == 0)
 					if (!strFile.assign("/etc/indigo.conf"))
 						LOG_ERROR_RETURN(("Failed assign string"),false);
-			}
+			}*/
 		}
 #endif
 	}
@@ -138,14 +138,21 @@ static bool load_config(OOBase::CmdArgs::options_t& options)
 #endif
 		OOBase::Logger::log(OOBase::Logger::Information,"Using configuration file: '%s'",rpath);
 
+		OOBase::CmdArgs::options_t file_options;
 		OOBase::ConfigFile::error_pos_t error = {0};
-		err = OOBase::ConfigFile::load(strFile.c_str(),options,&error);
+		err = OOBase::ConfigFile::load(strFile.c_str(),file_options,&error);
 		if (err == EINVAL)
 			LOG_ERROR_RETURN(("Failed read configuration file %s: Syntax error at line %lu, column %lu",rpath,(unsigned long)error.line,(unsigned long)error.col),false);
 		else if (err)
 			LOG_ERROR_RETURN(("Failed load configuration file %s: %s",rpath,OOBase::system_error_text(err)),false);
 
 		OOBase::Logger::log(OOBase::Logger::Information,"Configuration loaded successfully");
+
+		for (OOBase::CmdArgs::options_t::iterator i=file_options.begin();i;++i)
+		{
+			if (!options.find(i->first) && !options.insert(i->first,i->second))
+				LOG_ERROR_RETURN(("Failed insert configuration entry: %s",OOBase::system_error_text()),false);
+		}
 	}
 	else
 	{
