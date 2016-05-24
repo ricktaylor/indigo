@@ -1,5 +1,7 @@
 @SET_MAKE@
 
+SUBDIRS = . glfw
+
 # Lua 5.3.1 automake
 noinst_LTLIBRARIES = liblua.la
 
@@ -43,16 +45,20 @@ liblua_la_SOURCES = \
 	lua/src/lutf8lib.c \
 	lua/src/loadlib.c \
 	lua/src/linit.c
-
-clean-local:
-	@if [ -f @builddir@/glfw/Makefile ]; then make -C @builddir@/glfw clean; fi
 	
-all-local:
-	$(MKDIR_P) @builddir@/glfw
-	cd @builddir@/glfw; cmake -G 'Unix Makefiles' \
+BUILT_SOURCES = glfw/Makefile
+
+glfw/Makefile:
+	$(MKDIR_P) glfw
+	cd glfw; cmake -G 'Unix Makefiles' \
 		-D BUILD_SHARED_LIBS:BOOL=OFF \
 		-D GLFW_BUILD_EXAMPLES:BOOL=OFF \
 		-D GLFW_BUILD_TESTS:BOOL=OFF \
 		@abs_srcdir@/glfw
-	$(MAKE) -C @builddir@/glfw all
+	
+#clean-local:
+#	@if [ -f @builddir@/glfw/Makefile ]; then make -C @builddir@/glfw clean; fi
+	
+#all-local:
+	
 	
