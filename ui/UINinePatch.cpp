@@ -588,6 +588,7 @@ glm::uvec2 Indigo::NinePatch::ideal_size() const
 Indigo::UINinePatch::UINinePatch(UIGroup* parent, const CreateParams& params) :
 		UIWidget(parent,params),
 		m_9patch(params.m_patch),
+		m_render_9patch(NULL),
 		m_colour(params.m_colour)
 {
 	if (!m_9patch || !m_9patch->valid())
@@ -610,7 +611,7 @@ glm::uvec2 Indigo::UINinePatch::ideal_size() const
 void Indigo::UINinePatch::on_size(const glm::uvec2& sz)
 {
 	if (m_render_9patch)
-		render_pipe()->post(OOBase::make_delegate(m_render_9patch.get(),&Render::UIDrawable::size),sz);
+		render_pipe()->post(OOBase::make_delegate(m_render_9patch,&Render::UIDrawable::size),sz);
 }
 
 bool Indigo::UINinePatch::on_render_create(Indigo::Render::UIGroup* group)
@@ -618,9 +619,13 @@ bool Indigo::UINinePatch::on_render_create(Indigo::Render::UIGroup* group)
 	if (!m_9patch)
 		return false;
 
-	m_render_9patch = m_9patch->make_drawable(true,glm::ivec2(0),size(),m_colour);
-	if (!m_render_9patch)
+	OOBase::SharedPtr<Render::UIDrawable> render_9patch = m_9patch->make_drawable(true,glm::ivec2(0),size(),m_colour);
+	if (!render_9patch)
 		return false;
 
-	return group->add_drawable(m_render_9patch,0);
+	if (!group->add_drawable(render_9patch,0))
+		return false;
+
+	m_render_9patch = render_9patch.get();
+	return true;
 }

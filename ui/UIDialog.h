@@ -28,7 +28,7 @@
 
 namespace Indigo
 {
-	class UIDialog : public UIGroup, public Layer
+	class UIDialog : public Layer, public UIGroup
 	{
 	public:
 		struct CreateParams : UIWidget::CreateParams
@@ -65,9 +65,10 @@ namespace Indigo
 		OOBase::SharedPtr<UIWidget> find_widget(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const;
 
 	protected:
-		OOBase::SharedPtr<Render::Layer> create_render_layer(Indigo::Render::Window* window);
+		OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window);
+		void destroy_render_layer();
 
-		virtual bool on_render_create(Indigo::Render::UIGroup* group) { return true; }
+		virtual bool on_render_create(Render::UIGroup* group) { return true; }
 		virtual void on_size(const glm::uvec2& sz);
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual bool on_mousemove(const double& screen_x, const double& screen_y);
@@ -79,9 +80,10 @@ namespace Indigo
 		bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name);
 
 	private:
-		OOBase::WeakPtr<Window> m_wnd;
-		UIGridSizer             m_sizer;
-		bool                    m_modal;
+		OOBase::WeakPtr<Window>            m_wnd;
+		OOBase::SharedPtr<Render::UIGroup> m_group;
+		UIGridSizer                        m_sizer;
+		bool                               m_modal;
 
 		OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::WeakPtr<UIWidget>,OOBase::ThreadLocalAllocator> m_names;
 	};

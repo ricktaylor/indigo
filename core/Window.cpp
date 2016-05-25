@@ -37,6 +37,16 @@ void Indigo::Render::Layer::show(bool visible)
 	}
 }
 
+Indigo::Layer::~Layer()
+{
+	render_pipe()->call(OOBase::make_delegate(this,&Layer::destroy_render_layer));
+}
+
+void Indigo::Layer::destroy_render_layer()
+{
+	m_render_layer.reset();
+}
+
 void Indigo::Layer::show(bool visible)
 {
 	if (visible != m_visible)
@@ -101,18 +111,35 @@ void Indigo::Render::Window::on_move(const OOGL::Window& win, const glm::ivec2& 
 
 void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& sz)
 {
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
-		i->second->on_size(sz);
+	for (OOBase::Table<unsigned int,OOBase::WeakPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;)
+	{
+		OOBase::SharedPtr<Layer> layer = i->second.lock();
+		if (layer)
+		{
+			layer->on_size(sz);
+			++i;
+		}
+		else
+			i = m_layers.erase(i);
+	}
+
 
 	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_size),sz);
 }
 
 void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
+	for (OOBase::Table<unsigned int,OOBase::WeakPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;)
 	{ 
-		if (i->second->m_visible)
-			i->second->on_draw(glState);
+		OOBase::SharedPtr<Layer> layer = i->second.lock();
+		if (layer)
+		{
+			if (layer->m_visible)
+				layer->on_draw(glState);
+			++i;
+		}
+		else
+			i = m_layers.erase(i);
 	}
 }
 

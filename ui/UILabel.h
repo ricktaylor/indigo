@@ -98,7 +98,7 @@ namespace Indigo
 		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
 		virtual glm::uvec2 ideal_size() const;
 
-		virtual bool on_render_create(Indigo::Render::UIGroup* group);
+		virtual bool on_render_create(Render::UIGroup* group);
 
 	private:
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_text;
@@ -106,7 +106,7 @@ namespace Indigo
 		unsigned int m_font_size;
 		unsigned int m_style;
 		glm::vec4 m_colour;
-		OOBase::SharedPtr<Render::UIDrawable> m_caption;
+		Render::UIDrawable* m_caption;
 
 		void on_size(const glm::uvec2& sz);
 	};

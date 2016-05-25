@@ -61,7 +61,8 @@ Indigo::UILabel::UILabel(UIGroup* parent, const OOBase::SharedString<OOBase::Thr
 		m_font(params.m_font),
 		m_font_size(params.m_font_size),
 		m_style(params.m_style),
-		m_colour(params.m_colour)
+		m_colour(params.m_colour),
+		m_caption(NULL)
 {
 	if (!m_font || !m_font->valid())
 		LOG_ERROR(("Invalid font passed to UILabel constructor"));
@@ -77,7 +78,8 @@ Indigo::UILabel::UILabel(UIGroup* parent, const char* sz, size_t len, const Crea
 		m_font(params.m_font),
 		m_font_size(params.m_font_size),
 		m_style(params.m_style),
-		m_colour(params.m_colour)
+		m_colour(params.m_colour),
+		m_caption(NULL)
 {
 	if (!m_font || !m_font->valid())
 		LOG_ERROR(("Invalid font passed to UILabel constructor"));
@@ -115,11 +117,15 @@ bool Indigo::UILabel::on_render_create(Indigo::Render::UIGroup* group)
 	else if (m_style & UILabel::align_vcentre)
 		pos.y = (sz.y - caption_height) / 2;
 
-	m_caption = OOBase::allocate_shared<Render::UILabel,OOBase::ThreadLocalAllocator>(m_font->render_font(),m_text.c_str(),m_text.length(),m_font_size,m_colour,true,pos);
-	if (!m_caption)
+	OOBase::SharedPtr<Render::UIDrawable> caption = OOBase::allocate_shared<Render::UILabel,OOBase::ThreadLocalAllocator>(m_font->render_font(),m_text.c_str(),m_text.length(),m_font_size,m_colour,true,pos);
+	if (!caption)
 		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 
-	return group->add_drawable(m_caption,0);
+	if (!group->add_drawable(caption,0))
+		return false;
+
+	m_caption = caption.get();
+	return true;
 }
 
 glm::uvec2 Indigo::UILabel::ideal_size() const
@@ -159,5 +165,5 @@ void Indigo::UILabel::on_size(const glm::uvec2& sz)
 		pos.y = (sz.y - caption_height) / 2;
 
 	if (m_caption)
-		render_pipe()->post(OOBase::make_delegate(static_cast<Render::UIDrawable*>(m_caption.get()),&Render::UIDrawable::position),pos);
+		render_pipe()->post(OOBase::make_delegate(m_caption,&Render::UIDrawable::position),pos);
 }

@@ -28,7 +28,7 @@ namespace
 	class UIDialog : public Indigo::Render::UIGroup, public Indigo::Render::Layer
 	{
 	public:
-		UIDialog(Indigo::Render::Window* window);
+		UIDialog(Indigo::Render::Window* window, const glm::vec2& sz);
 
 		void on_draw(OOGL::State& glState) const;
 		void on_size(const glm::uvec2& sz);
@@ -37,11 +37,10 @@ namespace
 	};
 }
 
-::UIDialog::UIDialog(Indigo::Render::Window* window) :
+::UIDialog::UIDialog(Indigo::Render::Window* window, const glm::vec2& sz) :
 		Indigo::Render::UIGroup(true),
 		Indigo::Render::Layer(window)
 {
-	glm::vec2 sz = window->window()->size();
 	m_mvp = glm::ortho(0.f,sz.x,0.f,sz.y);
 }
 
@@ -67,7 +66,6 @@ Indigo::UIDialog::UIDialog(const OOBase::SharedPtr<Window>& wnd, const CreatePar
 {
 	if (params.m_size == glm::uvec2(0))
 		this->size(ideal_size());
-
 }
 
 void Indigo::UIDialog::show(bool visible)
@@ -137,17 +135,25 @@ OOBase::SharedPtr<Indigo::Window> Indigo::UIDialog::window() const
 
 OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UIDialog::create_render_layer(Indigo::Render::Window* window)
 {
-	OOBase::SharedPtr< ::UIDialog> group = OOBase::allocate_shared< ::UIDialog,OOBase::ThreadLocalAllocator>(window);
+	m_size = window->window()->size();
+
+	OOBase::SharedPtr< ::UIDialog> group = OOBase::allocate_shared< ::UIDialog,OOBase::ThreadLocalAllocator>(window,m_size);
 	if (!group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
 	else
 	{
-		m_render_group = OOBase::static_pointer_cast<Render::UIGroup>(group);
-		
-		m_size = window->window()->size();
+		m_group = OOBase::static_pointer_cast<Render::UIGroup>(group);
+		m_render_group = m_group.get();
 	}
 
 	return OOBase::static_pointer_cast<Indigo::Render::Layer>(group);
+}
+
+void Indigo::UIDialog::destroy_render_layer()
+{
+	m_group.reset();
+
+	Layer::destroy_render_layer();
 }
 
 bool Indigo::UIDialog::on_mousemove(const double& screen_x, const double& screen_y)

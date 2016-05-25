@@ -28,7 +28,8 @@ Indigo::UIPanel::UIPanel(UIGroup* parent, const CreateParams& params) :
 		UIGroup(parent,params),
 		m_sizer(params.m_fixed,params.m_background ? params.m_background->margins() : glm::uvec4(0),params.m_padding),
 		m_background(params.m_background),
-		m_colour(params.m_colour)
+		m_colour(params.m_colour),
+		m_render_background(NULL)
 {
 	if (params.m_size == glm::uvec2(0))
 		this->size(ideal_size());
@@ -39,12 +40,14 @@ bool Indigo::UIPanel::on_render_create(Indigo::Render::UIGroup* group)
 	unsigned int zorder = 0;
 	if (m_background)
 	{
-		m_render_background = m_background->make_drawable(true,glm::ivec2(0),size(),m_colour);
-		if (!m_render_background)
+		OOBase::SharedPtr<Render::UIDrawable> bk = m_background->make_drawable(true,glm::ivec2(0),size(),m_colour);
+		if (!bk)
 			return false;
 
-		if (!group->add_drawable(m_render_background,zorder++))
+		if (!group->add_drawable(bk,zorder++))
 			return false;
+
+		m_render_background = bk.get();
 	}
 
 	OOBase::SharedPtr<Indigo::Render::UIGroup> subgroup = OOBase::allocate_shared<Indigo::Render::UIGroup,OOBase::ThreadLocalAllocator>() ;
@@ -54,7 +57,7 @@ bool Indigo::UIPanel::on_render_create(Indigo::Render::UIGroup* group)
 	if (!group->add_drawable(subgroup,zorder++))
 		return false;
 
-	m_render_parent.swap(subgroup);
+	m_render_parent = subgroup.get();
 	return true;
 }
 
@@ -72,7 +75,7 @@ void Indigo::UIPanel::on_size(const glm::uvec2& sz)
 	m_sizer.fit(sz);
 
 	if (m_render_background)
-		render_pipe()->post(OOBase::make_delegate(m_render_background.get(),&Render::UIDrawable::size),sz);
+		render_pipe()->post(OOBase::make_delegate(m_render_background,&Render::UIDrawable::size),sz);
 }
 
 bool Indigo::UIPanel::on_mousemove(const glm::ivec2& pos)

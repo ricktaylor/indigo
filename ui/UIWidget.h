@@ -106,8 +106,7 @@ namespace Indigo
 			glm::uvec2       m_size;
 		};
 
-		virtual ~UIWidget()
-		{}
+		virtual ~UIWidget();
 
 		UIGroup* parent() const { return m_parent; }
 
@@ -137,7 +136,7 @@ namespace Indigo
 	protected:
 		UIWidget(UIGroup* parent, const CreateParams& params = CreateParams());
 
-		virtual bool on_render_create(Indigo::Render::UIGroup* group) = 0;
+		virtual bool on_render_create(Render::UIGroup* group) = 0;
 		virtual void on_size(const glm::uvec2& sz) { }
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual void on_mouseenter(bool enter) { }
@@ -146,7 +145,7 @@ namespace Indigo
 
 	private:
 		UIGroup* m_parent;
-		OOBase::SharedPtr<Indigo::Render::UIGroup> m_render_group;
+		Render::UIGroup* m_render_group;
 		OOBase::uint32_t m_state;
 		glm::ivec2 m_position;
 		glm::uvec2 m_size;
@@ -165,7 +164,7 @@ namespace Indigo
 		OOBase::SharedPtr<UIWidget> get_widget(unsigned int zorder) const;
 
 	protected:
-		OOBase::SharedPtr<Indigo::Render::UIGroup> m_render_parent;
+		Render::UIGroup* m_render_parent;
 
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;

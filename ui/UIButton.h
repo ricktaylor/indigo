@@ -101,7 +101,7 @@ namespace Indigo
 		virtual glm::uvec2 min_size() const { return m_min_size; }
 		virtual glm::uvec2 ideal_size() const { return m_ideal_size; }
 
-		virtual bool on_render_create(Indigo::Render::UIGroup* group);
+		virtual bool on_render_create(Render::UIGroup* group);
 		virtual void on_size(const glm::uvec2& sz);
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual void on_mouseenter(bool enter);
@@ -114,8 +114,11 @@ namespace Indigo
 
 		struct RenderStyleState
 		{
-			OOBase::SharedPtr<Render::UIDrawable> m_background;
-			OOBase::SharedPtr<Render::UIDrawable> m_caption;
+			RenderStyleState() : m_background(NULL), m_caption(NULL)
+			{}
+
+			Render::UIDrawable* m_background;
+			Render::UIDrawable* m_caption;
 		};
 		RenderStyleState m_normal;
 		RenderStyleState m_active;
@@ -130,7 +133,7 @@ namespace Indigo
 		glm::uvec2 min_style_size(const StyleState& style) const;
 		glm::uvec2 ideal_style_size(const StyleState& style) const;
 		void do_size(glm::uvec2 sz);
-		bool style_create(Indigo::Render::UIGroup* group, StyleState& style, RenderStyleState& rs, bool visible, unsigned int& zorder);
+		bool style_create(Render::UIGroup* group, StyleState& style, RenderStyleState& rs, bool visible, unsigned int& zorder);
 		void do_style_size(const glm::uvec2& sz, const StyleState& style, RenderStyleState& rs);
 		void do_style_change(RenderStyleState* new_style);
 	};

@@ -66,7 +66,7 @@ namespace Indigo
 			glm::uvec4 m_borders;
 			glm::uvec2 m_tex_size;
 		};
-		OOBase::SharedPtr<Indigo::NinePatch::Info> m_info;
+		OOBase::SharedPtr<NinePatch::Info> m_info;
 	};
 
 	namespace Render
@@ -76,7 +76,7 @@ namespace Indigo
 			friend class Indigo::NinePatch;
 
 		public:
-			UINinePatch(const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info, bool visible = true, const glm::ivec2& position = glm::ivec2(0));
+			UINinePatch(const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<NinePatch::Info>& info, bool visible = true, const glm::ivec2& position = glm::ivec2(0));
 			virtual ~UINinePatch();
 
 			virtual bool valid() const;
@@ -90,7 +90,7 @@ namespace Indigo
 			GLsizeiptr m_firsts[3];
 			GLsizei    m_counts[3];
 
-			OOBase::SharedPtr<Indigo::NinePatch::Info> m_info;
+			OOBase::SharedPtr<NinePatch::Info> m_info;
 
 			void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};
@@ -122,11 +122,11 @@ namespace Indigo
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;
 
-		virtual bool on_render_create(Indigo::Render::UIGroup* group);
+		virtual bool on_render_create(Render::UIGroup* group);
 
 	private:
 		OOBase::SharedPtr<NinePatch> m_9patch;
-		OOBase::SharedPtr<Render::UIDrawable> m_render_9patch;
+		Render::UIDrawable* m_render_9patch;
 
 		glm::vec4 m_colour;
 

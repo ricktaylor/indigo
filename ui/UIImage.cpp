@@ -43,6 +43,7 @@ void Indigo::Render::UIImage::on_draw(OOGL::State& glState, const glm::mat4& mvp
 Indigo::UIImage::UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image, const CreateParams& params) :
 		UIWidget(parent,params),
 		m_image(image),
+		m_render_image(NULL),
 		m_colour(params.m_colour)
 {
 	if (!m_image || !m_image->valid())
@@ -60,7 +61,7 @@ glm::uvec2 Indigo::UIImage::ideal_size() const
 void Indigo::UIImage::on_size(const glm::uvec2& sz)
 {
 	if (m_render_image)
-		render_pipe()->post(OOBase::make_delegate(m_render_image.get(),&Render::UIImage::size),sz);
+		render_pipe()->post(OOBase::make_delegate(m_render_image,&Render::UIImage::size),sz);
 }
 
 bool Indigo::UIImage::on_render_create(Indigo::Render::UIGroup* group)
@@ -78,9 +79,13 @@ bool Indigo::UIImage::on_render_create(Indigo::Render::UIGroup* group)
 		texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	}
 
-	m_render_image = OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,size(),m_colour,true);
-	if (!m_render_image)
+	OOBase::SharedPtr<Render::UIImage> render_image = OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,size(),m_colour,true);
+	if (!render_image)
 		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 
-	return group->add_drawable(m_render_image,0);
+	if (!group->add_drawable(render_image,0))
+		return false;
+
+	m_render_image = render_image.get();
+	return true;
 }

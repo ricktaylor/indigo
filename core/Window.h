@@ -68,9 +68,12 @@ namespace Indigo
 		Layer() : m_visible(false)
 		{}
 
+		virtual ~Layer();
+
 		OOBase::SharedPtr<Render::Layer> render_layer() const { return m_render_layer; }
 
 		virtual OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window) = 0;
+		virtual void destroy_render_layer();
 
 		virtual void on_move(const glm::ivec2& sz) {}
 		virtual void on_size(const glm::uvec2& sz) {}
@@ -161,7 +164,7 @@ namespace Indigo
 
 			bool create_window(const Indigo::Window::CreateParams& params);
 
-			OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_layers;
+			OOBase::Table<unsigned int,OOBase::WeakPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_layers;
 
 			void on_close(const OOGL::Window& win);
 			void on_draw(const OOGL::Window& win, OOGL::State& glState);

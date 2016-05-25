@@ -63,16 +63,21 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder
 		m_children.remove(zorder);
 	else
 	{
-		widget->m_render_group.swap(group);
+		widget->m_render_group = group.get();
 		*ret = true;
 	}
 }
 
 Indigo::UIWidget::UIWidget(UIGroup* parent, const CreateParams& params) :
 		m_parent(parent),
+		m_render_group(NULL),
 		m_state(params.m_state),
 		m_position(params.m_position),
 		m_size(params.m_size)
+{
+}
+
+Indigo::UIWidget::~UIWidget()
 {
 }
 
@@ -98,7 +103,7 @@ void Indigo::UIWidget::on_state_change(OOBase::uint32_t state, OOBase::uint32_t 
 	{
 		bool visible = (state & eWS_visible) == eWS_visible;
 		if (m_render_group)
-			render_pipe()->post(OOBase::make_delegate(static_cast<Render::UIDrawable*>(m_render_group.get()),&Render::UIDrawable::show),visible);
+			render_pipe()->post(OOBase::make_delegate(static_cast<Render::UIDrawable*>(m_render_group),&Render::UIDrawable::show),visible);
 	}
 }
 
@@ -119,7 +124,7 @@ void Indigo::UIWidget::position(const glm::ivec2& pos)
 		m_position = pos;
 
 		if (m_render_group)
-			render_pipe()->post(OOBase::make_delegate(static_cast<Render::UIDrawable*>(m_render_group.get()),&Render::UIDrawable::position),pos);
+			render_pipe()->post(OOBase::make_delegate(static_cast<Render::UIDrawable*>(m_render_group),&Render::UIDrawable::position),pos);
 	}
 }
 
@@ -139,7 +144,8 @@ glm::uvec2 Indigo::UIWidget::size(const glm::uvec2& sz)
 }
 
 Indigo::UIGroup::UIGroup(UIGroup* parent, const CreateParams& params) :
-		UIWidget(parent,params)
+		UIWidget(parent,params),
+		m_render_parent(NULL)
 {
 }
 
@@ -170,7 +176,7 @@ bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsi
 	}
 
 	bool ret = false;
-	if (!render_pipe()->call(OOBase::make_delegate(m_render_parent.get(),&Render::UIGroup::add_subgroup),widget.get(),zorder,&ret) || !ret)
+	if (!render_pipe()->call(OOBase::make_delegate(m_render_parent,&Render::UIGroup::add_subgroup),widget.get(),zorder,&ret) || !ret)
 		m_children.remove(zorder);
 
 	return ret;

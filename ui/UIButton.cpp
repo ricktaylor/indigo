@@ -181,12 +181,14 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 
 	if (!rs.m_background && style.m_background)
 	{
-		rs.m_background = style.m_background->make_drawable(visible,glm::ivec2(0),sz,style.m_background_colour);
-		if (!rs.m_background)
+		OOBase::SharedPtr<Render::UIDrawable> bk = style.m_background->make_drawable(visible,glm::ivec2(0),sz,style.m_background_colour);
+		if (!bk)
 			return false;
 
-		if (!group->add_drawable(rs.m_background,zorder++))
+		if (!group->add_drawable(bk,zorder++))
 			return false;
+
+		rs.m_background = bk.get();
 
 		margins = style.m_background->margins();
 		sz.x -= margins.x + margins.z;
@@ -215,15 +217,18 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 		else if (style.m_style_flags & UIButton::align_vcentre)
 			pos.y += (sz.y - caption_height) / 2;
 
+		OOBase::SharedPtr<Render::UILabel> caption;
 		if (style.m_drop.x && style.m_drop.y && style.m_shadow.a > 0.f)
-			rs.m_caption = OOBase::allocate_shared<Render::UIShadowLabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,style.m_shadow,style.m_drop,visible,pos);
+			caption = OOBase::allocate_shared<Render::UIShadowLabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,style.m_shadow,style.m_drop,visible,pos);
 		else
-			rs.m_caption = OOBase::allocate_shared<Render::UILabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,visible,pos);
-		if (!rs.m_caption)
+			caption = OOBase::allocate_shared<Render::UILabel,OOBase::ThreadLocalAllocator>(style.m_font->render_font(),m_text.c_str(),m_text.length(),style.m_font_size,style.m_text_colour,visible,pos);
+		if (!caption)
 			LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 
-		if (!group->add_drawable(rs.m_caption,zorder++))
+		if (!group->add_drawable(caption,zorder++))
 			return false;
+
+		rs.m_caption = caption.get();
 	}
 
 	if (visible)

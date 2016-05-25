@@ -72,11 +72,11 @@ namespace Indigo
 		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
 		virtual glm::uvec2 ideal_size() const;
 
-		virtual bool on_render_create(Indigo::Render::UIGroup* group);
+		virtual bool on_render_create(Render::UIGroup* group);
 
 	private:
 		OOBase::SharedPtr<Image> m_image;
-		OOBase::SharedPtr<Render::UIImage> m_render_image;
+		Render::UIImage* m_render_image;
 
 		glm::vec4 m_colour;
 

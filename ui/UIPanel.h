@@ -61,7 +61,7 @@ namespace Indigo
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;
 
-		virtual bool on_render_create(Indigo::Render::UIGroup* group);
+		virtual bool on_render_create(Render::UIGroup* group);
 		virtual void on_size(const glm::uvec2& sz);
 		virtual bool on_mousemove(const glm::ivec2& pos);
 
@@ -70,7 +70,7 @@ namespace Indigo
 		OOBase::SharedPtr<NinePatch> m_background;
 		glm::vec4 m_colour;
 
-		OOBase::SharedPtr<Render::UIDrawable> m_render_background;
+		Render::UIDrawable* m_render_background;
 	};
 }
 
