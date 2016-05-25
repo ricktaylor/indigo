@@ -58,8 +58,17 @@ namespace
 
 bool QuadFactory::alloc_quad()
 {
-	OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,vertices_per_quad * sizeof(vertex_data));
-	OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,elements_per_quad * sizeof(GLuint));
+	GLuint e[6] = { 0,1,2,2,1,3 };
+	vertex_data a[4] =
+	{
+		{ 0.f, 1.f, 0, 0},
+		{ 0.f, 0.f, 0, 0xFFFF},
+		{ 1.f, 1.f, 0xFFFF, 0 },
+		{ 1.f, 0.f, 0xFFFF, 0xFFFF }
+	};
+
+	OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(a),a);
+	OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(e),e);
 	if (!m_ptrVertices || !m_ptrElements)
 		LOG_ERROR_RETURN(("Failed to allocate VBO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
@@ -92,35 +101,6 @@ bool QuadFactory::alloc_quad()
 
 	m_ptrVAO->element_array(m_ptrElements);
 	m_ptrVAO->unbind();
-
-	OOBase::SharedPtr<GLuint> ei = m_ptrElements->auto_map<GLuint>(GL_MAP_WRITE_BIT,0,elements_per_quad * sizeof(GLuint));
-	GLuint* e = ei.get();
-	e[0] = 0;
-	e[1] = 1;
-	e[2] = 2;
-	e[3] = 2;
-	e[4] = 1;
-	e[5] = 3;
-
-	OOBase::SharedPtr<vertex_data> attribs = m_ptrVertices->auto_map<vertex_data>(GL_MAP_WRITE_BIT,0,vertices_per_quad * sizeof(vertex_data));
-	vertex_data* a = attribs.get();
-	a[0].x = 0.f;
-	a[0].y = 1.f;
-	a[1].x = 0.f;
-	a[1].y = 0.f;
-	a[2].x = 1.f;
-	a[2].y = 1.f;
-	a[3].x = 1.f;
-	a[3].y = 0.f;
-
-	a[0].u = 0;
-	a[0].v = 0;
-	a[1].u = 0;
-	a[1].v = 0xFFFF;
-	a[2].u = 0xFFFF;
-	a[2].v = 0;
-	a[3].u = 0xFFFF;
-	a[3].v = 0xFFFF;
 
 	return true;
 }
