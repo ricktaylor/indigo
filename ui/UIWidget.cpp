@@ -32,35 +32,35 @@ Indigo::Render::UIDrawable::UIDrawable(bool visible, const glm::ivec2& position)
 
 void Indigo::Render::UIGroup::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIDrawable>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
+	for (OOBase::Vector<OOBase::SharedPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
 	{
-		if (i->second->m_visible)
-			i->second->on_draw(glState,glm::translate(mvp,glm::vec3(i->second->m_position.x,i->second->m_position.y,0)));
+		if ((*i)->m_visible)
+			(*i)->on_draw(glState,glm::translate(mvp,glm::vec3((*i)->m_position.x,(*i)->m_position.y,0)));
 	}
 }
 
-bool Indigo::Render::UIGroup::add_drawable(const OOBase::SharedPtr<UIDrawable>& drawable, unsigned int zorder)
+bool Indigo::Render::UIGroup::add_drawable(const OOBase::SharedPtr<UIDrawable>& drawable)
 {
-	if (!m_children.insert(zorder,drawable))
+	if (!m_children.push_back(drawable))
 		LOG_ERROR_RETURN(("Failed to insert drawable: %s",OOBase::system_error_text()),false);
 	return true;
 }
 
-bool Indigo::Render::UIGroup::remove_drawable(unsigned int zorder)
+bool Indigo::Render::UIGroup::remove_drawable(const OOBase::SharedPtr<UIDrawable>& drawable)
 {
-	return m_children.remove(zorder);
+	return m_children.remove(drawable);
 }
 
-void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, unsigned int zorder, bool* ret)
+void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, bool* ret)
 {
 	*ret = false;
 	OOBase::SharedPtr<Render::UIGroup> group = OOBase::allocate_shared<Render::UIGroup,OOBase::ThreadLocalAllocator>((widget->state() & Indigo::UIWidget::eWS_visible) != 0,widget->position());
 	if (!group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
-	else if (!m_children.insert(zorder,group))
+	else if (!m_children.push_back(group))
 		LOG_ERROR(("Failed to insert group: %s",OOBase::system_error_text()));
 	else if (!widget->on_render_create(group.get()))
-		m_children.remove(zorder);
+		m_children.pop_back();
 	else
 	{
 		widget->m_render_group = group.get();
@@ -149,7 +149,7 @@ Indigo::UIGroup::UIGroup(UIGroup* parent, const CreateParams& params) :
 {
 }
 
-bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder, const char* name, size_t len)
+bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len)
 {
 	if (!m_render_group)
 		LOG_ERROR_RETURN(("Failed to insert widget: incomplete parent"),false);
@@ -157,18 +157,18 @@ bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsi
 	if (!m_render_parent)
 		m_render_parent = m_render_group;
 
-	if (!m_children.insert(zorder,widget))
+	if (!m_children.push_back(widget))
 		LOG_ERROR_RETURN(("Failed to insert widget: %s",OOBase::system_error_text()),false);
 
 	if (name && len && !add_named_widget(widget,name,len))
 	{
-		m_children.remove(zorder);
+		m_children.pop_back();
 		return false;
 	}
 
 	bool ret = false;
-	if (!render_pipe()->call(OOBase::make_delegate(m_render_parent,&Render::UIGroup::add_subgroup),widget.get(),zorder,&ret) || !ret)
-		m_children.remove(zorder);
+	if (!render_pipe()->call(OOBase::make_delegate(m_render_parent,&Render::UIGroup::add_subgroup),widget.get(),&ret) || !ret)
+		m_children.pop_back();
 
 	return ret;
 }
@@ -178,28 +178,20 @@ bool Indigo::UIGroup::add_named_widget(const OOBase::SharedPtr<UIWidget>& widget
 	return m_parent->add_named_widget(widget,name,len);
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UIGroup::get_widget(unsigned int zorder) const
+bool Indigo::UIGroup::remove_widget(const OOBase::SharedPtr<UIWidget>& widget)
 {
-	OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i = m_children.find(zorder);
-	if (i == m_children.end())
-		return OOBase::SharedPtr<Indigo::UIWidget>();
-	return i->second;
-}
-
-bool Indigo::UIGroup::remove_widget(unsigned int zorder)
-{
-	return m_children.remove(zorder);
+	return m_children.remove(widget);
 }
 
 glm::uvec2 Indigo::UIGroup::min_size() const
 {
 	glm::uvec2 min(0);
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
+	for (OOBase::Vector<OOBase::SharedPtr<UIWidget>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
 	{
-		if (i->second->visible())
+		if ((*i)->visible())
 		{
-			glm::uvec2 min1(i->second->min_size());
-			min1 += i->second->position();
+			glm::uvec2 min1((*i)->min_size());
+			min1 += (*i)->position();
 			min = glm::max(min1,min);
 		}
 	}
@@ -210,12 +202,12 @@ glm::uvec2 Indigo::UIGroup::min_size() const
 glm::uvec2 Indigo::UIGroup::ideal_size() const
 {
 	glm::uvec2 ideal(0);
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
+	for (OOBase::Vector<OOBase::SharedPtr<UIWidget>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
 	{
-		if (i->second->visible())
+		if ((*i)->visible())
 		{
-			glm::uvec2 ideal1(i->second->ideal_size());
-			ideal1 += i->second->position();
+			glm::uvec2 ideal1((*i)->ideal_size());
+			ideal1 += (*i)->position();
 			ideal = glm::max(ideal1,ideal);
 		}
 	}
@@ -225,27 +217,27 @@ glm::uvec2 Indigo::UIGroup::ideal_size() const
 
 bool Indigo::UIGroup::on_mousemove(const glm::ivec2& pos)
 {
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_children.back();i;--i)
+	for (OOBase::Vector<OOBase::SharedPtr<UIWidget>,OOBase::ThreadLocalAllocator>::iterator i=m_children.back();i;--i)
 	{
-		if (i->second->visible())
+		if ((*i)->visible())
 		{
-			glm::ivec2 child_pos = i->second->position();
+			glm::ivec2 child_pos = (*i)->position();
 			if (pos.x >= child_pos.x && pos.y >= child_pos.y)
 			{
-				glm::ivec2 child_size = i->second->size();
+				glm::ivec2 child_size = (*i)->size();
 				if (pos.x < child_pos.x + child_size.x && pos.y < child_pos.y + child_size.y)
 				{
 					OOBase::SharedPtr<UIWidget> mouse_child = m_mouse_child.lock();
-					if (mouse_child != i->second)
+					if (mouse_child != (*i))
 					{
 						if (mouse_child)
 							mouse_child->on_mouseenter(false);
 
-						m_mouse_child = i->second;
-						i->second->on_mouseenter(true);
+						m_mouse_child = (*i);
+						(*i)->on_mouseenter(true);
 					}
 
-					return i->second->on_mousemove(pos - child_pos);
+					return (*i)->on_mousemove(pos - child_pos);
 				}
 			}
 		}

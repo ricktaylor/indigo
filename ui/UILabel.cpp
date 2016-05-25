@@ -121,7 +121,7 @@ bool Indigo::UILabel::on_render_create(Indigo::Render::UIGroup* group)
 	if (!caption)
 		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 
-	if (!group->add_drawable(caption,0))
+	if (!group->add_drawable(caption))
 		return false;
 
 	m_caption = caption.get();

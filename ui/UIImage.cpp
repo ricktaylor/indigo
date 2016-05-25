@@ -83,7 +83,7 @@ bool Indigo::UIImage::on_render_create(Indigo::Render::UIGroup* group)
 	if (!render_image)
 		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 
-	if (!group->add_drawable(render_image,0))
+	if (!group->add_drawable(render_image))
 		return false;
 
 	m_render_image = render_image.get();

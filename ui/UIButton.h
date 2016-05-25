@@ -133,7 +133,7 @@ namespace Indigo
 		glm::uvec2 min_style_size(const StyleState& style) const;
 		glm::uvec2 ideal_style_size(const StyleState& style) const;
 		void do_size(glm::uvec2 sz);
-		bool style_create(Render::UIGroup* group, StyleState& style, RenderStyleState& rs, bool visible, unsigned int& zorder);
+		bool style_create(Render::UIGroup* group, StyleState& style, RenderStyleState& rs, bool visible);
 		void do_style_size(const glm::uvec2& sz, const StyleState& style, RenderStyleState& rs);
 		void do_style_change(RenderStyleState* new_style);
 	};

@@ -37,7 +37,7 @@ namespace Indigo
 		UILoader(OOBase::SharedPtr<Window> wnd) : m_wnd(wnd), m_resource(NULL)
 		{}
 
-		bool load(ResourceBundle& resource, const char* resource_name, unsigned int& zorder, UIGroup* parent = NULL);
+		bool load(ResourceBundle& resource, const char* resource_name);
 		
 		OOBase::SharedPtr<UIDialog> find_dialog(const char* name, size_t len = size_t(-1)) const;
 
@@ -85,20 +85,20 @@ namespace Indigo
 		bool parse_colour(const char*& p, const char* pe, glm::vec4& c);
 		bool parse_create_params(const OOBase::ScopedString& arg, const char*& p, const char* pe, UIWidget::CreateParams& params);
 
-		bool load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder);
-		bool load_dialog(const char*& p, const char* pe, unsigned int zorder);
-		bool load_children(const char*& p, const char* pe, UIGroup* parent, unsigned int& zorder);
-		OOBase::SharedPtr<UIWidget> load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder);
-		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, UIGridSizer& sizer, unsigned int& zorder, bool add_loose);
+		bool load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type);
+		bool load_dialog(const char*& p, const char* pe);
+		bool load_children(const char*& p, const char* pe, UIGroup* parent);
+		OOBase::SharedPtr<UIWidget> load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent);
+		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, UIGridSizer& sizer, bool add_loose);
 		OOBase::SharedPtr<Image> load_image(const char*& p, const char* pe, const OOBase::ScopedString& image_name);
 		OOBase::SharedPtr<Font> load_font(const char*& p, const char* pe, const OOBase::ScopedString& font_name);
 		OOBase::SharedPtr<NinePatch> load_9patch(const char*& p, const char* pe, const OOBase::ScopedString& patch_name);
 		bool load_button_style(const char*& p, const char* pe);
 		bool load_button_style_state(const char*& p, const char* pe, UIButton::StyleState& state, const OOBase::SharedPtr<UIButton::Style>& style);
-		OOBase::SharedPtr<UIWidget> load_uiimage(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder);
-		OOBase::SharedPtr<UIWidget> load_button(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder);
-		OOBase::SharedPtr<UIWidget> load_label(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder);
-		OOBase::SharedPtr<UIWidget> load_panel(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder);
+		OOBase::SharedPtr<UIWidget> load_uiimage(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name);
+		OOBase::SharedPtr<UIWidget> load_button(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name);
+		OOBase::SharedPtr<UIWidget> load_label(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name);
+		OOBase::SharedPtr<UIWidget> load_panel(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name);
 	};
 }
 

@@ -111,9 +111,9 @@ void Indigo::Render::Window::on_move(const OOGL::Window& win, const glm::ivec2& 
 
 void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& sz)
 {
-	for (OOBase::Table<unsigned int,OOBase::WeakPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;)
+	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;)
 	{
-		OOBase::SharedPtr<Layer> layer = i->second.lock();
+		OOBase::SharedPtr<Layer> layer = i->lock();
 		if (layer)
 		{
 			layer->on_size(sz);
@@ -129,9 +129,9 @@ void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& 
 
 void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
-	for (OOBase::Table<unsigned int,OOBase::WeakPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;)
+	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;)
 	{ 
-		OOBase::SharedPtr<Layer> layer = i->second.lock();
+		OOBase::SharedPtr<Layer> layer = i->lock();
 		if (layer)
 		{
 			if (layer->m_visible)
@@ -153,13 +153,13 @@ void Indigo::Render::Window::on_mousebutton(const OOGL::Window& win, const OOGL:
 	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_mousebutton),click);
 }
 
-void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, unsigned int zorder, bool* ret)
+void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, bool* ret)
 {
 	*ret = false;
 	layer->m_render_layer = layer->create_render_layer(this);
 	if (layer->m_render_layer)
 	{
-		if (!m_layers.insert(zorder,layer->m_render_layer))
+		if (!m_layers.push_back(layer->m_render_layer))
 		{
 			LOG_ERROR(("Failed to insert layer: %s",OOBase::system_error_text()));
 			layer->m_render_layer.reset();
@@ -278,37 +278,23 @@ bool Indigo::Window::show(bool visible)
 	return render_pipe()->post(OOBase::make_delegate(m_render_wnd->m_wnd.get(),&OOGL::Window::show),visible);
 }
 
-bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, unsigned int zorder)
+bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer)
 {
 	if (!m_render_wnd)
 		LOG_ERROR_RETURN(("Failed to insert layer: incomplete window"),false);
 
-	if (!m_layers.insert(zorder,layer))
+	if (!m_layers.push_back(layer))
 		LOG_ERROR_RETURN(("Failed to insert layer: %s",OOBase::system_error_text()),false);
 
 	bool ret = false;
-	if (!render_pipe()->call(OOBase::make_delegate(m_render_wnd.get(),&Render::Window::add_render_layer),layer.get(),zorder,&ret) || !ret)
-		m_layers.remove(zorder);
+	if (!render_pipe()->call(OOBase::make_delegate(m_render_wnd.get(),&Render::Window::add_render_layer),layer.get(),&ret) || !ret)
+		m_layers.pop_back();
 	return ret;
 }
 
-OOBase::SharedPtr<Indigo::Layer> Indigo::Window::get_layer(unsigned int zorder) const
+bool Indigo::Window::remove_layer(const OOBase::SharedPtr<Layer>& layer)
 {
-	OOBase::Table<unsigned int,OOBase::SharedPtr<Indigo::Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i = m_layers.find(zorder);
-	if (i == m_layers.end())
-		return OOBase::SharedPtr<Layer>();
-	return i->second;
-}
-
-bool Indigo::Window::remove_layer(unsigned int zorder)
-{
-	return m_layers.remove(zorder);
-}
-
-unsigned int Indigo::Window::top_layer() const
-{
-	OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::const_iterator i = m_layers.back();
-	return (i ? i->first : 0);
+	return m_layers.remove(layer);
 }
 
 void Indigo::Window::call_on_close()
@@ -326,32 +312,32 @@ OOBase::Delegate1<void,const Indigo::Window&,OOBase::ThreadLocalAllocator> Indig
 
 void Indigo::Window::on_move(glm::ivec2 pos)
 {
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
-		i->second->on_move(pos);
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
+		(*i)->on_move(pos);
 }
 
 void Indigo::Window::on_size(glm::uvec2 sz)
 {
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
-		i->second->on_size(sz);
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
+		(*i)->on_size(sz);
 }
 
 void Indigo::Window::on_mousemove(double screen_x, double screen_y)
 {
 	bool handled = false;
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
 	{
-		if (i->second->visible())
-			handled = i->second->on_mousemove(screen_x,screen_y);
+		if ((*i)->visible())
+			handled = (*i)->on_mousemove(screen_x,screen_y);
 	}
 }
 
 void Indigo::Window::on_mousebutton(OOGL::Window::mouse_click_t click)
 {
 	bool handled = false;
-	for (OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
 	{
-		if (i->second->visible())
-			handled = i->second->on_mousebutton(click);
+		if ((*i)->visible())
+			handled = (*i)->on_mousebutton(click);
 	}
 }

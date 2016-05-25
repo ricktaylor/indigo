@@ -122,17 +122,14 @@ namespace Indigo
 
 		bool show(bool visible = true);
 
-		bool add_layer(const OOBase::SharedPtr<Layer>& layer, unsigned int zorder);
-		OOBase::SharedPtr<Layer> get_layer(unsigned int zorder) const;
-		bool remove_layer(unsigned int zorder);
-
-		unsigned int top_layer() const;
+		bool add_layer(const OOBase::SharedPtr<Layer>& layer);
+		bool remove_layer(const OOBase::SharedPtr<Layer>& layer);
 
 		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> on_close(const OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator>& delegate);
 
 	private:
 		OOBase::SharedPtr<Indigo::Render::Window> m_render_wnd;
-		OOBase::Table<unsigned int,OOBase::SharedPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_layers;
+		OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
 
 		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> m_on_close;
 
@@ -164,7 +161,7 @@ namespace Indigo
 
 			bool create_window(const Indigo::Window::CreateParams& params);
 
-			OOBase::Table<unsigned int,OOBase::WeakPtr<Layer>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_layers;
+			OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
 
 			void on_close(const OOGL::Window& win);
 			void on_draw(const OOGL::Window& win, OOGL::State& glState);
@@ -173,7 +170,7 @@ namespace Indigo
 			void on_mousemove(const OOGL::Window& win, double screen_x, double screen_y);
 			void on_mousebutton(const OOGL::Window& win, const OOGL::Window::mouse_click_t& click);
 
-			void add_render_layer(Indigo::Layer* layer, unsigned int zorder, bool* ret);
+			void add_render_layer(Indigo::Layer* layer, bool* ret);
 		};
 	}
 }

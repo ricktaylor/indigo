@@ -623,7 +623,7 @@ bool Indigo::UINinePatch::on_render_create(Indigo::Render::UIGroup* group)
 	if (!render_9patch)
 		return false;
 
-	if (!group->add_drawable(render_9patch,0))
+	if (!group->add_drawable(render_9patch))
 		return false;
 
 	m_render_9patch = render_9patch.get();

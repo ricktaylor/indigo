@@ -115,15 +115,14 @@ bool Indigo::Application::show_start_dlg(ResourceBundle& res, Window::CreatePara
 					img_layer = OOBase::allocate_shared<ImageLayer,OOBase::ThreadLocalAllocator>(image);
 					if (!img_layer)
 						LOG_ERROR(("Failed to allocate image layer 'start.png': %s",OOBase::system_error_text()));
-					else if (!m_wnd->add_layer(img_layer,50))
+					else if (!m_wnd->add_layer(img_layer))
 						img_layer.reset();
 				}
 				image.reset();
 			}
 							
 			UILoader loader(m_wnd);
-			unsigned int zorder = 100;
-			if (!loader.load(res,"start.ui",zorder))
+			if (!loader.load(res,"start.ui"))
 			{
 				// TODO Error Message
 				return false;
@@ -159,11 +158,6 @@ bool Indigo::Application::show_start_dlg(ResourceBundle& res, Window::CreatePara
 				m_wnd->show();
 
 				Indigo::StartDlg::Result ret = dlg.do_modal();
-
-				if (img_layer)
-				{
-					m_wnd->remove_layer(50);
-				}
 
 				if (ret == StartDlg::quit)
 					return false;

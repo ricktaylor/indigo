@@ -64,16 +64,16 @@ namespace Indigo
 			UIGroup(bool visible = true, const glm::ivec2& position = glm::ivec2(0,0)) : UIDrawable(visible,position)
 			{}
 
-			bool add_drawable(const OOBase::SharedPtr<UIDrawable>& drawable, unsigned int zorder);
-			bool remove_drawable(unsigned int zorder);
+			bool add_drawable(const OOBase::SharedPtr<UIDrawable>& drawable);
+			bool remove_drawable(const OOBase::SharedPtr<UIDrawable>& drawable);
 
 		protected:
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 
 		private:
-			OOBase::Table<unsigned int,OOBase::SharedPtr<UIDrawable>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_children;
+			OOBase::Vector<OOBase::SharedPtr<UIDrawable>,OOBase::ThreadLocalAllocator> m_children;
 
-			void add_subgroup(UIWidget* widget, unsigned int zorder, bool* ret);
+			void add_subgroup(UIWidget* widget, bool* ret);
 		};
 	}
 
@@ -156,11 +156,8 @@ namespace Indigo
 	public:
 		UIGroup(UIGroup* parent, const CreateParams& params = CreateParams());
 
-		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder, const char* name, size_t len = -1);
-
-		bool remove_widget(unsigned int zorder);
-
-		OOBase::SharedPtr<UIWidget> get_widget(unsigned int zorder) const;
+		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name = NULL, size_t len = -1);
+		bool remove_widget(const OOBase::SharedPtr<UIWidget>& widget);
 
 	protected:
 		Render::UIGroup* m_render_parent;
@@ -174,7 +171,7 @@ namespace Indigo
 		virtual bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len = size_t(-1));
 
 	private:
-		OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_children;
+		OOBase::Vector<OOBase::SharedPtr<UIWidget>,OOBase::ThreadLocalAllocator> m_children;
 
 		OOBase::WeakPtr<UIWidget> m_mouse_child;
 	};
