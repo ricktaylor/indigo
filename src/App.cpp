@@ -163,7 +163,10 @@ bool Indigo::Application::show_start_dlg(ResourceBundle& res, Window::CreatePara
 					return false;
 
 				if (ret != StartDlg::reinit)
+				{
+					img_layer->show(false);
 					return true;
+				}
 
 				reinit = true;
 			}
