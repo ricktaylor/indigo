@@ -23,11 +23,13 @@
 
 #include "StartDlg.h"
 #include "QuitDlg.h"
+#include "Game.h"
 
 #include "../core/Thread.h"
 
-Indigo::StartDlg::StartDlg(UILoader& loader, Window::CreateParams& window_params) :
+Indigo::StartDlg::StartDlg(UILoader& loader, Window::CreateParams& window_params, Game& game) :
 		m_loader(loader),
+		m_game(game),
 		m_window_params(window_params),
 		m_live(false),
 		m_result(StartDlg::quit)
@@ -48,9 +50,13 @@ Indigo::StartDlg::Result Indigo::StartDlg::do_modal()
 	else
 		btn->on_click(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&StartDlg::on_quit));
 	
-	btn = OOBase::static_pointer_cast<UIButton>(dialog->find_widget("config"));
+	btn = OOBase::static_pointer_cast<UIButton>(dialog->find_widget("options"));
 	if (btn)
 		btn->on_click(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&StartDlg::on_config));
+
+	btn = OOBase::static_pointer_cast<UIButton>(dialog->find_widget("new"));
+	if (btn)
+		btn->on_click(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&StartDlg::on_new_game));
 
 	dialog->show();
 
@@ -91,6 +97,15 @@ void Indigo::StartDlg::on_config()
 		m_window_params.m_fullscreen = !m_window_params.m_fullscreen;
 
 		m_result = StartDlg::reinit;
+		m_live = false;
+	}
+}
+
+void Indigo::StartDlg::on_new_game()
+{
+	if (m_live)
+	{
+		m_result = StartDlg::new_game;
 		m_live = false;
 	}
 }

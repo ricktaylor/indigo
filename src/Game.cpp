@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2014 Rick Taylor
+// Copyright (C) 2016 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -19,31 +19,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_APP_H_INCLUDED
-#define INDIGO_APP_H_INCLUDED
+#include "../core/Common.h"
 
-#include "../core/Window.h"
+#include "Game.h"
 
-namespace Indigo
+bool Indigo::Game::run()
 {
-	class ResourceBundle;
-	class Game;
+	OOBase::Thread::sleep(5000);
 
-	class Application
-	{
-	public:
-		Application();
-
-		OOBase::CmdArgs::options_t m_options;
-		OOBase::CmdArgs::arguments_t m_args;
-
-		void run();
-
-	private:
-		OOBase::SharedPtr<Window> m_wnd;
-
-		bool show_start_dlg(ResourceBundle& res, Window::CreateParams orig_params, Indigo::Game& game);
-	};
+	return true;
 }
-
-#endif // INDIGO_APP_H_INCLUDED

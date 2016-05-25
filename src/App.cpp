@@ -24,6 +24,7 @@
 #include "App.h"
 #include "StartDlg.h"
 #include "WindowChangeDlg.h"
+#include "Game.h"
 
 #include "../core/ZipResource.h"
 
@@ -35,8 +36,6 @@ Indigo::Application::Application()
 
 void Indigo::Application::run()
 {
-	const Window::CreateParams default_window_params(1024,768,false,"The House");
-
 	m_wnd = OOBase::allocate_shared<Window,OOBase::ThreadLocalAllocator>();
 	if (!m_wnd)
 	{
@@ -45,9 +44,11 @@ void Indigo::Application::run()
 		return;
 	}
 
+	OOBase::CmdArgs::options_t::const_iterator opt = m_options.find("window_caption");
+	const Window::CreateParams default_window_params(1024,768,false,opt && !opt->second.empty() ? opt->second.c_str() : "The House");
 	Window::CreateParams window_params(default_window_params);
-	// TODO Load window params settings
 
+	// TODO Load window params settings
 	if (!m_wnd->create(window_params))
 	{
 		// Reset window params to sensible defaults
@@ -59,18 +60,19 @@ void Indigo::Application::run()
 		}
 	}
 	
-	// Load resources
+	// Find resources
 	OOBase::String resources;
-	ZipResource zip;
 	if (m_args.size() > 1)
 		resources = m_args[0];
 	else
 	{
-		OOBase::CmdArgs::options_t::const_iterator i=m_options.find("data_file");
-		if (i)
-			resources = i->second;
+		opt = m_options.find("data_file");
+		if (opt)
+			resources = opt->second;
 	}
 
+	// Load resources
+	ZipResource zip;
 	if (resources.empty() || !zip.open(resources.c_str()))
 	{
 		// TODO Error Message
@@ -81,17 +83,19 @@ void Indigo::Application::run()
 
 		for (;;)
 		{
-			if (!show_start_dlg(zip,window_params))
+			Game game;
+			if (!show_start_dlg(zip,window_params,game))
 				break;
 
-
+			if (!game.run())
+				break;
 		}
 	}
 	
 	m_wnd.reset();
 }
 
-bool Indigo::Application::show_start_dlg(ResourceBundle& res, Window::CreateParams orig_params)
+bool Indigo::Application::show_start_dlg(ResourceBundle& res, Window::CreateParams orig_params, Game& game)
 {
 	Window::CreateParams new_params;
 	for (bool reinit = false;;)
@@ -150,11 +154,17 @@ bool Indigo::Application::show_start_dlg(ResourceBundle& res, Window::CreatePara
 			{
 				new_params = orig_params;
 
-				StartDlg dlg(loader,new_params);
+				StartDlg dlg(loader,new_params,game);
 
 				m_wnd->show();
 
 				Indigo::StartDlg::Result ret = dlg.do_modal();
+
+				if (img_layer)
+				{
+					m_wnd->remove_layer(50);
+				}
+
 				if (ret == StartDlg::quit)
 					return false;
 

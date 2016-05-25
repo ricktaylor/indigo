@@ -27,6 +27,7 @@
 namespace Indigo
 {
 	class UILoader;
+	class Game;
 
 	class StartDlg
 	{
@@ -39,12 +40,13 @@ namespace Indigo
 			quit
 		};
 
-		StartDlg(UILoader& loader, Window::CreateParams& window_params);
+		StartDlg(UILoader& loader, Window::CreateParams& window_params, Game& game);
 
 		enum Result do_modal();
 
 	private:
 		UILoader&                   m_loader;
+		Game&                       m_game;
 		Window::CreateParams&       m_window_params;
 		bool                        m_live;
 		Result                      m_result;
@@ -52,6 +54,7 @@ namespace Indigo
 		void window_close(const Window& w);
 		void on_quit();
 		void on_config();
+		void on_new_game();
 	};
 }
 
