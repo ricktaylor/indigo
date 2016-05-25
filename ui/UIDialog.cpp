@@ -74,9 +74,9 @@ void Indigo::UIDialog::show(bool visible)
 	UIGroup::show(visible);
 }
 
-bool Indigo::UIDialog::add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name)
+bool Indigo::UIDialog::add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len)
 {
-	if (!m_names.insert(name,widget))
+	if (!m_names.insert(OOBase::Hash<const char*>::hash(name,len),widget))
 		LOG_ERROR_RETURN(("Failed to insert widget name: %s",OOBase::system_error_text()),false);
 
 	return true;
@@ -84,16 +84,7 @@ bool Indigo::UIDialog::add_named_widget(const OOBase::SharedPtr<UIWidget>& widge
 
 OOBase::SharedPtr<Indigo::UIWidget> Indigo::UIDialog::find_widget(const char* name, size_t len) const
 {
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> str;
-	if (!str.assign(name,len))
-		LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),OOBase::SharedPtr<Indigo::UIWidget>());
-
-	return find_widget(str);
-}
-
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UIDialog::find_widget(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const
-{
-	OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::WeakPtr<UIWidget>,OOBase::ThreadLocalAllocator>::const_iterator i = m_names.find(name);
+	OOBase::HashTable<size_t,OOBase::WeakPtr<UIWidget>,OOBase::ThreadLocalAllocator>::const_iterator i = m_names.find(OOBase::Hash<const char*>::hash(name,len));
 	if (i == m_names.end())
 		return OOBase::SharedPtr<Indigo::UIWidget>();
 	return i->second.lock();

@@ -151,15 +151,6 @@ Indigo::UIGroup::UIGroup(UIGroup* parent, const CreateParams& params) :
 
 bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder, const char* name, size_t len)
 {
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> str;
-	if (!str.assign(name,len))
-		LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),false);
-
-	return add_widget(widget,zorder,str);
-}
-
-bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name)
-{
 	if (!m_render_group)
 		LOG_ERROR_RETURN(("Failed to insert widget: incomplete parent"),false);
 
@@ -169,7 +160,7 @@ bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsi
 	if (!m_children.insert(zorder,widget))
 		LOG_ERROR_RETURN(("Failed to insert widget: %s",OOBase::system_error_text()),false);
 
-	if (!name.empty() && !add_named_widget(widget,name))
+	if (name && len && !add_named_widget(widget,name,len))
 	{
 		m_children.remove(zorder);
 		return false;
@@ -182,9 +173,9 @@ bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsi
 	return ret;
 }
 
-bool Indigo::UIGroup::add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name)
+bool Indigo::UIGroup::add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len)
 {
-	return m_parent->add_named_widget(widget,name);
+	return m_parent->add_named_widget(widget,name,len);
 }
 
 OOBase::SharedPtr<Indigo::UIWidget> Indigo::UIGroup::get_widget(unsigned int zorder) const

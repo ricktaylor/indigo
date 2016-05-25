@@ -495,22 +495,13 @@ bool Indigo::UILoader::parse_create_params(const OOBase::ScopedString& arg, cons
 	return false;
 }
 
-OOBase::SharedPtr<Indigo::UIDialog> Indigo::UILoader::find_dialog(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const
+OOBase::SharedPtr<Indigo::UIDialog> Indigo::UILoader::find_dialog(const char* name, size_t len) const
 {
 	OOBase::SharedPtr<UIDialog> ret;
-	dialog_hash_t::const_iterator i = m_hashDialogs.find(name);
+	dialog_hash_t::const_iterator i = m_hashDialogs.find(OOBase::Hash<const char*>::hash(name,len));
 	if (i)
 		ret = i->second;
 	return ret;
-}
-
-OOBase::SharedPtr<Indigo::UIDialog> Indigo::UILoader::find_dialog(const char* name, size_t len) const
-{
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> str;
-	if (!str.assign(name,len))
-		LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIDialog>());
-
-	return find_dialog(str);
 }
 
 bool Indigo::UILoader::load(ResourceBundle& resource, const char* name, unsigned int& zorder, UIGroup* parent)
@@ -566,11 +557,12 @@ bool Indigo::UILoader::load_top_level(const char*& p, const char* pe, const OOBa
 
 bool Indigo::UILoader::load_dialog(const char*& p, const char* pe, unsigned int zorder)
 {
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> name;
+	OOBase::ScopedString name;
 	if (!ident(p,pe,name))
 		SYNTAX_ERROR_RETURN(("Identifier expected"),false);
 
-	if (m_hashDialogs.find(name))
+	size_t hash = OOBase::Hash<const char*>::hash(name);
+	if (m_hashDialogs.find(hash))
 		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),false);
 
 	UIDialog::CreateParams params;
@@ -619,7 +611,7 @@ bool Indigo::UILoader::load_dialog(const char*& p, const char* pe, unsigned int 
 	if (!dialog)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
-	if (!m_hashDialogs.insert(name,dialog))
+	if (!m_hashDialogs.insert(hash,dialog))
 		LOG_ERROR_RETURN(("Failed to insert dialog into map: %s",OOBase::system_error_text()),false);
 
 	if (!m_wnd->add_layer(dialog,zorder))
@@ -898,7 +890,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 			SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
 	}
 
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> image_name;
+	OOBase::ScopedString image_name;
 	if (!parse_string(p,pe,image_name))
 		return OOBase::SharedPtr<UIWidget>();
 
@@ -919,9 +911,10 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 	return uiimage;
 }
 
-OOBase::SharedPtr<Indigo::Image> Indigo::UILoader::load_image(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& image_name)
+OOBase::SharedPtr<Indigo::Image> Indigo::UILoader::load_image(const char*& p, const char* pe, const OOBase::ScopedString& image_name)
 {
-	image_hash_t::iterator i = m_hashImages.find(image_name.c_str());
+	size_t hash = OOBase::Hash<const char*>::hash(image_name);
+	image_hash_t::iterator i = m_hashImages.find(hash);
 	if (i)
 		return i->second;
 
@@ -935,15 +928,16 @@ OOBase::SharedPtr<Indigo::Image> Indigo::UILoader::load_image(const char*& p, co
 	if (!image->load(*m_resource,image_name.c_str(),4))
 		return OOBase::SharedPtr<Image>();
 
-	if (!m_hashImages.insert(image_name,image))
+	if (!m_hashImages.insert(hash,image))
 		LOG_WARNING(("Failed to cache image: %s",OOBase::system_error_text()));
 
 	return image;
 }
 
-OOBase::SharedPtr<Indigo::NinePatch> Indigo::UILoader::load_9patch(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& patch_name)
+OOBase::SharedPtr<Indigo::NinePatch> Indigo::UILoader::load_9patch(const char*& p, const char* pe, const OOBase::ScopedString& patch_name)
 {
-	ninepatch_hash_t::iterator i = m_hash9Patches.find(patch_name);
+	size_t hash = OOBase::Hash<const char*>::hash(patch_name);
+	ninepatch_hash_t::iterator i = m_hash9Patches.find(hash);
 	if (i)
 		return i->second;
 
@@ -957,15 +951,16 @@ OOBase::SharedPtr<Indigo::NinePatch> Indigo::UILoader::load_9patch(const char*& 
 	if (!patch->load(*m_resource,patch_name.c_str(),4))
 		return OOBase::SharedPtr<NinePatch>();
 
-	if (!m_hash9Patches.insert(patch_name,patch))
+	if (!m_hash9Patches.insert(hash,patch))
 		LOG_WARNING(("Failed to cache 9 patch: %s",OOBase::system_error_text()));
 
 	return patch;
 }
 
-OOBase::SharedPtr<Indigo::Font> Indigo::UILoader::load_font(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& font_name)
+OOBase::SharedPtr<Indigo::Font> Indigo::UILoader::load_font(const char*& p, const char* pe, const OOBase::ScopedString& font_name)
 {
-	font_hash_t::iterator i = m_hashFonts.find(font_name);
+	size_t hash = OOBase::Hash<const char*>::hash(font_name);
+	font_hash_t::iterator i = m_hashFonts.find(hash);
 	if (i)
 		return i->second;
 
@@ -979,7 +974,7 @@ OOBase::SharedPtr<Indigo::Font> Indigo::UILoader::load_font(const char*& p, cons
 	if (!font->load(*m_resource,font_name.c_str()))
 		return OOBase::SharedPtr<Font>();
 
-	if (!m_hashFonts.insert(font_name,font))
+	if (!m_hashFonts.insert(hash,font))
 		LOG_WARNING(("Failed to cache font: %s",OOBase::system_error_text()));
 
 	return font;
@@ -987,11 +982,12 @@ OOBase::SharedPtr<Indigo::Font> Indigo::UILoader::load_font(const char*& p, cons
 
 bool Indigo::UILoader::load_button_style(const char*& p, const char* pe)
 {
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> name;
+	OOBase::ScopedString name;
 	if (!ident(p,pe,name))
 		SYNTAX_ERROR_RETURN(("Identifier expected"),false);
 
-	if (m_hashButtonStyles.find(name))
+	size_t hash = OOBase::Hash<const char*>::hash(name);
+	if (m_hashButtonStyles.find(hash))
 		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),false);
 
 	OOBase::SharedPtr<UIButton::Style> style = OOBase::allocate_shared<UIButton::Style,OOBase::ThreadLocalAllocator>();
@@ -1009,7 +1005,7 @@ bool Indigo::UILoader::load_button_style(const char*& p, const char* pe)
 	if (!load_button_style_state(p,pe,default_state,style))
 		return false;
 
-	if (!m_hashButtonStyles.insert(name,style))
+	if (!m_hashButtonStyles.insert(hash,style))
 		LOG_ERROR_RETURN(("Failed to cache button style: %s",OOBase::system_error_text()),false);
 
 	return true;
@@ -1067,7 +1063,7 @@ bool Indigo::UILoader::load_button_style_state(const char*& p, const char* pe, U
 							SYNTAX_ERROR_RETURN(("')' expected"),false);
 					}
 
-					OOBase::SharedString<OOBase::ThreadLocalAllocator> font_name;
+					OOBase::ScopedString font_name;
 					if (!parse_string(p,pe,font_name))
 						return false;
 
@@ -1111,7 +1107,7 @@ bool Indigo::UILoader::load_button_style_state(const char*& p, const char* pe, U
 							SYNTAX_ERROR_RETURN(("')' expected"),false);
 					}
 
-					OOBase::SharedString<OOBase::ThreadLocalAllocator> patch_name;
+					OOBase::ScopedString patch_name;
 					if (!parse_string(p,pe,patch_name))
 						return false;
 
@@ -1226,18 +1222,18 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_button(const char*& p
 			SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
 	}
 
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> caption;
-	if (!parse_string(p,pe,caption))
-		return OOBase::SharedPtr<UIWidget>();
-
 	if (style_name.empty())
 		SYNTAX_ERROR_RETURN(("No style for BUTTON"),OOBase::SharedPtr<UIWidget>());
 
-	button_style_hash_t::iterator i = m_hashButtonStyles.find(style_name.c_str());
+	button_style_hash_t::iterator i = m_hashButtonStyles.find(OOBase::Hash<const char*>::hash(style_name));
 	if (!i)
 		SYNTAX_ERROR_RETURN(("Undefined style '%s' for BUTTON",style_name.c_str()),OOBase::SharedPtr<UIWidget>());
 
 	params.m_style = i->second;
+
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> caption;
+	if (!parse_string(p,pe,caption))
+		return OOBase::SharedPtr<UIWidget>();
 
 	OOBase::SharedPtr<UIButton> button = OOBase::allocate_shared<UIButton,OOBase::ThreadLocalAllocator>(parent,caption,params);
 	if (!button)
@@ -1293,7 +1289,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p,
 							SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
 					}
 
-					OOBase::SharedString<OOBase::ThreadLocalAllocator> font_name;
+					OOBase::ScopedString font_name;
 					if (!parse_string(p,pe,font_name))
 						return OOBase::SharedPtr<UIWidget>();
 
@@ -1333,12 +1329,12 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p,
 			SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
 	}
 
+	if (!params.m_font)
+		SYNTAX_ERROR_RETURN(("No font for LABEL"),OOBase::SharedPtr<UIWidget>());
+
 	OOBase::SharedString<OOBase::ThreadLocalAllocator> caption;
 	if (!parse_string(p,pe,caption))
 		return OOBase::SharedPtr<UIWidget>();
-
-	if (!params.m_font)
-		SYNTAX_ERROR_RETURN(("No font for LABEL"),OOBase::SharedPtr<UIWidget>());
 
 	OOBase::SharedPtr<UILabel> label = OOBase::allocate_shared<UILabel,OOBase::ThreadLocalAllocator>(parent,caption,params);
 	if (!label)
@@ -1390,7 +1386,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p,
 			SYNTAX_ERROR_RETURN(("')' expected"),OOBase::SharedPtr<UIWidget>());
 	}
 
-	OOBase::SharedString<OOBase::ThreadLocalAllocator> patch_name;
+	OOBase::ScopedString patch_name;
 	if (!parse_string(p,pe,patch_name))
 		return OOBase::SharedPtr<UIWidget>();
 

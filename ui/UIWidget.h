@@ -156,7 +156,6 @@ namespace Indigo
 	public:
 		UIGroup(UIGroup* parent, const CreateParams& params = CreateParams());
 
-		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name = OOBase::SharedString<OOBase::ThreadLocalAllocator>());
 		bool add_widget(const OOBase::SharedPtr<UIWidget>& widget, unsigned int zorder, const char* name, size_t len = -1);
 
 		bool remove_widget(unsigned int zorder);
@@ -172,7 +171,7 @@ namespace Indigo
 		virtual bool on_mousemove(const glm::ivec2& pos);
 		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 
-		virtual bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name);
+		virtual bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len = size_t(-1));
 
 	private:
 		OOBase::Table<unsigned int,OOBase::SharedPtr<UIWidget>,OOBase::Less<unsigned int>,OOBase::ThreadLocalAllocator> m_children;

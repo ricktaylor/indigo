@@ -62,7 +62,6 @@ namespace Indigo
 		OOBase::SharedPtr<Window> window() const;
 
 		OOBase::SharedPtr<UIWidget> find_widget(const char* name, size_t len = -1) const;
-		OOBase::SharedPtr<UIWidget> find_widget(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const;
 
 	protected:
 		OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window);
@@ -77,7 +76,7 @@ namespace Indigo
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;
 
-		bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name);
+		bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len = size_t(-1));
 
 	private:
 		OOBase::WeakPtr<Window>            m_wnd;
@@ -85,7 +84,7 @@ namespace Indigo
 		UIGridSizer                        m_sizer;
 		bool                               m_modal;
 
-		OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::WeakPtr<UIWidget>,OOBase::ThreadLocalAllocator> m_names;
+		OOBase::HashTable<size_t,OOBase::WeakPtr<UIWidget>,OOBase::ThreadLocalAllocator> m_names;
 	};
 }
 

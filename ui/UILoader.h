@@ -39,8 +39,7 @@ namespace Indigo
 
 		bool load(ResourceBundle& resource, const char* resource_name, unsigned int& zorder, UIGroup* parent = NULL);
 		
-		OOBase::SharedPtr<UIDialog> find_dialog(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& name) const;
-		OOBase::SharedPtr<UIDialog> find_dialog(const char* name, size_t len = -1) const;
+		OOBase::SharedPtr<UIDialog> find_dialog(const char* name, size_t len = size_t(-1)) const;
 
 		OOBase::SharedPtr<Window> window() const { return m_wnd; }
 
@@ -54,19 +53,19 @@ namespace Indigo
 			unsigned int m_col;
 		} m_error_pos;
 
-		typedef OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::SharedPtr<UIDialog>,OOBase::ThreadLocalAllocator> dialog_hash_t;
+		typedef OOBase::HashTable<size_t,OOBase::SharedPtr<UIDialog>,OOBase::ThreadLocalAllocator> dialog_hash_t;
 		dialog_hash_t m_hashDialogs;
 
-		typedef OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator> image_hash_t;
+		typedef OOBase::HashTable<size_t,OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator> image_hash_t;
 		image_hash_t m_hashImages;
 
-		typedef OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::SharedPtr<NinePatch>,OOBase::ThreadLocalAllocator> ninepatch_hash_t;
+		typedef OOBase::HashTable<size_t,OOBase::SharedPtr<NinePatch>,OOBase::ThreadLocalAllocator> ninepatch_hash_t;
 		ninepatch_hash_t m_hash9Patches;
 
-		typedef OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::SharedPtr<Font>,OOBase::ThreadLocalAllocator> font_hash_t;
+		typedef OOBase::HashTable<size_t,OOBase::SharedPtr<Font>,OOBase::ThreadLocalAllocator> font_hash_t;
 		font_hash_t m_hashFonts;
 
-		typedef OOBase::HashTable<OOBase::SharedString<OOBase::ThreadLocalAllocator>,OOBase::SharedPtr<UIButton::Style>,OOBase::ThreadLocalAllocator> button_style_hash_t;
+		typedef OOBase::HashTable<size_t,OOBase::SharedPtr<UIButton::Style>,OOBase::ThreadLocalAllocator> button_style_hash_t;
 		button_style_hash_t m_hashButtonStyles;
 
 		void syntax_error(const char* fmt, ...) OOBASE_FORMAT(printf,2,3);
@@ -91,9 +90,9 @@ namespace Indigo
 		bool load_children(const char*& p, const char* pe, UIGroup* parent, unsigned int& zorder);
 		OOBase::SharedPtr<UIWidget> load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent, unsigned int zorder);
 		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, UIGridSizer& sizer, unsigned int& zorder, bool add_loose);
-		OOBase::SharedPtr<Image> load_image(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& image_name);
-		OOBase::SharedPtr<Font> load_font(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& font_name);
-		OOBase::SharedPtr<NinePatch> load_9patch(const char*& p, const char* pe, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& patch_name);
+		OOBase::SharedPtr<Image> load_image(const char*& p, const char* pe, const OOBase::ScopedString& image_name);
+		OOBase::SharedPtr<Font> load_font(const char*& p, const char* pe, const OOBase::ScopedString& font_name);
+		OOBase::SharedPtr<NinePatch> load_9patch(const char*& p, const char* pe, const OOBase::ScopedString& patch_name);
 		bool load_button_style(const char*& p, const char* pe);
 		bool load_button_style_state(const char*& p, const char* pe, UIButton::StyleState& state, const OOBase::SharedPtr<UIButton::Style>& style);
 		OOBase::SharedPtr<UIWidget> load_uiimage(const char*& p, const char* pe, UIGroup* parent, const OOBase::ScopedString& name, unsigned int zorder);
