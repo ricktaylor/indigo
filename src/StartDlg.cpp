@@ -94,7 +94,18 @@ void Indigo::StartDlg::on_config()
 {
 	if (m_live)
 	{
-		m_window_params.m_fullscreen = !m_window_params.m_fullscreen;
+		if (m_window_params.m_fullscreen)
+		{
+			m_window_params.m_fullscreen = false;
+			m_window_params.m_width = 1024;
+			m_window_params.m_height = 768;
+		}
+		else
+		{
+			m_window_params.m_fullscreen = true;
+			m_window_params.m_width = 0;
+			m_window_params.m_height = 0;
+		}
 
 		m_result = StartDlg::reinit;
 		m_live = false;
