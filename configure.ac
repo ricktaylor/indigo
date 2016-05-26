@@ -2,7 +2,7 @@ AC_PREREQ(2.61)
 
 AC_INIT(indigo,0.0.1)
 AC_CONFIG_SRCDIR([README.md])
-AC_CONFIG_HEADERS([autoheader_dummy.h core/Config.h])
+AC_CONFIG_HEADERS([autoheader_dummy.h src/Config.h])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SUBDIRS([oobase])

@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../core/Common.h"
-#include "../core/Resource.h"
+#include "../src/Common.h"
+#include "../src/Resource.h"
 
 namespace
 {

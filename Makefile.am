@@ -63,32 +63,32 @@ indigo_SOURCES = \
 	oogl/Texture.cpp \
 	oogl/BufferObject.cpp \
 	oogl/VertexArrayObject.cpp \
-	core/Pipe.cpp \
-	core/Thread.cpp \
-	core/Render.cpp \
-	core/Window.cpp \
-	core/Image.cpp \
-	core/Font.cpp \
-	core/ShaderPool.cpp \
-	core/ZipResource.cpp \
+	src/Pipe.cpp \
+	src/Thread.cpp \
+	src/Render.cpp \
+	src/Window.cpp \
+	src/Image.cpp \
+	src/Font.cpp \
+	src/ShaderPool.cpp \
+	src/ZipResource.cpp \
+	src/ui/Quad.cpp \
+	src/ui/ImageLayer.cpp \
+	src/ui/UILabel.cpp \
+	src/ui/UINinePatch.cpp \
+	src/ui/UIWidget.cpp \
+	src/ui/UIDialog.cpp \
+	src/ui/UIButton.cpp \
+	src/ui/UIImage.cpp \
+	src/ui/UISizer.cpp \
+	src/ui/UIPanel.cpp \
+	src/ui/UILoader.cpp \
 	resources/StaticResources.cpp \
-	ui/Quad.cpp \
-	ui/ImageLayer.cpp \
-	ui/UILabel.cpp \
-	ui/UINinePatch.cpp \
-	ui/UIWidget.cpp \
-	ui/UIDialog.cpp \
-	ui/UIButton.cpp \
-	ui/UIImage.cpp \
-	ui/UISizer.cpp \
-	ui/UIPanel.cpp \
-	ui/UILoader.cpp \
-	src/Main.cpp \
-	src/App.cpp \
-	src/QuitDlg.cpp \
-	src/StartDlg.cpp \
-	src/WindowChangeDlg.cpp \
-	src/Game.cpp
+	game/Main.cpp \
+	game/App.cpp \
+	game/QuitDlg.cpp \
+	game/StartDlg.cpp \
+	game/WindowChangeDlg.cpp \
+	game/Game.cpp
 			
 indigo_LDADD = \
 	@top_builddir@/oobase/liboobase.la \
