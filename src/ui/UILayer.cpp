@@ -21,14 +21,14 @@
 
 #include "../src/Common.h"
 
-#include "UIDialog.h"
+#include "UILayer.h"
 
 namespace
 {
-	class UIDialog : public Indigo::Render::UIGroup, public Indigo::Render::Layer
+	class UILayer : public Indigo::Render::UIGroup, public Indigo::Render::Layer
 	{
 	public:
-		UIDialog(Indigo::Render::Window* window, const glm::vec2& sz);
+		UILayer(Indigo::Render::Window* window, const glm::vec2& sz);
 
 		void on_draw(OOGL::State& glState) const;
 		void on_size(const glm::uvec2& sz);
@@ -37,14 +37,14 @@ namespace
 	};
 }
 
-::UIDialog::UIDialog(Indigo::Render::Window* window, const glm::vec2& sz) :
+::UILayer::UILayer(Indigo::Render::Window* window, const glm::vec2& sz) :
 		Indigo::Render::UIGroup(true),
 		Indigo::Render::Layer(window)
 {
 	m_mvp = glm::ortho(0.f,sz.x,0.f,sz.y);
 }
 
-void ::UIDialog::on_draw(OOGL::State& glState) const
+void ::UILayer::on_draw(OOGL::State& glState) const
 {
 	glState.enable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -52,13 +52,13 @@ void ::UIDialog::on_draw(OOGL::State& glState) const
 	Indigo::Render::UIGroup::on_draw(glState,m_mvp);
 }
 
-void ::UIDialog::on_size(const glm::uvec2& sz)
+void ::UILayer::on_size(const glm::uvec2& sz)
 {
 	glm::vec2 sz2 = sz;
 	m_mvp = glm::ortho(0.f,sz2.x,0.f,sz2.y);
 }
 
-Indigo::UIDialog::UIDialog(const OOBase::SharedPtr<Window>& wnd, const CreateParams& params) :
+Indigo::UILayer::UILayer(const OOBase::SharedPtr<Window>& wnd, const CreateParams& params) :
 		UIGroup(NULL,params),
 		m_wnd(wnd),
 		m_sizer(params.m_fixed,params.m_margins,params.m_padding),
@@ -68,13 +68,13 @@ Indigo::UIDialog::UIDialog(const OOBase::SharedPtr<Window>& wnd, const CreatePar
 		this->size(ideal_size());
 }
 
-void Indigo::UIDialog::show(bool visible)
+void Indigo::UILayer::show(bool visible)
 {
 	Layer::show(visible);
 	UIGroup::show(visible);
 }
 
-bool Indigo::UIDialog::add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len)
+bool Indigo::UILayer::add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len)
 {
 	if (!m_names.insert(OOBase::Hash<const char*>::hash(name,len),widget))
 		LOG_ERROR_RETURN(("Failed to insert widget name: %s",OOBase::system_error_text()),false);
@@ -82,7 +82,7 @@ bool Indigo::UIDialog::add_named_widget(const OOBase::SharedPtr<UIWidget>& widge
 	return true;
 }
 
-OOBase::SharedPtr<Indigo::UIWidget> Indigo::UIDialog::find_widget(const char* name, size_t len) const
+OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILayer::find_widget(const char* name, size_t len) const
 {
 	OOBase::HashTable<size_t,OOBase::WeakPtr<UIWidget>,OOBase::ThreadLocalAllocator>::const_iterator i = m_names.find(OOBase::Hash<const char*>::hash(name,len));
 	if (i == m_names.end())
@@ -90,7 +90,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UIDialog::find_widget(const char* na
 	return i->second.lock();
 }
 
-void Indigo::UIDialog::on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask)
+void Indigo::UILayer::on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask)
 {
 	UIGroup::on_state_change(state,change_mask);
 
@@ -104,31 +104,31 @@ void Indigo::UIDialog::on_state_change(OOBase::uint32_t state, OOBase::uint32_t 
 	}
 }
 
-void Indigo::UIDialog::on_size(const glm::uvec2& sz)
+void Indigo::UILayer::on_size(const glm::uvec2& sz)
 {
 	m_size = sz;
 	m_sizer.fit(sz);
 }
 
-glm::uvec2 Indigo::UIDialog::min_size() const
+glm::uvec2 Indigo::UILayer::min_size() const
 {
 	return m_sizer.min_fit();
 }
-glm::uvec2 Indigo::UIDialog::ideal_size() const
+glm::uvec2 Indigo::UILayer::ideal_size() const
 {
 	return m_sizer.ideal_fit();
 }
 
-OOBase::SharedPtr<Indigo::Window> Indigo::UIDialog::window() const
+OOBase::SharedPtr<Indigo::Window> Indigo::UILayer::window() const
 {
 	return m_wnd.lock();
 }
 
-OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UIDialog::create_render_layer(Indigo::Render::Window* window)
+OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(Indigo::Render::Window* window)
 {
 	m_size = window->window()->size();
 
-	OOBase::SharedPtr< ::UIDialog> group = OOBase::allocate_shared< ::UIDialog,OOBase::ThreadLocalAllocator>(window,m_size);
+	OOBase::SharedPtr< ::UILayer> group = OOBase::allocate_shared< ::UILayer,OOBase::ThreadLocalAllocator>(window,m_size);
 	if (!group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
 	else
@@ -140,14 +140,14 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UIDialog::create_render_layer(I
 	return OOBase::static_pointer_cast<Indigo::Render::Layer>(group);
 }
 
-void Indigo::UIDialog::destroy_render_layer()
+void Indigo::UILayer::destroy_render_layer()
 {
 	m_group.reset();
 
 	Layer::destroy_render_layer();
 }
 
-bool Indigo::UIDialog::on_mousemove(const double& screen_x, const double& screen_y)
+bool Indigo::UILayer::on_mousemove(const double& screen_x, const double& screen_y)
 {
 	if (!m_size.x || !m_size.y)
 		return false;
@@ -156,7 +156,7 @@ bool Indigo::UIDialog::on_mousemove(const double& screen_x, const double& screen
 	return m_modal || ret;
 }
 
-bool Indigo::UIDialog::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+bool Indigo::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 {
 	bool ret = UIGroup::on_mousebutton(click);
 	return m_modal || ret;

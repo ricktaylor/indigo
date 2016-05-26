@@ -80,7 +80,7 @@ namespace Indigo
 	class UIWidget : public OOBase::NonCopyable
 	{
 		friend class UIGroup;
-		friend class UIDialog;
+		friend class UILayer;
 		friend class Render::UIGroup;
 
 	public:

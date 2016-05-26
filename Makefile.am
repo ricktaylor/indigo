@@ -76,7 +76,7 @@ indigo_SOURCES = \
 	src/ui/UILabel.cpp \
 	src/ui/UINinePatch.cpp \
 	src/ui/UIWidget.cpp \
-	src/ui/UIDialog.cpp \
+	src/ui/UILayer.cpp \
 	src/ui/UIButton.cpp \
 	src/ui/UIImage.cpp \
 	src/ui/UISizer.cpp \

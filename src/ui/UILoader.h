@@ -23,7 +23,7 @@
 #define INDIGO_UILOADER_H_INCLUDED
 
 #include "UIButton.h"
-#include "UIDialog.h"
+#include "UILayer.h"
 
 namespace Indigo
 {
@@ -39,7 +39,7 @@ namespace Indigo
 
 		bool load(ResourceBundle& resource, const char* resource_name);
 		
-		OOBase::SharedPtr<UIDialog> find_dialog(const char* name, size_t len = size_t(-1)) const;
+		OOBase::SharedPtr<UILayer> find_layer(const char* name, size_t len = size_t(-1)) const;
 
 		OOBase::SharedPtr<Window> window() const { return m_wnd; }
 
@@ -53,8 +53,8 @@ namespace Indigo
 			unsigned int m_col;
 		} m_error_pos;
 
-		typedef OOBase::HashTable<size_t,OOBase::SharedPtr<UIDialog>,OOBase::ThreadLocalAllocator> dialog_hash_t;
-		dialog_hash_t m_hashDialogs;
+		typedef OOBase::HashTable<size_t,OOBase::SharedPtr<UILayer>,OOBase::ThreadLocalAllocator> layer_hash_t;
+		layer_hash_t m_hashLayers;
 
 		typedef OOBase::HashTable<size_t,OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator> image_hash_t;
 		image_hash_t m_hashImages;
@@ -86,7 +86,7 @@ namespace Indigo
 		bool parse_create_params(const OOBase::ScopedString& arg, const char*& p, const char* pe, UIWidget::CreateParams& params);
 
 		bool load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type);
-		bool load_dialog(const char*& p, const char* pe);
+		bool load_layer(const char*& p, const char* pe);
 		bool load_children(const char*& p, const char* pe, UIGroup* parent);
 		OOBase::SharedPtr<UIWidget> load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent);
 		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, UIGridSizer& sizer, bool add_loose);

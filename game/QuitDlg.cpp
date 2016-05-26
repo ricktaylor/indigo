@@ -25,7 +25,7 @@
 
 #include "../src/Thread.h"
 
-Indigo::QuitDlg::QuitDlg(const OOBase::SharedPtr<UIDialog>& dialog) :
+Indigo::QuitDlg::QuitDlg(const OOBase::SharedPtr<UILayer>& dialog) :
 		m_dialog(dialog),
 		m_live(false),
 		m_result(true)

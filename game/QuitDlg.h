@@ -29,12 +29,12 @@ namespace Indigo
 	class QuitDlg
 	{
 	public:
-		QuitDlg(const OOBase::SharedPtr<UIDialog>& dialog);
+		QuitDlg(const OOBase::SharedPtr<UILayer>& dialog);
 
 		bool do_modal();
 
 	private:
-		OOBase::SharedPtr<UIDialog> m_dialog;
+		OOBase::SharedPtr<UILayer> m_dialog;
 		bool                        m_live;
 		bool                        m_result;
 

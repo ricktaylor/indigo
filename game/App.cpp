@@ -133,7 +133,7 @@ bool Indigo::Application::show_start_dlg(ResourceBundle& res, Window::CreatePara
 
 			if (reinit)
 			{
-				WindowChangeDlg dlg(loader.find_dialog("window_change"));
+				WindowChangeDlg dlg(loader.find_layer("window_change"));
 
 				m_wnd->show();
 

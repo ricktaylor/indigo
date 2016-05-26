@@ -495,10 +495,10 @@ bool Indigo::UILoader::parse_create_params(const OOBase::ScopedString& arg, cons
 	return false;
 }
 
-OOBase::SharedPtr<Indigo::UIDialog> Indigo::UILoader::find_dialog(const char* name, size_t len) const
+OOBase::SharedPtr<Indigo::UILayer> Indigo::UILoader::find_layer(const char* name, size_t len) const
 {
-	OOBase::SharedPtr<UIDialog> ret;
-	dialog_hash_t::const_iterator i = m_hashDialogs.find(OOBase::Hash<const char*>::hash(name,len));
+	OOBase::SharedPtr<UILayer> ret;
+	layer_hash_t::const_iterator i = m_hashLayers.find(OOBase::Hash<const char*>::hash(name,len));
 	if (i)
 		ret = i->second;
 	return ret;
@@ -539,7 +539,7 @@ bool Indigo::UILoader::load_top_level(const char*& p, const char* pe, const OOBa
 {
 	if (type == "DIALOG")
 	{
-		return load_dialog(p,pe);
+		return load_layer(p,pe);
 	}
 
 	if (type == "BUTTON_STYLE")
@@ -552,17 +552,17 @@ bool Indigo::UILoader::load_top_level(const char*& p, const char* pe, const OOBa
 	return false;
 }
 
-bool Indigo::UILoader::load_dialog(const char*& p, const char* pe)
+bool Indigo::UILoader::load_layer(const char*& p, const char* pe)
 {
 	OOBase::ScopedString name;
 	if (!ident(p,pe,name))
 		SYNTAX_ERROR_RETURN(("Identifier expected"),false);
 
 	size_t hash = OOBase::Hash<const char*>::hash(name);
-	if (m_hashDialogs.find(hash))
+	if (m_hashLayers.find(hash))
 		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),false);
 
-	UIDialog::CreateParams params;
+	UILayer::CreateParams params;
 
 	if (character(p,pe,'('))
 	{
@@ -604,17 +604,17 @@ bool Indigo::UILoader::load_dialog(const char*& p, const char* pe)
 			SYNTAX_ERROR_RETURN(("')' expected"),false);
 	}
 
-	OOBase::SharedPtr<UIDialog> dialog = OOBase::allocate_shared<UIDialog,OOBase::ThreadLocalAllocator>(m_wnd,params);
-	if (!dialog)
+	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(m_wnd,params);
+	if (!layer)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
-	if (!m_hashDialogs.insert(hash,dialog))
-		LOG_ERROR_RETURN(("Failed to insert dialog into map: %s",OOBase::system_error_text()),false);
+	if (!m_hashLayers.insert(hash,layer))
+		LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),false);
 
-	if (!m_wnd->add_layer(dialog))
+	if (!m_wnd->add_layer(layer))
 		return false;
 
-	if (!load_grid_sizer(p,pe,dialog.get(),dialog->sizer(),true))
+	if (!load_grid_sizer(p,pe,layer.get(),layer->sizer(),true))
 		return false;
 
 	return true;

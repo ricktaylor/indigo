@@ -29,12 +29,12 @@ namespace Indigo
 	class WindowChangeDlg
 	{
 	public:
-		WindowChangeDlg(const OOBase::SharedPtr<UIDialog>& dialog);
+		WindowChangeDlg(const OOBase::SharedPtr<UILayer>& dialog);
 
 		bool do_modal();
 
 	private:
-		OOBase::SharedPtr<UIDialog> m_dialog;
+		OOBase::SharedPtr<UILayer> m_dialog;
 		bool                        m_live;
 		bool                        m_result;
 

@@ -39,7 +39,7 @@ Indigo::StartDlg::StartDlg(UILoader& loader, Window::CreateParams& window_params
 
 Indigo::StartDlg::Result Indigo::StartDlg::do_modal()
 {
-	OOBase::SharedPtr<UIDialog> dialog = m_loader.find_dialog("start");
+	OOBase::SharedPtr<UILayer> dialog = m_loader.find_layer("start");
 	if (!dialog)
 		LOG_WARNING_RETURN(("No dialog assigned to quit dialog"),StartDlg::quit);
 
@@ -73,7 +73,7 @@ Indigo::StartDlg::Result Indigo::StartDlg::do_modal()
 
 void Indigo::StartDlg::window_close(const Window& w)
 {
-	if (m_loader.find_dialog("start")->window().get() == &w)
+	if (m_loader.find_layer("start")->window().get() == &w)
 		on_quit();
 }
 
@@ -81,7 +81,7 @@ void Indigo::StartDlg::on_quit()
 {
 	if (m_live)
 	{
-		QuitDlg dlg(m_loader.find_dialog("quit"));
+		QuitDlg dlg(m_loader.find_layer("quit"));
 
 		if (dlg.do_modal())
 		{

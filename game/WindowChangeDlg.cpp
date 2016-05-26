@@ -25,7 +25,7 @@
 
 #include "../src/Thread.h"
 
-Indigo::WindowChangeDlg::WindowChangeDlg(const OOBase::SharedPtr<UIDialog>& dialog) :
+Indigo::WindowChangeDlg::WindowChangeDlg(const OOBase::SharedPtr<UILayer>& dialog) :
 		m_dialog(dialog),
 		m_live(false),
 		m_result(false)

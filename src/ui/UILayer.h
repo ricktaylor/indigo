@@ -28,7 +28,7 @@
 
 namespace Indigo
 {
-	class UIDialog : public Layer, public UIGroup
+	class UILayer : public Layer, public UIGroup
 	{
 	public:
 		struct CreateParams : UIWidget::CreateParams
@@ -51,7 +51,7 @@ namespace Indigo
 			glm::uvec2    m_padding;
 		};
 
-		UIDialog(const OOBase::SharedPtr<Window>& wnd, const CreateParams& params = CreateParams());
+		UILayer(const OOBase::SharedPtr<Window>& wnd, const CreateParams& params = CreateParams());
 
 		bool valid() const { return m_render_group; }
 
