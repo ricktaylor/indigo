@@ -22,7 +22,7 @@
 #ifndef INDIGO_NinePatch_H_INCLUDED
 #define INDIGO_NinePatch_H_INCLUDED
 
-#include "../src/Image.h"
+#include "../Image.h"
 
 #include "UIWidget.h"
 

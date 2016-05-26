@@ -19,10 +19,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../src/Common.h"
+#include "../Common.h"
 
-#include "../src/ShaderPool.h"
-#include "../src/Render.h"
+#include "../ShaderPool.h"
+#include "../Render.h"
 
 #include "UINinePatch.h"
 #include "UIImage.h"

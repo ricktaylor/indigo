@@ -19,10 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../src/Common.h"
-
-#include "../src/Image.h"
-
+#include "Common.h"
+#include "Image.h"
 #include "ImageLayer.h"
 #include "Quad.h"
 

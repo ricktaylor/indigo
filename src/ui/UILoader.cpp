@@ -19,11 +19,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../src/Common.h"
+#include "../Common.h"
 
 #include "UILoader.h"
 
-#include "../src/Resource.h"
+#include "../Resource.h"
 
 #include "UISizer.h"
 #include "UIImage.h"

@@ -19,12 +19,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../src/Common.h"
-#include "../src/Render.h"
+#include "../Common.h"
+#include "../Render.h"
+#include "../Quad.h"
 
 #include "UIImage.h"
-
-#include "Quad.h"
 
 Indigo::Render::UIImage::UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::uvec2& size, const glm::vec4& colour, bool visible, const glm::ivec2& position) :
 		UIDrawable(visible,position),

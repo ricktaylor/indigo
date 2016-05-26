@@ -24,7 +24,7 @@
 
 #include "UISizer.h"
 
-#include "../src/Window.h"
+#include "../Window.h"
 
 namespace Indigo
 {

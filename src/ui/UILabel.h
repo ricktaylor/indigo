@@ -24,7 +24,7 @@
 
 #include "UIWidget.h"
 
-#include "../src/Font.h"
+#include "../Font.h"
 
 namespace Indigo
 {

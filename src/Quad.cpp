@@ -19,11 +19,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../src/Common.h"
+#include "./Common.h"
 
 #include "Quad.h"
 
-#include "../src/ShaderPool.h"
+#include "./ShaderPool.h"
 
 #include "../oogl/BufferObject.h"
 #include "../oogl/Shader.h"

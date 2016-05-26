@@ -71,8 +71,8 @@ indigo_SOURCES = \
 	src/Font.cpp \
 	src/ShaderPool.cpp \
 	src/ZipResource.cpp \
-	src/ui/Quad.cpp \
-	src/ui/ImageLayer.cpp \
+	src/Quad.cpp \
+	src/ImageLayer.cpp \
 	src/ui/UILabel.cpp \
 	src/ui/UINinePatch.cpp \
 	src/ui/UIWidget.cpp \

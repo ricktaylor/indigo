@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../src/Common.h"
-#include "../src/Window.h"
+#include "../Common.h"
+#include "../Window.h"
 
 #include "UIWidget.h"
 

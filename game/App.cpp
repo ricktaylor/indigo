@@ -28,7 +28,7 @@
 #include "WindowChangeDlg.h"
 
 #include "../src/ZipResource.h"
-#include "../src/ui/ImageLayer.h"
+#include "../src/ImageLayer.h"
 
 Indigo::Application::Application()
 {

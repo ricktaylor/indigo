@@ -23,9 +23,9 @@
 #define INDIGO_UIImage_H_INCLUDED
 
 #include "UIWidget.h"
-#include "Quad.h"
 
-#include "../src/Image.h"
+#include "../Quad.h"
+#include "../Image.h"
 
 namespace Indigo
 {

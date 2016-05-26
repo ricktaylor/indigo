@@ -19,8 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../src/Common.h"
-#include "../src/Render.h"
+#include "../Common.h"
+#include "../Render.h"
 
 #include "UIPanel.h"
 
