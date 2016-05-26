@@ -49,67 +49,67 @@
     <ClInclude Include="..\resources\resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\core\Common.h">
+    <ClInclude Include="..\src\Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\core\Font.h">
+    <ClInclude Include="..\src\Font.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\core\Image.h">
+    <ClInclude Include="..\src\Image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\core\Pipe.h">
+    <ClInclude Include="..\src\Pipe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\core\Render.h">
+    <ClInclude Include="..\src\Render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\core\Resource.h">
+    <ClInclude Include="..\src\Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\core\ShaderPool.h">
+    <ClInclude Include="..\src\ShaderPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\core\Thread.h">
+    <ClInclude Include="..\src\Thread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\core\Window.h">
+    <ClInclude Include="..\src\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\core\ZipResource.h">
+    <ClInclude Include="..\src\ZipResource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\UIButton.h">
+    <ClInclude Include="..\src\ui\UIButton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\UIImage.h">
+    <ClInclude Include="..\src\ui\UIImage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\Quad.h">
+    <ClInclude Include="..\src\Quad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\ImageLayer.h">
+    <ClInclude Include="..\src\ImageLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\UISizer.h">
+    <ClInclude Include="..\src\ui\UISizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\UILoader.h">
+    <ClInclude Include="..\src\ui\UILoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\UIPanel.h">
+    <ClInclude Include="..\src\ui\UIPanel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\UIWidget.h">
+    <ClInclude Include="..\src\ui\UIWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\UILabel.h">
+    <ClInclude Include="..\src\ui\UILabel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\UINinePatch.h">
+    <ClInclude Include="..\src\ui\UINinePatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="QuitDlg.h">
@@ -118,7 +118,7 @@
     <ClInclude Include="StartDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ui\UIDialog.h">
+    <ClInclude Include="..\src\ui\UIDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WindowChangeDlg.h">
@@ -126,64 +126,64 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\core\Font.cpp">
+    <ClCompile Include="..\src\Font.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\core\Image.cpp">
+    <ClCompile Include="..\src\Image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\core\Pipe.cpp">
+    <ClCompile Include="..\src\Pipe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\core\Render.cpp">
+    <ClCompile Include="..\src\Render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\core\ShaderPool.cpp">
+    <ClCompile Include="..\src\ShaderPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\core\Thread.cpp">
+    <ClCompile Include="..\src\Thread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\core\Window.cpp">
+    <ClCompile Include="..\src\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\core\ZipResource.cpp">
+    <ClCompile Include="..\src\ZipResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\UIButton.cpp">
+    <ClCompile Include="..\src\ui\UIButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\UIImage.cpp">
+    <ClCompile Include="..\src\ui\UIImage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\Quad.cpp">
+    <ClCompile Include="..\src\Quad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\ImageLayer.cpp">
+    <ClCompile Include="..\src\ImageLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\UISizer.cpp">
+    <ClCompile Include="..\src\ui\UISizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\resources\StaticResources.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\UILoader.cpp">
+    <ClCompile Include="..\src\ui\UILoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\UIPanel.cpp">
+    <ClCompile Include="..\src\ui\UIPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\UIWidget.cpp">
+    <ClCompile Include="..\src\ui\UIWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\UILabel.cpp">
+    <ClCompile Include="..\src\ui\UILabel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\UINinePatch.cpp">
+    <ClCompile Include="..\src\ui\UINinePatch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
@@ -195,7 +195,7 @@
     <ClCompile Include="StartDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ui\UIDialog.cpp">
+    <ClCompile Include="..\src\ui\UIDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WindowChangeDlg.cpp">
