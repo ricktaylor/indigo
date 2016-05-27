@@ -21,11 +21,11 @@
 
 #include "../Common.h"
 
-#include "../ShaderPool.h"
-#include "../Render.h"
+#include "../../include/indigo/ShaderPool.h"
+#include "../../include/indigo/Render.h"
 
-#include "UINinePatch.h"
-#include "UIImage.h"
+#include "../../include/indigo/ui/UINinePatch.h"
+#include "../../include/indigo/ui/UIImage.h"
 
 #include "../oogl/include/OOGL/BufferObject.h"
 #include "../oogl/include/OOGL/VertexArrayObject.h"

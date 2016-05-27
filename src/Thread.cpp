@@ -20,7 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
-#include "Thread.h"
+#include "../include/indigo/Thread.h"
 
 namespace Indigo
 {

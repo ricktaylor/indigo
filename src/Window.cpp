@@ -20,9 +20,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
-#include "Window.h"
-#include "Render.h"
-#include "Thread.h"
+#include "../include/indigo/Window.h"
+#include "../include/indigo/Render.h"
+#include "../include/indigo/Thread.h"
 
 void Indigo::Render::Layer::show(bool visible)
 {
@@ -73,11 +73,7 @@ bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& p
 	if (!title)
 		title = "Indigo";
 
-	unsigned int style = params.m_style;
-	if (Indigo::is_debug())
-		style |= OOGL::Window::eWSdebug_context;
-
-	m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(params.m_width,params.m_height,title,style,monitor);
+	m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(params.m_width,params.m_height,title,params.m_style,monitor);
 	if (!m_wnd)
 		LOG_ERROR_RETURN(("Failed to create window: %s",OOBase::system_error_text()),false);
 
@@ -92,7 +88,7 @@ bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& p
 		m_wnd->on_mousemove(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_mousemove));
 		m_wnd->on_mousebutton(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_mousebutton));
 
-		if (Indigo::is_debug())
+		if (params.m_style & OOGL::Window::eWSdebug_context)
 			OOGL::StateFns::get_current()->enable_logging();
 	}
 

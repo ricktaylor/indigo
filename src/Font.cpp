@@ -20,10 +20,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
-#include "Font.h"
-#include "Render.h"
-#include "Image.h"
-#include "ShaderPool.h"
+#include "../include/indigo/Font.h"
+#include "../include/indigo/Render.h"
+#include "../include/indigo/Image.h"
+#include "../include/indigo/ShaderPool.h"
 
 namespace
 {

@@ -20,7 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
-#include "ShaderPool.h"
+#include "../include/indigo/ShaderPool.h"
 
 namespace
 {

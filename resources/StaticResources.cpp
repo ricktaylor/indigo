@@ -20,7 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "../src/Common.h"
-#include "../src/Resource.h"
+#include "../include/indigo/Resource.h"
 
 namespace
 {

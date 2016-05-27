@@ -20,9 +20,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
-#include "Image.h"
-#include "ImageLayer.h"
-#include "Quad.h"
+#include "../include/indigo/Image.h"
+#include "../include/indigo/ImageLayer.h"
+#include "../include/indigo/Quad.h"
 
 namespace
 {

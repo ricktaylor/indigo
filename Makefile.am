@@ -1,9 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = oobase oogl .  
-
 EXTRA_DIST = \
-	gpl3_0.txt \
 	lgpl3_0.txt
 
 ####################################
@@ -24,18 +21,18 @@ dist-hook:
 
 include $(top_srcdir)/m4/ltrc.inc
 
-bin_PROGRAMS = indigo
+noinst_LTLIBRARIES = libindigo.la
 
-indigo_CPPFLAGS = \
-	-I@top_srcdir@/oobase/include \
-	-I@top_builddir@/oobase/include
+# Hack below...
+libindigo_la_CPPFLAGS = -I./oobase/include -I../oobase/include -I./oogl/include
+# Hack above
 	
-indigo_CFLAGS = $(PTHREAD_CFLAGS)
-indigo_CXXFLAGS = $(PTHREAD_CFLAGS)
-indigo_LDFLAGS = $(PTHREAD_LIBS)
+libindigo_la_CFLAGS = $(PTHREAD_CFLAGS)
+libindigo_la_CXXFLAGS = $(PTHREAD_CFLAGS)
+libindigo_la_LDFLAGS = $(PTHREAD_LIBS)
 
 if WIN32
-indigo_CPPFLAGS += -D_WIN32_WINNT=0x0502
+libindigo_la_CPPFLAGS += -D_WIN32_WINNT=0x0502
 endif
 
 bin2c: $(top_srcdir)/tools/bin2c.c Makefile
@@ -52,7 +49,7 @@ BUILT_SOURCES = \
 	
 CLEANFILES = $(BUILT_SOURCES)
 	
-indigo_SOURCES = \
+libindigo_la_SOURCES = \
 	src/Pipe.cpp \
 	src/Thread.cpp \
 	src/Render.cpp \
@@ -72,25 +69,9 @@ indigo_SOURCES = \
 	src/ui/UISizer.cpp \
 	src/ui/UIPanel.cpp \
 	src/ui/UILoader.cpp \
-	resources/StaticResources.cpp \
-	game/Main.cpp \
-	game/App.cpp \
-	game/QuitDlg.cpp \
-	game/StartDlg.cpp \
-	game/WindowChangeDlg.cpp \
-	game/Game.cpp
+	resources/StaticResources.cpp
 			
-indigo_LDADD = \
-	@top_builddir@/oogl/liboogl.la \
-	@top_builddir@/oobase/liboobase.la
-		
-#	@top_builddir@/3rdparty/liblua.la 
-	
-#indigo_LDADD += -lglfw -lGL
-
 if WIN32
-indigo_SOURCES += ../resources/indigo.rc
-indigo_LDADD += -lole32 -lrpcrt4
-#else
-#indigo_LDADD += -ldl
+libindigo_la_SOURCES += ../resources/indigo.rc
+#libindigo_la_LDADD += -lole32 -lrpcrt4
 endif

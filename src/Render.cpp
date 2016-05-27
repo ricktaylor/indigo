@@ -20,9 +20,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
-#include "Render.h"
-#include "Window.h"
-#include "Thread.h"
+#include "../include/indigo/Render.h"
+#include "../include/indigo/Window.h"
+#include "../include/indigo/Thread.h"
 
 namespace Indigo
 {

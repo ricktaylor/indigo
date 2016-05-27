@@ -21,7 +21,7 @@
 
 #include "../Common.h"
 
-#include "UILayer.h"
+#include "../../include/indigo/ui/UILayer.h"
 
 namespace
 {

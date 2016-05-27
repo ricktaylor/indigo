@@ -48,25 +48,13 @@
 	//#include "Config_msvc.h"
 #elif defined(HAVE_CONFIG_H)
 	// Autoconf
-	#include <Config.h>
+	//#include <Config.h>
 #else
 #error Need some kind of configure scipt!
 #endif
 
-#include "../oogl/include/OOGL/State.h"
+#include <OOGL/State.h>
 
 #include <glm/gtc/matrix_transform.hpp>
-
-/*extern "C"
-{
-	#include "../3rdparty/lua/src/lua.h"
-	#include "../3rdparty/lua/src/lauxlib.h"
-	#include "../3rdparty/lua/src/lualib.h"
-}*/
-
-namespace Indigo
-{
-	bool is_debug();
-}
 
 #endif // INDIGO_COMMON_H_INCLUDED

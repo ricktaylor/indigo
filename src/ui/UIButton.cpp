@@ -21,9 +21,9 @@
 
 #include "../Common.h"
 
-#include "UIButton.h"
+#include "../../include/indigo/ui/UIButton.h"
 
-#include "../Render.h"
+#include "../../include/indigo/Render.h"
 
 void Indigo::UIButton::StyleState::unload()
 {

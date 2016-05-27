@@ -21,14 +21,14 @@
 
 #include "../Common.h"
 
-#include "UILoader.h"
+#include "../../include/indigo/ui/UILoader.h"
 
-#include "../Resource.h"
+#include "../../include/indigo/Resource.h"
 
-#include "UISizer.h"
-#include "UIImage.h"
-#include "UIButton.h"
-#include "UIPanel.h"
+#include "../../include/indigo/ui/UISizer.h"
+#include "../../include/indigo/ui/UIImage.h"
+#include "../../include/indigo/ui/UIButton.h"
+#include "../../include/indigo/ui/UIPanel.h"
 
 #include <stdlib.h>
 

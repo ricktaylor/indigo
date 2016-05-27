@@ -21,7 +21,7 @@
 
 #include "Common.h"
 
-#include "ZipResource.h"
+#include "../include/indigo/ZipResource.h"
 
 extern "C"
 {

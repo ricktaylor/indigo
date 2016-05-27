@@ -21,10 +21,10 @@
 
 #include "../Common.h"
 
-#include "UILabel.h"
+#include "../../include/indigo/ui/UILabel.h"
 
-#include "../Font.h"
-#include "../Render.h"
+#include "../../include/indigo/Font.h"
+#include "../../include/indigo/Render.h"
 
 Indigo::Render::UILabel::UILabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int size, const glm::vec4& colour, bool visible, const glm::ivec2& position) :
 		Text(font,sz,len),

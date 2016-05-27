@@ -20,8 +20,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "Common.h"
-#include "Quad.h"
-#include "ShaderPool.h"
+#include "../include/indigo/Quad.h"
+#include "../include/indigo/ShaderPool.h"
 
 #include "../oogl/include/OOGL/BufferObject.h"
 #include "../oogl/include/OOGL/VertexArrayObject.h"

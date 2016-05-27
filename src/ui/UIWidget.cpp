@@ -20,9 +20,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "../Common.h"
-#include "../Window.h"
+#include "../../include/indigo/Window.h"
 
-#include "UIWidget.h"
+#include "../../include/indigo/ui/UIWidget.h"
 
 Indigo::Render::UIDrawable::UIDrawable(bool visible, const glm::ivec2& position) :
 		m_visible(visible),
