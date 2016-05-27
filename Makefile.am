@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = 3rdparty oobase oogl .  
+SUBDIRS = oobase oogl .  
 
 EXTRA_DIST = \
 	gpl3_0.txt \
@@ -28,9 +28,7 @@ bin_PROGRAMS = indigo
 
 indigo_CPPFLAGS = \
 	-I@top_srcdir@/oobase/include \
-	-I@top_builddir@/oobase/include \
-	-I@top_srcdir@/3rdparty/glfw/include \
-	-I@top_srcdir@/3rdparty/glm
+	-I@top_builddir@/oobase/include
 	
 indigo_CFLAGS = $(PTHREAD_CFLAGS)
 indigo_CXXFLAGS = $(PTHREAD_CFLAGS)
@@ -84,16 +82,15 @@ indigo_SOURCES = \
 			
 indigo_LDADD = \
 	@top_builddir@/oogl/liboogl.la \
-	@top_builddir@/oobase/liboobase.la \
-	@top_builddir@/3rdparty/glfw/src/libglfw3.a
-	
+	@top_builddir@/oobase/liboobase.la
+		
 #	@top_builddir@/3rdparty/liblua.la 
 	
-indigo_LDADD += -lGL
+#indigo_LDADD += -lglfw -lGL
 
 if WIN32
 indigo_SOURCES += ../resources/indigo.rc
 indigo_LDADD += -lole32 -lrpcrt4
-else
-indigo_LDADD += -lX11 -lXrandr -lXi -lXxf86vm -lXcursor -lXinerama -ldl
+#else
+#indigo_LDADD += -ldl
 endif

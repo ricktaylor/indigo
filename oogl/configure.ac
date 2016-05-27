@@ -17,10 +17,6 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # I like maintainer mode
 AM_MAINTAINER_MODE
 
-AS_IF([test -f oobase/include/OOBase/Base.h],,[AC_MSG_ERROR(["No OOBase found, please symlink or copy into $ac_pwd/oobase"])])
-AS_IF([test -f GLFW/glfw3.h],,[AC_MSG_ERROR(["No GLFW found, please symlink or copy glfw/include/GLFW into $ac_pwd/GLFW"])])
-AS_IF([test -f glm/glm.hpp],,[AC_MSG_ERROR(["No GLFW found, please symlink or copy glm/glm into $ac_pwd/glm"])])
-
 AC_CANONICAL_HOST
 
 # Set the WIN32 conditional in the makefiles if the host is MinGW
@@ -81,6 +77,13 @@ AX_APPEND_COMPILE_FLAGS([-fvisibility=hidden -fno-rtti -fno-exceptions -pipe],[C
 # Always add full warnings
 AX_CFLAGS_WARN_ALL
 AX_CXXFLAGS_WARN_ALL
+
+AS_IF([test -f oobase/include/OOBase/Base.h],,[AC_MSG_ERROR(["No OOBase found, please symlink or copy into $ac_pwd/oobase"])])
+
+AC_LANG_PUSH([C++])
+AC_CHECK_HEADER([GLFW/glfw3.h],,[AC_MSG_ERROR(["No GLFW found"])])
+AC_CHECK_HEADER([glm/glm.hpp],,[AC_MSG_ERROR(["No GLM found"])])
+AC_LANG_POP([C++])
 
 # Set up libtool correctly
 m4_ifdef([LT_PREREQ],,[AC_MSG_ERROR([Need libtool version 2.2.6 or later])])

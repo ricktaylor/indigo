@@ -10,13 +10,10 @@ AC_CONFIG_SUBDIRS([oobase oogl])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([
 	Makefile
-	3rdparty/Makefile
 ])
 
 AC_CONFIG_LINKS([
 	oogl/oobase:$srcdir/oobase
-	oogl/GLFW:$srcdir/3rdparty/glfw/include/GLFW
-	oogl/glm:$srcdir/3rdparty/glm/glm
 ])
 
 AM_INIT_AUTOMAKE([foreign 1.10 no-define subdir-objects])

@@ -33,18 +33,18 @@ dist-hook:
 noinst_LTLIBRARIES = liboogl.la
 
 # Hack below...
-liboogl_la_CPPFLAGS = -I./oobase/include -I./oobase -I../oobase/include
+liboogl_la_CPPFLAGS = -I./oobase/include -I../oobase/include
 # Hack above
 
 liboogl_la_CFLAGS = $(PTHREAD_CFLAGS)
 liboogl_la_CXXFLAGS = $(PTHREAD_CFLAGS)
 
-liboogl_la_LIBADD = -lGL
+liboogl_la_LIBADD = -lglfw -lGL
 
 if WIN32
 liboogl_la_CPPFLAGS += -D_WIN32_WINNT=0x0502
-#else
-#liboogl_la_LIBADD += -lrt
+else
+liboogl_la_LIBADD += -lX11 -lXrandr -lXi -lXxf86vm -lXcursor -lXinerama -lrt
 endif
 
 liboogl_la_SOURCES = \
