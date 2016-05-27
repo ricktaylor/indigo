@@ -19,11 +19,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../oogl/VertexArrayObject.h"
-
-#include "../oogl/BufferObject.h"
-#include "../oogl/State.h"
-#include "../oogl/StateFns.h"
+#include "../include/OOGL/VertexArrayObject.h"
+#include "../include/OOGL/BufferObject.h"
+#include "../include/OOGL/State.h"
+#include "../include/OOGL/StateFns.h"
 
 OOGL::VertexArrayObject::VertexArrayObject() : m_array(0)
 {

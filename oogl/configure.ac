@@ -1,23 +1,13 @@
 AC_PREREQ(2.61)
 
-AC_INIT(indigo,0.0.1)
-AC_CONFIG_SRCDIR([README.md])
-AC_CONFIG_HEADERS([autoheader_dummy.h src/Config.h])
+AC_INIT(oogl,0.0.1)
+AC_CONFIG_SRCDIR([src/State.cpp])
+AC_CONFIG_HEADERS([autoheader_dummy.h])
 
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_SUBDIRS([oobase oogl])
 
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_FILES([
-	Makefile
-	3rdparty/Makefile
-])
-
-AC_CONFIG_LINKS([
-	oogl/oobase:$srcdir/oobase
-	oogl/GLFW:$srcdir/3rdparty/glfw/include/GLFW
-	oogl/glm:$srcdir/3rdparty/glm/glm
-])
+AC_CONFIG_FILES([Makefile])
 
 AM_INIT_AUTOMAKE([foreign 1.10 no-define subdir-objects])
 
@@ -26,6 +16,10 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # I like maintainer mode
 AM_MAINTAINER_MODE
+
+AS_IF([test -f oobase/include/OOBase/Base.h],,[AC_MSG_ERROR(["No OOBase found, please symlink or copy into $ac_pwd/oobase"])])
+AS_IF([test -f GLFW/glfw3.h],,[AC_MSG_ERROR(["No GLFW found, please symlink or copy glfw/include/GLFW into $ac_pwd/GLFW"])])
+AS_IF([test -f glm/glm.hpp],,[AC_MSG_ERROR(["No GLFW found, please symlink or copy glm/glm into $ac_pwd/glm"])])
 
 AC_CANONICAL_HOST
 
@@ -41,10 +35,10 @@ AM_CONDITIONAL([WIN32],[test "x$win32" = "xtrue"])
 AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[Turn on debugging]),[debug=true],[debug=false])
 AM_CONDITIONAL([DEBUG], [test "x$debug" = "xtrue"])
 
+AC_PROG_RANLIB
+
 OO_PROG_CC
 OO_PROG_CXX
-
-AX_CC_FOR_BUILD
 
 # Check the multi-threading flags
 AS_CASE([$host_os],
@@ -84,22 +78,15 @@ AS_IF([test "x$oo_test_CXXFLAGS" != "xset"],
 AX_APPEND_COMPILE_FLAGS([-fvisibility=hidden -pipe],[CFLAGS])
 AX_APPEND_COMPILE_FLAGS([-fvisibility=hidden -fno-rtti -fno-exceptions -pipe],[CXXFLAGS])
 
-# Check for functions we use
-AC_CHECK_FUNCS([realpath])
-
 # Always add full warnings
 AX_CFLAGS_WARN_ALL
 AX_CXXFLAGS_WARN_ALL
 
-# Check for CMake
-AC_PATH_PROG([CMAKE],[cmake])
-AS_IF([test "x$CMAKE" == "x"],[AC_MSG_ERROR([Need cmake command])])
-
 # Set up libtool correctly
 m4_ifdef([LT_PREREQ],,[AC_MSG_ERROR([Need libtool version 2.2.6 or later])])
 LT_PREREQ([2.2.6])
-LT_INIT([disable-shared])
-
-AC_PROG_MAKE_SET
+LT_CONFIG_LTDL_DIR([libltdl])
+LT_INIT([static disable-shared])
+LTDL_INIT
 
 AC_OUTPUT

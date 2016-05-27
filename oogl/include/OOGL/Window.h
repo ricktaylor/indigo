@@ -23,9 +23,10 @@
 #define INDIGO_WINDOWS_H_INCLUDED
 
 #include <OOBase/Delegate.h>
-#include "../oogl/Framebuffer.h"
-#include "../oogl/State.h"
-#include "../oogl/StateFns.h"
+
+#include "Framebuffer.h"
+#include "State.h"
+#include "StateFns.h"
 
 namespace OOGL
 {

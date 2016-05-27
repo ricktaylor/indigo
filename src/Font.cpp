@@ -21,10 +21,6 @@
 
 #include "Common.h"
 #include "Font.h"
-
-#include "../oogl/StateFns.h"
-#include "../oogl/Shader.h"
-
 #include "Render.h"
 #include "Image.h"
 #include "ShaderPool.h"

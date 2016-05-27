@@ -20,11 +20,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <OOBase/Logger.h>
-#include "../oogl/BufferObject.h"
-#include "../oogl/Shader.h"
-#include "../oogl/Texture.h"
-#include "../oogl/VertexArrayObject.h"
-#include "../oogl/Window.h"
+
+#include "../include/OOGL/BufferObject.h"
+#include "../include/OOGL/Shader.h"
+#include "../include/OOGL/Texture.h"
+#include "../include/OOGL/VertexArrayObject.h"
+#include "../include/OOGL/Window.h"
 
 namespace
 {

@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = 3rdparty oobase .  
+SUBDIRS = 3rdparty oobase oogl .  
 
 EXTRA_DIST = \
 	gpl3_0.txt \
@@ -55,14 +55,6 @@ BUILT_SOURCES = \
 CLEANFILES = $(BUILT_SOURCES)
 	
 indigo_SOURCES = \
-	oogl/Window.cpp \
-	oogl/Framebuffer.cpp \
-	oogl/State.cpp \
-	oogl/StateFns.cpp \
-	oogl/Shader.cpp \
-	oogl/Texture.cpp \
-	oogl/BufferObject.cpp \
-	oogl/VertexArrayObject.cpp \
 	src/Pipe.cpp \
 	src/Thread.cpp \
 	src/Render.cpp \
@@ -91,6 +83,7 @@ indigo_SOURCES = \
 	game/Game.cpp
 			
 indigo_LDADD = \
+	@top_builddir@/oogl/liboogl.la \
 	@top_builddir@/oobase/liboobase.la \
 	@top_builddir@/3rdparty/glfw/src/libglfw3.a
 	

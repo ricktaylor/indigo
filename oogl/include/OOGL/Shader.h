@@ -24,7 +24,8 @@
 
 #include <OOBase/String.h>
 #include <OOBase/Table.h>
-#include "../oogl/OOGL.h"
+
+#include "OOGL.h"
 
 namespace OOGL
 {

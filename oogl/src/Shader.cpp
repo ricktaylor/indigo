@@ -19,13 +19,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../oogl/Shader.h"
+#include "../include/OOGL/Shader.h"
+#include "../include/OOGL/StateFns.h"
 
 #include <OOBase/StackAllocator.h>
 #include <OOBase/Logger.h>
 
 #include <glm/gtc/type_ptr.hpp>
-#include "../oogl/StateFns.h"
 
 OOGL::Shader::Shader(GLenum shaderType) : m_id(StateFns::get_current()->glCreateShader(shaderType))
 {

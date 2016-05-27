@@ -27,9 +27,8 @@
 #include "UINinePatch.h"
 #include "UIImage.h"
 
-#include "../oogl/BufferObject.h"
-#include "../oogl/Shader.h"
-#include "../oogl/VertexArrayObject.h"
+#include "../oogl/include/OOGL/BufferObject.h"
+#include "../oogl/include/OOGL/VertexArrayObject.h"
 
 namespace
 {

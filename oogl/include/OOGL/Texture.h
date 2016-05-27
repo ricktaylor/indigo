@@ -23,7 +23,8 @@
 #define INDIGO_TEXTURE_H_INCLUDED
 
 #include <OOBase/SharedPtr.h>
-#include "../oogl/OOGL.h"
+
+#include "OOGL.h"
 
 namespace OOGL
 {

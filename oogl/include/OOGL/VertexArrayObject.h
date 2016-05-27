@@ -3,7 +3,8 @@
 
 #include <OOBase/SharedPtr.h>
 #include <OOBase/Table.h>
-#include "../oogl/OOGL.h"
+
+#include "OOGL.h"
 
 namespace OOGL
 {

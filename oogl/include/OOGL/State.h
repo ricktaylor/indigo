@@ -26,7 +26,8 @@
 #include <OOBase/Table.h>
 #include <OOBase/HashTable.h>
 #include <OOBase/List.h>
-#include "../oogl/OOGL.h"
+
+#include "OOGL.h"
 
 namespace OOGL
 {

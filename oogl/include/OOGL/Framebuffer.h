@@ -19,40 +19,34 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef OOGL_H_INCLUDED
-#define OOGL_H_INCLUDED
+#ifndef INDIGO_FRAMEBUFFER_H_INCLUDED
+#define INDIGO_FRAMEBUFFER_H_INCLUDED
 
-//////////////////////////////////////////////
-
-#include <OOBase/Base.h>
-
-#if defined(_MSC_VER)
-	//#include "Config_msvc.h"
-#elif defined(HAVE_CONFIG_H)
-	// Autoconf
-	#include <Config.h>
-#else
-#error Need some kind of configure scipt!
-#endif
-
-#define GL_GLEXT_LEGACY
-#include <GLFW/glfw3.h>
-
-#define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-
-// Include our own glext.h
-#include "../oogl/glext.h"
+#include "State.h"
 
 namespace OOGL
 {
-	void glPrimitiveRestartIndex(GLuint index);
+	class Framebuffer : public OOBase::NonCopyable
+	{
+		friend class OOBase::AllocateNewStatic<OOBase::ThreadLocalAllocator>;
+		friend class Window;
+		friend class State;
+
+	public:
+		Framebuffer();
+		~Framebuffer();
+
+		bool valid() const;
+
+		GLenum check() const;
+
+	private:
+		GLuint       m_id;
+		bool         m_default;
+
+		Framebuffer(GLuint id);
+		static OOBase::SharedPtr<Framebuffer> get_default();
+	};
 }
 
-#if !defined(NDEBUG)
-#define OOGL_CHECK(fn) OOGL::glCheckError(fn,__FILE__,__LINE__)
-#else
-#define OOGL_CHECK(fn)
-#endif
-
-#endif // OOGL_H_INCLUDED
+#endif // INDIGO_FRAMEBUFFER_H_INCLUDED

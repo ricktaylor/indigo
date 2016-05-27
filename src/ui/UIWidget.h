@@ -22,7 +22,7 @@
 #ifndef INDIGO_UIWIDGET_H_INCLUDED
 #define INDIGO_UIWIDGET_H_INCLUDED
 
-#include "../oogl/Window.h"
+#include "../oogl/include/OOGL/Window.h"
 
 namespace Indigo
 {

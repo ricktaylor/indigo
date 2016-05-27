@@ -22,10 +22,10 @@
 #ifndef INDIGO_FONT_H_INCLUDED
 #define INDIGO_FONT_H_INCLUDED
 
-#include "../oogl/Window.h"
-#include "../oogl/BufferObject.h"
-#include "../oogl/Texture.h"
-#include "../oogl/VertexArrayObject.h"
+#include "../oogl/include/OOGL/Window.h"
+#include "../oogl/include/OOGL/BufferObject.h"
+#include "../oogl/include/OOGL/Texture.h"
+#include "../oogl/include/OOGL/VertexArrayObject.h"
 
 #include "Resource.h"
 

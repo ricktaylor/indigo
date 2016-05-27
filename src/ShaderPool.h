@@ -22,7 +22,7 @@
 #ifndef INDIGO_CORE_SHADERPOOL_H_
 #define INDIGO_CORE_SHADERPOOL_H_
 
-#include "../oogl/Shader.h"
+#include "../oogl/include/OOGL/Shader.h"
 
 #include "Resource.h"
 

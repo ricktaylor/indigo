@@ -53,7 +53,7 @@
 #error Need some kind of configure scipt!
 #endif
 
-#include "../oogl/State.h"
+#include "../oogl/include/OOGL/State.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 

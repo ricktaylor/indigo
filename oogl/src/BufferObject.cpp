@@ -19,10 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../oogl/BufferObject.h"
-
-#include "../oogl/State.h"
-#include "../oogl/StateFns.h"
+#include "../include/OOGL/BufferObject.h"
+#include "../include/OOGL/State.h"
+#include "../include/OOGL/StateFns.h"
 
 namespace
 {

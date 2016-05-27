@@ -19,9 +19,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../oogl/Framebuffer.h"
-
-#include "../oogl/Window.h"
+#include "../include/OOGL/Framebuffer.h"
+#include "../include/OOGL/Window.h"
 
 OOGL::Framebuffer::Framebuffer() :
 		m_id(GL_INVALID_VALUE),
