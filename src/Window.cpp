@@ -290,7 +290,7 @@ bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer)
 
 bool Indigo::Window::remove_layer(const OOBase::SharedPtr<Layer>& layer)
 {
-	return m_layers.remove(layer);
+	return m_layers.remove(layer) != 0;
 }
 
 void Indigo::Window::call_on_close()

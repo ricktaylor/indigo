@@ -48,7 +48,7 @@ bool Indigo::Render::UIGroup::add_drawable(const OOBase::SharedPtr<UIDrawable>& 
 
 bool Indigo::Render::UIGroup::remove_drawable(const OOBase::SharedPtr<UIDrawable>& drawable)
 {
-	return m_children.remove(drawable);
+	return m_children.remove(drawable) != 0;
 }
 
 void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, bool* ret)
@@ -180,7 +180,7 @@ bool Indigo::UIGroup::add_named_widget(const OOBase::SharedPtr<UIWidget>& widget
 
 bool Indigo::UIGroup::remove_widget(const OOBase::SharedPtr<UIWidget>& widget)
 {
-	return m_children.remove(widget);
+	return m_children.remove(widget) != 0;
 }
 
 glm::uvec2 Indigo::UIGroup::min_size() const

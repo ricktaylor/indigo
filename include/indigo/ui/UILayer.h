@@ -53,7 +53,7 @@ namespace Indigo
 
 		UILayer(const OOBase::SharedPtr<Window>& wnd, const CreateParams& params = CreateParams());
 
-		bool valid() const { return m_render_group; }
+		bool valid() const { return m_render_group != NULL; }
 
 		UIGridSizer& sizer() { return m_sizer; }
 
