@@ -22,7 +22,7 @@
 #ifndef CORE_QUAD_H_
 #define CORE_QUAD_H_
 
-#include "../oogl/include/OOGL/Texture.h"
+#include <OOGL/Texture.h>
 
 namespace Indigo
 {

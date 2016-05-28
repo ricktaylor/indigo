@@ -22,7 +22,7 @@
 #ifndef INDIGO_IMAGE_H_INCLUDED
 #define INDIGO_IMAGE_H_INCLUDED
 
-#include "../oogl/include/OOGL/Texture.h"
+#include <OOGL/Texture.h>
 
 #include "Resource.h"
 

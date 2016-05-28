@@ -27,8 +27,8 @@
 #include "../../include/indigo/ui/UINinePatch.h"
 #include "../../include/indigo/ui/UIImage.h"
 
-#include "../oogl/include/OOGL/BufferObject.h"
-#include "../oogl/include/OOGL/VertexArrayObject.h"
+#include <OOGL/BufferObject.h>
+#include <OOGL/VertexArrayObject.h>
 
 namespace
 {

@@ -22,7 +22,7 @@
 #ifndef INDIGO_Window_H_INCLUDED
 #define INDIGO_Window_H_INCLUDED
 
-#include "../oogl/include/OOGL/Window.h"
+#include <OOGL/Window.h>
 
 #include "Render.h"
 

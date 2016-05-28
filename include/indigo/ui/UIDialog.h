@@ -22,7 +22,7 @@
 #ifndef INDIGO_UIDIALOG_H_INCLUDED
 #define INDIGO_UIDIALOG_H_INCLUDED
 
-#include "../indigo/include/indigo/ui/UILayer.h"
+#include "UILayer.h"
 
 namespace Indigo
 {
