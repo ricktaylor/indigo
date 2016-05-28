@@ -604,7 +604,7 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe)
 			SYNTAX_ERROR_RETURN(("')' expected"),false);
 	}
 
-	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(m_wnd,params);
+	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(m_wnd.get(),params);
 	if (!layer)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 

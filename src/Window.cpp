@@ -24,40 +24,6 @@
 #include "../include/indigo/Render.h"
 #include "../include/indigo/Thread.h"
 
-void Indigo::Render::Layer::show(bool visible)
-{
-	if (m_visible != visible)
-	{
-		m_visible = visible;
-
-		if (visible)
-		{
-			// TODO: Fake a mouse move to init any cursor stuff here
-		}
-	}
-}
-
-Indigo::Layer::~Layer()
-{
-	render_pipe()->call(OOBase::make_delegate(this,&Layer::destroy_render_layer));
-}
-
-void Indigo::Layer::destroy_render_layer()
-{
-	m_render_layer.reset();
-}
-
-void Indigo::Layer::show(bool visible)
-{
-	if (visible != m_visible)
-	{
-		m_visible = visible;
-
-		if (m_render_layer)
-			render_pipe()->post(OOBase::make_delegate(m_render_layer.get(),&Render::Layer::show),visible);
-	}
-}
-
 Indigo::Render::Window::Window(Indigo::Window* owner) :
 		m_owner(owner)
 {

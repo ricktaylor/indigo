@@ -20,6 +20,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "../Common.h"
+
+#include "../../include/indigo/Render.h"
 #include "../../include/indigo/Window.h"
 
 #include "../../include/indigo/ui/UIWidget.h"
@@ -81,9 +83,9 @@ Indigo::UIWidget::~UIWidget()
 {
 }
 
-OOBase::SharedPtr<Indigo::Window> Indigo::UIWidget::window() const
+Indigo::Window* Indigo::UIWidget::window() const
 {
-	return m_parent->window();
+	return m_parent ? m_parent->window() : NULL;
 }
 
 void Indigo::UIWidget::toggle_state(OOBase::uint32_t new_state, OOBase::uint32_t mask)

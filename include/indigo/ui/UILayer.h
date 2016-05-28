@@ -51,7 +51,7 @@ namespace Indigo
 			glm::uvec2    m_padding;
 		};
 
-		UILayer(const OOBase::SharedPtr<Window>& wnd, const CreateParams& params = CreateParams());
+		UILayer(Window* wnd, const CreateParams& params = CreateParams());
 
 		bool valid() const { return m_render_group != NULL; }
 
@@ -59,7 +59,7 @@ namespace Indigo
 
 		void show(bool visible = true);
 
-		OOBase::SharedPtr<Window> window() const;
+		Window* window() const;
 
 		OOBase::SharedPtr<UIWidget> find_widget(const char* name, size_t len = -1) const;
 
@@ -79,7 +79,7 @@ namespace Indigo
 		bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len = size_t(-1));
 
 	private:
-		OOBase::WeakPtr<Window>            m_wnd;
+		Window*                            m_wnd;
 		OOBase::SharedPtr<Render::UIGroup> m_group;
 		UIGridSizer                        m_sizer;
 		bool                               m_modal;

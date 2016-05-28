@@ -19,72 +19,15 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INDIGO_Window_H_INCLUDED
-#define INDIGO_Window_H_INCLUDED
+#ifndef INDIGO_WINDOW_H_INCLUDED
+#define INDIGO_WINDOW_H_INCLUDED
 
 #include <OOGL/Window.h>
 
-#include "Render.h"
+#include "Layer.h"
 
 namespace Indigo
 {
-	class Window;
-
-	namespace Render
-	{
-		class Window;
-
-		class Layer : public OOBase::NonCopyable
-		{
-			friend class Window;
-
-		public:
-			void show(bool visible);
-
-		protected:
-			Layer(Window* window) : m_window(window), m_visible(false)
-			{}
-
-			virtual void on_draw(OOGL::State& glState) const = 0;
-			virtual void on_size(const glm::uvec2& sz) {};
-
-			Window* const m_window;
-			bool m_visible;
-		};
-	}
-
-	class Layer : public OOBase::NonCopyable
-	{
-		friend class Window;
-		friend class Render::Window;
-
-	public:
-		virtual bool valid() const { return m_render_layer; }
-		
-		virtual void show(bool visible = true);
-		bool visible() const { return m_visible; }
-
-	protected:
-		Layer() : m_visible(false)
-		{}
-
-		virtual ~Layer();
-
-		OOBase::SharedPtr<Render::Layer> render_layer() const { return m_render_layer; }
-
-		virtual OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window) = 0;
-		virtual void destroy_render_layer();
-
-		virtual void on_move(const glm::ivec2& sz) {}
-		virtual void on_size(const glm::uvec2& sz) {}
-		virtual bool on_mousemove(const double& screen_x, const double& screen_y) { return false; }
-		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
-
-	private:
-		OOBase::SharedPtr<Render::Layer> m_render_layer;
-		bool m_visible;
-	};
-
 	class Window : public OOBase::NonCopyable
 	{
 		friend class Render::Window;
@@ -175,4 +118,4 @@ namespace Indigo
 	}
 }
 
-#endif // INDIGO_Window_H_INCLUDED
+#endif // INDIGO_WINDOW_H_INCLUDED

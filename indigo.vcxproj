@@ -22,6 +22,7 @@
     <ClInclude Include="include\indigo\Font.h" />
     <ClInclude Include="include\indigo\Image.h" />
     <ClInclude Include="include\indigo\ImageLayer.h" />
+    <ClInclude Include="include\indigo\Layer.h" />
     <ClInclude Include="include\indigo\Pipe.h" />
     <ClInclude Include="include\indigo\Quad.h" />
     <ClInclude Include="include\indigo\Render.h" />
@@ -51,6 +52,7 @@
     <ClCompile Include="src\Font.cpp" />
     <ClCompile Include="src\Image.cpp" />
     <ClCompile Include="src\ImageLayer.cpp" />
+    <ClCompile Include="src\Layer.cpp" />
     <ClCompile Include="src\Pipe.cpp" />
     <ClCompile Include="src\Quad.cpp" />
     <ClCompile Include="src\Render.cpp" />

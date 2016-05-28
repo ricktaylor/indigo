@@ -58,7 +58,7 @@ void ::UILayer::on_size(const glm::uvec2& sz)
 	m_mvp = glm::ortho(0.f,sz2.x,0.f,sz2.y);
 }
 
-Indigo::UILayer::UILayer(const OOBase::SharedPtr<Window>& wnd, const CreateParams& params) :
+Indigo::UILayer::UILayer(Window* wnd, const CreateParams& params) :
 		UIGroup(NULL,params),
 		m_wnd(wnd),
 		m_sizer(params.m_fixed,params.m_margins,params.m_padding),
@@ -119,9 +119,9 @@ glm::uvec2 Indigo::UILayer::ideal_size() const
 	return m_sizer.ideal_fit();
 }
 
-OOBase::SharedPtr<Indigo::Window> Indigo::UILayer::window() const
+Indigo::Window* Indigo::UILayer::window() const
 {
-	return m_wnd.lock();
+	return m_wnd;
 }
 
 OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(Indigo::Render::Window* window)

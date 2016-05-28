@@ -21,6 +21,8 @@
 
 #include "../Common.h"
 
+#include "../../include/indigo/Render.h"
+
 #include "../../include/indigo/ui/UIDialog.h"
 #include "../../include/indigo/ui/UILayer.h"
 
@@ -58,6 +60,6 @@ void Indigo::UIDialog::end_dialog()
 
 void Indigo::UIDialog::window_close(const Window& w)
 {
-	if (m_layer->window().get() == &w)
+	if (m_layer->window() == &w)
 		this->on_window_close();
 }

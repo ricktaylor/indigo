@@ -131,7 +131,7 @@ namespace Indigo
 		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
 		virtual glm::uvec2 ideal_size() const = 0;
 
-		virtual OOBase::SharedPtr<Window> window() const;
+		virtual Window* window() const;
 
 	protected:
 		UIWidget(UIGroup* parent, const CreateParams& params = CreateParams());
