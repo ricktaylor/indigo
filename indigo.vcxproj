@@ -28,6 +28,7 @@
     <ClInclude Include="include\indigo\Quad.h" />
     <ClInclude Include="include\indigo\Render.h" />
     <ClInclude Include="include\indigo\Resource.h" />
+    <ClInclude Include="include\indigo\sg\SGNode.h" />
     <ClInclude Include="include\indigo\ShaderPool.h" />
     <ClInclude Include="include\indigo\Thread.h" />
     <ClInclude Include="include\indigo\ui\UIButton.h" />
@@ -58,6 +59,7 @@
     <ClCompile Include="src\Pipe.cpp" />
     <ClCompile Include="src\Quad.cpp" />
     <ClCompile Include="src\Render.cpp" />
+    <ClCompile Include="src\sg\SGNode.cpp" />
     <ClCompile Include="src\ShaderPool.cpp" />
     <ClCompile Include="src\Thread.cpp" />
     <ClCompile Include="src\ui\UIButton.cpp" />
