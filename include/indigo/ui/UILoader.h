@@ -38,6 +38,10 @@ namespace Indigo
 		UILoader(OOBase::SharedPtr<Window> wnd) : m_wnd(wnd)
 		{}
 
+		virtual ~UILoader();
+
+		void unload();
+
 		OOBase::SharedPtr<UILayer> find_layer(const char* name, size_t len = size_t(-1)) const;
 
 		OOBase::SharedPtr<Window> window() const { return m_wnd; }

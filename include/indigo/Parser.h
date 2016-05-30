@@ -32,7 +32,10 @@ namespace Indigo
 	class Parser
 	{
 	public:
+		virtual ~Parser();
+
 		bool load(const OOBase::SharedPtr<ResourceBundle>& resource, const char* resource_name);
+		virtual void unload();
 
 	protected:
 		OOBase::SharedPtr<ResourceBundle> m_resource;

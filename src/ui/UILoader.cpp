@@ -30,6 +30,11 @@
 #include "../../include/indigo/ui/UIButton.h"
 #include "../../include/indigo/ui/UIPanel.h"
 
+Indigo::UILoader::~UILoader()
+{
+	unload();
+}
+
 bool Indigo::UILoader::parse_create_params(const OOBase::ScopedString& arg, const char*& p, const char* pe, UIWidget::CreateParams& params)
 {
 	if (arg == "POSITION")
@@ -78,8 +83,7 @@ bool Indigo::UILoader::load_top_level(const char*& p, const char* pe, const OOBa
 	if (type == "BUTTON_STYLE")
 	{
 		return load_button_style(p,pe);
-	}
-	
+	}	
 
 	LOG_WARNING(("Invalid top level type '%s'",type.c_str()));
 	return false;
@@ -891,4 +895,15 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p,
 		return OOBase::SharedPtr<UIWidget>();
 
 	return panel;
+}
+
+void Indigo::UILoader::unload()
+{
+	for (button_style_hash_t::iterator i=m_hashButtonStyles.begin();i;++i)
+		i->second->unload();
+	
+	for (ninepatch_hash_t::iterator i=m_hash9Patches.begin();i;++i)
+		i->second->unload();
+	
+	Parser::unload();
 }

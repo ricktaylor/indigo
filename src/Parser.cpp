@@ -46,6 +46,11 @@ namespace
 	}
 }
 
+Indigo::Parser::~Parser()
+{
+	unload();
+}
+
 void Indigo::Parser::syntax_error(const char* fmt, ...)
 {
 	va_list args;
@@ -582,4 +587,10 @@ bool Indigo::Parser::load(const OOBase::SharedPtr<ResourceBundle>& resource, con
 
 	m_resource.reset();
 	return ok;
+}
+
+void Indigo::Parser::unload()
+{
+	for (image_hash_t::iterator i=m_hashImages.begin();i;++i)
+		i->second->unload();
 }
