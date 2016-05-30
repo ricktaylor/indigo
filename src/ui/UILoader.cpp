@@ -68,13 +68,13 @@ OOBase::SharedPtr<Indigo::UILayer> Indigo::UILoader::find_layer(const char* name
 	return ret;
 }
 
-bool Indigo::UILoader::load(ResourceBundle& resource, const char* name)
+bool Indigo::UILoader::load(const OOBase::SharedPtr<ResourceBundle>& resource, const char* name)
 {
-	OOBase::SharedPtr<const char> res = resource.load<const char>(name);
+	OOBase::SharedPtr<const char> res = resource->load<const char>(name);
 	if (!res)
 		LOG_ERROR_RETURN(("UIResource '%s' does not exist in bundle",name),false);
 
-	m_resource = &resource;
+	m_resource = resource;
 	m_error_pos.m_line = 1;
 	m_error_pos.m_col = 1;
 
@@ -95,7 +95,7 @@ bool Indigo::UILoader::load(ResourceBundle& resource, const char* name)
 		}
 	}
 
-	m_resource = NULL;
+	m_resource.reset();
 	return ok;
 }
 

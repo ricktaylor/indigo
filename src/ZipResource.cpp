@@ -315,13 +315,20 @@ bool Indigo::ZipResource::is_open() const
 	return m_zip;
 }
 
-Indigo::ZipResource Indigo::ZipResource::sub_dir(const char* prefix)
+OOBase::SharedPtr<Indigo::ResourceBundle> Indigo::ZipResource::sub_dir(const char* name) const
 {
+	OOBase::SharedPtr<ZipResource> ret;
 	OOBase::String new_prefix(m_prefix);
-	if (!new_prefix.append(prefix))
-		return ZipResource();
+	if (!new_prefix.append('/') || !new_prefix.append(name))
+		LOG_ERROR(("Failed to assign string: %s",OOBase::system_error_text()));
+	else
+	{
+		ret = OOBase::allocate_shared<ZipResource>(m_zip,new_prefix);
+		if (!ret)
+			LOG_ERROR(("Failed to allocate: %s",OOBase::system_error_text()));
+	}
 
-	return ZipResource(m_zip,new_prefix);
+	return ret;
 }
 
 OOBase::SharedPtr<const char> Indigo::ZipResource::load_i(const char* name) const

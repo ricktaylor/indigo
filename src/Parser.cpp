@@ -460,6 +460,36 @@ bool Indigo::Parser::parse_colour(const char*& p, const char* pe, glm::vec4& c)
 	return false;
 }
 
+OOBase::SharedPtr<Indigo::ResourceBundle> Indigo::Parser::cd_resource(const OOBase::ScopedString& res_name)
+{
+	OOBase::SharedPtr<ResourceBundle> prev_resource = m_resource;
+
+	size_t start = 0;
+	for (;;)
+	{
+		size_t slash = res_name.find('/',start);
+		if (slash == OOBase::ScopedString::npos)
+			break;
+
+		if (slash > start)
+		{
+			OOBase::ScopedString sub_dir;
+			if (!sub_dir.assign(res_name.c_str() + start,slash - start - 1))
+				LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),prev_resource);
+
+			OOBase::SharedPtr<ResourceBundle> res = m_resource->sub_dir(sub_dir.c_str());
+			if (!res)
+				break;
+
+			m_resource = res;
+		}
+
+		start = slash + 1;
+	}
+
+	return prev_resource;
+}
+
 OOBase::SharedPtr<Indigo::Image> Indigo::Parser::load_image(const char*& p, const char* pe, const OOBase::ScopedString& image_name)
 {
 	size_t hash = OOBase::Hash<const char*>::hash(image_name);
@@ -493,12 +523,18 @@ OOBase::SharedPtr<Indigo::Font> Indigo::Parser::load_font(const char*& p, const 
 	if (!m_resource->exists(font_name.c_str()))
 		SYNTAX_ERROR_RETURN(("Missing font resource '%s'",font_name.c_str()),OOBase::SharedPtr<Font>());
 
+	OOBase::SharedPtr<ResourceBundle> prev_res = m_resource;
+	
+	// TODO: cd into resource subdir
+
 	OOBase::SharedPtr<Font> font = OOBase::allocate_shared<Font,OOBase::ThreadLocalAllocator>();
 	if (!font)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),font);
 
 	if (!font->load(*m_resource,font_name.c_str()))
 		return OOBase::SharedPtr<Font>();
+
+	m_resource = prev_res;
 
 	if (!m_hashFonts.insert(hash,font))
 		LOG_WARNING(("Failed to cache font: %s",OOBase::system_error_text()));

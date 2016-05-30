@@ -35,11 +35,12 @@ namespace Indigo
 	{
 	public:
 		ZipResource();
+		ZipResource(const OOBase::SharedPtr<detail::ZipFile>& zip, const OOBase::String& prefix);
 
 		bool open(const char* filename);
 		bool is_open() const;
 
-		ZipResource sub_dir(const char* prefix);
+		OOBase::SharedPtr<ResourceBundle> sub_dir(const char* name) const;
 
 		OOBase::uint64_t size(const char* name) const;
 		bool exists(const char* name) const;
@@ -47,9 +48,7 @@ namespace Indigo
 	private:
 		OOBase::SharedPtr<detail::ZipFile> m_zip;
 		OOBase::String m_prefix;
-
-		ZipResource(const OOBase::SharedPtr<detail::ZipFile>& zip, const OOBase::String& prefix);
-
+		
 		OOBase::SharedPtr<const char> load_i(const char* name) const;
 	};
 }

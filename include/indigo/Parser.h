@@ -32,10 +32,7 @@ namespace Indigo
 	class Parser
 	{
 	protected:
-		Parser() : m_resource(NULL)
-		{}
-
-		ResourceBundle* m_resource;
+		OOBase::SharedPtr<ResourceBundle> m_resource;
 
 		struct error_pos_t
 		{
@@ -58,6 +55,8 @@ namespace Indigo
 		bool parse_string(const char*& p, const char* pe, OOBase::ScopedString& s);
 		bool parse_float(const char*& p, const char* pe, float& i);
 		bool parse_colour(const char*& p, const char* pe, glm::vec4& c);
+
+		OOBase::SharedPtr<ResourceBundle> cd_resource(const OOBase::ScopedString& res_name);
 		
 		OOBase::SharedPtr<Image> load_image(const char*& p, const char* pe, const OOBase::ScopedString& image_name);
 		OOBase::SharedPtr<Font> load_font(const char*& p, const char* pe, const OOBase::ScopedString& font_name);

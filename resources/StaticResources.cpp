@@ -27,6 +27,11 @@ namespace
 	class StaticResources : public Indigo::ResourceBundle
 	{
 	public:
+		OOBase::SharedPtr<ResourceBundle> sub_dir(const char* name) const
+		{
+			return OOBase::SharedPtr<ResourceBundle>();
+		}
+
 		OOBase::SharedPtr<const char> load_i(const char* name) const;
 		OOBase::uint64_t size(const char* name) const;
 		bool exists(const char* name) const;

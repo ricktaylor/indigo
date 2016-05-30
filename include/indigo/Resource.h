@@ -41,6 +41,8 @@ namespace Indigo
 		virtual OOBase::uint64_t size(const char* name) const = 0;
 		virtual bool exists(const char* name) const = 0;
 
+		virtual OOBase::SharedPtr<ResourceBundle> sub_dir(const char* name) const = 0;
+
 	protected:
 		virtual OOBase::SharedPtr<const char> load_i(const char* name) const = 0;
 	};

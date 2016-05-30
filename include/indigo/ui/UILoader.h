@@ -35,10 +35,10 @@ namespace Indigo
 	class UILoader : public Parser
 	{
 	public:
-		UILoader(OOBase::SharedPtr<Window> wnd) : Parser(), m_wnd(wnd)
+		UILoader(OOBase::SharedPtr<Window> wnd) : m_wnd(wnd)
 		{}
 
-		bool load(ResourceBundle& resource, const char* resource_name);
+		bool load(const OOBase::SharedPtr<ResourceBundle>& resource, const char* resource_name);
 		
 		OOBase::SharedPtr<UILayer> find_layer(const char* name, size_t len = size_t(-1)) const;
 
