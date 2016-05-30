@@ -31,6 +31,9 @@ namespace Indigo
 	
 	class Parser
 	{
+	public:
+		bool load(const OOBase::SharedPtr<ResourceBundle>& resource, const char* resource_name);
+
 	protected:
 		OOBase::SharedPtr<ResourceBundle> m_resource;
 
@@ -56,10 +59,12 @@ namespace Indigo
 		bool parse_float(const char*& p, const char* pe, float& i);
 		bool parse_colour(const char*& p, const char* pe, glm::vec4& c);
 
-		OOBase::SharedPtr<ResourceBundle> cd_resource(const OOBase::ScopedString& res_name);
+		OOBase::SharedPtr<ResourceBundle> cd_resource(const char* res_name, OOBase::ScopedString& filename);
 		
 		OOBase::SharedPtr<Image> load_image(const char*& p, const char* pe, const OOBase::ScopedString& image_name);
 		OOBase::SharedPtr<Font> load_font(const char*& p, const char* pe, const OOBase::ScopedString& font_name);
+
+		virtual bool load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type) = 0;
 		
 	private:
 		typedef OOBase::HashTable<size_t,OOBase::SharedPtr<Image>,OOBase::ThreadLocalAllocator> image_hash_t;

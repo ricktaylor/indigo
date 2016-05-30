@@ -68,37 +68,6 @@ OOBase::SharedPtr<Indigo::UILayer> Indigo::UILoader::find_layer(const char* name
 	return ret;
 }
 
-bool Indigo::UILoader::load(const OOBase::SharedPtr<ResourceBundle>& resource, const char* name)
-{
-	OOBase::SharedPtr<const char> res = resource->load<const char>(name);
-	if (!res)
-		LOG_ERROR_RETURN(("UIResource '%s' does not exist in bundle",name),false);
-
-	m_resource = resource;
-	m_error_pos.m_line = 1;
-	m_error_pos.m_col = 1;
-
-	const char* p = res.get();
-	const char* pe = p + m_resource->size(name);
-	bool ok = true;
-
-	for (OOBase::ScopedString type;ok && p != pe;)
-	{
-		if (type_name(p,pe,type))
-		{
-			ok = load_top_level(p,pe,type);
-		}
-		else if (p != pe)
-		{
-			syntax_error("Type name expected");
-			ok = false;
-		}
-	}
-
-	m_resource.reset();
-	return ok;
-}
-
 bool Indigo::UILoader::load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type)
 {
 	if (type == "DIALOG")

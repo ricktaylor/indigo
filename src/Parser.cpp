@@ -460,21 +460,27 @@ bool Indigo::Parser::parse_colour(const char*& p, const char* pe, glm::vec4& c)
 	return false;
 }
 
-OOBase::SharedPtr<Indigo::ResourceBundle> Indigo::Parser::cd_resource(const OOBase::ScopedString& res_name)
+OOBase::SharedPtr<Indigo::ResourceBundle> Indigo::Parser::cd_resource(const char* res_name, OOBase::ScopedString& filename)
 {
 	OOBase::SharedPtr<ResourceBundle> prev_resource = m_resource;
 
-	size_t start = 0;
-	for (;;)
-	{
-		size_t slash = res_name.find('/',start);
-		if (slash == OOBase::ScopedString::npos)
-			break;
+	if (!filename.assign(res_name))
+		LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),prev_resource);
 
-		if (slash > start)
+	for (size_t start = 0;;)
+	{
+		size_t slash = filename.find('/',start);
+		if (slash == OOBase::ScopedString::npos)
+		{
+			if (!filename.assign(res_name + start))
+				LOG_ERROR(("Failed to assign string: %s",OOBase::system_error_text()));
+			break;
+		}
+
+		if (slash > 0)
 		{
 			OOBase::ScopedString sub_dir;
-			if (!sub_dir.assign(res_name.c_str() + start,slash - start - 1))
+			if (!sub_dir.assign(res_name + start,slash - start - 1))
 				LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),prev_resource);
 
 			OOBase::SharedPtr<ResourceBundle> res = m_resource->sub_dir(sub_dir.c_str());
@@ -540,4 +546,40 @@ OOBase::SharedPtr<Indigo::Font> Indigo::Parser::load_font(const char*& p, const 
 		LOG_WARNING(("Failed to cache font: %s",OOBase::system_error_text()));
 
 	return font;
+}
+
+bool Indigo::Parser::load(const OOBase::SharedPtr<ResourceBundle>& resource, const char* res_name)
+{
+	m_resource = resource;
+
+	OOBase::ScopedString filename;
+	if (!cd_resource(res_name,filename))
+		return false;
+
+	OOBase::SharedPtr<const char> res = resource->load<const char>(filename.c_str());
+	if (!res)
+		LOG_ERROR_RETURN(("Resource '%s' does not exist in bundle",res_name),false);
+		
+	m_error_pos.m_line = 1;
+	m_error_pos.m_col = 1;
+
+	const char* p = res.get();
+	const char* pe = p + m_resource->size(filename.c_str());
+	bool ok = true;
+
+	for (OOBase::ScopedString type;ok && p != pe;)
+	{
+		if (type_name(p,pe,type))
+		{
+			ok = load_top_level(p,pe,type);
+		}
+		else if (p != pe)
+		{
+			syntax_error("Type name expected");
+			ok = false;
+		}
+	}
+
+	m_resource.reset();
+	return ok;
 }
