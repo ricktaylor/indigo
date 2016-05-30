@@ -87,6 +87,9 @@
     <ClInclude Include="include\indigo\Layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\indigo\Parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\indigo.rc">
@@ -158,6 +161,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Layer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
