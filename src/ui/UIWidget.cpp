@@ -83,11 +83,6 @@ Indigo::UIWidget::~UIWidget()
 {
 }
 
-Indigo::Window* Indigo::UIWidget::window() const
-{
-	return m_parent ? m_parent->window() : NULL;
-}
-
 void Indigo::UIWidget::toggle_state(OOBase::uint32_t new_state, OOBase::uint32_t mask)
 {
 	OOBase::uint32_t change_mask = (m_state ^ new_state) & mask;

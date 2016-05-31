@@ -26,7 +26,6 @@
 
 namespace Indigo
 {
-	class Window;
 	class UIWidget;
 	class UIGroup;
 
@@ -130,8 +129,6 @@ namespace Indigo
 
 		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
 		virtual glm::uvec2 ideal_size() const = 0;
-
-		virtual Window* window() const;
 
 	protected:
 		UIWidget(UIGroup* parent, const CreateParams& params = CreateParams());
