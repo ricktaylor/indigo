@@ -146,7 +146,7 @@ Indigo::Window::~Window()
 bool Indigo::Window::create(const CreateParams& params)
 {
 	if (m_render_wnd)
-		LOG_ERROR_RETURN(("Failed to create window: Already exists"),false);
+		LOG_WARNING_RETURN(("Window already created"),true);
 
 	bool ret = false;
 	if (!render_pipe()->call(OOBase::make_delegate(this,&Window::on_create),&params,&ret) || !ret)
@@ -239,7 +239,12 @@ void Indigo::Window::on_destroy()
 bool Indigo::Window::show(bool visible)
 {
 	if (!m_render_wnd)
-		LOG_ERROR_RETURN(("Failed to show: incomplete window"),false);
+	{
+		if (visible)
+			LOG_ERROR_RETURN(("Failed to show: incomplete window"),false);
+		else
+			LOG_WARNING_RETURN(("Incomplete window is not visible"),true);
+	}
 
 	return render_pipe()->post(OOBase::make_delegate(m_render_wnd->m_wnd.get(),&OOGL::Window::show),visible);
 }
@@ -247,27 +252,26 @@ bool Indigo::Window::show(bool visible)
 bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, const char* name, size_t len)
 {
 	if (!m_render_wnd)
-		LOG_ERROR_RETURN(("Failed to insert layer: incomplete window"),false);
+		LOG_ERROR_RETURN(("Failed to add layer: incomplete window"),false);
 
 	if (!m_layers.push_back(layer))
 		LOG_ERROR_RETURN(("Failed to insert layer: %s",OOBase::system_error_text()),false);
 
 	if (name && len && !m_named_layers.insert(OOBase::Hash<const char*>::hash(name,len),layer))
-	{
-		LOG_ERROR(("Failed to insert layer name: %s",OOBase::system_error_text()));
-		m_layers.pop_back();
-		return false;
-	}
+		LOG_ERROR_RETURN(("Failed to insert layer name: %s",OOBase::system_error_text()),false);
 
 	bool ret = false;
 	if (!render_pipe()->call(OOBase::make_delegate(m_render_wnd.get(),&Render::Window::add_render_layer),layer.get(),&ret) || !ret)
-		m_layers.pop_back();
+		remove_layer(name,len);
 
 	return ret;
 }
 
 bool Indigo::Window::remove_layer(const char* name, size_t len)
 {
+	if (!name || !len)
+		return false;
+
 	return m_named_layers.remove(OOBase::Hash<const char*>::hash(name,len)) != 0;
 }
 

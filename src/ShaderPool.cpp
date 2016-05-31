@@ -28,8 +28,6 @@ namespace
 	class ShaderPool
 	{
 	public:
-
-
 		typedef OOBase::HashTable<const char*,OOBase::SharedPtr<OOGL::Shader>,OOBase::ThreadLocalAllocator> shader_name_map_t;
 		typedef OOBase::HashTable<GLenum,shader_name_map_t,OOBase::ThreadLocalAllocator> shader_map_t;
 		shader_map_t m_shader_map;
