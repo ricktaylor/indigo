@@ -59,7 +59,9 @@ libindigo_la_SOURCES = \
 	src/ShaderPool.cpp \
 	src/ZipResource.cpp \
 	src/Quad.cpp \
+	src/Layer.cpp \
 	src/ImageLayer.cpp \
+	src/Parser.cpp \
 	src/ui/UILabel.cpp \
 	src/ui/UINinePatch.cpp \
 	src/ui/UIWidget.cpp \

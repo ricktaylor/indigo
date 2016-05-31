@@ -148,7 +148,7 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe)
 	if (!m_hashLayers.insert(hash,layer))
 		LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),false);
 
-	if (!m_wnd->add_layer(layer))
+	if (!m_wnd->add_layer(layer,name.c_str(),name.length()))
 		return false;
 
 	if (!load_grid_sizer(p,pe,layer.get(),layer->sizer(),true))

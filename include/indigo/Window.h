@@ -65,14 +65,15 @@ namespace Indigo
 
 		bool show(bool visible = true);
 
-		bool add_layer(const OOBase::SharedPtr<Layer>& layer);
-		bool remove_layer(const OOBase::SharedPtr<Layer>& layer);
+		bool add_layer(const OOBase::SharedPtr<Layer>& layer, const char* name = NULL, size_t len = -1);
+		bool remove_layer(const char* name, size_t len = -1);
 
 		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> on_close(const OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator>& delegate);
 
 	private:
 		OOBase::SharedPtr<Indigo::Render::Window> m_render_wnd;
-		OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
+		OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
+		OOBase::HashTable<size_t,OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator> m_named_layers;
 
 		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> m_on_close;
 

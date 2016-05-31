@@ -76,7 +76,7 @@ namespace Indigo
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;
 
-		bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len = size_t(-1));
+		bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len = -1);
 
 	private:
 		Window*                            m_wnd;

@@ -168,7 +168,7 @@ namespace Indigo
 		virtual bool on_mousemove(const glm::ivec2& pos);
 		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 
-		virtual bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len = size_t(-1));
+		virtual bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len = -1);
 
 	private:
 		OOBase::Vector<OOBase::SharedPtr<UIWidget>,OOBase::ThreadLocalAllocator> m_children;

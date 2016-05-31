@@ -73,6 +73,7 @@ namespace Indigo
 		virtual OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window) = 0;
 		virtual void destroy_render_layer();
 
+		virtual bool on_close() { return false; }
 		virtual void on_move(const glm::ivec2& sz) {}
 		virtual void on_size(const glm::uvec2& sz) {}
 		virtual bool on_mousemove(const double& screen_x, const double& screen_y) { return false; }
