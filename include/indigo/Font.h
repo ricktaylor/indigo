@@ -23,9 +23,13 @@
 #define INDIGO_FONT_H_INCLUDED
 
 #include <OOGL/Window.h>
+#include <OOGL/Shader.h>
+#include <OOGL/StateFns.h>
 #include <OOGL/BufferObject.h>
 #include <OOGL/Texture.h>
 #include <OOGL/VertexArrayObject.h>
+
+#include <OOBase/HashTable.h>
 
 #include "Resource.h"
 

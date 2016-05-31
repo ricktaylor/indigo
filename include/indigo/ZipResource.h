@@ -24,6 +24,8 @@
 
 #include "Resource.h"
 
+#include <OOBase/String.h>
+
 namespace Indigo
 {
 	namespace detail

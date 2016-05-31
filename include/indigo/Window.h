@@ -24,6 +24,9 @@
 
 #include <OOGL/Window.h>
 
+#include <OOBase/Vector.h>
+#include <OOBase/HashTable.h>
+
 #include "Layer.h"
 
 namespace Indigo

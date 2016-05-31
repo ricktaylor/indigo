@@ -19,9 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
-
 #include "../include/indigo/ZipResource.h"
+
+#include "Common.h"
 
 extern "C"
 {

@@ -22,6 +22,11 @@
 #ifndef INDIGO_PIPE_H_INCLUDED
 #define INDIGO_PIPE_H_INCLUDED
 
+#include <OOBase/Queue.h>
+#include <OOBase/Condition.h>
+#include <OOBase/Delegate.h>
+#include <OOBase/Logger.h>
+
 namespace Indigo
 {
 	namespace detail

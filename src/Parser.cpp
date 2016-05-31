@@ -19,14 +19,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
-
 #include "../include/indigo/Parser.h"
 #include "../include/indigo/Resource.h"
 #include "../include/indigo/Image.h"
 #include "../include/indigo/Font.h"
 
-#include <stdlib.h>
+#include "Common.h"
 
 namespace
 {

@@ -22,7 +22,7 @@
 #ifndef OOGL_RESOURCE_H_INCLUDED
 #define OOGL_RESOURCE_H_INCLUDED
 
-#include <OOGL/OOGL.h>
+#include <OOBase/SharedPtr.h>
 
 namespace Indigo
 {

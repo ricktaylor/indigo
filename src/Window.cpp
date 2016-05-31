@@ -19,10 +19,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
 #include "../include/indigo/Window.h"
 #include "../include/indigo/Render.h"
 #include "../include/indigo/Thread.h"
+
+#include <OOGL/StateFns.h>
+
+#include "Common.h"
 
 Indigo::Render::Window::Window(Indigo::Window* owner) :
 		m_owner(owner)

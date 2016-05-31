@@ -24,9 +24,13 @@
 
 #include "Pipe.h"
 
+#include <OOBase/Thread.h>
+
 namespace Indigo
 {
 	OOBase::SharedPtr<Indigo::Pipe> start_thread(const char* name, OOBase::SharedPtr<OOBase::Thread>& thread);
+
+	bool run(const char* name, void (*fn)(void*), void* param);
 }
 
 #endif // INDIGO_THREAD_H_INCLUDED

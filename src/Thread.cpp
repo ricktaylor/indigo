@@ -19,8 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
 #include "../include/indigo/Thread.h"
+
+#include "Common.h"
 
 namespace Indigo
 {

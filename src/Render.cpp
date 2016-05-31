@@ -19,10 +19,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
 #include "../include/indigo/Render.h"
 #include "../include/indigo/Window.h"
 #include "../include/indigo/Thread.h"
+
+#include "Common.h"
 
 namespace Indigo
 {

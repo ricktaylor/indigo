@@ -22,6 +22,11 @@
 #ifndef INDIGO_PARSER_H_INCLUDED
 #define INDIGO_PARSER_H_INCLUDED
 
+#include <OOBase/HashTable.h>
+#include <OOBase/String.h>
+
+#include <glm/glm.hpp>
+
 namespace Indigo
 {
 	class Image;

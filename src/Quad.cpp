@@ -19,12 +19,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
 #include "../include/indigo/Quad.h"
 #include "../include/indigo/ShaderPool.h"
 
-#include <OOGL/BufferObject.h>
-#include <OOGL/VertexArrayObject.h>
+#include "Common.h"
 
 namespace
 {

@@ -33,14 +33,9 @@
 #include <OOBase/Condition.h>
 #include <OOBase/Queue.h>
 #include <OOBase/Thread.h>
-#include <OOBase/Environment.h>
-#include <OOBase/Posix.h>
-#include <OOBase/CmdArgs.h>
-#include <OOBase/ConfigFile.h>
 #include <OOBase/Logger.h>
 #include <OOBase/Delegate.h>
 #include <OOBase/File.h>
-#include <OOBase/HashTable.h>
 #include <OOBase/Singleton.h>
 #include <OOBase/TLSSingleton.h>
 
@@ -48,13 +43,17 @@
 	//#include "Config_msvc.h"
 #elif defined(HAVE_CONFIG_H)
 	// Autoconf
-	//#include <Config.h>
+	#include <Config.h>
 #else
 #error Need some kind of configure scipt!
 #endif
 
 #include <OOGL/State.h>
+#include <OOGL/BufferObject.h>
+#include <OOGL/VertexArrayObject.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+
+#include <stdlib.h>
 
 #endif // INDIGO_COMMON_H_INCLUDED

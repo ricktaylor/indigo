@@ -26,8 +26,6 @@
 
 namespace Indigo
 {
-	bool run(const char* name, void (*fn)(void*), void* param);
-
 	const OOBase::SharedPtr<Pipe>& render_pipe();
 	const OOBase::SharedPtr<Pipe>& logic_pipe();
 }

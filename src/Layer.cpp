@@ -19,9 +19,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
 #include "../include/indigo/Layer.h"
 #include "../include/indigo/Render.h"
+
+#include "Common.h"
 
 void Indigo::Render::Layer::show(bool visible)
 {

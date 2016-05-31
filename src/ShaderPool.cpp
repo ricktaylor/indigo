@@ -19,8 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
 #include "../include/indigo/ShaderPool.h"
+
+#include "Common.h"
 
 namespace
 {

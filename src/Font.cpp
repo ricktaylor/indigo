@@ -19,11 +19,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "Common.h"
 #include "../include/indigo/Font.h"
 #include "../include/indigo/Render.h"
 #include "../include/indigo/Image.h"
 #include "../include/indigo/ShaderPool.h"
+
+#include "Common.h"
 
 namespace
 {
