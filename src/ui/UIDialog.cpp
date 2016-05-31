@@ -40,14 +40,14 @@ void Indigo::UIDialog::internal_do_modal()
 {
 	if (m_layer)
 	{
-		OOBase::Delegate1<void,const Indigo::Window&,OOBase::ThreadLocalAllocator> prev_close = m_layer->window()->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&UIDialog::window_close));
+		OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> prev_close = m_layer->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&UIDialog::on_window_close));
 
 		m_layer->show();
 
 		for (m_live = true;m_live;)
 			thread_pipe()->get();
 
-		m_layer->window()->on_close(prev_close);
+		m_layer->on_close(prev_close);
 
 		m_layer->show(false);
 	}
@@ -58,8 +58,3 @@ void Indigo::UIDialog::end_dialog()
 	m_live = false;
 }
 
-void Indigo::UIDialog::window_close(const Window& w)
-{
-	if (m_layer->window() == &w)
-		this->on_window_close();
-}

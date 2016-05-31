@@ -40,8 +40,6 @@ namespace Indigo
 	private:
 		OOBase::SharedPtr<UILayer> m_layer;
 		bool                       m_live;
-
-		void window_close(const Window& w);
 	};
 }
 

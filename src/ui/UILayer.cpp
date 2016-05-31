@@ -104,6 +104,23 @@ void Indigo::UILayer::on_state_change(OOBase::uint32_t state, OOBase::uint32_t c
 	}
 }
 
+OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> Indigo::UILayer::on_close(const OOBase::Delegate0<void,OOBase::ThreadLocalAllocator>& delegate)
+{
+	OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> prev = m_on_close;
+	m_on_close = delegate;
+	return prev;
+}
+
+bool Indigo::UILayer::on_close()
+{
+	if (m_on_close)
+	{
+		m_on_close.invoke();
+		return true;
+	}
+	return false;
+}
+
 void Indigo::UILayer::on_size(const glm::uvec2& sz)
 {
 	m_size = sz;

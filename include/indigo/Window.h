@@ -68,19 +68,15 @@ namespace Indigo
 		bool add_layer(const OOBase::SharedPtr<Layer>& layer, const char* name = NULL, size_t len = -1);
 		bool remove_layer(const char* name, size_t len = -1);
 
-		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> on_close(const OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator>& delegate);
-
 	private:
 		OOBase::SharedPtr<Indigo::Render::Window> m_render_wnd;
 		OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
 		OOBase::HashTable<size_t,OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator> m_named_layers;
 
-		OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> m_on_close;
-
 		void run();
 		void on_create(const CreateParams* params, bool* ret);
 		void on_destroy();
-		void call_on_close();
+		void on_close();
 		void on_move(glm::ivec2 pos);
 		void on_size(glm::uvec2 sz);
 		void on_mousemove(double screen_x, double screen_y);

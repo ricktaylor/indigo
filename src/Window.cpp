@@ -63,7 +63,7 @@ bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& p
 
 void Indigo::Render::Window::on_close(const OOGL::Window& win)
 {
-	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::call_on_close));
+	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_close));
 }
 
 void Indigo::Render::Window::on_move(const OOGL::Window& win, const glm::ivec2& pos)
@@ -268,17 +268,22 @@ bool Indigo::Window::remove_layer(const char* name, size_t len)
 	return m_named_layers.remove(OOBase::Hash<const char*>::hash(name,len)) != 0;
 }
 
-void Indigo::Window::call_on_close()
+void Indigo::Window::on_close()
 {
-	if (m_on_close)
-		m_on_close.invoke(*this);
-}
+	bool handled = false;
+	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;)
+	{
+		OOBase::SharedPtr<Layer> layer = i->lock();
+		if (!layer)
+			i = m_layers.erase(i);
+		else
+		{
+			if (layer->visible())
+				handled = layer->on_close();
 
-OOBase::Delegate1<void,const Indigo::Window&,OOBase::ThreadLocalAllocator> Indigo::Window::on_close(const OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator>& delegate)
-{
-	OOBase::Delegate1<void,const Window&,OOBase::ThreadLocalAllocator> prev = m_on_close;
-	m_on_close = delegate;
-	return prev;
+			--i;
+		}
+	}
 }
 
 void Indigo::Window::on_move(glm::ivec2 pos)
