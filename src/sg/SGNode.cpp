@@ -24,19 +24,25 @@
 
 #include "../../include/indigo/Render.h"
 
-Indigo::Render::SGNode::SGNode(SGGroup* parent) :
-		m_state(eRSG_dirty),
-		m_parent(parent)
+Indigo::Render::SGNode::SGNode(SGGroup* parent, bool visible, const glm::mat4& local_transform) :
+		m_state((parent ? eRSG_dirty : 0) | (visible ? eRSG_visible : 0)),
+		m_parent(parent),
+		m_local_transform(local_transform),
+		m_world_transform(local_transform)
 {
-	make_dirty();
 }
 
 void Indigo::Render::SGNode::show(bool visible)
 {
-	if (visible)
-		m_state |= eRSG_visible;
-	else
+	if (!visible)
 		m_state &= ~eRSG_visible;
+	else if (!(m_state & eRSG_visible))
+	{
+		m_state |= eRSG_visible;
+
+		if (m_parent && dirty())
+			m_parent->make_dirty();
+	}
 }
 
 void Indigo::Render::SGNode::make_dirty()
@@ -45,12 +51,12 @@ void Indigo::Render::SGNode::make_dirty()
 	{
 		m_state |= eRSG_dirty;
 
-		if (m_parent)
+		if (m_parent && visible())
 			m_parent->make_dirty();
 	}
 }
 
-void Indigo::Render::SGNode::update(const glm::mat4& parent_transform)
+void Indigo::Render::SGNode::on_update(const glm::mat4& parent_transform)
 {
 	m_world_transform = parent_transform * m_local_transform;
 
@@ -69,10 +75,19 @@ void Indigo::Render::SGNode::local_transform(glm::mat4 transform)
 
 void Indigo::Render::SGGroup::attach_node(Indigo::SGNode* node, bool* ret)
 {
-	node->m_render_node = node->on_render_create(this);
-	*ret = (node->m_render_node != NULL);
-	if (*ret)
-		make_dirty();
+	*ret = false;
+	OOBase::SharedPtr<Render::SGNode> render_node = node->on_render_create(this);
+	if (render_node)
+	{
+		*ret = add_node(render_node);
+		if (*ret)
+		{
+			node->m_render_node = render_node.get();
+
+			if (render_node->dirty())
+				make_dirty();
+		}
+	}
 }
 
 Indigo::SGNode::SGNode(SGGroup* parent, const CreateParams& params) :
@@ -161,6 +176,44 @@ bool Indigo::SGGroup::attach_node(const OOBase::SharedPtr<SGNode>& node)
 	return ret;
 }
 
+namespace
+{
+	class SimpleGroup : public Indigo::Render::SGNode
+	{
+	public:
+		SimpleGroup(Indigo::Render::SGGroup* parent) : SGNode(parent)
+		{}
+
+		OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator> m_children;
+
+		void on_update(const glm::mat4& parent_transform);
+
+		bool add_node(const OOBase::SharedPtr<SGNode>& node);
+		bool remove_node(const OOBase::SharedPtr<SGNode>& node);
+	};
+}
+
+void ::SimpleGroup::on_update(const glm::mat4& parent_transform)
+{
+	SGNode::on_update(parent_transform);
+
+	for (OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i;++i)
+	{
+		if ((*i)->dirty())
+			(*i)->on_update(world_transform());
+	}
+}
+
+bool ::SimpleGroup::add_node(const OOBase::SharedPtr<Indigo::Render::SGNode>& node)
+{
+	return m_children.push_back(node);
+}
+
+bool ::SimpleGroup::remove_node(const OOBase::SharedPtr<Indigo::Render::SGNode>& node)
+{
+	return m_children.remove(node) != 0;
+}
+
 bool Indigo::SGSimpleGroup::add_node(const OOBase::SharedPtr<SGNode>& node)
 {
 	if (!m_children.push_back(node))
@@ -178,4 +231,12 @@ bool Indigo::SGSimpleGroup::add_node(const OOBase::SharedPtr<SGNode>& node)
 bool Indigo::SGSimpleGroup::remove_node(const OOBase::SharedPtr<SGNode>& node)
 {
 	return m_children.remove(node) != 0;
+}
+
+OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGSimpleGroup::on_render_create(Render::SGGroup* parent)
+{
+	OOBase::SharedPtr<Indigo::Render::SGNode> node = OOBase::allocate_shared< ::SimpleGroup>(parent);
+	if (!node)
+		LOG_ERROR(("Failed to allocate: %s\n",OOBase::system_error_text()));
+	return node;
 }

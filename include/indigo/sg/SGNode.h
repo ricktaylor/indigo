@@ -33,6 +33,30 @@ namespace Indigo
 
 	namespace Render
 	{
+		class AABB
+		{
+		public:
+			AABB(const glm::vec3& midpoint = glm::vec3(), const glm::vec3& extents = glm::vec3()) :
+				m_midpoint(midpoint),
+				m_extents(extents)
+			{}
+
+			AABB(const AABB& rhs) :
+				m_midpoint(rhs.m_midpoint),
+				m_extents(rhs.m_extents)
+			{}
+
+			AABB& operator = (const AABB& rhs)
+			{
+				m_midpoint = rhs.m_midpoint;
+				m_extents = rhs.m_extents;
+				return *this;
+			}
+
+			glm::vec3 m_midpoint;
+			glm::vec3 m_extents;
+		};
+
 		class SGGroup;
 
 		class SGNode : public OOBase::NonCopyable
@@ -44,17 +68,24 @@ namespace Indigo
 
 			SGGroup* parent() const { return m_parent; }
 
+			bool visible() const { return m_state & eRSG_visible; }
 			void show(bool visible = true);
 
-			bool is_dirty() const { return m_state & eRSG_dirty; }
+			bool dirty() const { return (m_state & (eRSG_visible | eRSG_dirty)) == (eRSG_visible | eRSG_dirty); }
 			void make_dirty();
 
+			const glm::mat4& local_transform() const { return m_local_transform; }
 			void local_transform(glm::mat4 transform);
 
-		protected:
-			SGNode(SGGroup* parent);
+			const glm::mat4& world_transform() const { return m_world_transform; }
+			virtual AABB world_AABB() const { return AABB(); }
 
-			virtual void update(const glm::mat4& parent_transform);
+			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const {}
+			virtual void on_update(const glm::mat4& parent_transform);
+
+
+		protected:
+			SGNode(SGGroup* parent, bool visible = false, const glm::mat4& local_transform = glm::mat4());
 
 		private:
 			enum State
@@ -73,7 +104,10 @@ namespace Indigo
 			friend class Indigo::SGGroup;
 
 		protected:
-			virtual void update(const glm::mat4& parent_transform) = 0;
+			virtual void on_update(const glm::mat4& parent_transform) = 0;
+
+			virtual bool add_node(const OOBase::SharedPtr<SGNode>& node) = 0;
+			virtual bool remove_node(const OOBase::SharedPtr<SGNode>& node) = 0;
 
 		private:
 			void attach_node(Indigo::SGNode* node, bool* ret);
@@ -132,8 +166,7 @@ namespace Indigo
 
 		Render::SGNode* render_node() const { return m_render_node; }
 
-		virtual Render::SGNode* on_render_create(Render::SGGroup* parent) = 0;
-
+		virtual OOBase::SharedPtr<Render::SGNode> on_render_create(Render::SGGroup* parent) = 0;
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 
 	private:
@@ -167,6 +200,8 @@ namespace Indigo
 
 	private:
 		OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator> m_children;
+
+		OOBase::SharedPtr<Render::SGNode> on_render_create(Render::SGGroup* parent);
 	};
 }
 
