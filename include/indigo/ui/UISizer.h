@@ -37,8 +37,7 @@ namespace Indigo
 		virtual void position(const glm::ivec2& p) = 0;
 
 	protected:
-		UISizer(const glm::uvec4& margins = glm::uvec4(0)) :
-			m_position(0),
+		UISizer(const glm::uvec4& margins = glm::uvec4()) :
 			m_margins(margins)
 		{}
 
@@ -63,7 +62,7 @@ namespace Indigo
 			expand = expand_horiz | expand_vert
 		};
 
-		UIGridSizer(bool fixed, const glm::uvec4& margins = glm::uvec4(0), const glm::uvec2& padding = glm::uvec2(0));
+		UIGridSizer(bool fixed, const glm::uvec4& margins = glm::uvec4(), const glm::uvec2& padding = glm::uvec2());
 		
 		virtual void fit(const glm::uvec2& size);
 		virtual glm::uvec2 min_fit() const;

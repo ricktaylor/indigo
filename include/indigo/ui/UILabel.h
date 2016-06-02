@@ -33,7 +33,7 @@ namespace Indigo
 		class UILabel : public Text, public UIDrawable
 		{
 		public:
-			UILabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), bool visible = true, const glm::ivec2& position = glm::ivec2(0));
+			UILabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), bool visible = true, const glm::ivec2& position = glm::ivec2());
 
 		protected:
 			glm::vec4 m_colour;
@@ -45,7 +45,7 @@ namespace Indigo
 		class UIShadowLabel : public UILabel
 		{
 		public:
-			UIShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::vec4& shadow = glm::vec4(.5f), const glm::ivec2& drop = glm::ivec2(0,-1), bool visible = true, const glm::ivec2& position = glm::ivec2(0));
+			UIShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), const glm::vec4& shadow = glm::vec4(.5f), const glm::ivec2& drop = glm::ivec2(0,-1), bool visible = true, const glm::ivec2& position = glm::ivec2());
 
 		private:
 			glm::vec4 m_shadow;
@@ -72,8 +72,8 @@ namespace Indigo
 		struct CreateParams : UIWidget::CreateParams
 		{
 			CreateParams(OOBase::uint32_t state = 0,
-					const glm::ivec2& position = glm::ivec2(0),
-					const glm::uvec2& size = glm::uvec2(0),
+					const glm::ivec2& position = glm::ivec2(),
+					const glm::uvec2& size = glm::uvec2(),
 					const OOBase::SharedPtr<Font>& font = OOBase::SharedPtr<Font>(),
 					unsigned int font_size = 0,
 					unsigned int style = (align_left | align_vcentre),
@@ -96,7 +96,7 @@ namespace Indigo
 		UILabel(UIGroup* parent, const char* sz, size_t len = -1, const CreateParams& params = CreateParams());
 
 	protected:
-		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
+		virtual glm::uvec2 min_size() const { return glm::uvec2(); }
 		virtual glm::uvec2 ideal_size() const;
 
 		virtual bool on_render_create(Render::UIGroup* group);

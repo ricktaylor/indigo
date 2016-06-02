@@ -36,10 +36,10 @@ namespace Indigo
 			CreateParams(OOBase::uint32_t state = 0,
 					bool fixed = false,
 					bool modal = true,
-					const glm::uvec4& margins = glm::uvec4(0),
-					const glm::uvec2& padding = glm::uvec2(0)
+					const glm::uvec4& margins = glm::uvec4(),
+					const glm::uvec2& padding = glm::uvec2()
 			) :
-				UIWidget::CreateParams(state,glm::ivec2(0),glm::uvec2(0)),
+				UIWidget::CreateParams(state,glm::ivec2(),glm::uvec2()),
 				m_fixed(fixed),
 				m_modal(modal),
 				m_padding(padding)

@@ -45,7 +45,7 @@ namespace Indigo
 			virtual void size(glm::uvec2 sz) {}
 
 		protected:
-			UIDrawable(bool visible = true, const glm::ivec2& position = glm::ivec2(0,0));
+			UIDrawable(bool visible = true, const glm::ivec2& position = glm::ivec2());
 			virtual ~UIDrawable() {}
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
@@ -60,7 +60,7 @@ namespace Indigo
 			friend class Indigo::UIGroup;
 
 		public:
-			UIGroup(bool visible = true, const glm::ivec2& position = glm::ivec2(0,0)) : UIDrawable(visible,position)
+			UIGroup(bool visible = true, const glm::ivec2& position = glm::ivec2()) : UIDrawable(visible,position)
 			{}
 
 			bool add_drawable(const OOBase::SharedPtr<UIDrawable>& drawable);
@@ -92,8 +92,8 @@ namespace Indigo
 		struct CreateParams
 		{
 			CreateParams(OOBase::uint32_t state = 0,
-					const glm::ivec2& position = glm::ivec2(0),
-					const glm::uvec2& size = glm::uvec2(0)
+					const glm::ivec2& position = glm::ivec2(),
+					const glm::uvec2& size = glm::uvec2()
 			) :
 				m_state(state),
 				m_position(position),
@@ -127,7 +127,7 @@ namespace Indigo
 		const glm::uvec2& size() const { return m_size; }
 		glm::uvec2 size(const glm::uvec2& sz);
 
-		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
+		virtual glm::uvec2 min_size() const { return glm::uvec2(); }
 		virtual glm::uvec2 ideal_size() const = 0;
 
 	protected:

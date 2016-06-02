@@ -34,7 +34,7 @@ namespace Indigo
 		class UIImage : public UIDrawable
 		{
 		public:
-			UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::uvec2& size, const glm::vec4& colour = glm::vec4(1.f), bool visible = true, const glm::ivec2& position = glm::ivec2(0));
+			UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::uvec2& size, const glm::vec4& colour = glm::vec4(1.f), bool visible = true, const glm::ivec2& position = glm::ivec2());
 
 			virtual bool valid() const { return UIDrawable::valid() && m_texture->valid(); }
 
@@ -55,8 +55,8 @@ namespace Indigo
 		struct CreateParams : UIWidget::CreateParams
 		{
 			CreateParams(OOBase::uint32_t state = 0,
-					const glm::ivec2& position = glm::ivec2(0),
-					const glm::uvec2& size = glm::uvec2(0),
+					const glm::ivec2& position = glm::ivec2(),
+					const glm::uvec2& size = glm::uvec2(),
 					const glm::vec4& colour = glm::vec4(1.f)
 			) :
 				UIWidget::CreateParams(state,position,size),
@@ -69,7 +69,7 @@ namespace Indigo
 		UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image, const CreateParams& params = CreateParams());
 
 	protected:
-		virtual glm::uvec2 min_size() const { return glm::uvec2(0); }
+		virtual glm::uvec2 min_size() const { return glm::uvec2(); }
 		virtual glm::uvec2 ideal_size() const;
 
 		virtual bool on_render_create(Render::UIGroup* group);
