@@ -79,10 +79,6 @@ Indigo::UIWidget::UIWidget(UIGroup* parent, const CreateParams& params) :
 {
 }
 
-Indigo::UIWidget::~UIWidget()
-{
-}
-
 void Indigo::UIWidget::toggle_state(OOBase::uint32_t new_state, OOBase::uint32_t mask)
 {
 	OOBase::uint32_t change_mask = (m_state ^ new_state) & mask;

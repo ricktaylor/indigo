@@ -42,17 +42,17 @@ namespace Indigo
 
 			void show(bool visible = true) { m_visible = visible; }
 			void position(glm::ivec2 pos) { m_position = pos; }
-
 			virtual void size(glm::uvec2 sz) {}
 
 		protected:
 			UIDrawable(bool visible = true, const glm::ivec2& position = glm::ivec2(0,0));
 			virtual ~UIDrawable() {}
 
-			bool m_visible;
-			glm::ivec2 m_position;
-
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
+
+		private:
+			bool       m_visible;
+			glm::ivec2 m_position;
 		};
 
 		class UIGroup : public UIDrawable
@@ -105,7 +105,7 @@ namespace Indigo
 			glm::uvec2       m_size;
 		};
 
-		virtual ~UIWidget();
+		virtual ~UIWidget() {}
 
 		UIGroup* parent() const { return m_parent; }
 
@@ -141,11 +141,11 @@ namespace Indigo
 		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
 
 	private:
-		UIGroup* m_parent;
+		UIGroup*         m_parent;
 		Render::UIGroup* m_render_group;
 		OOBase::uint32_t m_state;
-		glm::ivec2 m_position;
-		glm::uvec2 m_size;
+		glm::ivec2       m_position;
+		glm::uvec2       m_size;
 	};
 
 	class UIGroup : public UIWidget
