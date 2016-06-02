@@ -72,6 +72,7 @@ libindigo_la_SOURCES = \
 	src/ui/UIPanel.cpp \
 	src/ui/UILoader.cpp \
 	src/ui/UIDialog.cpp \
+	src/sg/SGNode.cpp \
 	resources/StaticResources.cpp
 			
 if WIN32
