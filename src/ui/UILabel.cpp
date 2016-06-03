@@ -52,7 +52,7 @@ Indigo::Render::UIShadowLabel::UIShadowLabel(const OOBase::SharedPtr<Font>& font
 void Indigo::Render::UIShadowLabel::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	if (m_drop != glm::ivec2(0) && m_shadow.a > 0.f)
-		Text::draw(glState,glm::scale(glm::translate(mvp,glm::vec3(m_drop.x,m_drop.y,0.f)),glm::vec3(m_size)),m_shadow);
+		Text::draw(glState,glm::translate(glm::scale(mvp,glm::vec3(m_size)),glm::vec3(m_drop.x,m_drop.y,0.f)),m_shadow);
 
 	if (m_colour.a > 0.0f)
 		Text::draw(glState,glm::scale(mvp,glm::vec3(m_size)),m_colour);
