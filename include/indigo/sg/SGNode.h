@@ -31,32 +31,36 @@ namespace Indigo
 	class SGNode;
 	class SGGroup;
 
+	class AABB
+	{
+	public:
+		AABB(const glm::vec3& midpoint = glm::vec3(), const glm::vec3& extents = glm::vec3()) :
+			m_midpoint(midpoint),
+			m_extents(extents)
+		{}
+
+		AABB(const AABB& rhs) :
+			m_midpoint(rhs.m_midpoint),
+			m_extents(rhs.m_extents)
+		{}
+
+		AABB& operator = (const AABB& rhs)
+		{
+			m_midpoint = rhs.m_midpoint;
+			m_extents = rhs.m_extents;
+			return *this;
+		}
+
+		glm::vec3 min() const { return m_midpoint - m_extents; }
+		glm::vec3 max() const { return m_midpoint + m_extents; }
+
+		glm::vec3 m_midpoint;
+		glm::vec3 m_extents;
+	};
+
 	namespace Render
 	{
-		class AABB
-		{
-		public:
-			AABB(const glm::vec3& midpoint = glm::vec3(), const glm::vec3& extents = glm::vec3()) :
-				m_midpoint(midpoint),
-				m_extents(extents)
-			{}
-
-			AABB(const AABB& rhs) :
-				m_midpoint(rhs.m_midpoint),
-				m_extents(rhs.m_extents)
-			{}
-
-			AABB& operator = (const AABB& rhs)
-			{
-				m_midpoint = rhs.m_midpoint;
-				m_extents = rhs.m_extents;
-				return *this;
-			}
-
-			glm::vec3 m_midpoint;
-			glm::vec3 m_extents;
-		};
-
+		class SGVisitor;
 		class SGGroup;
 
 		class SGNode : public OOBase::NonCopyable
@@ -78,11 +82,12 @@ namespace Indigo
 			void local_transform(glm::mat4 transform);
 
 			const glm::mat4& world_transform() const { return m_world_transform; }
-			virtual AABB world_AABB() const { return AABB(); }
+			virtual AABB world_AABB() const;
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const {}
 			virtual void on_update(const glm::mat4& parent_transform);
 
+			virtual void visit(SGVisitor& visitor) const;
 
 		protected:
 			SGNode(SGGroup* parent, bool visible = false, const glm::mat4& local_transform = glm::mat4());
@@ -103,14 +108,25 @@ namespace Indigo
 		{
 			friend class Indigo::SGGroup;
 
-		protected:
+		public:
+			virtual AABB world_AABB() const = 0;
+
 			virtual void on_update(const glm::mat4& parent_transform) = 0;
 
+			virtual void visit(SGVisitor& visitor) const = 0;
+
+		protected:
 			virtual bool add_node(const OOBase::SharedPtr<SGNode>& node) = 0;
 			virtual bool remove_node(const OOBase::SharedPtr<SGNode>& node) = 0;
 
 		private:
 			void attach_node(Indigo::SGNode* node, bool* ret);
+		};
+
+		class SGVisitor
+		{
+		public:
+			virtual bool visit(const SGNode& node) = 0;
 		};
 	}
 
