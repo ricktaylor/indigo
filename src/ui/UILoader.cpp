@@ -24,6 +24,7 @@
 #include "../../include/indigo/ui/UILoader.h"
 
 #include "../../include/indigo/Resource.h"
+#include "../../include/indigo/Window.h"
 
 #include "../../include/indigo/ui/UISizer.h"
 #include "../../include/indigo/ui/UIImage.h"

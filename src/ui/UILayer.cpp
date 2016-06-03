@@ -22,6 +22,7 @@
 #include "../Common.h"
 
 #include "../../include/indigo/ui/UILayer.h"
+#include "../../include/indigo/Window.h"
 
 namespace
 {
