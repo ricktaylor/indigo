@@ -29,7 +29,7 @@ namespace
 	class UILayer : public Indigo::Render::UIGroup, public Indigo::Render::Layer
 	{
 	public:
-		UILayer(Indigo::Render::Window* window, const glm::vec2& sz);
+		UILayer(Indigo::Render::Window* window);
 
 		void on_draw(OOGL::State& glState) const;
 		void on_size(const glm::uvec2& sz);
@@ -38,10 +38,12 @@ namespace
 	};
 }
 
-::UILayer::UILayer(Indigo::Render::Window* window, const glm::vec2& sz) :
+::UILayer::UILayer(Indigo::Render::Window* window) :
 		Indigo::Render::UIGroup(true),
 		Indigo::Render::Layer(window)
 {
+	glm::vec2 sz = window->window()->size();
+
 	m_mvp = glm::ortho(0.f,sz.x,0.f,sz.y);
 }
 
@@ -140,7 +142,7 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 {
 	m_size = window->window()->size();
 
-	OOBase::SharedPtr< ::UILayer> group = OOBase::allocate_shared< ::UILayer,OOBase::ThreadLocalAllocator>(window,m_size);
+	OOBase::SharedPtr< ::UILayer> group = OOBase::allocate_shared< ::UILayer,OOBase::ThreadLocalAllocator>(window);
 	if (!group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
 	else
