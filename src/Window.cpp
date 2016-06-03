@@ -110,11 +110,13 @@ void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glSta
 
 void Indigo::Render::Window::on_mousemove(const OOGL::Window& win, double screen_x, double screen_y)
 {
+	void* TODO; // TODO - Make this go through the render layers!
 	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_mousemove),screen_x,screen_y);
 }
 
 void Indigo::Render::Window::on_mousebutton(const OOGL::Window& win, const OOGL::Window::mouse_click_t& click)
 {
+	void* TODO; // TODO - Make this go through the render layers!
 	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_mousebutton),click);
 }
 
