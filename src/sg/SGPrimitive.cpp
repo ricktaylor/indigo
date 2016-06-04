@@ -75,12 +75,12 @@ bool CubeFactory::alloc()
 
 	vertex_data vertices[] =
 	{
-		{ 1.f, 1.f, 1.f},  {-1.f, 1.f, 1.f},  {-1.f,-1.f, 1.f},  { 1.f,-1.f, 1.f},   // v0,v1,v2,v3 (front)
-        { 1.f, 1.f, 1.f},  { 1.f,-1.f, 1.f},  { 1.f,-1.f,-1.f},  { 1.f, 1.f,-1.f},   // v0,v3,v4,v5 (right)
-        { 1.f, 1.f, 1.f},  { 1.f, 1.f,-1.f},  {-1.f, 1.f,-1.f},  {-1.f, 1.f, 1.f},   // v0,v5,v6,v1 (top)
-        {-1.f, 1.f, 1.f},  {-1.f, 1.f,-1.f},  {-1.f,-1.f,-1.f},  {-1.f,-1.f, 1.f},   // v1,v6,v7,v2 (left)
-        {-1.f,-1.f,-1.f},  { 1.f,-1.f,-1.f},  { 1.f,-1.f, 1.f},  {-1.f,-1.f, 1.f},   // v7,v4,v3,v2 (bottom)
-        { 1.f,-1.f,-1.f},  {-1.f,-1.f,-1.f},  {-1.f, 1.f,-1.f},  { 1.f, 1.f,-1.f}    // v4,v7,v6,v5 (back)
+		{ 1.f, 1.f, 1.f},  { 0.f, 1.f, 1.f},  { 0.f, 0.f, 1.f},  { 1.f, 0.f, 1.f},   // v0,v1,v2,v3 (front)
+        { 1.f, 1.f, 1.f},  { 1.f, 0.f, 1.f},  { 1.f, 0.f, 0.f},  { 1.f, 1.f, 0.f},   // v0,v3,v4,v5 (right)
+        { 1.f, 1.f, 1.f},  { 1.f, 1.f, 0.f},  { 0.f, 1.f, 0.f},  { 0.f, 1.f, 1.f},   // v0,v5,v6,v1 (top)
+        { 0.f, 1.f, 1.f},  { 0.f, 1.f, 0.f},  { 0.f, 0.f, 0.f},  { 0.f, 0.f, 1.f},   // v1,v6,v7,v2 (left)
+        { 0.f, 0.f, 0.f},  { 1.f, 0.f, 0.f},  { 1.f, 0.f, 1.f},  { 0.f, 0.f, 1.f},   // v7,v4,v3,v2 (bottom)
+        { 1.f, 0.f, 0.f},  { 0.f, 0.f, 0.f},  { 0.f, 1.f, 0.f},  { 1.f, 1.f, 0.f}    // v4,v7,v6,v5 (back)
 	};
 
 	GLubyte indices[elements_per_cube] =
@@ -149,7 +149,7 @@ Cube::Cube(Indigo::Render::SGGroup* parent, const glm::vec4& colour, bool visibl
 void Cube::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	if (m_colour.a > 0.f)
-		OOGL::ContextSingleton<CubeFactory>::instance().draw(glState,mvp,m_colour);
+		OOGL::ContextSingleton<CubeFactory>::instance().draw(glState,mvp * world_transform(),m_colour);
 }
 
 OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGCube::on_render_create(Render::SGGroup* parent)

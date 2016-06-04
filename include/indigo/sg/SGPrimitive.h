@@ -33,7 +33,7 @@ namespace Indigo
 		{
 			CreateParams(OOBase::uint32_t state = 0,
 					const glm::vec3& position = glm::vec3(),
-					const glm::vec3& scaling = glm::vec3(),
+					const glm::vec3& scaling = glm::vec3(1.f,1.f,1.f),
 					const glm::quat& rotation = glm::quat(),
 					const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f)
 			) :

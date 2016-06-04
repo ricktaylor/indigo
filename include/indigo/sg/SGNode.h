@@ -158,7 +158,7 @@ namespace Indigo
 		{
 			CreateParams(OOBase::uint32_t state = 0,
 				const glm::vec3& position = glm::vec3(),
-				const glm::vec3& scaling = glm::vec3(),
+				const glm::vec3& scaling = glm::vec3(1.f,1.f,1.f),
 				const glm::quat& rotation = glm::quat()
 			) : 
 				m_state(state),
@@ -179,7 +179,7 @@ namespace Indigo
 
 		virtual bool valid() const { return m_render_node != NULL; }
 
-		bool visible() const { return valid() && (m_state & eNS_visible); }
+		bool visible() const { return (m_state & eNS_visible); }
 		virtual void show(bool visible = true);
 
 		bool enabled() const { return valid() && (m_state & eNS_enabled); }
@@ -224,7 +224,7 @@ namespace Indigo
 		{
 			CreateParams(OOBase::uint32_t state = eNS_enabled,
 				const glm::vec3& position = glm::vec3(),
-				const glm::vec3& scaling = glm::vec3(),
+				const glm::vec3& scaling = glm::vec3(1.f,1.f,1.f),
 				const glm::quat& rotation = glm::quat()
 			) : 
 				SGNode::CreateParams(state,position,scaling,rotation)

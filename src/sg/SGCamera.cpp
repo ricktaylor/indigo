@@ -40,8 +40,10 @@ namespace
 
 bool ClipVisitor::visit(const Indigo::Render::SGNode& node)
 {
-	m_nodes.push_back(&node);
+	if (!node.visible())
+		return false;
 
+	m_nodes.push_back(&node);
 	return true;
 }
 

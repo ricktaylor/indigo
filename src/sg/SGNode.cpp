@@ -284,7 +284,7 @@ OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGGroup::on_render_create(Rend
 }
 
 Indigo::SGRoot::SGRoot() : 
-		SGGroup(NULL,SGGroup::CreateParams())
+		SGGroup(NULL,SGGroup::CreateParams(eNS_enabled | eNS_visible))
 {
 	render_pipe()->call(OOBase::make_delegate(this,&SGRoot::on_init));
 }
