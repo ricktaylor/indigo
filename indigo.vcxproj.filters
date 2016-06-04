@@ -93,6 +93,12 @@
     <ClInclude Include="include\indigo\Parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\indigo\sg\SGCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\indigo\sg\SGPrimitive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\indigo.rc">
@@ -172,15 +178,27 @@
     <ClCompile Include="src\Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\sg\SGCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sg\SGPrimitive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\2d_colour.vert">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="resources\alpha_blend.frag">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resources\colour_blend.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\2d_textured_colour.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\colour.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\3d_colour.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

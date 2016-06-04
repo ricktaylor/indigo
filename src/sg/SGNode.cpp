@@ -19,10 +19,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../Common.h"
 #include "../../include/indigo/sg/SGNode.h"
 
 #include "../../include/indigo/Render.h"
+
+#include "../Common.h"
 
 Indigo::Render::SGNode::SGNode(SGGroup* parent, bool visible, const glm::mat4& local_transform) :
 		m_state(eRSG_dirty | (visible ? eRSG_visible : 0)),
@@ -62,6 +63,8 @@ void Indigo::Render::SGNode::on_update(const glm::mat4& parent_transform)
 	{
 		m_world_transform = parent_transform * m_local_transform;
 
+		m_world_aabb.m_midpoint = glm::vec3(m_world_transform * glm::vec4(0.f,0.f,0.f,1.f));
+
 		m_state &= ~eRSG_dirty;
 	}
 }
@@ -74,11 +77,6 @@ void Indigo::Render::SGNode::local_transform(glm::mat4 transform)
 
 		make_dirty();
 	}
-}
-
-Indigo::AABB Indigo::Render::SGNode::world_AABB() const
-{
-	return AABB(glm::vec3(m_world_transform * glm::vec4(0.f,0.f,0.f,1.f)));
 }
 
 void Indigo::Render::SGNode::visit(SGVisitor& visitor) const
@@ -106,7 +104,10 @@ void Indigo::Render::SGGroup::attach_node(Indigo::SGNode* node, bool* ret)
 Indigo::SGNode::SGNode(SGGroup* parent, const CreateParams& params) :
 		m_parent(parent),
 		m_render_node(NULL),
-		m_state(params.m_state)
+		m_state(params.m_state),
+		m_position(params.m_position),
+		m_scaling(params.m_scaling),
+		m_rotation(params.m_rotation)
 {
 }
 
@@ -143,7 +144,7 @@ void Indigo::SGNode::enable(bool enable)
 
 glm::mat4 Indigo::SGNode::transform() const
 {
-	return glm::translate(glm::mat4_cast(m_rotation) * glm::scale(glm::mat4(),m_scaling),m_position);
+	return glm::scale(glm::translate(glm::mat4_cast(m_rotation),m_position),m_scaling);
 }
 
 void Indigo::SGNode::position(const glm::vec3& pos)
@@ -179,43 +180,25 @@ void Indigo::SGNode::rotation(const glm::quat& rot)
 	}
 }
 
-bool Indigo::SGGroup::attach_node(const OOBase::SharedPtr<SGNode>& node)
-{
-	if (!m_render_node)
-		LOG_ERROR_RETURN(("Failed to insert node: incomplete group"),false);
-
-	bool ret = false;
-	render_pipe()->call(OOBase::make_delegate(static_cast<Indigo::Render::SGGroup*>(m_render_node),&Render::SGGroup::attach_node),node.get(),&ret);
-	return ret;
-}
-
 namespace
 {
-	class SimpleGroup : public Indigo::Render::SGNode
+	class SimpleGroup : public Indigo::Render::SGGroup
 	{
 	public:
-		SimpleGroup(Indigo::Render::SGGroup* parent) : SGNode(parent)
+		SimpleGroup(Indigo::Render::SGGroup* parent, bool visible = false, const glm::mat4& local_transform = glm::mat4()) : 
+			SGGroup(parent,visible,local_transform)
 		{}
 
 		OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator> m_children;
 
-		Indigo::AABB world_AABB() const;
-
 		void visit(Indigo::Render::SGVisitor& visitor) const;
 
+		void on_draw(OOGL::State& glState, const glm::mat4& mvp) const {}
 		void on_update(const glm::mat4& parent_transform);
 
 		bool add_node(const OOBase::SharedPtr<SGNode>& node);
 		bool remove_node(const OOBase::SharedPtr<SGNode>& node);
-
-	private:
-		Indigo::AABB m_aabb;
 	};
-}
-
-Indigo::AABB SimpleGroup::world_AABB() const
-{
-	return m_aabb;
 }
 
 void SimpleGroup::visit(Indigo::Render::SGVisitor& visitor) const
@@ -233,19 +216,15 @@ void SimpleGroup::on_update(const glm::mat4& parent_transform)
 	{
 		SGNode::on_update(parent_transform);
 
-		if (m_children.empty())
-		{
-			m_aabb = SGNode::world_AABB();
-		}
-		else
+		if (!m_children.empty())
 		{
 			glm::vec3 min,max;
 
-			for (OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i;++i)
+			for (OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
 			{
 				(*i)->on_update(world_transform());
 
-				Indigo::AABB b = (*i)->world_AABB();
+				const Indigo::AABB& b = (*i)->world_AABB();
 				if (i == m_children.begin())
 				{
 					min = b.min();
@@ -258,8 +237,7 @@ void SimpleGroup::on_update(const glm::mat4& parent_transform)
 				}
 			}
 
-			m_aabb.m_midpoint = (min + max) / 2.0f;
-			m_aabb.m_extents = (max - min) / 2.0f;
+			world_AABB(Indigo::AABB((min + max) / 2.0f,(max - min) / 2.0f));
 		}
 	}
 }
@@ -274,12 +252,16 @@ bool SimpleGroup::remove_node(const OOBase::SharedPtr<Indigo::Render::SGNode>& n
 	return m_children.remove(node) != 0;
 }
 
-bool Indigo::SGSimpleGroup::add_node(const OOBase::SharedPtr<SGNode>& node)
+bool Indigo::SGGroup::add_node(const OOBase::SharedPtr<SGNode>& node)
 {
+	if (!m_render_node)
+		LOG_ERROR_RETURN(("Failed to insert node: incomplete group"),false);
+
 	if (!m_children.push_back(node))
 		LOG_ERROR_RETURN(("Failed to insert node: %s",OOBase::system_error_text()),false);
 
-	if (!attach_node(node))
+	bool ret = false;
+	if (!render_pipe()->call(OOBase::make_delegate(static_cast<Indigo::Render::SGGroup*>(m_render_node),&Render::SGGroup::attach_node),node.get(),&ret) || !ret)
 	{
 		m_children.pop_back();
 		return false;
@@ -288,15 +270,40 @@ bool Indigo::SGSimpleGroup::add_node(const OOBase::SharedPtr<SGNode>& node)
 	return true;
 }
 
-bool Indigo::SGSimpleGroup::remove_node(const OOBase::SharedPtr<SGNode>& node)
+bool Indigo::SGGroup::remove_node(const OOBase::SharedPtr<SGNode>& node)
 {
 	return m_children.remove(node) != 0;
 }
 
-OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGSimpleGroup::on_render_create(Render::SGGroup* parent)
+OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGGroup::on_render_create(Render::SGGroup* parent)
 {
-	OOBase::SharedPtr<Indigo::Render::SGNode> node = OOBase::allocate_shared< ::SimpleGroup>(parent);
+	OOBase::SharedPtr<Indigo::Render::SGNode> node = OOBase::allocate_shared< ::SimpleGroup>(parent,visible(),transform());
 	if (!node)
 		LOG_ERROR(("Failed to allocate: %s\n",OOBase::system_error_text()));
 	return node;
+}
+
+Indigo::SGRoot::SGRoot() : 
+		SGGroup(NULL,SGGroup::CreateParams())
+{
+	render_pipe()->call(OOBase::make_delegate(this,&SGRoot::on_init));
+}
+
+Indigo::SGRoot::~SGRoot()
+{
+	render_pipe()->call(OOBase::make_delegate(this,&SGRoot::on_destroy));
+}
+
+void Indigo::SGRoot::on_init()
+{
+	m_render_root = OOBase::allocate_shared< ::SimpleGroup>(static_cast<Render::SGGroup*>(NULL),visible(),transform());
+
+	m_render_node = m_render_root.get();
+}
+
+void Indigo::SGRoot::on_destroy()
+{
+	m_render_root.reset();
+
+	m_render_node = NULL;
 }

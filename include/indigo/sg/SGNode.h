@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2015 Rick Taylor
+// Copyright (C) 2016 Rick Taylor
 //
 // This file is part of the Indigo boardgame engine.
 //
@@ -24,12 +24,16 @@
 
 #include <OOBase/SharedPtr.h>
 
+#include <OOGL/State.h>
+
 #include <glm/gtc/quaternion.hpp>
 
 namespace Indigo
 {
 	class SGNode;
 	class SGGroup;
+	class SGRoot;
+	class SGCamera;
 
 	class AABB
 	{
@@ -72,7 +76,7 @@ namespace Indigo
 
 			SGGroup* parent() const { return m_parent; }
 
-			bool visible() const { return m_state & eRSG_visible; }
+			bool visible() const { return (m_state & eRSG_visible) == eRSG_visible; }
 			void show(bool visible = true);
 
 			bool dirty() const { return (m_state & (eRSG_visible | eRSG_dirty)) == (eRSG_visible | eRSG_dirty); }
@@ -82,15 +86,18 @@ namespace Indigo
 			void local_transform(glm::mat4 transform);
 
 			const glm::mat4& world_transform() const { return m_world_transform; }
-			virtual AABB world_AABB() const;
+			
+			const AABB& world_AABB() const { return m_world_aabb; }
 
-			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const {}
+			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
 			virtual void on_update(const glm::mat4& parent_transform);
 
 			virtual void visit(SGVisitor& visitor) const;
 
 		protected:
 			SGNode(SGGroup* parent, bool visible = false, const glm::mat4& local_transform = glm::mat4());
+
+			void world_AABB(const AABB& aabb) { m_world_aabb = aabb; }
 
 		private:
 			enum State
@@ -102,6 +109,7 @@ namespace Indigo
 			SGGroup*     m_parent;
 			glm::mat4    m_local_transform;
 			glm::mat4    m_world_transform;
+			AABB         m_world_aabb;
 		};
 
 		class SGGroup : public SGNode
@@ -109,13 +117,15 @@ namespace Indigo
 			friend class Indigo::SGGroup;
 
 		public:
-			virtual AABB world_AABB() const = 0;
-
 			virtual void on_update(const glm::mat4& parent_transform) = 0;
 
 			virtual void visit(SGVisitor& visitor) const = 0;
 
 		protected:
+			SGGroup(SGGroup* parent, bool visible = false, const glm::mat4& local_transform = glm::mat4()) :
+					SGNode(parent,visible,local_transform)
+			{}
+
 			virtual bool add_node(const OOBase::SharedPtr<SGNode>& node) = 0;
 			virtual bool remove_node(const OOBase::SharedPtr<SGNode>& node) = 0;
 
@@ -133,8 +143,10 @@ namespace Indigo
 	class SGNode : public OOBase::NonCopyable
 	{
 		friend class SGGroup;
+		friend class SGRoot;
+		friend class SGCamera;
 		friend class Render::SGGroup;
-
+		
 	public:
 		enum State
 		{
@@ -144,19 +156,28 @@ namespace Indigo
 
 		struct CreateParams
 		{
-			CreateParams(OOBase::uint32_t state = 0
-			) :
-				m_state(state)
+			CreateParams(OOBase::uint32_t state = 0,
+				const glm::vec3& position = glm::vec3(),
+				const glm::vec3& scaling = glm::vec3(),
+				const glm::quat& rotation = glm::quat()
+			) : 
+				m_state(state),
+				m_position(position),
+				m_scaling(scaling),
+				m_rotation(rotation)
 			{}
 
 			OOBase::uint32_t m_state;
+			glm::vec3        m_position;
+			glm::vec3        m_scaling;
+			glm::quat        m_rotation;
 		};
 
 		virtual ~SGNode() {}
 
 		SGGroup* parent() const { return m_parent; }
 
-		virtual bool valid() const { return m_render_node; }
+		virtual bool valid() const { return m_render_node != NULL; }
 
 		bool visible() const { return valid() && (m_state & eNS_visible); }
 		virtual void show(bool visible = true);
@@ -177,6 +198,8 @@ namespace Indigo
 		const glm::quat& rotation() const { return m_rotation; }
 		void rotation(const glm::quat& rot);
 
+		glm::mat4 transform() const;
+
 	protected:
 		SGNode(SGGroup* parent, const CreateParams& params = CreateParams());
 
@@ -192,32 +215,46 @@ namespace Indigo
 		glm::vec3        m_position;
 		glm::vec3        m_scaling;
 		glm::quat        m_rotation;
-
-		glm::mat4 transform() const;
 	};
 
 	class SGGroup : public SGNode
 	{
-	protected:
-		SGGroup(SGGroup* parent, const CreateParams& params = CreateParams()) : SGNode(parent,params)
-		{}
-
-		bool attach_node(const OOBase::SharedPtr<SGNode>& node);
-	};
-
-	class SGSimpleGroup : public SGGroup
-	{
 	public:
-		SGSimpleGroup(SGGroup* parent = NULL, const CreateParams& params = CreateParams()) : SGGroup(parent,params)
+		struct CreateParams : public SGNode::CreateParams
+		{
+			CreateParams(OOBase::uint32_t state = eNS_enabled,
+				const glm::vec3& position = glm::vec3(),
+				const glm::vec3& scaling = glm::vec3(),
+				const glm::quat& rotation = glm::quat()
+			) : 
+				SGNode::CreateParams(state,position,scaling,rotation)
+			{}
+		};
+
+		SGGroup(SGGroup* parent, const CreateParams& params = CreateParams()) : SGNode(parent,params)
 		{}
 
 		bool add_node(const OOBase::SharedPtr<SGNode>& node);
 		bool remove_node(const OOBase::SharedPtr<SGNode>& node);
 
+	protected:
+		virtual OOBase::SharedPtr<Render::SGNode> on_render_create(Render::SGGroup* parent);
+
 	private:
 		OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator> m_children;
+	};
 
-		OOBase::SharedPtr<Render::SGNode> on_render_create(Render::SGGroup* parent);
+	class SGRoot : public SGGroup
+	{
+	public:
+		SGRoot();
+		virtual ~SGRoot();
+
+	private:
+		OOBase::SharedPtr<Render::SGGroup> m_render_root;
+
+		void on_init();
+		void on_destroy();
 	};
 }
 

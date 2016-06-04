@@ -67,9 +67,11 @@ namespace
 	};
 	RES s_resources[] =
 	{
-		{ "2d_colour.vert", IDR_2D_COLOUR_VS, RT_RCDATA, NULL, NULL, 0 },
+		{ "2d_textured_colour.vert", IDR_2D_TEX_COLOUR_VS, RT_RCDATA, NULL, NULL, 0 },
+		{ "3d_colour.vert", IDR_3D_COLOUR_VS, RT_RCDATA, NULL, NULL, 0 },
 		{ "colour_blend.frag", IDR_COLOUR_BLEND_FS, RT_RCDATA, NULL, NULL, 0 },
-		{ "alpha_blend.frag", IDR_ALPHA_BLEND_FS, RT_RCDATA, NULL, NULL, 0 }
+		{ "alpha_blend.frag", IDR_ALPHA_BLEND_FS, RT_RCDATA, NULL, NULL, 0 },
+		{ "colour.frag", IDR_COLOUR_FS, RT_RCDATA, NULL, NULL, 0 }
 	};
 
 	const RES* find_resource(const char* name)
@@ -96,7 +98,7 @@ namespace
 namespace
 {
 	// Include the bin2c files here
-	#include "./resources/2d_colour.vert.h"
+	#include "./resources/2d_textured_colour.vert.h"
 	#include "./resources/alpha_blend.frag.h"
 	#include "./resources/colour_blend.frag.h"
 
@@ -108,7 +110,7 @@ namespace
 	};
 	const RES s_resources[] =
 	{
-		{ "2d_colour.vert", s_2d_colour_vert, sizeof(s_2d_colour_vert) },
+		{ "2d_textured_colour.vert", s_2d_colour_vert, sizeof(s_2d_colour_vert) },
 		{ "alpha_blend.frag", s_alpha_blend_frag, sizeof(s_alpha_blend_frag) },
 		{ "colour_blend.frag", s_colour_blend_frag, sizeof(s_colour_blend_frag) }
 	};

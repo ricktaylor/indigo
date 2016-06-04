@@ -76,7 +76,7 @@ namespace Indigo
 			eBS_mouseover = 0x8
 		};
 
-		struct CreateParams : UIWidget::CreateParams
+		struct CreateParams : public UIWidget::CreateParams
 		{
 			CreateParams(OOBase::uint32_t state = UIWidget::eWS_enabled,
 					const glm::ivec2& position = glm::ivec2(),

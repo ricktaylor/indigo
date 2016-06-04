@@ -30,9 +30,9 @@ namespace Indigo
 	class UIPanel : public UIGroup
 	{
 	public:
-		struct CreateParams : UIWidget::CreateParams
+		struct CreateParams : public UIWidget::CreateParams
 		{
-			CreateParams(OOBase::uint32_t state = 0,
+			CreateParams(OOBase::uint32_t state = eWS_enabled,
 					const glm::ivec2& position = glm::ivec2(),
 					const glm::uvec2& size = glm::uvec2(),
 					const OOBase::SharedPtr<NinePatch>& background = OOBase::SharedPtr<NinePatch>(),

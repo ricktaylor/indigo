@@ -28,7 +28,9 @@
     <ClInclude Include="include\indigo\Quad.h" />
     <ClInclude Include="include\indigo\Render.h" />
     <ClInclude Include="include\indigo\Resource.h" />
+    <ClInclude Include="include\indigo\sg\SGCamera.h" />
     <ClInclude Include="include\indigo\sg\SGNode.h" />
+    <ClInclude Include="include\indigo\sg\SGPrimitive.h" />
     <ClInclude Include="include\indigo\ShaderPool.h" />
     <ClInclude Include="include\indigo\Thread.h" />
     <ClInclude Include="include\indigo\ui\UIButton.h" />
@@ -59,7 +61,9 @@
     <ClCompile Include="src\Pipe.cpp" />
     <ClCompile Include="src\Quad.cpp" />
     <ClCompile Include="src\Render.cpp" />
+    <ClCompile Include="src\sg\SGCamera.cpp" />
     <ClCompile Include="src\sg\SGNode.cpp" />
+    <ClCompile Include="src\sg\SGPrimitive.cpp" />
     <ClCompile Include="src\ShaderPool.cpp" />
     <ClCompile Include="src\Thread.cpp" />
     <ClCompile Include="src\ui\UIButton.cpp" />
@@ -76,8 +80,10 @@
     <ClCompile Include="src\ZipResource.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\2d_colour.vert" />
+    <None Include="resources\2d_textured_colour.vert" />
+    <None Include="resources\3d_colour.vert" />
     <None Include="resources\alpha_blend.frag" />
+    <None Include="resources\colour.frag" />
     <None Include="resources\colour_blend.frag" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

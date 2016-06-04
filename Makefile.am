@@ -43,7 +43,7 @@ resources/%.h: resources/% bin2c
 	$(AM_V_GEN) @top_builddir@/bin2c "$<" "$@" "$(*F)"
 	
 BUILT_SOURCES = \
-	resources/2d_colour.vert.h \
+	resources/2d_textured_colour.vert.h \
 	resources/alpha_blend.frag.h \
 	resources/colour_blend.frag.h
 	

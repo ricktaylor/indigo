@@ -69,7 +69,7 @@ namespace Indigo
 			align_centre = align_hcentre | align_vcentre
 		};
 
-		struct CreateParams : UIWidget::CreateParams
+		struct CreateParams : public UIWidget::CreateParams
 		{
 			CreateParams(OOBase::uint32_t state = 0,
 					const glm::ivec2& position = glm::ivec2(),

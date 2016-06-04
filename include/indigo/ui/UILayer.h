@@ -31,9 +31,9 @@ namespace Indigo
 	class UILayer : public Layer, public UIGroup
 	{
 	public:
-		struct CreateParams : UIWidget::CreateParams
+		struct CreateParams : public UIWidget::CreateParams
 		{
-			CreateParams(OOBase::uint32_t state = 0,
+			CreateParams(OOBase::uint32_t state = eWS_enabled,
 					bool fixed = false,
 					bool modal = true,
 					const glm::uvec4& margins = glm::uvec4(),

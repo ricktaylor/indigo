@@ -51,8 +51,8 @@ namespace
 
 		struct vertex_data
 		{
-			float x;
-			float y;
+			GLfloat x;
+			GLfloat y;
 			GLushort u;
 			GLushort v;
 		};
@@ -84,7 +84,7 @@ NinePatchFactory::~NinePatchFactory()
 bool NinePatchFactory::create_program()
 {
 	OOBase::SharedPtr<OOGL::Shader> shaders[2];
-	shaders[0] = Indigo::ShaderPool::add_shader("2d_colour.vert",GL_VERTEX_SHADER,Indigo::static_resources());
+	shaders[0] = Indigo::ShaderPool::add_shader("2d_textured_colour.vert",GL_VERTEX_SHADER,Indigo::static_resources());
 	shaders[1] = Indigo::ShaderPool::add_shader("colour_blend.frag",GL_FRAGMENT_SHADER,Indigo::static_resources());
 	if (shaders[0] && shaders[1])
 		m_ptrProgram = Indigo::ShaderPool::add_program("2d_image",shaders,2);
