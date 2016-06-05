@@ -63,14 +63,15 @@ bool QuadFactory::alloc()
 		{ 1.f, 0.f, 0xFFFF, 0xFFFF }
 	};
 
+	m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
+	if (!m_ptrVAO)
+		LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+	m_ptrVAO->bind();
+
 	OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(a),a);
 	OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(e),e);
 	if (!m_ptrVertices || !m_ptrElements)
 		LOG_ERROR_RETURN(("Failed to allocate VBO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
-
-	m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
-	if (!m_ptrVAO)
-		LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 	OOBase::SharedPtr<OOGL::Shader> shaders[2];
 	shaders[0] = Indigo::ShaderPool::add_shader("2d_textured_colour.vert",GL_VERTEX_SHADER,Indigo::static_resources());

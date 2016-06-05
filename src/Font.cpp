@@ -300,6 +300,17 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 
 	if (!found)
 	{
+		if (!m_ptrProgram && !font_program(m_info->m_packing))
+			return false;
+
+		if (!m_ptrVAO)
+		{
+			m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
+			if (!m_ptrVAO)
+				LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+		}
+		m_ptrVAO->bind();
+		
 		GLsizei new_size = 32;
 		while (new_size < m_allocated + len)
 			new_size *= 2;
@@ -324,16 +335,6 @@ bool Indigo::Render::Font::alloc_text(Text& text, const char* sz, size_t s_len)
 		else
 			last = m_listFree.insert(m_allocated,new_size - m_allocated);
 		m_allocated = new_size;
-
-		if (!m_ptrVAO)
-		{
-			m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
-			if (!m_ptrVAO)
-				LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
-		}
-
-		if (!font_program(m_info->m_packing))
-			return false;
 
 		text.m_glyph_start = last->first;
 		last->first += len;

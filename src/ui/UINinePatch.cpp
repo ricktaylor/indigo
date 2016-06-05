@@ -115,6 +115,17 @@ GLsizei NinePatchFactory::alloc_patch(const glm::uvec2& size, const glm::uvec4& 
 
 	if (patch == -1)
 	{
+		if (!m_ptrProgram && !create_program())
+			return patch;
+
+		if (!m_ptrVAO)
+		{
+			m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
+			if (!m_ptrVAO)
+				LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),patch);
+		}
+		m_ptrVAO->bind();
+
 		GLsizei new_size = 16;
 		while (new_size < m_allocated + 1)
 			new_size *= 2;
@@ -139,16 +150,6 @@ GLsizei NinePatchFactory::alloc_patch(const glm::uvec2& size, const glm::uvec4& 
 		else
 			last = m_listFree.insert(m_allocated,new_size - m_allocated);
 		m_allocated = new_size;
-
-		if (!m_ptrVAO)
-		{
-			m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
-			if (!m_ptrVAO)
-				LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),patch);
-		}
-
-		if (!m_ptrProgram && !create_program())
-			return patch;
 
 		patch = last->first;
 		last->first += 1;

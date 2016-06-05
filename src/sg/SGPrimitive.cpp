@@ -41,6 +41,9 @@ namespace
 	class CubeFactory
 	{
 	public:
+		CubeFactory() : m_discriminator(sizeof(vertex_data))
+		{}
+
 		void draw(OOGL::State& state, const glm::mat4& mvp, const glm::vec4& colour);
 
 	private:
@@ -55,6 +58,9 @@ namespace
 		OOBase::SharedPtr<OOGL::VertexArrayObject> m_ptrVAO;
 		OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices;
 		OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements;
+
+		// This is simply to stop MSVC optimizing the constructors
+		const size_t m_discriminator;
 
 		bool alloc();
 	};
@@ -93,14 +99,17 @@ bool CubeFactory::alloc()
 		20,21,22,  22,23,20       // back
 	};
 
-	OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(vertices),vertices);
-	OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(indices),indices);
-	if (!m_ptrVertices || !m_ptrElements)
-		LOG_ERROR_RETURN(("Failed to allocate VBO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 	m_ptrVAO = OOBase::allocate_shared<OOGL::VertexArrayObject,OOBase::ThreadLocalAllocator>();
 	if (!m_ptrVAO)
 		LOG_ERROR_RETURN(("Failed to allocate VAO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
+
+	m_ptrVAO->bind();
+
+	OOBase::SharedPtr<OOGL::BufferObject> m_ptrVertices = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(vertices),vertices);
+	OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements = OOBase::allocate_shared<OOGL::BufferObject,OOBase::ThreadLocalAllocator>(GL_ELEMENT_ARRAY_BUFFER,GL_STATIC_DRAW,sizeof(indices),indices);
+	if (!m_ptrVertices || !m_ptrElements)
+		LOG_ERROR_RETURN(("Failed to allocate VBO: %s",OOBase::system_error_text(ERROR_OUTOFMEMORY)),false);
 
 	OOBase::SharedPtr<OOGL::Shader> shaders[2];
 	shaders[0] = Indigo::ShaderPool::add_shader("3d_colour.vert",GL_VERTEX_SHADER,Indigo::static_resources());
