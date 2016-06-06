@@ -28,8 +28,28 @@
 
 namespace Indigo
 {
+	class UILayer;
+
+	namespace Render
+	{
+		class UILayer : public UIGroup, public Layer
+		{
+		public:
+			UILayer(Window* window, Indigo::UILayer* owner);
+
+			void on_draw(OOGL::State& glState) const;
+			void on_size(const glm::uvec2& sz);
+
+		private:
+			glm::mat4        m_mvp;
+			Indigo::UILayer* m_owner;
+		};
+	}
+
 	class UILayer : public Layer, public UIGroup
 	{
+		friend class Render::UILayer;
+
 	public:
 		struct CreateParams : public UIWidget::CreateParams
 		{
@@ -70,7 +90,7 @@ namespace Indigo
 		virtual bool on_render_create(Render::UIGroup* group) { return true; }
 
 		virtual bool on_close();
-		virtual void on_size(const glm::uvec2& sz);
+		virtual void on_size(glm::uvec2 sz);
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual bool on_mousemove(const double& screen_x, const double& screen_y);
 		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);

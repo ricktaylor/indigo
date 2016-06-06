@@ -81,7 +81,6 @@ namespace Indigo
 		void on_destroy();
 		void on_close();
 		void on_move(glm::ivec2 pos);
-		void on_size(glm::uvec2 sz);
 		void on_mousemove(double screen_x, double screen_y);
 		void on_mousebutton(OOGL::Window::mouse_click_t click);
 	};

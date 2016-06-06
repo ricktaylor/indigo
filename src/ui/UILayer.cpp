@@ -23,31 +23,19 @@
 
 #include "../../include/indigo/ui/UILayer.h"
 #include "../../include/indigo/Window.h"
+#include "../../include/indigo/Render.h"
 
-namespace
-{
-	class UILayer : public Indigo::Render::UIGroup, public Indigo::Render::Layer
-	{
-	public:
-		UILayer(Indigo::Render::Window* window);
-
-		void on_draw(OOGL::State& glState) const;
-		void on_size(const glm::uvec2& sz);
-
-		glm::mat4 m_mvp;
-	};
-}
-
-::UILayer::UILayer(Indigo::Render::Window* window) :
+Indigo::Render::UILayer::UILayer(Indigo::Render::Window* window, Indigo::UILayer* owner) :
 		Indigo::Render::UIGroup(true),
-		Indigo::Render::Layer(window)
+		Indigo::Render::Layer(window),
+		m_owner(owner)
 {
 	glm::vec2 sz = window->window()->size();
 
 	m_mvp = glm::ortho(0.f,sz.x,0.f,sz.y);
 }
 
-void ::UILayer::on_draw(OOGL::State& glState) const
+void Indigo::Render::UILayer::on_draw(OOGL::State& glState) const
 {
 	glState.enable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -55,10 +43,12 @@ void ::UILayer::on_draw(OOGL::State& glState) const
 	Indigo::Render::UIGroup::on_draw(glState,m_mvp);
 }
 
-void ::UILayer::on_size(const glm::uvec2& sz)
+void Indigo::Render::UILayer::on_size(const glm::uvec2& sz)
 {
 	glm::vec2 sz2 = sz;
 	m_mvp = glm::ortho(0.f,sz2.x,0.f,sz2.y);
+
+	Indigo::logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::UILayer::on_size),sz);
 }
 
 Indigo::UILayer::UILayer(const CreateParams& params) :
@@ -123,7 +113,7 @@ bool Indigo::UILayer::on_close()
 	return false;
 }
 
-void Indigo::UILayer::on_size(const glm::uvec2& sz)
+void Indigo::UILayer::on_size(glm::uvec2 sz)
 {
 	m_size = sz;
 	m_sizer.fit(sz);
@@ -142,7 +132,7 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 {
 	m_size = window->window()->size();
 
-	OOBase::SharedPtr< ::UILayer> group = OOBase::allocate_shared< ::UILayer,OOBase::ThreadLocalAllocator>(window);
+	OOBase::SharedPtr<Indigo::Render::UILayer> group = OOBase::allocate_shared<Indigo::Render::UILayer,OOBase::ThreadLocalAllocator>(window,this);
 	if (!group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
 	else

@@ -87,9 +87,6 @@ void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& 
 		else
 			i = m_layers.erase(i);
 	}
-
-
-	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_size),sz);
 }
 
 void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glState)
@@ -305,21 +302,6 @@ void Indigo::Window::on_move(glm::ivec2 pos)
 		else
 		{
 			layer->on_move(pos);
-			++i;
-		}
-	}
-}
-
-void Indigo::Window::on_size(glm::uvec2 sz)
-{
-	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;)
-	{
-		OOBase::SharedPtr<Layer> layer = i->lock();
-		if (!layer)
-			i = m_layers.erase(i);
-		else
-		{
-			layer->on_size(sz);
 			++i;
 		}
 	}
