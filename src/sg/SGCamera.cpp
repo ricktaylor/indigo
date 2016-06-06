@@ -26,31 +26,83 @@
 
 #include "../Common.h"
 
+#include <OOBase/Set.h>
+
 namespace
 {
+
+
 	class ClipVisitor : public Indigo::Render::SGVisitor
 	{
 	public:
-		bool visit(const Indigo::Render::SGNode& node);
+		ClipVisitor(const glm::vec3& source) :
+			m_front_to_back(source),
+			m_nodes(m_front_to_back)
+		{}
+
+		bool visit(const Indigo::Render::SGNode& node, OOBase::uint32_t& hint);
 		void draw(OOGL::State& glState, const glm::mat4& mvp) const;
 
-		OOBase::Vector<const Indigo::Render::SGNode*,OOBase::ThreadLocalAllocator> m_nodes;
+		struct node_info
+		{
+			Indigo::AABB m_bounds;
+			glm::mat4 m_transform;
+			OOBase::SharedPtr<Indigo::Render::SGDrawable> m_drawable;
+		};
+
+		struct FrontToBack
+		{
+			FrontToBack(const glm::vec3& source) : m_source(source)
+			{}
+
+			bool operator() (const node_info& lhs, const node_info& rhs) const
+			{
+				// Sort front to back
+				return glm::distance(m_source,lhs.m_bounds.m_midpoint) < glm::distance(m_source,rhs.m_bounds.m_midpoint);
+			}
+
+			glm::vec3 m_source;
+		} m_front_to_back;
+
+		/*struct BackToFront
+		{
+			BackToFront(const glm::vec3& source) : m_source(source)
+			{}
+
+			bool operator() (const node_info& lhs, const node_info& rhs) const
+			{
+				// Sort front to back
+				return glm::distance(m_source,lhs.m_bounds.m_midpoint) > glm::distance(m_source,rhs.m_bounds.m_midpoint);
+			}
+
+			glm::vec3 m_source;
+		} m_back_to_front;*/
+
+		OOBase::Set<node_info,FrontToBack,OOBase::ThreadLocalAllocator> m_nodes;
 	};
 }
 
-bool ClipVisitor::visit(const Indigo::Render::SGNode& node)
+bool ClipVisitor::visit(const Indigo::Render::SGNode& node, OOBase::uint32_t& hint)
 {
 	if (!node.visible())
 		return false;
 
-	m_nodes.push_back(&node);
+	node_info i;
+	i.m_drawable = node.drawable();
+	if (i.m_drawable)
+	{
+		i.m_bounds = node.world_bounds();
+		i.m_transform = node.world_transform();
+		m_nodes.insert(i);
+	}
+
 	return true;
 }
 
 void ClipVisitor::draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	for (OOBase::Vector<const Indigo::Render::SGNode*,OOBase::ThreadLocalAllocator>::const_iterator i=m_nodes.begin();i;++i)
-		(*i)->on_draw(glState,mvp);
+	for (OOBase::Set<node_info,FrontToBack,OOBase::ThreadLocalAllocator>::const_iterator i=m_nodes.begin();i;++i)
+		i->m_drawable->on_draw(glState,mvp * i->m_transform);
 }
 
 void Indigo::Render::SGCamera::on_draw(OOGL::State& glState) const
@@ -59,7 +111,7 @@ void Indigo::Render::SGCamera::on_draw(OOGL::State& glState) const
 	{
 		m_scene->on_update(glm::mat4());
 
-		ClipVisitor visitor;
+		ClipVisitor visitor(m_source);
 		m_scene->visit(visitor);
 
 		visitor.draw(glState,view_proj());
@@ -71,10 +123,10 @@ Indigo::SGCamera::SGCamera(const CreateParams& params) :
 		m_position(params.m_position),
 		m_target(params.m_target),
 		m_up(params.m_up),
-		m_ortho(!params.m_perspective),
 		m_near(params.m_near),
 		m_far(params.m_far),
-		m_fov(params.m_fov)
+		m_fov(params.m_fov),
+		m_ortho(!params.m_perspective)
 {
 }
 
@@ -86,7 +138,7 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::SGCamera::create_render_layer(R
 	if (m_scene)
 		render_scene = m_scene->render_node();
 
-	OOBase::SharedPtr<Render::SGCamera> render_cam = OOBase::allocate_shared<Render::SGCamera,OOBase::ThreadLocalAllocator>(window,view_proj(),render_scene);
+	OOBase::SharedPtr<Render::SGCamera> render_cam = OOBase::allocate_shared<Render::SGCamera,OOBase::ThreadLocalAllocator>(window,m_position,view_proj(),render_scene);
 	if (!render_cam)
 		LOG_ERROR(("Failed to allocate render camera: %s",OOBase::system_error_text()));
 	else
@@ -109,7 +161,7 @@ void Indigo::SGCamera::position(const glm::vec3& pos)
 		m_position = pos;
 
 		if (m_render_camera)
-			render_pipe()->post(OOBase::make_delegate(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
+			render_pipe()->post(OOBase::make_delegate(m_render_camera.get(),&Render::SGCamera::view_proj_source),view_proj(),m_position);
 	}
 }
 

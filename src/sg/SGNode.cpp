@@ -25,6 +25,15 @@
 
 #include "../Common.h"
 
+Indigo::Render::SGNode::SGNode(SGGroup* parent, const OOBase::SharedPtr<SGDrawable>& drawable, const glm::mat4& local_transform) :
+		m_state(eRSG_dirty | (drawable ? eRSG_visible : 0)),
+		m_parent(parent),
+		m_local_transform(local_transform),
+		m_world_transform(local_transform),
+		m_drawable(drawable)
+{
+}
+
 Indigo::Render::SGNode::SGNode(SGGroup* parent, bool visible, const glm::mat4& local_transform) :
 		m_state(eRSG_dirty | (visible ? eRSG_visible : 0)),
 		m_parent(parent),
@@ -63,7 +72,10 @@ void Indigo::Render::SGNode::on_update(const glm::mat4& parent_transform)
 	{
 		m_world_transform = parent_transform * m_local_transform;
 
-		m_world_aabb.m_midpoint = glm::vec3(m_world_transform * glm::vec4(0.f,0.f,0.f,1.f));
+		if (m_drawable)
+			m_world_aabb = m_drawable->bounds();
+		else
+			m_world_aabb.m_midpoint = glm::vec3(m_world_transform * glm::vec4(0.f,0.f,0.f,1.f));
 
 		m_state &= ~eRSG_dirty;
 	}
@@ -79,9 +91,20 @@ void Indigo::Render::SGNode::local_transform(glm::mat4 transform)
 	}
 }
 
-void Indigo::Render::SGNode::visit(SGVisitor& visitor) const
+void Indigo::Render::SGNode::drawable(const OOBase::SharedPtr<SGDrawable>& d)
 {
-	visitor.visit(*this);
+	if (m_drawable != d)
+	{
+		m_drawable = d;
+
+		make_dirty();
+	}
+}
+
+void Indigo::Render::SGNode::visit(SGVisitor& visitor, OOBase::uint32_t hint) const
+{
+	if (visible())
+		visitor.visit(*this,hint);
 }
 
 void Indigo::Render::SGGroup::attach_node(Indigo::SGNode* node, bool* ret)
@@ -191,7 +214,7 @@ namespace
 
 		OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator> m_children;
 
-		void visit(Indigo::Render::SGVisitor& visitor) const;
+		void visit(Indigo::Render::SGVisitor& visitor, OOBase::uint32_t hint = 0) const;
 
 		void on_draw(OOGL::State& glState, const glm::mat4& mvp) const {}
 		void on_update(const glm::mat4& parent_transform);
@@ -201,12 +224,12 @@ namespace
 	};
 }
 
-void SimpleGroup::visit(Indigo::Render::SGVisitor& visitor) const
+void SimpleGroup::visit(Indigo::Render::SGVisitor& visitor, OOBase::uint32_t hint) const
 {
-	if (visitor.visit(*this))
+	if (visible() && visitor.visit(*this,hint))
 	{
 		for (OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
-			(*i)->visit(visitor);
+			(*i)->visit(visitor,hint);
 	}
 }
 
@@ -216,29 +239,37 @@ void SimpleGroup::on_update(const glm::mat4& parent_transform)
 	{
 		SGNode::on_update(parent_transform);
 
-		if (!m_children.empty())
+		bool first_aabb = true;
+		glm::vec3 min,max;
+		if (drawable())
 		{
-			glm::vec3 min,max;
-
-			for (OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
-			{
-				(*i)->on_update(world_transform());
-
-				const Indigo::AABB& b = (*i)->world_AABB();
-				if (i == m_children.begin())
-				{
-					min = b.min();
-					max = b.max();
-				}
-				else
-				{
-					min = glm::min(min,b.min());
-					max = glm::max(max,b.max());
-				}
-			}
-
-			world_AABB(Indigo::AABB((min + max) / 2.0f,(max - min) / 2.0f));
+			const Indigo::AABB& ours = world_bounds();
+			min = ours.min();
+			max = ours.max();
+			first_aabb = false;
 		}
+
+
+		for (OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
+		{
+			(*i)->on_update(world_transform());
+
+			const Indigo::AABB& b = (*i)->world_bounds();
+
+			if (first_aabb)
+			{
+				min = b.min();
+				max = b.max();
+				first_aabb = false;
+			}
+			else
+			{
+				min = glm::min(min,b.min());
+				max = glm::max(max,b.max());
+			}
+		}
+
+		world_bounds(Indigo::AABB((min + max) / 2.0f,(max - min) / 2.0f));
 	}
 }
 

@@ -44,22 +44,28 @@ namespace Indigo
 			friend class Indigo::SGCamera;
 
 		public:
-			SGCamera(Window* window, const glm::mat4& vp, SGNode* scene) : 
+			SGCamera(Window* window, const glm::vec3& source, const glm::mat4& vp, SGNode* scene) :
 				Layer(window), 
+				m_source(source),
 				m_view_proj(vp),
 				m_scene(scene)
 			{}
 
 			const glm::mat4& view_proj() const { return m_view_proj; }
-			void view_proj(glm::mat4 vp) { m_view_proj = vp; }
-			void scene(SGNode* scene) { m_scene = scene; }
+			const glm::vec3& source() const { return m_source; }
+			SGNode* scene() const { return m_scene; }
 
 		protected:
 			virtual void on_draw(OOGL::State& glState) const;
 
 		private:
+			glm::vec3 m_source;
 			glm::mat4 m_view_proj;
 			SGNode*   m_scene;
+
+			void view_proj_source(glm::mat4 vp, glm::vec3 s) { m_view_proj = vp; m_source = s; }
+			void view_proj(glm::mat4 vp) { m_view_proj = vp; }
+			void scene(SGNode* scene) { m_scene = scene; }
 		};
 	}
 

@@ -27,10 +27,10 @@
 
 namespace
 {
-	class Cube : public Indigo::Render::SGNode
+	class Cube : public Indigo::Render::SGDrawable
 	{
 	public:
-		Cube(Indigo::Render::SGGroup* parent, const glm::vec4& colour, bool visible = false, const glm::mat4& local_transform = glm::mat4());
+		Cube(const Indigo::AABB& aabb, const glm::vec4& colour);
 
 		void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 
@@ -149,8 +149,8 @@ void CubeFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const glm::ve
 	}
 }
 
-Cube::Cube(Indigo::Render::SGGroup* parent, const glm::vec4& colour, bool visible, const glm::mat4& local_transform) :
-		Indigo::Render::SGNode(parent,visible,local_transform),
+Cube::Cube(const Indigo::AABB& aabb, const glm::vec4& colour) :
+		Indigo::Render::SGDrawable(aabb),
 		m_colour(colour)
 {
 }
@@ -158,13 +158,27 @@ Cube::Cube(Indigo::Render::SGGroup* parent, const glm::vec4& colour, bool visibl
 void Cube::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	if (m_colour.a > 0.f)
-		OOGL::ContextSingleton<CubeFactory>::instance().draw(glState,mvp * world_transform(),m_colour);
+		OOGL::ContextSingleton<CubeFactory>::instance().draw(glState,mvp,m_colour);
 }
 
 OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGCube::on_render_create(Render::SGGroup* parent)
 {
-	OOBase::SharedPtr<Indigo::Render::SGNode> node = OOBase::allocate_shared< ::Cube>(parent,m_colour,visible(),transform());
+	OOBase::SharedPtr<Render::SGNode> node;
+
+	OOBase::SharedPtr<Render::SGDrawable> drawable = m_drawable.lock();
+	if (!drawable)
+	{
+		OOBase::SharedPtr< ::Cube> cube = OOBase::allocate_shared< ::Cube>(AABB(glm::vec3(0.5f),glm::vec3(0.5f)),m_colour);
+		if (!cube)
+			LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
+
+		drawable = OOBase::static_pointer_cast<Render::SGDrawable>(cube);
+		m_drawable = drawable;
+	}
+
+	node = OOBase::allocate_shared<Render::SGNode>(parent,drawable,transform());
 	if (!node)
-		LOG_ERROR(("Failed to allocate: %s\n",OOBase::system_error_text()));
+		LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
+
 	return node;
 }

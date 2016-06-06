@@ -53,6 +53,8 @@ namespace Indigo
 		virtual OOBase::SharedPtr<Render::SGNode> on_render_create(Render::SGGroup* parent);
 
 		glm::vec4 m_colour;
+
+		OOBase::WeakPtr<Render::SGDrawable> m_drawable;
 	};
 }
 

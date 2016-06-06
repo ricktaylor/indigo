@@ -67,12 +67,29 @@ namespace Indigo
 		class SGVisitor;
 		class SGGroup;
 
+		class SGDrawable : public OOBase::NonCopyable
+		{
+		public:
+			virtual ~SGDrawable() {}
+
+			const AABB& bounds() const { return m_aabb; }
+
+			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
+
+		protected:
+			SGDrawable(const AABB& aabb) : m_aabb(aabb)
+			{}
+
+			AABB m_aabb;
+		};
+
 		class SGNode : public OOBase::NonCopyable
 		{
 		public:
-			virtual ~SGNode() {}
+			SGNode(SGGroup* parent, const OOBase::SharedPtr<SGDrawable>& drawable, const glm::mat4& local_transform = glm::mat4());
+			SGNode(SGGroup* parent, bool visible, const glm::mat4& local_transform = glm::mat4());
 
-			virtual bool valid() const { return true; }
+			virtual ~SGNode() {}
 
 			SGGroup* parent() const { return m_parent; }
 
@@ -86,18 +103,18 @@ namespace Indigo
 			void local_transform(glm::mat4 transform);
 
 			const glm::mat4& world_transform() const { return m_world_transform; }
-			
-			const AABB& world_AABB() const { return m_world_aabb; }
 
-			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
+			const AABB& world_bounds() const { return m_world_aabb; }
+
+			const OOBase::SharedPtr<SGDrawable>& drawable() const { return m_drawable; }
+
 			virtual void on_update(const glm::mat4& parent_transform);
 
-			virtual void visit(SGVisitor& visitor) const;
+			virtual void visit(SGVisitor& visitor, OOBase::uint32_t hint = 0) const;
 
 		protected:
-			SGNode(SGGroup* parent, bool visible = false, const glm::mat4& local_transform = glm::mat4());
-
-			void world_AABB(const AABB& aabb) { m_world_aabb = aabb; }
+			void world_bounds(const AABB& aabb) { m_world_aabb = aabb; }
+			void drawable(const OOBase::SharedPtr<SGDrawable>& d);
 
 		private:
 			enum State
@@ -110,6 +127,8 @@ namespace Indigo
 			glm::mat4    m_local_transform;
 			glm::mat4    m_world_transform;
 			AABB         m_world_aabb;
+
+			OOBase::SharedPtr<SGDrawable> m_drawable;
 		};
 
 		class SGGroup : public SGNode
@@ -119,7 +138,7 @@ namespace Indigo
 		public:
 			virtual void on_update(const glm::mat4& parent_transform) = 0;
 
-			virtual void visit(SGVisitor& visitor) const = 0;
+			virtual void visit(SGVisitor& visitor, OOBase::uint32_t hint = 0) const = 0;
 
 		protected:
 			SGGroup(SGGroup* parent, bool visible = false, const glm::mat4& local_transform = glm::mat4()) :
@@ -136,7 +155,7 @@ namespace Indigo
 		class SGVisitor
 		{
 		public:
-			virtual bool visit(const SGNode& node) = 0;
+			virtual bool visit(const SGNode& node, OOBase::uint32_t& hint) = 0;
 		};
 	}
 
