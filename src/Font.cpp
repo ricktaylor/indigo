@@ -509,7 +509,7 @@ Indigo::Font::~Font()
 	if (m_render_font)
 	{
 		if (m_render_font.unique())
-			render_pipe()->call(OOBase::make_delegate(this,&Font::do_unload));
+			render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Font::do_unload));
 		else
 			m_render_font.reset();
 	}
@@ -660,7 +660,7 @@ bool Indigo::Font::load(const ResourceBundle& resource, const unsigned char* dat
 		LOG_WARNING(("Extra bytes at end of font data"));
 
 	bool ret = false;
-	return render_pipe()->call(OOBase::make_delegate(this,&Indigo::Font::do_load),vecPages.data(),vecPages.size(),&ret) && ret;
+	return render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Indigo::Font::do_load),vecPages.data(),vecPages.size(),&ret) && ret;
 }
 
 void Indigo::Font::do_load(OOBase::SharedPtr<Indigo::Image>* pages, size_t page_count, bool* ret_val)

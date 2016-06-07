@@ -39,7 +39,7 @@ void Indigo::Render::Layer::show(bool visible)
 
 Indigo::Layer::~Layer()
 {
-	render_pipe()->call(OOBase::make_delegate(this,&Layer::destroy_render_layer));
+	render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Layer::destroy_render_layer));
 }
 
 void Indigo::Layer::destroy_render_layer()
@@ -54,6 +54,6 @@ void Indigo::Layer::show(bool visible)
 		m_visible = visible;
 
 		if (m_render_layer)
-			render_pipe()->post(OOBase::make_delegate(m_render_layer.get(),&Render::Layer::show),visible);
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_layer.get(),&Render::Layer::show),visible);
 	}
 }

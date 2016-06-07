@@ -612,7 +612,7 @@ glm::uvec2 Indigo::UINinePatch::ideal_size() const
 void Indigo::UINinePatch::on_size(const glm::uvec2& sz)
 {
 	if (m_render_9patch)
-		render_pipe()->post(OOBase::make_delegate(m_render_9patch,&Render::UIDrawable::size),sz);
+		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_9patch,&Render::UIDrawable::size),sz);
 }
 
 bool Indigo::UINinePatch::on_render_create(Indigo::Render::UIGroup* group)

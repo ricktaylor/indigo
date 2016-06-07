@@ -168,5 +168,5 @@ void Indigo::UILabel::on_size(const glm::uvec2& sz)
 		pos.y = (sz.y - caption_height) / 2;
 
 	if (m_caption)
-		render_pipe()->post(OOBase::make_delegate(m_caption,&Render::UIDrawable::position),pos);
+		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_caption,&Render::UIDrawable::position),pos);
 }

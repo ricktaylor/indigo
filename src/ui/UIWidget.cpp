@@ -96,7 +96,7 @@ void Indigo::UIWidget::on_state_change(OOBase::uint32_t state, OOBase::uint32_t 
 	{
 		bool visible = (state & eWS_visible) == eWS_visible;
 		if (m_render_group)
-			render_pipe()->post(OOBase::make_delegate(static_cast<Render::UIDrawable*>(m_render_group),&Render::UIDrawable::show),visible);
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Render::UIDrawable*>(m_render_group),&Render::UIDrawable::show),visible);
 	}
 }
 
@@ -117,7 +117,7 @@ void Indigo::UIWidget::position(const glm::ivec2& pos)
 		m_position = pos;
 
 		if (m_render_group)
-			render_pipe()->post(OOBase::make_delegate(static_cast<Render::UIDrawable*>(m_render_group),&Render::UIDrawable::position),pos);
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Render::UIDrawable*>(m_render_group),&Render::UIDrawable::position),pos);
 	}
 }
 
@@ -160,7 +160,7 @@ bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, cons
 	}
 
 	bool ret = false;
-	if (!render_pipe()->call(OOBase::make_delegate(m_render_parent,&Render::UIGroup::add_subgroup),widget.get(),&ret) || !ret)
+	if (!render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_parent,&Render::UIGroup::add_subgroup),widget.get(),&ret) || !ret)
 		m_children.pop_back();
 
 	return ret;

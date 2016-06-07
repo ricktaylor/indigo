@@ -308,7 +308,7 @@ void Indigo::UIButton::do_size(glm::uvec2 sz)
 void Indigo::UIButton::on_size(const glm::uvec2& sz)
 {
 	if (valid())
-		render_pipe()->post(OOBase::make_delegate(this,&UIButton::do_size),sz);
+		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&UIButton::do_size),sz);
 }
 
 void Indigo::UIButton::do_style_change(RenderStyleState* new_style)
@@ -356,7 +356,7 @@ void Indigo::UIButton::on_state_change(OOBase::uint32_t state, OOBase::uint32_t 
 			new_style = &m_normal;
 
 		if (valid() && new_style)
-			render_pipe()->post(OOBase::make_delegate(this,&UIButton::do_style_change),new_style);
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&UIButton::do_style_change),new_style);
 	}
 
 	UIWidget::on_state_change(state,change_mask);

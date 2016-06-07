@@ -161,7 +161,7 @@ void Indigo::SGCamera::position(const glm::vec3& pos)
 		m_position = pos;
 
 		if (m_render_camera)
-			render_pipe()->post(OOBase::make_delegate(m_render_camera.get(),&Render::SGCamera::view_proj_source),view_proj(),m_position);
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj_source),view_proj(),m_position);
 	}
 }
 
@@ -172,7 +172,7 @@ void Indigo::SGCamera::target(const glm::vec3& t)
 		m_target = t;
 
 		if (m_render_camera)
-			render_pipe()->post(OOBase::make_delegate(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
 	}
 }
 
@@ -183,7 +183,7 @@ void Indigo::SGCamera::up(const glm::vec3& u)
 		m_up = u;
 
 		if (m_render_camera)
-			render_pipe()->post(OOBase::make_delegate(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
 	}
 }
 
@@ -194,7 +194,7 @@ void Indigo::SGCamera::ortho(bool ortho)
 		m_ortho = ortho;
 
 		if (m_render_camera)
-			render_pipe()->post(OOBase::make_delegate(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
 	}
 }
 
@@ -221,7 +221,7 @@ void Indigo::SGCamera::near(glm::mat4::value_type n)
 		m_near = n;
 
 		if (m_render_camera)
-			render_pipe()->post(OOBase::make_delegate(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
 	}
 }
 
@@ -232,7 +232,7 @@ void Indigo::SGCamera::far(glm::mat4::value_type f)
 		m_far = f;
 
 		if (m_render_camera)
-			render_pipe()->post(OOBase::make_delegate(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
 	}
 }
 
@@ -248,7 +248,7 @@ void Indigo::SGCamera::fov(glm::mat4::value_type f)
 		m_fov = f;
 
 		if (m_render_camera)
-			render_pipe()->post(OOBase::make_delegate(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
 	}
 }
 
@@ -263,7 +263,7 @@ void Indigo::SGCamera::scene(const OOBase::SharedPtr<SGNode>& s)
 			render_scene = m_scene->render_node();
 
 		if (m_render_camera)
-			render_pipe()->post(OOBase::make_delegate(m_render_camera.get(),&Render::SGCamera::scene),render_scene);
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::scene),render_scene);
 	}
 }
 
@@ -274,7 +274,7 @@ void Indigo::SGCamera::on_size(const glm::uvec2& sz)
 		m_size = sz;
 
 		if (m_render_camera)
-			render_pipe()->post(OOBase::make_delegate(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
 	}
 }
 

@@ -88,7 +88,7 @@ bool Indigo::run(const char* name, void (*fn)(void*), void* param)
 	OOBase::SharedPtr<Indigo::Pipe> logic_pipe = Indigo::start_thread(name,thread);
 	if (logic_pipe)
 	{
-		ret = logic_pipe->call(OOBase::make_delegate(fn),param);
+		ret = logic_pipe->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(fn),param);
 		if (ret)
 			thread->join();
 	}

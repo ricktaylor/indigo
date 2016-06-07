@@ -151,7 +151,7 @@ void Indigo::SGNode::on_state_change(OOBase::uint32_t state, OOBase::uint32_t ch
 	{
 		bool visible = (state & eNS_visible) == eNS_visible;
 		if (m_render_node)
-			render_pipe()->post(OOBase::make_delegate(m_render_node,&Render::SGNode::show),visible);
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_node,&Render::SGNode::show),visible);
 	}
 }
 
@@ -177,7 +177,7 @@ void Indigo::SGNode::position(const glm::vec3& pos)
 		m_position = pos;
 
 		if (m_render_node)
-			render_pipe()->post(OOBase::make_delegate(m_render_node,&Render::SGNode::local_transform),transform());
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_node,&Render::SGNode::local_transform),transform());
 	}
 }
 
@@ -188,7 +188,7 @@ void Indigo::SGNode::scaling(const glm::vec3& scale)
 		m_scaling = scale;
 
 		if (m_render_node)
-			render_pipe()->post(OOBase::make_delegate(m_render_node,&Render::SGNode::local_transform),transform());
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_node,&Render::SGNode::local_transform),transform());
 	}
 }
 
@@ -199,7 +199,7 @@ void Indigo::SGNode::rotation(const glm::quat& rot)
 		m_rotation = rot;
 
 		if (m_render_node)
-			render_pipe()->post(OOBase::make_delegate(m_render_node,&Render::SGNode::local_transform),transform());
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_node,&Render::SGNode::local_transform),transform());
 	}
 }
 
@@ -292,7 +292,7 @@ bool Indigo::SGGroup::add_node(const OOBase::SharedPtr<SGNode>& node)
 		LOG_ERROR_RETURN(("Failed to insert node: %s",OOBase::system_error_text()),false);
 
 	bool ret = false;
-	if (!render_pipe()->call(OOBase::make_delegate(static_cast<Indigo::Render::SGGroup*>(m_render_node),&Render::SGGroup::attach_node),node.get(),&ret) || !ret)
+	if (!render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Indigo::Render::SGGroup*>(m_render_node),&Render::SGGroup::attach_node),node.get(),&ret) || !ret)
 	{
 		m_children.pop_back();
 		return false;
@@ -317,12 +317,12 @@ OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGGroup::on_render_create(Rend
 Indigo::SGRoot::SGRoot() : 
 		SGGroup(NULL,SGGroup::CreateParams(eNS_enabled | eNS_visible))
 {
-	render_pipe()->call(OOBase::make_delegate(this,&SGRoot::on_init));
+	render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&SGRoot::on_init));
 }
 
 Indigo::SGRoot::~SGRoot()
 {
-	render_pipe()->call(OOBase::make_delegate(this,&SGRoot::on_destroy));
+	render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&SGRoot::on_destroy));
 }
 
 void Indigo::SGRoot::on_init()

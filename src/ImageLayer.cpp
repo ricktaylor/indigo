@@ -99,7 +99,7 @@ glm::vec4 Indigo::ImageLayer::colour(const glm::vec4& colour)
 	{
 		OOBase::SharedPtr< ::ImageLayer> layer = OOBase::static_pointer_cast< ::ImageLayer>(render_layer());
 		if (layer)
-			render_pipe()->post(OOBase::make_delegate(layer.get(),&::ImageLayer::colour),colour);
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(layer.get(),&::ImageLayer::colour),colour);
 	}
 
 	return prev_colour;

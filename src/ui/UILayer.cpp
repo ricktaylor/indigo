@@ -48,7 +48,7 @@ void Indigo::Render::UILayer::on_size(const glm::uvec2& sz)
 	glm::vec2 sz2 = sz;
 	m_mvp = glm::ortho(0.f,sz2.x,0.f,sz2.y);
 
-	Indigo::logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::UILayer::on_size),sz);
+	Indigo::logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::UILayer::on_size),sz);
 }
 
 Indigo::UILayer::UILayer(const CreateParams& params) :

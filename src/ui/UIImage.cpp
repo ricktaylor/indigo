@@ -60,7 +60,7 @@ glm::uvec2 Indigo::UIImage::ideal_size() const
 void Indigo::UIImage::on_size(const glm::uvec2& sz)
 {
 	if (m_render_image)
-		render_pipe()->post(OOBase::make_delegate(m_render_image,&Render::UIImage::size),sz);
+		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_image,&Render::UIImage::size),sz);
 }
 
 bool Indigo::UIImage::on_render_create(Indigo::Render::UIGroup* group)

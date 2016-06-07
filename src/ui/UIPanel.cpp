@@ -74,7 +74,7 @@ void Indigo::UIPanel::on_size(const glm::uvec2& sz)
 	m_sizer.fit(sz);
 
 	if (m_render_background)
-		render_pipe()->post(OOBase::make_delegate(m_render_background,&Render::UIDrawable::size),sz);
+		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_background,&Render::UIDrawable::size),sz);
 }
 
 bool Indigo::UIPanel::on_mousemove(const glm::ivec2& pos)

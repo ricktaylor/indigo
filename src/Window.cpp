@@ -66,12 +66,12 @@ bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& p
 
 void Indigo::Render::Window::on_close(const OOGL::Window& win)
 {
-	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_close));
+	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::Window::on_close));
 }
 
 void Indigo::Render::Window::on_move(const OOGL::Window& win, const glm::ivec2& pos)
 {
-	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_move),pos);
+	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::Window::on_move),pos);
 }
 
 void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& sz)
@@ -108,13 +108,13 @@ void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glSta
 void Indigo::Render::Window::on_mousemove(const OOGL::Window& win, double screen_x, double screen_y)
 {
 	void* TODO; // TODO - Make this go through the render layers!
-	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_mousemove),screen_x,screen_y);
+	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::Window::on_mousemove),screen_x,screen_y);
 }
 
 void Indigo::Render::Window::on_mousebutton(const OOGL::Window& win, const OOGL::Window::mouse_click_t& click)
 {
 	void* TODO; // TODO - Make this go through the render layers!
-	logic_pipe()->post(OOBase::make_delegate(m_owner,&Indigo::Window::on_mousebutton),click);
+	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::Window::on_mousebutton),click);
 }
 
 void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, bool* ret)
@@ -148,10 +148,10 @@ bool Indigo::Window::create(const CreateParams& params)
 		LOG_WARNING_RETURN(("Window already created"),true);
 
 	bool ret = false;
-	if (!render_pipe()->call(OOBase::make_delegate(this,&Window::on_create),&params,&ret) || !ret)
+	if (!render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_create),&params,&ret) || !ret)
 		return false;
 
-	return render_pipe()->post(OOBase::make_delegate(this,&Window::run));
+	return render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::run));
 }
 
 void Indigo::Window::on_create(const CreateParams* params, bool* ret)
@@ -227,7 +227,7 @@ void Indigo::Window::destroy()
 	m_layers.clear();
 	m_named_layers.clear();
 
-	render_pipe()->call(OOBase::make_delegate(this,&Window::on_destroy));
+	render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_destroy));
 }
 
 void Indigo::Window::on_destroy()
@@ -245,7 +245,7 @@ bool Indigo::Window::show(bool visible)
 			LOG_WARNING_RETURN(("Incomplete window is not visible"),true);
 	}
 
-	return render_pipe()->post(OOBase::make_delegate(m_render_wnd->m_wnd.get(),&OOGL::Window::show),visible);
+	return render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_wnd->m_wnd.get(),&OOGL::Window::show),visible);
 }
 
 bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, const char* name, size_t len)
@@ -260,7 +260,7 @@ bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, const char
 		LOG_ERROR_RETURN(("Failed to insert layer name: %s",OOBase::system_error_text()),false);
 
 	bool ret = false;
-	if (!render_pipe()->call(OOBase::make_delegate(m_render_wnd.get(),&Render::Window::add_render_layer),layer.get(),&ret) || !ret)
+	if (!render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_wnd.get(),&Render::Window::add_render_layer),layer.get(),&ret) || !ret)
 		remove_layer(name,len);
 
 	return ret;
