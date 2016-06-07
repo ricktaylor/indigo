@@ -61,7 +61,7 @@ namespace Indigo
 				{}
 
 				OOBase::Delegate1<void,P1,OOBase::ThreadLocalAllocator> m_delegate;
-				P1 m_p1;
+				typename OOBase::remove_const_ref<P1>::type m_p1;
 
 				static void call(void* p)
 				{
@@ -78,15 +78,15 @@ namespace Indigo
 			template <typename P1, typename P2>
 			struct thunk2
 			{
-				thunk2(const OOBase::Delegate2<void,P1,P2,OOBase::ThreadLocalAllocator>& d, P1 p1, P2 p2) :
+				thunk2(const OOBase::Delegate2<void,P1,P2,OOBase::ThreadLocalAllocator>& d, typename OOBase::call_traits<P1>::param_type p1, typename OOBase::call_traits<P2>::param_type p2) :
 					m_delegate(d),
 					m_p1(p1),
 					m_p2(p2)
 				{}
 
 				OOBase::Delegate2<void,P1,P2,OOBase::ThreadLocalAllocator> m_delegate;
-				P1 m_p1;
-				P2 m_p2;
+				typename OOBase::remove_const_ref<P1>::type m_p1;
+				typename OOBase::remove_const_ref<P2>::type m_p2;
 
 				static void call(void* p)
 				{
@@ -103,7 +103,7 @@ namespace Indigo
 			template <typename P1, typename P2, typename P3>
 			struct thunk3
 			{
-				thunk3(const OOBase::Delegate3<void,P1,P2,P3,OOBase::ThreadLocalAllocator>& d, P1 p1, P2 p2, P3 p3) :
+				thunk3(const OOBase::Delegate3<void,P1,P2,P3,OOBase::ThreadLocalAllocator>& d, typename OOBase::call_traits<P1>::param_type p1, typename OOBase::call_traits<P2>::param_type p2, typename OOBase::call_traits<P3>::param_type p3) :
 					m_delegate(d),
 					m_p1(p1),
 					m_p2(p2),
@@ -111,9 +111,9 @@ namespace Indigo
 				{}
 
 				OOBase::Delegate3<void,P1,P2,P3,OOBase::ThreadLocalAllocator> m_delegate;
-				P1 m_p1;
-				P2 m_p2;
-				P3 m_p3;
+				typename OOBase::remove_const_ref<P1>::type m_p1;
+				typename OOBase::remove_const_ref<P2>::type m_p2;
+				typename OOBase::remove_const_ref<P3>::type m_p3;
 
 				static void call(void* p)
 				{
@@ -207,7 +207,7 @@ namespace Indigo
 		}
 
 		template <typename P1>
-		bool call(const OOBase::Delegate1<void,P1,OOBase::ThreadLocalAllocator>& delegate, P1 p1)
+		bool call(const OOBase::Delegate1<void,P1,OOBase::ThreadLocalAllocator>& delegate, typename OOBase::call_traits<P1>::param_type p1)
 		{
 			struct thunk
 			{
@@ -231,7 +231,7 @@ namespace Indigo
 		}
 
 		template <typename P1, typename P2>
-		bool call(const OOBase::Delegate2<void,P1,P2,OOBase::ThreadLocalAllocator>& delegate, P1 p1, P2 p2)
+		bool call(const OOBase::Delegate2<void,P1,P2,OOBase::ThreadLocalAllocator>& delegate, typename OOBase::call_traits<P1>::param_type p1, typename OOBase::call_traits<P2>::param_type p2)
 		{
 			struct thunk
 			{
@@ -257,7 +257,7 @@ namespace Indigo
 		}
 
 		template <typename P1, typename P2, typename P3>
-		bool call(const OOBase::Delegate3<void,P1,P2,P3,OOBase::ThreadLocalAllocator>& delegate, P1 p1, P2 p2, P3 p3)
+		bool call(const OOBase::Delegate3<void,P1,P2,P3,OOBase::ThreadLocalAllocator>& delegate, typename OOBase::call_traits<P1>::param_type p1, typename OOBase::call_traits<P2>::param_type p2, typename OOBase::call_traits<P3>::param_type p3)
 		{
 			struct thunk
 			{
@@ -285,7 +285,7 @@ namespace Indigo
 		}
 
 		template <typename P1, typename P2, typename P3, typename P4>
-		bool call(const OOBase::Delegate4<void,P1,P2,P3,P4,OOBase::ThreadLocalAllocator>& delegate, P1 p1, P2 p2, P3 p3, P4 p4)
+		bool call(const OOBase::Delegate4<void,P1,P2,P3,P4,OOBase::ThreadLocalAllocator>& delegate, typename OOBase::call_traits<P1>::param_type p1, typename OOBase::call_traits<P2>::param_type p2, typename OOBase::call_traits<P3>::param_type p3, typename OOBase::call_traits<P4>::param_type p4)
 		{
 			struct thunk
 			{
@@ -315,7 +315,7 @@ namespace Indigo
 		}
 
 		template <typename P1, typename P2, typename P3, typename P4, typename P5>
-		bool call(const OOBase::Delegate5<void,P1,P2,P3,P4,P5,OOBase::ThreadLocalAllocator>& delegate, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
+		bool call(const OOBase::Delegate5<void,P1,P2,P3,P4,P5,OOBase::ThreadLocalAllocator>& delegate, typename OOBase::call_traits<P1>::param_type p1, typename OOBase::call_traits<P2>::param_type p2, typename OOBase::call_traits<P3>::param_type p3, typename OOBase::call_traits<P4>::param_type p4, typename OOBase::call_traits<P5>::param_type p5)
 		{
 			struct thunk
 			{
@@ -382,7 +382,7 @@ namespace Indigo
 		}
 
 		template <typename P1, typename P2>
-		bool post(const OOBase::Delegate2<void,P1,P2,OOBase::ThreadLocalAllocator>& delegate, P1 p1, P2 p2)
+		bool post(const OOBase::Delegate2<void,P1,P2,OOBase::ThreadLocalAllocator>& delegate, typename OOBase::call_traits<P1>::param_type p1, typename OOBase::call_traits<P2>::param_type p2)
 		{
 			typedef detail::IPC::thunk2<P1,P2> thunk;
 
@@ -399,7 +399,7 @@ namespace Indigo
 		}
 
 		template <typename P1, typename P2, typename P3>
-		bool post(const OOBase::Delegate3<void,P1,P2,P3,OOBase::ThreadLocalAllocator>& delegate, P1 p1, P2 p2, P3 p3)
+		bool post(const OOBase::Delegate3<void,P1,P2,P3,OOBase::ThreadLocalAllocator>& delegate, typename OOBase::call_traits<P1>::param_type p1, typename OOBase::call_traits<P2>::param_type p2, typename OOBase::call_traits<P3>::param_type p3)
 		{
 			typedef detail::IPC::thunk3<P1,P2,P3> thunk;
 
