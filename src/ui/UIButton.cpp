@@ -297,7 +297,7 @@ void Indigo::UIButton::do_style_size(const glm::uvec2& sz, const StyleState& sty
 	}
 }
 
-void Indigo::UIButton::do_size(glm::uvec2 sz)
+void Indigo::UIButton::do_size(const glm::uvec2& sz)
 {
 	do_style_size(sz,m_style->m_normal,m_normal);
 	do_style_size(sz,m_style->m_active,m_active);

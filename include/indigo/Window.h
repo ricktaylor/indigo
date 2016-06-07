@@ -80,9 +80,9 @@ namespace Indigo
 		void on_create(const CreateParams* params, bool* ret);
 		void on_destroy();
 		void on_close();
-		void on_move(glm::ivec2 pos);
+		void on_move(const glm::ivec2& pos);
 		void on_mousemove(double screen_x, double screen_y);
-		void on_mousebutton(OOGL::Window::mouse_click_t click);
+		void on_mousebutton(const OOGL::Window::mouse_click_t& click);
 	};
 
 	namespace Render

@@ -63,8 +63,8 @@ namespace Indigo
 			glm::mat4 m_view_proj;
 			SGNode*   m_scene;
 
-			void view_proj_source(glm::mat4 vp, glm::vec3 s) { m_view_proj = vp; m_source = s; }
-			void view_proj(glm::mat4 vp) { m_view_proj = vp; }
+			void view_proj_source(const glm::mat4& vp, const glm::vec3& s) { m_view_proj = vp; m_source = s; }
+			void view_proj(const glm::mat4& vp) { m_view_proj = vp; }
 			void scene(SGNode* scene) { m_scene = scene; }
 		};
 	}

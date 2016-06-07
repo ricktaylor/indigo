@@ -100,7 +100,7 @@ namespace Indigo
 			void make_dirty();
 
 			const glm::mat4& local_transform() const { return m_local_transform; }
-			void local_transform(glm::mat4 transform);
+			void local_transform(const glm::mat4& transform);
 
 			const glm::mat4& world_transform() const { return m_world_transform; }
 

@@ -333,7 +333,7 @@ bool Indigo::Render::UINinePatch::valid() const
 	return m_patch != -1 && m_info && m_texture->valid() && UIDrawable::valid();
 }
 
-void Indigo::Render::UINinePatch::size(glm::uvec2 size)
+void Indigo::Render::UINinePatch::size(const glm::uvec2& size)
 {
 	if (valid())
 		NinePatchFactory_t::instance().layout_patch(m_patch,size,m_info->m_borders,m_info->m_tex_size);

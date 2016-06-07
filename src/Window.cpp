@@ -292,7 +292,7 @@ void Indigo::Window::on_close()
 	}
 }
 
-void Indigo::Window::on_move(glm::ivec2 pos)
+void Indigo::Window::on_move(const glm::ivec2& pos)
 {
 	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;)
 	{
@@ -325,7 +325,7 @@ void Indigo::Window::on_mousemove(double screen_x, double screen_y)
 	}
 }
 
-void Indigo::Window::on_mousebutton(OOGL::Window::mouse_click_t click)
+void Indigo::Window::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 {
 	bool handled = false;
 	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;)

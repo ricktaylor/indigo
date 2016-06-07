@@ -90,7 +90,7 @@ namespace Indigo
 		virtual bool on_render_create(Render::UIGroup* group) { return true; }
 
 		virtual bool on_close();
-		virtual void on_size(glm::uvec2 sz);
+		virtual void on_size(const glm::uvec2& sz);
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual bool on_mousemove(const double& screen_x, const double& screen_y);
 		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);

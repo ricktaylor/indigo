@@ -35,7 +35,7 @@ namespace
 
 		void on_draw(OOGL::State& glState) const;
 
-		void colour(glm::vec4 colour) { m_colour = colour; }
+		void colour(const glm::vec4& colour) { m_colour = colour; }
 
 		OOBase::SharedPtr<OOGL::Texture> m_texture;
 		glm::vec4 m_colour;

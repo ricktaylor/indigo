@@ -81,7 +81,7 @@ void Indigo::Render::SGNode::on_update(const glm::mat4& parent_transform)
 	}
 }
 
-void Indigo::Render::SGNode::local_transform(glm::mat4 transform)
+void Indigo::Render::SGNode::local_transform(const glm::mat4& transform)
 {
 	if (m_local_transform != transform)
 	{

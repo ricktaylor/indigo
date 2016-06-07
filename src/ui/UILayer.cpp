@@ -113,7 +113,7 @@ bool Indigo::UILayer::on_close()
 	return false;
 }
 
-void Indigo::UILayer::on_size(glm::uvec2 sz)
+void Indigo::UILayer::on_size(const glm::uvec2& sz)
 {
 	m_size = sz;
 	m_sizer.fit(sz);

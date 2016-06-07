@@ -81,7 +81,7 @@ namespace Indigo
 
 			virtual bool valid() const;
 
-			virtual void size(glm::uvec2 size);
+			virtual void size(const glm::uvec2& size);
 
 		private:
 			OOBase::SharedPtr<OOGL::Texture> m_texture;

@@ -38,7 +38,7 @@ namespace Indigo
 
 			virtual bool valid() const { return UIDrawable::valid() && m_texture->valid(); }
 
-			virtual void size(glm::uvec2 size) { m_size = glm::vec3(size.x,size.y,1.f); }
+			virtual void size(const glm::uvec2& size) { m_size = glm::vec3(size.x,size.y,1.f); }
 
 		protected:
 			OOBase::SharedPtr<OOGL::Texture> m_texture;
