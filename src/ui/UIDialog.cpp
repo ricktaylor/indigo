@@ -19,12 +19,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../Common.h"
-
 #include "../../include/indigo/Render.h"
 
 #include "../../include/indigo/ui/UIDialog.h"
 #include "../../include/indigo/ui/UILayer.h"
+
+#include "../Common.h"
 
 Indigo::UIDialog::UIDialog(const OOBase::SharedPtr<UILayer>& layer) :
 		m_layer(layer),

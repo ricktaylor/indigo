@@ -19,8 +19,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../Common.h"
-
 #include "../../include/indigo/ui/UILoader.h"
 
 #include "../../include/indigo/Resource.h"
@@ -30,6 +28,8 @@
 #include "../../include/indigo/ui/UIImage.h"
 #include "../../include/indigo/ui/UIButton.h"
 #include "../../include/indigo/ui/UIPanel.h"
+
+#include "../Common.h"
 
 Indigo::UILoader::~UILoader()
 {

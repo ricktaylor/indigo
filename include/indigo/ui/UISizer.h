@@ -22,6 +22,8 @@
 #ifndef INDIGO_SIZER_H_INCLUDED
 #define INDIGO_SIZER_H_INCLUDED
 
+#include <OOBase/Table.h>
+
 #include "UIWidget.h"
 
 namespace Indigo

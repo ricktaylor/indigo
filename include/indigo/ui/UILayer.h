@@ -22,9 +22,11 @@
 #ifndef INDIGO_UILAYER_H_INCLUDED
 #define INDIGO_UILAYER_H_INCLUDED
 
-#include "UISizer.h"
+#include <OOBase/HashTable.h>
 
 #include "../Layer.h"
+
+#include "UISizer.h"
 
 namespace Indigo
 {

@@ -19,11 +19,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../Common.h"
-
 #include "../../include/indigo/ui/UIButton.h"
 
 #include "../../include/indigo/Render.h"
+
+#include "../Common.h"
 
 void Indigo::UIButton::StyleState::unload()
 {

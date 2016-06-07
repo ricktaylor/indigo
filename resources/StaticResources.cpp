@@ -19,8 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../src/Common.h"
 #include "../include/indigo/Resource.h"
+
+#include "../src/Common.h"
 
 namespace
 {

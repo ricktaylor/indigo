@@ -19,11 +19,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../Common.h"
-
 #include "../../include/indigo/ui/UILayer.h"
 #include "../../include/indigo/Window.h"
 #include "../../include/indigo/Render.h"
+
+#include "../Common.h"
 
 Indigo::Render::UILayer::UILayer(Indigo::Render::Window* window, Indigo::UILayer* owner) :
 		Indigo::Render::UIGroup(true),

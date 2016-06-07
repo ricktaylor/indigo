@@ -19,12 +19,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../Common.h"
-
 #include "../../include/indigo/ui/UILabel.h"
 
 #include "../../include/indigo/Font.h"
 #include "../../include/indigo/Render.h"
+
+#include "../Common.h"
 
 Indigo::Render::UILabel::UILabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int size, const glm::vec4& colour, bool visible, const glm::ivec2& position) :
 		Text(font,sz,len),

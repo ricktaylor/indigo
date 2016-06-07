@@ -19,10 +19,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../Common.h"
+#include "../../include/indigo/ui/UIPanel.h"
+
 #include "../../include/indigo/Render.h"
 
-#include "../../include/indigo/ui/UIPanel.h"
+#include "../Common.h"
 
 Indigo::UIPanel::UIPanel(UIGroup* parent, const CreateParams& params) :
 		UIGroup(parent,params),

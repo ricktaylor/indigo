@@ -19,9 +19,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../Common.h"
-
 #include "../../include/indigo/ui/UISizer.h"
+
+#include "../Common.h"
 
 Indigo::UIGridSizer::UIGridSizer(bool fixed, const glm::uvec4& margins, const glm::uvec2& padding) :
 	UISizer(margins),

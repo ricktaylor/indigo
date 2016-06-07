@@ -19,13 +19,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "../Common.h"
-
 #include "../../include/indigo/ShaderPool.h"
 #include "../../include/indigo/Render.h"
 
 #include "../../include/indigo/ui/UINinePatch.h"
 #include "../../include/indigo/ui/UIImage.h"
+
+#include "../Common.h"
 
 #include <OOGL/BufferObject.h>
 #include <OOGL/VertexArrayObject.h>
