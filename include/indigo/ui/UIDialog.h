@@ -28,14 +28,15 @@ namespace Indigo
 {
 	class UIDialog
 	{
-	protected:
+	public:
 		UIDialog(const OOBase::SharedPtr<UILayer>& layer);
 
 		void internal_do_modal();
 
+	protected:
 		void end_dialog();
 
-		virtual void on_window_close() = 0;
+		virtual void on_window_close() { m_live = false; }
 
 	private:
 		OOBase::SharedPtr<UILayer> m_layer;
