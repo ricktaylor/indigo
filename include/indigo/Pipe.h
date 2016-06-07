@@ -211,13 +211,14 @@ namespace Indigo
 		{
 			struct thunk
 			{
-				thunk(OOBase::Delegate1<void,P1,OOBase::ThreadLocalAllocator> const* d, P1 const* p1) :
+				thunk(OOBase::Delegate1<void,P1,OOBase::ThreadLocalAllocator> const* d,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P1>::param_type>::type p1) :
 					m_delegate(d),
 					m_p1(p1)
 				{}
 
 				OOBase::Delegate1<void,P1,OOBase::ThreadLocalAllocator> const* m_delegate;
-				P1 const* m_p1;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P1>::param_type>::type m_p1;
 
 				static void call(void* p)
 				{
@@ -235,15 +236,17 @@ namespace Indigo
 		{
 			struct thunk
 			{
-				thunk(OOBase::Delegate2<void,P1,P2,OOBase::ThreadLocalAllocator> const* d, P1 const* p1, P2 const* p2) :
+				thunk(OOBase::Delegate2<void,P1,P2,OOBase::ThreadLocalAllocator> const* d,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P1>::param_type>::type p1,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P2>::param_type>::type p2) :
 					m_delegate(d),
 					m_p1(p1),
 					m_p2(p2)
 				{}
 
 				OOBase::Delegate2<void,P1,P2,OOBase::ThreadLocalAllocator> const* m_delegate;
-				P1 const* m_p1;
-				P2 const* m_p2;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P1>::param_type>::type m_p1;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P2>::param_type>::type m_p2;
 
 				static void call(void* p)
 				{
@@ -261,7 +264,10 @@ namespace Indigo
 		{
 			struct thunk
 			{
-				thunk(OOBase::Delegate3<void,P1,P2,P3,OOBase::ThreadLocalAllocator> const* d, P1 const* p1, P2 const* p2, P3 const* p3) :
+				thunk(OOBase::Delegate3<void,P1,P2,P3,OOBase::ThreadLocalAllocator> const* d,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P1>::param_type>::type p1,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P2>::param_type>::type p2,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P3>::param_type>::type p3) :
 					m_delegate(d),
 					m_p1(p1),
 					m_p2(p2),
@@ -269,9 +275,9 @@ namespace Indigo
 				{}
 
 				OOBase::Delegate3<void,P1,P2,P3,OOBase::ThreadLocalAllocator> const* m_delegate;
-				P1 const* m_p1;
-				P2 const* m_p2;
-				P3 const* m_p3;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P1>::param_type>::type m_p1;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P2>::param_type>::type m_p2;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P3>::param_type>::type m_p3;
 
 				static void call(void* p)
 				{
@@ -289,7 +295,11 @@ namespace Indigo
 		{
 			struct thunk
 			{
-				thunk(OOBase::Delegate4<void,P1,P2,P3,P4,OOBase::ThreadLocalAllocator> const* d, P1 const* p1, P2 const* p2, P3 const* p3, P4 const* p4) :
+				thunk(OOBase::Delegate4<void,P1,P2,P3,P4,OOBase::ThreadLocalAllocator> const* d,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P1>::param_type>::type p1,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P2>::param_type>::type p2,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P3>::param_type>::type p3,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P4>::param_type>::type p4) :
 					m_delegate(d),
 					m_p1(p1),
 					m_p2(p2),
@@ -298,10 +308,10 @@ namespace Indigo
 				{}
 
 				OOBase::Delegate4<void,P1,P2,P3,P4,OOBase::ThreadLocalAllocator> const* m_delegate;
-				P1 const* m_p1;
-				P2 const* m_p2;
-				P3 const* m_p3;
-				P4 const* m_p4;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P1>::param_type>::type m_p1;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P2>::param_type>::type m_p2;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P3>::param_type>::type m_p3;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P4>::param_type>::type m_p4;
 
 				static void call(void* p)
 				{
@@ -319,7 +329,12 @@ namespace Indigo
 		{
 			struct thunk
 			{
-				thunk(OOBase::Delegate5<void,P1,P2,P3,P4,P5,OOBase::ThreadLocalAllocator> const* d, P1 const* p1, P2 const* p2, P3 const* p3, P4 const* p4, P5 const* p5) :
+				thunk(OOBase::Delegate5<void,P1,P2,P3,P4,P5,OOBase::ThreadLocalAllocator> const* d,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P1>::param_type>::type p1,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P2>::param_type>::type p2,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P3>::param_type>::type p3,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P4>::param_type>::type p4,
+						typename OOBase::add_pointer<const typename OOBase::call_traits<P5>::param_type>::type p5) :
 					m_delegate(d),
 					m_p1(p1),
 					m_p2(p2),
@@ -329,11 +344,11 @@ namespace Indigo
 				{}
 
 				OOBase::Delegate5<void,P1,P2,P3,P4,P5,OOBase::ThreadLocalAllocator> const* m_delegate;
-				P1 const* m_p1;
-				P2 const* m_p2;
-				P3 const* m_p3;
-				P4 const* m_p4;
-				P5 const* m_p5;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P1>::param_type>::type m_p1;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P2>::param_type>::type m_p2;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P3>::param_type>::type m_p3;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P4>::param_type>::type m_p4;
+				typename OOBase::add_pointer<const typename OOBase::call_traits<P5>::param_type>::type m_p5;
 
 				static void call(void* p)
 				{

@@ -77,7 +77,7 @@ namespace Indigo
 		OOBase::HashTable<size_t,OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator> m_named_layers;
 
 		void run();
-		void on_create(const CreateParams* params, bool* ret);
+		void on_create(const CreateParams& params, bool* ret);
 		void on_destroy();
 		void on_close();
 		void on_move(const glm::ivec2& pos);

@@ -148,13 +148,13 @@ bool Indigo::Window::create(const CreateParams& params)
 		LOG_WARNING_RETURN(("Window already created"),true);
 
 	bool ret = false;
-	if (!render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_create),&params,&ret) || !ret)
+	if (!render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_create),params,&ret) || !ret)
 		return false;
 
 	return render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::run));
 }
 
-void Indigo::Window::on_create(const CreateParams* params, bool* ret)
+void Indigo::Window::on_create(const CreateParams& params, bool* ret)
 {
 	*ret = false;
 
@@ -163,7 +163,7 @@ void Indigo::Window::on_create(const CreateParams* params, bool* ret)
 		LOG_ERROR(("Failed to create window: %s",OOBase::system_error_text()));
 	else
 	{
-		if (!m_render_wnd->create_window(*params))
+		if (!m_render_wnd->create_window(params))
 			m_render_wnd.reset();
 		else
 			*ret = true;
