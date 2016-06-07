@@ -367,8 +367,8 @@ namespace Indigo
 		{
 			typedef detail::IPC::thunk0 thunk;
 
-			thunk* t;
-			if (!OOBase::ThreadLocalAllocator::allocate_new(t,delegate))
+			thunk* t = OOBase::ThreadLocalAllocator::allocate_new<thunk>(delegate);
+			if (!t)
 				LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
 			if (!post(&thunk::call,t,&thunk::cleanup))
@@ -384,8 +384,8 @@ namespace Indigo
 		{
 			typedef detail::IPC::thunk1<P1> thunk;
 
-			thunk* t;
-			if (!OOBase::ThreadLocalAllocator::allocate_new(t,delegate,p1))
+			thunk* t = OOBase::ThreadLocalAllocator::allocate_new<thunk>(delegate,p1);
+			if (!t)
 				LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
 			if (!post(&thunk::call,t,&thunk::cleanup))
@@ -401,8 +401,8 @@ namespace Indigo
 		{
 			typedef detail::IPC::thunk2<P1,P2> thunk;
 
-			thunk* t;
-			if (!OOBase::ThreadLocalAllocator::allocate_new(t,delegate,p1,p2))
+			thunk* t = OOBase::ThreadLocalAllocator::allocate_new<thunk>(delegate,p1,p2);
+			if (!t)
 				LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
 			if (!post(&thunk::call,t,&thunk::cleanup))
@@ -418,8 +418,8 @@ namespace Indigo
 		{
 			typedef detail::IPC::thunk3<P1,P2,P3> thunk;
 
-			thunk* t;
-			if (!OOBase::ThreadLocalAllocator::allocate_new(t,delegate,p1,p2,p3))
+			thunk* t = OOBase::ThreadLocalAllocator::allocate_new<thunk>(delegate,p1,p2,p3);
+			if (!t)
 				LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
 			if (!post(&thunk::call,t,&thunk::cleanup))

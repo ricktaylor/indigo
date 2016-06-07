@@ -139,8 +139,8 @@ OOBase::SharedPtr<const char> StaticResources::load_i(const char* name) const
 	const RES* r = find_resource(name);
 	if (r && r->data)
 	{
-		NullShare* ns = NULL;
-		if (!OOBase::CrtAllocator::allocate_new(ns))
+		NullShare* ns = OOBase::CrtAllocator::allocate_new<NullShare>();
+		if (!ns)
 			LOG_ERROR(("Failed to find allocate: %s",OOBase::system_error_text()));
 		else
 		{

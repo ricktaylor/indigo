@@ -226,8 +226,8 @@ bool Indigo::Pipe::post(void (*fn)(void*), void* param, void (*fn_cleanup)(void*
 	if (!m_send_queue && this != thread_pipe())
 		return false;
 
-	CallInfo* ci;
-	if (!OOBase::ThreadLocalAllocator::allocate_new(ci))
+	CallInfo* ci = OOBase::ThreadLocalAllocator::allocate_new<CallInfo>();
+	if (!ci)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
 	ci->m_fn = fn;
