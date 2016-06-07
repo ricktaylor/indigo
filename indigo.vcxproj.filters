@@ -99,6 +99,9 @@
     <ClInclude Include="include\indigo\sg\SGPrimitive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\indigo\sg\SGMeshLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\indigo.rc">
@@ -182,6 +185,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\sg\SGPrimitive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sg\SGMeshLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -29,6 +29,7 @@
     <ClInclude Include="include\indigo\Render.h" />
     <ClInclude Include="include\indigo\Resource.h" />
     <ClInclude Include="include\indigo\sg\SGCamera.h" />
+    <ClInclude Include="include\indigo\sg\SGMeshLoader.h" />
     <ClInclude Include="include\indigo\sg\SGNode.h" />
     <ClInclude Include="include\indigo\sg\SGPrimitive.h" />
     <ClInclude Include="include\indigo\ShaderPool.h" />
@@ -62,6 +63,7 @@
     <ClCompile Include="src\Quad.cpp" />
     <ClCompile Include="src\Render.cpp" />
     <ClCompile Include="src\sg\SGCamera.cpp" />
+    <ClCompile Include="src\sg\SGMeshLoader.cpp" />
     <ClCompile Include="src\sg\SGNode.cpp" />
     <ClCompile Include="src\sg\SGPrimitive.cpp" />
     <ClCompile Include="src\ShaderPool.cpp" />
