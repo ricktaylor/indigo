@@ -454,7 +454,9 @@ void Indigo::Render::Font::draw(OOGL::State& state, const glm::mat4& mvp, const 
 		m_ptrProgram->uniform("in_Colour",colour);
 		m_ptrProgram->uniform("MVP",mvp);
 
-		m_ptrVAO->draw_elements(GL_TRIANGLES,elements_per_glyph * len,GL_UNSIGNED_INT,start * elements_per_glyph * sizeof(GLuint));
+		GLuint idx = start * vertices_per_glyph;
+
+		m_ptrVAO->draw_elements(GL_TRIANGLES,idx,idx+3,elements_per_glyph * len,GL_UNSIGNED_INT,start * elements_per_glyph * sizeof(GLuint));
 	}
 }
 

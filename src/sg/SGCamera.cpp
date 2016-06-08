@@ -30,8 +30,6 @@
 
 namespace
 {
-
-
 	class ClipVisitor : public Indigo::Render::SGVisitor
 	{
 	public:
@@ -102,6 +100,10 @@ bool ClipVisitor::visit(const Indigo::Render::SGNode& node, OOBase::uint32_t& hi
 void ClipVisitor::draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	glState.disable(GL_BLEND);
+
+	glDepthMask(GL_TRUE);
+	glState.enable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 
 	for (OOBase::Set<node_info,FrontToBack,OOBase::ThreadLocalAllocator>::const_iterator i=m_nodes.begin();i;++i)
 		i->m_drawable->on_draw(glState,mvp * i->m_transform);

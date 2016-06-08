@@ -145,7 +145,7 @@ void CubeFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const glm::ve
 		m_ptrProgram->uniform("in_Colour",colour);
 		m_ptrProgram->uniform("MVP",mvp);
 
-		m_ptrVAO->draw_elements(GL_TRIANGLES,elements_per_cube,GL_UNSIGNED_BYTE,0);
+		m_ptrVAO->draw_elements(GL_TRIANGLES,0,23,elements_per_cube,GL_UNSIGNED_BYTE,0);
 	}
 }
 

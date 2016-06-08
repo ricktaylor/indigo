@@ -115,7 +115,7 @@ void QuadFactory::draw(OOGL::State& glState, const OOBase::SharedPtr<OOGL::Textu
 		m_ptrProgram->uniform("in_Colour",colour);
 		m_ptrProgram->uniform("MVP",mvp);
 
-		m_ptrVAO->draw_elements(GL_TRIANGLES,elements_per_quad,GL_UNSIGNED_BYTE,0);
+		m_ptrVAO->draw_elements(GL_TRIANGLES,0,3,elements_per_quad,GL_UNSIGNED_BYTE,0);
 	}
 }
 

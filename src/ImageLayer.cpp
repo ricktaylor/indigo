@@ -59,6 +59,9 @@ void ::ImageLayer::on_draw(OOGL::State& glState) const
 		glState.enable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
+		glDepthMask(GL_FALSE);
+		glState.disable(GL_DEPTH_TEST);
+
 		Indigo::Render::Quad::draw(glState,m_texture,m_mvp,m_colour);
 	}
 }
