@@ -78,13 +78,13 @@ bool Indigo::detail::IPC::Queue::drain()
 	// Get next buffer
 	for (Item item;m_queue.pop(&item);)
 	{
-		guard.release();
-
 		if (!item.m_callback)
 		{
 			m_queue.push(item);
 			return false;
 		}
+
+		guard.release();
 
 		if (!(*item.m_callback)(item.m_param))
 			return false;
@@ -112,8 +112,6 @@ bool Indigo::detail::IPC::Queue::dequeue(bool call_blocked, bool once, const OOB
 		// Get next buffer
 		for (Item item;m_queue.pop(&item);)
 		{
-			guard.release();
-
 			if (!item.m_callback)
 			{
 				if (call_blocked)
@@ -122,6 +120,8 @@ bool Indigo::detail::IPC::Queue::dequeue(bool call_blocked, bool once, const OOB
 				m_queue.push(item);
 				return false;
 			}
+
+			guard.release();
 
 			if (!(*item.m_callback)(item.m_param))
 				return false;
@@ -276,31 +276,61 @@ bool Indigo::Pipe::drain()
 
 bool Indigo::Pipe::acquire()
 {
-	if (!m_send_queue)
+	/*if (!m_send_queue)
 		return false;
 
-	return post(&Pipe::spin_lock,NULL);
+	LOG_DEBUG(("Spinlock acquire"));
+
+	return m_send_queue->enqueue(&Pipe::spin_lock,NULL);*/
+
+	return true;
 }
 
 bool Indigo::Pipe::release()
 {
-	if (!m_send_queue)
+	/*if (!m_send_queue)
 		return false;
 
-	return post(&Pipe::spin_unlock,NULL);
+	LOG_DEBUG(("Spinlock release"));
+
+	return m_send_queue->enqueue(&Pipe::spin_unlock,NULL);*/
+
+	return true;
 }
 
-void Indigo::Pipe::spin_lock(void* param)
+bool Indigo::Pipe::spin_lock(void* param)
 {
-	Pipe* pThis = thread_pipe();
-
-	for (++pThis->m_spin_lock;pThis->m_spin_lock;)
-		pThis->get();
+	return thread_pipe()->do_spin_lock();
 }
 
-void Indigo::Pipe::spin_unlock(void* param)
+bool Indigo::Pipe::do_spin_lock()
+{
+	if (!m_recv_queue)
+		return false;
+
+	if (m_spin_lock)
+		LOG_DEBUG(("Double lock!"));
+
+	size_t prev = m_spin_lock++;
+
+	LOG_DEBUG(("Pipe %p enter spinlock %zu",this,m_spin_lock));
+
+
+	while (m_spin_lock != prev)
+	{
+		m_recv_queue->dequeue(false,true);
+	}
+
+	LOG_DEBUG(("Pipe %p leave spinlock %zu",this,m_spin_lock));
+
+	return true;
+}
+
+bool Indigo::Pipe::spin_unlock(void* param)
 {
 	Pipe* pThis = thread_pipe();
 	if (pThis->m_spin_lock)
 		--pThis->m_spin_lock;
+
+	return true;
 }

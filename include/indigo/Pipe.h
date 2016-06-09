@@ -452,8 +452,9 @@ namespace Indigo
 		static bool make_call(void* param);
 		static bool do_post(void* param);
 		static bool post_cleanup(void* param);
-		static void spin_lock(void* param);
-		static void spin_unlock(void* param);
+		static bool spin_lock(void* param);
+		static bool spin_unlock(void* param);
+		bool do_spin_lock();
 	};
 
 	Pipe* const thread_pipe();

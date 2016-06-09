@@ -95,7 +95,7 @@ void Indigo::UILayer::on_state_change(OOBase::uint32_t state, OOBase::uint32_t c
 	{
 		bool visible = (state & eWS_visible) == eWS_visible;
 		if (visible)
-			m_sizer.fit(m_size);
+			m_sizer.fit(size());
 
 		Layer::show(visible);
 	}
@@ -161,9 +161,6 @@ void Indigo::UILayer::destroy_render_layer()
 
 bool Indigo::UILayer::on_mousemove(const double& screen_x, const double& screen_y)
 {
-	if (!visible())
-		return false;
-
 	const glm::uvec2& sz = size();
 	if (!sz.x || !sz.y)
 		return false;
@@ -174,9 +171,6 @@ bool Indigo::UILayer::on_mousemove(const double& screen_x, const double& screen_
 
 bool Indigo::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 {
-	if (!visible())
-		return false;
-
 	bool ret = UIGroup::on_mousebutton(click);
 	return m_modal || ret;
 }
