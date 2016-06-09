@@ -65,7 +65,6 @@ Indigo::UILayer::UILayer(const CreateParams& params) :
 
 void Indigo::UILayer::show(bool visible)
 {
-	Layer::show(visible);
 	UIGroup::show(visible);
 }
 
@@ -138,11 +137,8 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 	OOBase::SharedPtr<Indigo::Render::UILayer> group = OOBase::allocate_shared<Indigo::Render::UILayer,OOBase::ThreadLocalAllocator>(window,this);
 	if (!group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
-	else
-	{
-		m_group = OOBase::static_pointer_cast<Render::UIGroup>(group);
-		m_render_group = m_group.get();
-	}
+	else if (!on_render_create(group.get()))
+		group.reset();
 
 	return OOBase::static_pointer_cast<Indigo::Render::Layer>(group);
 }

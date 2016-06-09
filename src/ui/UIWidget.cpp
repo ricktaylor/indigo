@@ -144,12 +144,6 @@ Indigo::UIGroup::UIGroup(UIGroup* parent, const CreateParams& params) :
 
 bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len)
 {
-	if (!m_render_group)
-		LOG_ERROR_RETURN(("Failed to insert widget: incomplete parent"),false);
-
-	if (!m_render_parent)
-		m_render_parent = m_render_group;
-
 	if (!m_children.push_back(widget))
 		LOG_ERROR_RETURN(("Failed to insert widget: %s",OOBase::system_error_text()),false);
 
@@ -159,11 +153,30 @@ bool Indigo::UIGroup::add_widget(const OOBase::SharedPtr<UIWidget>& widget, cons
 		return false;
 	}
 
+	if (!m_render_group)
+		return true;
+
 	bool ret = false;
 	if (!render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_parent,&Render::UIGroup::add_subgroup),widget.get(),&ret) || !ret)
 		m_children.pop_back();
 
 	return ret;
+}
+
+bool Indigo::UIGroup::on_render_create(Render::UIGroup* group)
+{
+	if (!m_render_parent)
+		m_render_parent = group;
+
+	for (OOBase::Vector<OOBase::SharedPtr<UIWidget>,OOBase::ThreadLocalAllocator>::iterator i=m_children.begin();i;++i)
+	{
+		bool ret = false;
+		m_render_parent->add_subgroup(i->get(),&ret);
+		if (!ret)
+			return false;
+	}
+
+	return true;
 }
 
 bool Indigo::UIGroup::add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len)

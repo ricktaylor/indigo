@@ -169,6 +169,8 @@ namespace Indigo
 
 		virtual bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len = -1);
 
+		virtual bool on_render_create(Render::UIGroup* group);
+
 	private:
 		OOBase::Vector<OOBase::SharedPtr<UIWidget>,OOBase::ThreadLocalAllocator> m_children;
 

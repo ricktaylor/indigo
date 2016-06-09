@@ -58,7 +58,8 @@ bool Indigo::UIPanel::on_render_create(Indigo::Render::UIGroup* group)
 		return false;
 
 	m_render_parent = subgroup.get();
-	return true;
+
+	return UIGroup::on_render_create(group);
 }
 
 glm::uvec2 Indigo::UIPanel::min_size() const

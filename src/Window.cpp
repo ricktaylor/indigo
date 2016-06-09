@@ -119,17 +119,22 @@ void Indigo::Render::Window::on_mousebutton(const OOGL::Window& win, const OOGL:
 
 void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, bool* ret)
 {
-	*ret = false;
-	layer->m_render_layer = layer->create_render_layer(this);
-	if (layer->m_render_layer)
+	*ret = true;
+	if (!layer->m_render_layer)
 	{
-		if (!m_layers.push_back(layer->m_render_layer))
+		*ret = false;
+
+		layer->m_render_layer = layer->create_render_layer(this);
+		if (layer->m_render_layer)
 		{
-			LOG_ERROR(("Failed to insert layer: %s",OOBase::system_error_text()));
-			layer->m_render_layer.reset();
+			if (!m_layers.push_back(layer->m_render_layer))
+			{
+				LOG_ERROR(("Failed to insert layer: %s",OOBase::system_error_text()));
+				layer->m_render_layer.reset();
+			}
+			else
+				*ret = true;
 		}
-		else
-			*ret = true;
 	}
 }
 
@@ -253,11 +258,18 @@ bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, const char
 	if (!m_render_wnd)
 		LOG_ERROR_RETURN(("Failed to add layer: incomplete window"),false);
 
+	if (name && len)
+	{
+		size_t hash = OOBase::Hash<const char*>::hash(name,len);
+
+		m_named_layers.remove(hash);
+
+		if (!m_named_layers.insert(hash,layer))
+			LOG_ERROR_RETURN(("Failed to insert layer name: %s",OOBase::system_error_text()),false);
+	}
+
 	if (!m_layers.push_back(layer))
 		LOG_ERROR_RETURN(("Failed to insert layer: %s",OOBase::system_error_text()),false);
-
-	if (name && len && !m_named_layers.insert(OOBase::Hash<const char*>::hash(name,len),layer))
-		LOG_ERROR_RETURN(("Failed to insert layer name: %s",OOBase::system_error_text()),false);
 
 	bool ret = false;
 	if (!render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_wnd.get(),&Render::Window::add_render_layer),layer.get(),&ret) || !ret)
