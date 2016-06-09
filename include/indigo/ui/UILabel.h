@@ -71,7 +71,7 @@ namespace Indigo
 
 		struct CreateParams : public UIWidget::CreateParams
 		{
-			CreateParams(OOBase::uint32_t state = 0,
+			CreateParams(OOBase::uint32_t state = eWS_visible,
 					const glm::ivec2& position = glm::ivec2(),
 					const glm::uvec2& size = glm::uvec2(),
 					const OOBase::SharedPtr<Font>& font = OOBase::SharedPtr<Font>(),
