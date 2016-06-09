@@ -135,12 +135,14 @@ bool Indigo::detail::IPC::Queue::dequeue(bool call_blocked, bool once, const OOB
 	return once;
 }
 
-Indigo::Pipe::Pipe(const char* name)
+Indigo::Pipe::Pipe(const char* name) :
+		m_spin_lock(0)
 {
 	m_recv_queue = register_queue(name);
 }
 
 Indigo::Pipe::Pipe(const OOBase::SharedPtr<detail::IPC::Queue>& send_queue, const OOBase::SharedPtr<detail::IPC::Queue>& recv_queue) :
+		m_spin_lock(0),
 		m_recv_queue(recv_queue),
 		m_send_queue(send_queue)
 {
@@ -246,6 +248,7 @@ bool Indigo::Pipe::post(void (*fn)(void*), void* param, void (*fn_cleanup)(void*
 	}
 	else
 	{
+		// Self post
 		if (!m_recv_queue->enqueue(&Pipe::do_post,ci))
 		{
 			OOBase::ThreadLocalAllocator::delete_free(ci);
@@ -269,4 +272,35 @@ bool Indigo::Pipe::get(const OOBase::Timeout& timeout)
 bool Indigo::Pipe::drain()
 {
 	return m_recv_queue && m_recv_queue->drain();
+}
+
+bool Indigo::Pipe::acquire()
+{
+	if (!m_send_queue)
+		return false;
+
+	return post(&Pipe::spin_lock,NULL);
+}
+
+bool Indigo::Pipe::release()
+{
+	if (!m_send_queue)
+		return false;
+
+	return post(&Pipe::spin_unlock,NULL);
+}
+
+void Indigo::Pipe::spin_lock(void* param)
+{
+	Pipe* pThis = thread_pipe();
+
+	for (++pThis->m_spin_lock;pThis->m_spin_lock;)
+		pThis->get();
+}
+
+void Indigo::Pipe::spin_unlock(void* param)
+{
+	Pipe* pThis = thread_pipe();
+	if (pThis->m_spin_lock)
+		--pThis->m_spin_lock;
 }

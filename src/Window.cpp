@@ -271,6 +271,8 @@ bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, const char
 	if (!m_layers.push_back(layer))
 		LOG_ERROR_RETURN(("Failed to insert layer: %s",OOBase::system_error_text()),false);
 
+	OOBase::Guard<Pipe> lock(*render_pipe());
+
 	bool ret = false;
 	if (!render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_wnd.get(),&Render::Window::add_render_layer),layer.get(),&ret) || !ret)
 		remove_layer(name,len);

@@ -182,6 +182,10 @@ namespace Indigo
 		bool get(const OOBase::Timeout& timeout = OOBase::Timeout());
 		bool drain();
 
+		// Mutex style blocking of the pipe *other end*
+		bool acquire();
+		bool release();
+
 		void close();
 
 		bool call(void (*fn)(void*), void* param);
@@ -435,6 +439,7 @@ namespace Indigo
 
 		OOBase::SharedPtr<detail::IPC::Queue> m_recv_queue;
 		OOBase::SharedPtr<detail::IPC::Queue> m_send_queue;
+		size_t m_spin_lock;
 
 		struct CallInfo
 		{
@@ -447,6 +452,8 @@ namespace Indigo
 		static bool make_call(void* param);
 		static bool do_post(void* param);
 		static bool post_cleanup(void* param);
+		static void spin_lock(void* param);
+		static void spin_unlock(void* param);
 	};
 
 	Pipe* const thread_pipe();

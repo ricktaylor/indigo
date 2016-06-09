@@ -122,6 +122,8 @@ void Indigo::UILayer::on_layer_size(const glm::uvec2& sz)
 
 void Indigo::UILayer::on_size(glm::uvec2& sz)
 {
+	OOBase::Guard<Pipe> lock(*render_pipe());
+
 	m_sizer.fit(sz);
 }
 
