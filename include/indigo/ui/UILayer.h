@@ -75,8 +75,6 @@ namespace Indigo
 
 		UILayer(const CreateParams& params = CreateParams());
 
-		bool valid() const { return m_render_group != NULL; }
-
 		UIGridSizer& sizer() { return m_sizer; }
 
 		void show(bool visible = true);

@@ -67,8 +67,8 @@ Indigo::UILabel::UILabel(UIGroup* parent, const OOBase::SharedString<OOBase::Thr
 		m_colour(params.m_colour),
 		m_caption(NULL)
 {
-	if (!m_font || !m_font->valid())
-		LOG_ERROR(("Invalid font passed to UILabel constructor"));
+	if (!m_font)
+		LOG_ERROR(("No font passed to UILabel constructor"));
 	else if (!m_font_size)
 		m_font_size = m_font->line_height();
 
@@ -84,8 +84,8 @@ Indigo::UILabel::UILabel(UIGroup* parent, const char* sz, size_t len, const Crea
 		m_colour(params.m_colour),
 		m_caption(NULL)
 {
-	if (!m_font || !m_font->valid())
-		LOG_ERROR(("Invalid font passed to UILabel constructor"));
+	if (!m_font)
+		LOG_ERROR(("No font passed to UILabel constructor"));
 	else if (!m_font_size)
 		m_font_size = m_font->line_height();
 

@@ -196,12 +196,10 @@ namespace Indigo
 
 		SGGroup* parent() const { return m_parent; }
 
-		virtual bool valid() const { return m_render_node != NULL; }
-
 		bool visible() const { return (m_state & eNS_visible); }
 		virtual void show(bool visible = true);
 
-		bool enabled() const { return valid() && (m_state & eNS_enabled); }
+		bool enabled() const { return (m_state & eNS_enabled); }
 		void enable(bool enabled = true);
 
 		OOBase::uint32_t state() const { return m_state; }

@@ -96,8 +96,6 @@ namespace Indigo
 		OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> on_click(const OOBase::Delegate0<void,OOBase::ThreadLocalAllocator>& delegate);
 
 	protected:
-		virtual bool valid() const;
-
 		virtual glm::uvec2 min_size() const { return m_min_size; }
 		virtual glm::uvec2 ideal_size() const { return m_ideal_size; }
 

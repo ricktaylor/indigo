@@ -40,8 +40,6 @@ namespace Indigo
 			friend class UIGroup;
 
 		public:
-			virtual bool valid() const { return true; }
-
 			void show(bool visible = true) { m_visible = visible; }
 
 			void position(const glm::ivec2& pos) { m_position = pos; }
@@ -116,12 +114,10 @@ namespace Indigo
 
 		UIGroup* parent() const { return m_parent; }
 
-		virtual bool valid() const { return m_parent != NULL && m_render_group; }
-
-		bool visible() const { return valid() && (m_state & eWS_visible); }
+		bool visible() const { return (m_state & eWS_visible); }
 		virtual void show(bool visible = true);
 
-		bool enabled() const { return valid() && (m_state & eWS_enabled); }
+		bool enabled() const { return (m_state & eWS_enabled); }
 		void enable(bool enabled = true);
 
 		OOBase::uint32_t state() const { return m_state; }

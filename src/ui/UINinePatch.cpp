@@ -328,14 +328,9 @@ Indigo::Render::UINinePatch::~UINinePatch()
 		NinePatchFactory_t::instance().free_patch(m_patch);
 }
 
-bool Indigo::Render::UINinePatch::valid() const
-{
-	return m_patch != -1 && m_info && m_texture->valid() && UIDrawable::valid();
-}
-
 void Indigo::Render::UINinePatch::size(const glm::uvec2& sz)
 {
-	if (valid())
+	if (m_patch != -1 && m_info)
 		NinePatchFactory_t::instance().layout_patch(m_patch,sz,m_info->m_borders,m_info->m_tex_size);
 
 	UIDrawable::size(sz);
@@ -343,7 +338,7 @@ void Indigo::Render::UINinePatch::size(const glm::uvec2& sz)
 
 void Indigo::Render::UINinePatch::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	if (valid() && m_colour.a > 0)
+	if (m_patch != -1 && m_colour.a > 0)
 	{
 		if (m_counts[0])
 		{

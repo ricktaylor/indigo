@@ -50,8 +50,6 @@ namespace Indigo
 		Font();
 		~Font();
 
-		bool valid() const { return m_render_font; }
-		
 		bool load(const ResourceBundle& resource, const char* name);
 		bool load(const ResourceBundle& resource, const unsigned char* buffer, size_t len);
 

@@ -70,11 +70,6 @@ Indigo::UIButton::UIButton(UIGroup* parent, const char* sz, size_t len, const Cr
 		this->size(ideal_size());
 }
 
-bool Indigo::UIButton::valid() const
-{
-	return UIWidget::valid() && m_style;
-}
-
 glm::uvec2 Indigo::UIButton::min_style_size(const StyleState& style) const
 {
 	glm::uvec2 min_size(0);
@@ -307,7 +302,7 @@ void Indigo::UIButton::do_size(const glm::uvec2& sz)
 
 void Indigo::UIButton::on_size(glm::uvec2& sz)
 {
-	if (valid())
+	if (m_style)
 		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&UIButton::do_size),sz);
 }
 
@@ -355,7 +350,7 @@ void Indigo::UIButton::on_state_change(OOBase::uint32_t state, OOBase::uint32_t 
 		else
 			new_style = &m_normal;
 
-		if (valid() && new_style)
+		if (new_style)
 			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&UIButton::do_style_change),new_style);
 	}
 

@@ -57,8 +57,6 @@ namespace Indigo
 		friend class Render::Window;
 
 	public:
-		virtual bool valid() const { return m_render_layer; }
-		
 		virtual void show(bool visible = true);
 		bool visible() const { return m_visible; }
 

@@ -79,8 +79,6 @@ namespace Indigo
 			UINinePatch(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::vec4& colour, const OOBase::SharedPtr<NinePatch::Info>& info, bool visible = true, const glm::ivec2& position = glm::ivec2(), const glm::uvec2& size = glm::uvec2());
 			virtual ~UINinePatch();
 
-			virtual bool valid() const;
-
 			virtual void size(const glm::uvec2& size);
 
 		private:
