@@ -74,6 +74,7 @@ namespace Indigo
 		};
 
 		UILayer(const CreateParams& params = CreateParams());
+		virtual ~UILayer();
 
 		UIGridSizer& sizer() { return m_sizer; }
 
@@ -85,7 +86,6 @@ namespace Indigo
 
 	protected:
 		OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window);
-		void destroy_render_layer();
 
 		virtual bool on_close();
 		virtual void on_size(glm::uvec2& sz);
@@ -107,6 +107,7 @@ namespace Indigo
 
 		OOBase::HashTable<size_t,OOBase::WeakPtr<UIWidget>,OOBase::ThreadLocalAllocator> m_names;
 
+		void destroy_render_layer();
 		void on_layer_size(const glm::uvec2& sz);
 	};
 }

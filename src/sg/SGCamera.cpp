@@ -134,6 +134,11 @@ Indigo::SGCamera::SGCamera(const CreateParams& params) :
 {
 }
 
+Indigo::SGCamera::~SGCamera()
+{
+	render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&SGCamera::destroy_render_layer));
+}
+
 OOBase::SharedPtr<Indigo::Render::Layer> Indigo::SGCamera::create_render_layer(Render::Window* window)
 {
 	m_size = window->window()->size();
@@ -154,8 +159,6 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::SGCamera::create_render_layer(R
 void Indigo::SGCamera::destroy_render_layer()
 {
 	m_render_camera.reset();
-
-	Layer::destroy_render_layer();
 }
 
 void Indigo::SGCamera::position(const glm::vec3& pos)

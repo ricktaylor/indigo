@@ -105,6 +105,7 @@ namespace Indigo
 		};
 
 		SGCamera(const CreateParams& params = CreateParams());
+		virtual ~SGCamera();
 
 		const glm::vec3& position() const { return m_position; }
 		void position(const glm::vec3& pos);

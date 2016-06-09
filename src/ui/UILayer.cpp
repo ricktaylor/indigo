@@ -66,6 +66,11 @@ Indigo::UILayer::UILayer(const CreateParams& params) :
 		this->size(ideal_size());
 }
 
+Indigo::UILayer::~UILayer()
+{
+	render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&UILayer::destroy_render_layer));
+}
+
 void Indigo::UILayer::show(bool visible)
 {
 	UIGroup::show(visible);
@@ -155,8 +160,6 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 void Indigo::UILayer::destroy_render_layer()
 {
 	m_group.reset();
-
-	Layer::destroy_render_layer();
 }
 
 bool Indigo::UILayer::on_mousemove(const double& screen_x, const double& screen_y)

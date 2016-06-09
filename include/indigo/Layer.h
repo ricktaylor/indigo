@@ -69,7 +69,6 @@ namespace Indigo
 		OOBase::SharedPtr<Render::Layer> render_layer() const { return m_render_layer; }
 
 		virtual OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window) = 0;
-		virtual void destroy_render_layer();
 
 		virtual bool on_close() { return false; }
 		virtual void on_move(const glm::ivec2& sz) {}
@@ -80,6 +79,8 @@ namespace Indigo
 	private:
 		OOBase::SharedPtr<Render::Layer> m_render_layer;
 		bool m_visible;
+
+		void destroy_render_layer();
 	};
 }
 
