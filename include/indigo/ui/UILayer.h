@@ -90,7 +90,7 @@ namespace Indigo
 		void destroy_render_layer();
 
 		virtual bool on_close();
-		virtual void on_size(const glm::uvec2& sz);
+		virtual void on_size(glm::uvec2& sz);
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual bool on_mousemove(const double& screen_x, const double& screen_y);
 		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
@@ -108,6 +108,8 @@ namespace Indigo
 		OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> m_on_close;
 
 		OOBase::HashTable<size_t,OOBase::WeakPtr<UIWidget>,OOBase::ThreadLocalAllocator> m_names;
+
+		void on_layer_size(const glm::uvec2& sz);
 	};
 }
 

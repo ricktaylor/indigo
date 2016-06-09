@@ -51,7 +51,7 @@ namespace Indigo
 		glm::uvec2 ideal_size() const;
 		glm::uvec2 min_size() const;
 
-		OOBase::SharedPtr<Render::UIDrawable> make_drawable(bool visible = true, const glm::ivec2& position = glm::ivec2(), const glm::uvec2& size = glm::uvec2(), const glm::vec4& colour = glm::vec4(1.f)) const;
+		OOBase::SharedPtr<Render::UIDrawable> make_drawable(const glm::vec4& colour = glm::vec4(1.f), bool visible = true, const glm::ivec2& position = glm::ivec2(), const glm::uvec2& size = glm::uvec2()) const;
 
 	private:
 		bool pixel_cmp(int x, int y, bool black);
@@ -76,7 +76,7 @@ namespace Indigo
 			friend class Indigo::NinePatch;
 
 		public:
-			UINinePatch(const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<NinePatch::Info>& info, bool visible = true, const glm::ivec2& position = glm::ivec2());
+			UINinePatch(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::vec4& colour, const OOBase::SharedPtr<NinePatch::Info>& info, bool visible = true, const glm::ivec2& position = glm::ivec2(), const glm::uvec2& size = glm::uvec2());
 			virtual ~UINinePatch();
 
 			virtual bool valid() const;
@@ -130,7 +130,7 @@ namespace Indigo
 
 		glm::vec4 m_colour;
 
-		void on_size(const glm::uvec2& sz);
+		void on_size(glm::uvec2& sz);
 	};
 }
 

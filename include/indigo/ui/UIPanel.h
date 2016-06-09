@@ -62,7 +62,7 @@ namespace Indigo
 		virtual glm::uvec2 ideal_size() const;
 
 		virtual bool on_render_create(Render::UIGroup* group);
-		virtual void on_size(const glm::uvec2& sz);
+		virtual void on_size(glm::uvec2& sz);
 		virtual bool on_mousemove(const glm::ivec2& pos);
 
 	private:

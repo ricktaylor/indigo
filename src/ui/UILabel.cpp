@@ -26,20 +26,20 @@
 
 #include "../Common.h"
 
-Indigo::Render::UILabel::UILabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int size, const glm::vec4& colour, bool visible, const glm::ivec2& position) :
+Indigo::Render::UILabel::UILabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int font_size, const glm::vec4& colour, bool visible, const glm::ivec2& position, const glm::uvec2& size) :
 		Text(font,sz,len),
-		UIDrawable(visible,position),
+		UIDrawable(visible,position,size),
 		m_colour(colour),
-		m_size(static_cast<float>(size))
+		m_font_size(static_cast<float>(font_size))
 {
-	if (size == 0)
-		m_size = static_cast<float>(font->line_height());
+	if (font_size == 0)
+		m_font_size = static_cast<float>(font->line_height());
 }
 
 void Indigo::Render::UILabel::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	if (m_colour.a > 0.0f)
-		Text::draw(glState,glm::scale(mvp,glm::vec3(m_size)),m_colour);
+		Text::draw(glState,glm::scale(mvp,glm::vec3(m_font_size)),m_colour);
 }
 
 Indigo::Render::UIShadowLabel::UIShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int size, const glm::vec4& colour, const glm::vec4& shadow, const glm::ivec2& drop, bool visible, const glm::ivec2& position) :
@@ -52,10 +52,10 @@ Indigo::Render::UIShadowLabel::UIShadowLabel(const OOBase::SharedPtr<Font>& font
 void Indigo::Render::UIShadowLabel::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	if (m_drop != glm::ivec2(0) && m_shadow.a > 0.f)
-		Text::draw(glState,glm::scale(glm::translate(mvp,glm::vec3(m_drop.x,m_drop.y,0.f)),glm::vec3(m_size)),m_shadow);
+		Text::draw(glState,glm::scale(glm::translate(mvp,glm::vec3(m_drop.x,m_drop.y,0.f)),glm::vec3(m_font_size)),m_shadow);
 
 	if (m_colour.a > 0.0f)
-		Text::draw(glState,glm::scale(mvp,glm::vec3(m_size)),m_colour);
+		Text::draw(glState,glm::scale(mvp,glm::vec3(m_font_size)),m_colour);
 }
 
 Indigo::UILabel::UILabel(UIGroup* parent, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const CreateParams& params) :
@@ -145,7 +145,7 @@ glm::uvec2 Indigo::UILabel::ideal_size() const
 	return glm::uvec2(caption_width,caption_height);
 }
 
-void Indigo::UILabel::on_size(const glm::uvec2& sz)
+void Indigo::UILabel::on_size(glm::uvec2& sz)
 {
 	unsigned int caption_height = 0;
 	unsigned int caption_width = 0;

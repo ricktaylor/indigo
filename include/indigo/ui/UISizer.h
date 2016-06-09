@@ -86,7 +86,7 @@ namespace Indigo
 		{
 			OOBase::WeakPtr<UIWidget>  m_widget;
 			OOBase::SharedPtr<UISizer> m_sizer;
-			glm::uvec2                 m_size;
+			glm::uvec2                 m_spacer;
 			unsigned int               m_flags;
 			unsigned int               m_proportion;
 		};

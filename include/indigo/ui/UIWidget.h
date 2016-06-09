@@ -43,11 +43,15 @@ namespace Indigo
 			virtual bool valid() const { return true; }
 
 			void show(bool visible = true) { m_visible = visible; }
+
 			void position(const glm::ivec2& pos) { m_position = pos; }
-			virtual void size(const glm::uvec2& sz) {}
+			const glm::ivec2& position() const { return m_position; }
+
+			virtual void size(const glm::uvec2& size) { m_size = size; }
+			const glm::uvec2& size() const { return m_size; }
 
 		protected:
-			UIDrawable(bool visible = true, const glm::ivec2& position = glm::ivec2());
+			UIDrawable(bool visible, const glm::ivec2& position, const glm::uvec2& size);
 			virtual ~UIDrawable() {}
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
@@ -55,6 +59,7 @@ namespace Indigo
 		private:
 			bool       m_visible;
 			glm::ivec2 m_position;
+			glm::uvec2 m_size;
 		};
 
 		class UIGroup : public UIDrawable
@@ -62,7 +67,7 @@ namespace Indigo
 			friend class Indigo::UIGroup;
 
 		public:
-			UIGroup(bool visible = true, const glm::ivec2& position = glm::ivec2()) : UIDrawable(visible,position)
+			UIGroup(bool visible = true, const glm::ivec2& position = glm::ivec2(), const glm::uvec2& size = glm::uvec2()) : UIDrawable(visible,position,size)
 			{}
 
 			bool add_drawable(const OOBase::SharedPtr<UIDrawable>& drawable);
@@ -127,7 +132,7 @@ namespace Indigo
 		void position(const glm::ivec2& pos);
 
 		const glm::uvec2& size() const { return m_size; }
-		glm::uvec2 size(const glm::uvec2& sz);
+		const glm::uvec2& size(const glm::uvec2& sz);
 
 		virtual glm::uvec2 min_size() const { return glm::uvec2(); }
 		virtual glm::uvec2 ideal_size() const = 0;
@@ -136,7 +141,7 @@ namespace Indigo
 		UIWidget(UIGroup* parent, const CreateParams& params = CreateParams());
 
 		virtual bool on_render_create(Render::UIGroup* group) = 0;
-		virtual void on_size(const glm::uvec2& sz) { }
+		virtual void on_size(glm::uvec2& sz) { }
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual void on_mouseenter(bool enter) { }
 		virtual bool on_mousemove(const glm::ivec2& pos) { return false; }

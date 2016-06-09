@@ -256,8 +256,8 @@ void NinePatchFactory::draw(OOGL::State& glState, const OOBase::SharedPtr<OOGL::
 	}
 }
 
-Indigo::Render::UINinePatch::UINinePatch(const glm::uvec2& size, const glm::vec4& colour, const OOBase::SharedPtr<OOGL::Texture>& texture, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info, bool visible, const glm::ivec2& position) :
-		UIDrawable(visible,position),
+Indigo::Render::UINinePatch::UINinePatch(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info, bool visible, const glm::ivec2& position, const glm::uvec2& size) :
+		UIDrawable(visible,position,size),
 		m_texture(texture),
 		m_colour(colour),
 		m_patch(-1),
@@ -333,10 +333,12 @@ bool Indigo::Render::UINinePatch::valid() const
 	return m_patch != -1 && m_info && m_texture->valid() && UIDrawable::valid();
 }
 
-void Indigo::Render::UINinePatch::size(const glm::uvec2& size)
+void Indigo::Render::UINinePatch::size(const glm::uvec2& sz)
 {
 	if (valid())
-		NinePatchFactory_t::instance().layout_patch(m_patch,size,m_info->m_borders,m_info->m_tex_size);
+		NinePatchFactory_t::instance().layout_patch(m_patch,sz,m_info->m_borders,m_info->m_tex_size);
+
+	UIDrawable::size(sz);
 }
 
 void Indigo::Render::UINinePatch::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
@@ -547,7 +549,7 @@ bool Indigo::NinePatch::get_bounds()
 	return true;
 }
 
-OOBase::SharedPtr<Indigo::Render::UIDrawable> Indigo::NinePatch::make_drawable(bool visible, const glm::ivec2& position, const glm::uvec2& size, const glm::vec4& colour) const
+OOBase::SharedPtr<Indigo::Render::UIDrawable> Indigo::NinePatch::make_drawable(const glm::vec4& colour, bool visible, const glm::ivec2& position, const glm::uvec2& size) const
 {
 	if (!valid())
 		LOG_ERROR_RETURN(("NinePatch::make_drawable called when invalid!"),OOBase::SharedPtr<Indigo::Render::UIDrawable>());
@@ -568,9 +570,9 @@ OOBase::SharedPtr<Indigo::Render::UIDrawable> Indigo::NinePatch::make_drawable(b
 	}
 
 	if (is_9)
-		return OOBase::allocate_shared<Render::UINinePatch,OOBase::ThreadLocalAllocator>(size,colour,texture,m_info,visible,position);
+		return OOBase::allocate_shared<Render::UINinePatch,OOBase::ThreadLocalAllocator>(texture,colour,m_info,visible,position,size);
 	else
-		return OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,size,colour);
+		return OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,colour,visible,position,size);
 }
 
 glm::uvec2 Indigo::NinePatch::min_size() const
@@ -609,7 +611,7 @@ glm::uvec2 Indigo::UINinePatch::ideal_size() const
 	return m_9patch->ideal_size();
 }
 
-void Indigo::UINinePatch::on_size(const glm::uvec2& sz)
+void Indigo::UINinePatch::on_size(glm::uvec2& sz)
 {
 	if (m_render_9patch)
 		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_9patch,&Render::UIDrawable::size),sz);
@@ -620,7 +622,7 @@ bool Indigo::UINinePatch::on_render_create(Indigo::Render::UIGroup* group)
 	if (!m_9patch)
 		return false;
 
-	OOBase::SharedPtr<Render::UIDrawable> render_9patch = m_9patch->make_drawable(true,glm::ivec2(0),size(),m_colour);
+	OOBase::SharedPtr<Render::UIDrawable> render_9patch = m_9patch->make_drawable(m_colour,true,glm::ivec2(0),size());
 	if (!render_9patch)
 		return false;
 

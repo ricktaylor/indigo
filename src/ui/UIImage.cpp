@@ -26,18 +26,17 @@
 
 #include "../Common.h"
 
-Indigo::Render::UIImage::UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::uvec2& size, const glm::vec4& colour, bool visible, const glm::ivec2& position) :
-		UIDrawable(visible,position),
+Indigo::Render::UIImage::UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::vec4& colour, bool visible, const glm::ivec2& position, const glm::uvec2& size) :
+		UIDrawable(visible,position,size),
 		m_texture(texture),
-		m_colour(colour),
-		m_size(size.x,size.y,1.f)
+		m_colour(colour)
 {
 }
 
 void Indigo::Render::UIImage::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	glm::mat4 mvp2 = glm::scale(mvp,m_size);
-	Quad::draw(glState,m_texture,mvp2,m_colour);
+	const glm::uvec2& sz = size();
+	Quad::draw(glState,m_texture,glm::scale(mvp,glm::vec3(sz.x,sz.y,0.f)),m_colour);
 }
 
 Indigo::UIImage::UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image, const CreateParams& params) :
@@ -58,10 +57,10 @@ glm::uvec2 Indigo::UIImage::ideal_size() const
 	return m_image->size();
 }
 
-void Indigo::UIImage::on_size(const glm::uvec2& sz)
+void Indigo::UIImage::on_size(glm::uvec2& sz)
 {
 	if (m_render_image)
-		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_image,&Render::UIImage::size),sz);
+		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Render::UIDrawable*>(m_render_image),&Render::UIDrawable::size),sz);
 }
 
 bool Indigo::UIImage::on_render_create(Indigo::Render::UIGroup* group)
@@ -79,7 +78,7 @@ bool Indigo::UIImage::on_render_create(Indigo::Render::UIGroup* group)
 		texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	}
 
-	OOBase::SharedPtr<Render::UIImage> render_image = OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,size(),m_colour,true);
+	OOBase::SharedPtr<Render::UIImage> render_image = OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,m_colour,true,glm::ivec2(),size());
 	if (!render_image)
 		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 

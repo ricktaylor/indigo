@@ -51,7 +51,7 @@ bool Indigo::UIGridSizer::add_sizer(unsigned int row, unsigned int col, const OO
 bool Indigo::UIGridSizer::add_spacer(unsigned int row, unsigned int col, const glm::uvec2& size, unsigned int proportion)
 {
 	struct Item item;
-	item.m_size = size;
+	item.m_spacer = size;
 	item.m_flags = 0;
 	item.m_proportion = proportion;
 	return m_items.insert(OOBase::Pair<unsigned int,unsigned int>(row,col),item);
@@ -94,7 +94,7 @@ bool Indigo::UIGridSizer::measure(OOBase::Vector<OOBase::Pair<unsigned int,unsig
 				sz = i->second.m_sizer->ideal_fit();
 		}
 		else
-			sz = i->second.m_size;
+			sz = i->second.m_spacer;
 
 		while (widths.size() <= i->first.first)
 		{

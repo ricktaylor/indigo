@@ -102,7 +102,7 @@ namespace Indigo
 		virtual glm::uvec2 ideal_size() const { return m_ideal_size; }
 
 		virtual bool on_render_create(Render::UIGroup* group);
-		virtual void on_size(const glm::uvec2& sz);
+		virtual void on_size(glm::uvec2& sz);
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 		virtual void on_mouseenter(bool enter);
 		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);

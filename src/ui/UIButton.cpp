@@ -181,7 +181,7 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 
 	if (!rs.m_background && style.m_background)
 	{
-		OOBase::SharedPtr<Render::UIDrawable> bk = style.m_background->make_drawable(visible,glm::ivec2(0),sz,style.m_background_colour);
+		OOBase::SharedPtr<Render::UIDrawable> bk = style.m_background->make_drawable(style.m_background_colour,visible,glm::ivec2(0),sz);
 		if (!bk)
 			return false;
 
@@ -305,7 +305,7 @@ void Indigo::UIButton::do_size(const glm::uvec2& sz)
 	do_style_size(sz,m_style->m_disabled,m_disabled);
 }
 
-void Indigo::UIButton::on_size(const glm::uvec2& sz)
+void Indigo::UIButton::on_size(glm::uvec2& sz)
 {
 	if (valid())
 		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&UIButton::do_size),sz);

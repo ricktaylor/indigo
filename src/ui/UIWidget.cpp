@@ -26,9 +26,10 @@
 
 #include "../Common.h"
 
-Indigo::Render::UIDrawable::UIDrawable(bool visible, const glm::ivec2& position) :
+Indigo::Render::UIDrawable::UIDrawable(bool visible, const glm::ivec2& position, const glm::uvec2& size) :
 		m_visible(visible),
-		m_position(position)
+		m_position(position),
+		m_size(size)
 {
 }
 
@@ -56,7 +57,7 @@ bool Indigo::Render::UIGroup::remove_drawable(const OOBase::SharedPtr<UIDrawable
 void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, bool* ret)
 {
 	*ret = false;
-	OOBase::SharedPtr<Render::UIGroup> group = OOBase::allocate_shared<Render::UIGroup,OOBase::ThreadLocalAllocator>((widget->state() & Indigo::UIWidget::eWS_visible) != 0,widget->position());
+	OOBase::SharedPtr<Render::UIGroup> group = OOBase::allocate_shared<Render::UIGroup,OOBase::ThreadLocalAllocator>((widget->state() & Indigo::UIWidget::eWS_visible) != 0,widget->position(),widget->size());
 	if (!group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
 	else if (!m_children.push_back(group))
@@ -121,16 +122,25 @@ void Indigo::UIWidget::position(const glm::ivec2& pos)
 	}
 }
 
-glm::uvec2 Indigo::UIWidget::size(const glm::uvec2& sz)
+const glm::uvec2& Indigo::UIWidget::size(const glm::uvec2& sz)
 {
 	if (m_size != sz)
 	{
 		glm::uvec2 prev_size = m_size;
+		glm::uvec2 new_size = glm::max(sz,this->min_size());
 
-		m_size = glm::max(sz,this->min_size());
+		if (prev_size != new_size)
+		{
+			on_size(new_size);
 
-		if (prev_size != m_size)
-			on_size(m_size);
+			if (new_size != prev_size)
+			{
+				m_size = new_size;
+
+				if (m_render_group)
+					render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Render::UIDrawable*>(m_render_group),&Render::UIDrawable::size),m_size);
+			}
+		}
 	}
 
 	return m_size;

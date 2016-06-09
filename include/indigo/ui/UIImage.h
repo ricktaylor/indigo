@@ -34,16 +34,13 @@ namespace Indigo
 		class UIImage : public UIDrawable
 		{
 		public:
-			UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::uvec2& size, const glm::vec4& colour = glm::vec4(1.f), bool visible = true, const glm::ivec2& position = glm::ivec2());
+			UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::vec4& colour = glm::vec4(1.f), bool visible = true, const glm::ivec2& position = glm::ivec2(), const glm::uvec2& size = glm::uvec2());
 
 			virtual bool valid() const { return UIDrawable::valid() && m_texture->valid(); }
-
-			virtual void size(const glm::uvec2& size) { m_size = glm::vec3(size.x,size.y,1.f); }
 
 		protected:
 			OOBase::SharedPtr<OOGL::Texture> m_texture;
 			glm::vec4 m_colour;
-			glm::vec3 m_size;
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 		};
@@ -80,7 +77,7 @@ namespace Indigo
 
 		glm::vec4 m_colour;
 
-		void on_size(const glm::uvec2& sz);
+		void on_size(glm::uvec2& sz);
 	};
 }
 

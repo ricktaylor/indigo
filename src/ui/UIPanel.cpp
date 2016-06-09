@@ -40,7 +40,7 @@ bool Indigo::UIPanel::on_render_create(Indigo::Render::UIGroup* group)
 {
 	if (m_background)
 	{
-		OOBase::SharedPtr<Render::UIDrawable> bk = m_background->make_drawable(true,glm::ivec2(0),size(),m_colour);
+		OOBase::SharedPtr<Render::UIDrawable> bk = m_background->make_drawable(m_colour,true,glm::ivec2(),size());
 		if (!bk)
 			return false;
 
@@ -50,7 +50,7 @@ bool Indigo::UIPanel::on_render_create(Indigo::Render::UIGroup* group)
 		m_render_background = bk.get();
 	}
 
-	OOBase::SharedPtr<Indigo::Render::UIGroup> subgroup = OOBase::allocate_shared<Indigo::Render::UIGroup,OOBase::ThreadLocalAllocator>() ;
+	OOBase::SharedPtr<Indigo::Render::UIGroup> subgroup = OOBase::allocate_shared<Indigo::Render::UIGroup,OOBase::ThreadLocalAllocator>(true,glm::ivec2(),size()) ;
 	if (!subgroup)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
 
@@ -71,7 +71,7 @@ glm::uvec2 Indigo::UIPanel::ideal_size() const
 	return m_sizer.ideal_fit();
 }
 
-void Indigo::UIPanel::on_size(const glm::uvec2& sz)
+void Indigo::UIPanel::on_size(glm::uvec2& sz)
 {
 	m_sizer.fit(sz);
 
