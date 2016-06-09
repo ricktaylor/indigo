@@ -19,37 +19,40 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "../../include/indigo/ui/UIDialog.h"
+
 #include "../../include/indigo/Render.h"
 
-#include "../../include/indigo/ui/UIDialog.h"
 #include "../../include/indigo/ui/UILayer.h"
 
 #include "../Common.h"
 
-Indigo::UIDialog::UIDialog(const OOBase::SharedPtr<UILayer>& layer) :
-		m_layer(layer),
+Indigo::UIDialog::UIDialog() :
 		m_live(false)
 {
-	if (!m_layer)
-		LOG_WARNING(("No layer assigned to quit dialog"));
-
-
 }
 
-void Indigo::UIDialog::internal_do_modal()
+void Indigo::UIDialog::internal_do_modal(Window& wnd, const OOBase::SharedPtr<UILayer>& layer)
 {
-	if (m_layer)
+	if (!layer)
+		LOG_WARNING(("No layer assigned to dialog!"));
+	else
 	{
-		OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> prev_close = m_layer->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&UIDialog::on_window_close));
+		OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> prev_close = layer->on_close(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&UIDialog::on_window_close));
 
-		m_layer->show();
+		if (wnd.add_layer(layer))
+		{
+			layer->show(true);
+			wnd.show();
 
-		for (m_live = true;m_live;)
-			thread_pipe()->get();
+			for (m_live = true;m_live;)
+				thread_pipe()->get();
 
-		m_layer->on_close(prev_close);
+			layer->show(false);
+			wnd.remove_layer(layer);
+		}
 
-		m_layer->show(false);
+		layer->on_close(prev_close);
 	}
 }
 

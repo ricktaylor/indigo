@@ -37,13 +37,16 @@ Indigo::Render::UILayer::UILayer(Indigo::Render::Window* window, Indigo::UILayer
 
 void Indigo::Render::UILayer::on_draw(OOGL::State& glState) const
 {
-	glState.enable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	if (visible())
+	{
+		glState.enable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	glDepthMask(GL_FALSE);
-	glState.disable(GL_DEPTH_TEST);
-		
-	Indigo::Render::UIGroup::on_draw(glState,m_mvp);
+		glDepthMask(GL_FALSE);
+		glState.disable(GL_DEPTH_TEST);
+
+		Indigo::Render::UIGroup::on_draw(glState,m_mvp);
+	}
 }
 
 void Indigo::Render::UILayer::on_size(const glm::uvec2& sz)
@@ -138,7 +141,7 @@ glm::uvec2 Indigo::UILayer::ideal_size() const
 
 OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(Indigo::Render::Window* window)
 {
-	m_size = window->window()->size();
+	size(window->window()->size());
 
 	OOBase::SharedPtr<Indigo::Render::UILayer> group = OOBase::allocate_shared<Indigo::Render::UILayer,OOBase::ThreadLocalAllocator>(window,this);
 	if (!group)
@@ -158,15 +161,22 @@ void Indigo::UILayer::destroy_render_layer()
 
 bool Indigo::UILayer::on_mousemove(const double& screen_x, const double& screen_y)
 {
-	if (!m_size.x || !m_size.y)
+	if (!visible())
 		return false;
 
-	bool ret = UIGroup::on_mousemove(glm::clamp(glm::ivec2(floor(screen_x),floor(screen_y)),glm::ivec2(0),glm::ivec2(m_size.x-1,m_size.y-1)));
+	const glm::uvec2& sz = size();
+	if (!sz.x || !sz.y)
+		return false;
+
+	bool ret = UIGroup::on_mousemove(glm::clamp(glm::ivec2(floor(screen_x),floor(screen_y)),glm::ivec2(0),glm::ivec2(sz.x-1,sz.y-1)));
 	return m_modal || ret;
 }
 
 bool Indigo::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 {
+	if (!visible())
+		return false;
+
 	bool ret = UIGroup::on_mousebutton(click);
 	return m_modal || ret;
 }

@@ -23,15 +23,16 @@
 #define INDIGO_UIDIALOG_H_INCLUDED
 
 #include "UILayer.h"
+#include "../Window.h"
 
 namespace Indigo
 {
 	class UIDialog
 	{
 	public:
-		UIDialog(const OOBase::SharedPtr<UILayer>& layer);
+		UIDialog();
 
-		void internal_do_modal();
+		void internal_do_modal(Window& wnd, const OOBase::SharedPtr<UILayer>& layer);
 
 	protected:
 		void end_dialog();
@@ -39,8 +40,7 @@ namespace Indigo
 		virtual void on_window_close() { m_live = false; }
 
 	private:
-		OOBase::SharedPtr<UILayer> m_layer;
-		bool                       m_live;
+		bool m_live;
 	};
 }
 

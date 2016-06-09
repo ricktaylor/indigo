@@ -35,7 +35,7 @@ namespace Indigo
 	class UILoader : public Parser
 	{
 	public:
-		UILoader(OOBase::SharedPtr<Window> wnd) : m_wnd(wnd)
+		UILoader()
 		{}
 
 		virtual ~UILoader();
@@ -44,11 +44,7 @@ namespace Indigo
 
 		OOBase::SharedPtr<UILayer> find_layer(const char* name, size_t len = -1) const;
 
-		OOBase::SharedPtr<Window> window() const { return m_wnd; }
-
 	private:
-		OOBase::SharedPtr<Window> m_wnd;
-		
 		typedef OOBase::HashTable<size_t,OOBase::SharedPtr<UILayer>,OOBase::ThreadLocalAllocator> layer_hash_t;
 		layer_hash_t m_hashLayers;
 

@@ -285,7 +285,20 @@ bool Indigo::Window::remove_layer(const char* name, size_t len)
 	if (!name || !len)
 		return false;
 
-	return m_named_layers.remove(OOBase::Hash<const char*>::hash(name,len)) != 0;
+	bool ret = false;
+	OOBase::HashTable<size_t,OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i = m_named_layers.find(OOBase::Hash<const char*>::hash(name,len));
+	if (i)
+	{
+		ret = m_layers.remove(i->second) != 0;
+		m_named_layers.erase(i);
+	}
+
+	return ret;
+}
+
+bool Indigo::Window::remove_layer(const OOBase::SharedPtr<Layer>& layer)
+{
+	return m_layers.remove(layer) != 0;
 }
 
 void Indigo::Window::on_close()

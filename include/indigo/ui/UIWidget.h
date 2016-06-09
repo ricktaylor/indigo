@@ -41,6 +41,7 @@ namespace Indigo
 
 		public:
 			void show(bool visible = true) { m_visible = visible; }
+			bool visible() const { return m_visible; }
 
 			void position(const glm::ivec2& pos) { m_position = pos; }
 			const glm::ivec2& position() const { return m_position; }
@@ -84,7 +85,6 @@ namespace Indigo
 	class UIWidget : public OOBase::NonCopyable
 	{
 		friend class UIGroup;
-		friend class UILayer;
 		friend class Render::UIGroup;
 
 	public:
