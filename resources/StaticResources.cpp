@@ -71,7 +71,7 @@ namespace
 		{ "2d_textured_colour.vert", IDR_2D_TEX_COLOUR_VS, RT_RCDATA, NULL, NULL, 0 },
 		{ "3d_colour.vert", IDR_3D_COLOUR_VS, RT_RCDATA, NULL, NULL, 0 },
 		{ "colour_blend.frag", IDR_COLOUR_BLEND_FS, RT_RCDATA, NULL, NULL, 0 },
-		{ "alpha_blend.frag", IDR_ALPHA_BLEND_FS, RT_RCDATA, NULL, NULL, 0 },
+		{ "font_red_blend.frag", IDR_FONT_RED_BLEND_FS, RT_RCDATA, NULL, NULL, 0 },
 		{ "colour.frag", IDR_COLOUR_FS, RT_RCDATA, NULL, NULL, 0 }
 	};
 
@@ -101,7 +101,7 @@ namespace
 	// Include the bin2c files here
 	#include "./resources/2d_textured_colour.vert.h"
 	#include "./resources/3d_colour.vert.h"
-	#include "./resources/alpha_blend.frag.h"
+	#include "./resources/font_red_blend.frag.h"
 	#include "./resources/colour_blend.frag.h"
 	#include "./resources/colour.frag.h"
 
@@ -115,7 +115,7 @@ namespace
 	{
 		{ "2d_textured_colour.vert", s_2d_textured_colour_vert, sizeof(s_2d_textured_colour_vert) },
 		{ "3d_colour.vert", s_3d_colour_vert, sizeof(s_3d_colour_vert) },
-		{ "alpha_blend.frag", s_alpha_blend_frag, sizeof(s_alpha_blend_frag) },
+		{ "font_red_blend.frag", s_font_red_blend_frag, sizeof(s_font_red_blend_frag) },
 		{ "colour_blend.frag", s_colour_blend_frag, sizeof(s_colour_blend_frag) },
 		{ "colour.frag", s_colour_frag, sizeof(s_colour_frag) }
 	};

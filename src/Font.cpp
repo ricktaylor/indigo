@@ -256,7 +256,7 @@ bool Indigo::Render::Font::font_program(OOBase::uint32_t packing)
 		{
 			OOBase::SharedPtr<OOGL::Shader> shaders[2];
 			shaders[0] = Indigo::ShaderPool::add_shader("2d_textured_colour.vert",GL_VERTEX_SHADER,Indigo::static_resources());
-			shaders[1] = Indigo::ShaderPool::add_shader("alpha_blend.frag",GL_FRAGMENT_SHADER,Indigo::static_resources());
+			shaders[1] = Indigo::ShaderPool::add_shader("font_red_blend.frag",GL_FRAGMENT_SHADER,Indigo::static_resources());
 			if (shaders[0] && shaders[1])
 				m_ptrProgram = Indigo::ShaderPool::add_program("Font_8bit",shaders,2);
 		}

@@ -45,7 +45,7 @@ resources/%.h: resources/% bin2c
 BUILT_SOURCES = \
 	resources/2d_textured_colour.vert.h \
 	resources/3d_colour.vert.h \
-	resources/alpha_blend.frag.h \
+	resources/font_red_blend.frag.h \
 	resources/colour_blend.frag.h \
 	resources/colour.frag.h
 	
