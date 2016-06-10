@@ -70,15 +70,14 @@ namespace Indigo
 		class SGDrawable : public OOBase::NonCopyable
 		{
 		public:
-			virtual ~SGDrawable() {}
+			virtual ~SGDrawable();
 
 			const AABB& bounds() const { return m_aabb; }
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
 
 		protected:
-			SGDrawable(const AABB& aabb) : m_aabb(aabb)
-			{}
+			SGDrawable(const AABB& aabb);
 
 			AABB m_aabb;
 		};
@@ -89,7 +88,7 @@ namespace Indigo
 			SGNode(SGGroup* parent, const OOBase::SharedPtr<SGDrawable>& drawable, const glm::mat4& local_transform = glm::mat4());
 			SGNode(SGGroup* parent, bool visible, const glm::mat4& local_transform = glm::mat4());
 
-			virtual ~SGNode() {}
+			virtual ~SGNode();
 
 			SGGroup* parent() const { return m_parent; }
 

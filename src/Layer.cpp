@@ -24,36 +24,22 @@
 
 #include "Common.h"
 
-void Indigo::Render::Layer::show(bool visible)
+Indigo::Render::Layer::Layer(Window* window) : m_window(window)
 {
-	if (m_visible != visible)
-	{
-		m_visible = visible;
+	ASSERT_RENDER_THREAD();
+}
 
-		if (visible)
-		{
-			// TODO: Fake a mouse move to init any cursor stuff here
-		}
-	}
+Indigo::Render::Layer::~Layer()
+{
+	ASSERT_RENDER_THREAD();
 }
 
 Indigo::Layer::~Layer()
 {
-	render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Layer::destroy_render_layer));
+	render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Layer::reset_render_layer));
 }
 
-void Indigo::Layer::destroy_render_layer()
+void Indigo::Layer::reset_render_layer()
 {
 	m_render_layer.reset();
-}
-
-void Indigo::Layer::show(bool visible)
-{
-	if (visible != m_visible)
-	{
-		m_visible = visible;
-
-		if (m_render_layer)
-			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_layer.get(),&Render::Layer::show),visible);
-	}
 }

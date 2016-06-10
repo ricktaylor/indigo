@@ -28,6 +28,16 @@ namespace Indigo
 {
 	const OOBase::SharedPtr<Pipe>& render_pipe();
 	const OOBase::SharedPtr<Pipe>& logic_pipe();
+
+#if !defined(NDEBUG)
+	void assert_render_thread();
+#endif
 }
+
+#if !defined(NDEBUG)
+#define ASSERT_RENDER_THREAD() (Indigo::assert_render_thread())
+#else
+#define ASSERT_RENDER_THREAD()
+#endif
 
 #endif // INDIGO_RENDER_H_INCLUDED

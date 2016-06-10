@@ -111,7 +111,7 @@ void ClipVisitor::draw(OOGL::State& glState, const glm::mat4& mvp) const
 
 void Indigo::Render::SGCamera::on_draw(OOGL::State& glState) const
 {
-	if (m_scene)
+	if (m_scene && m_scene->visible())
 	{
 		m_scene->on_update(glm::mat4());
 

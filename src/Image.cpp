@@ -20,6 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "../include/indigo/Image.h"
+#include "../include/indigo/Render.h"
 
 #include "Common.h"
 
@@ -170,6 +171,8 @@ void Indigo::Image::unload()
 
 OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalFormat, bool& cached, GLsizei levels) const
 {
+	ASSERT_RENDER_THREAD();
+
 	OOBase::SharedPtr<OOGL::Texture> tex;
 	if (!m_pixels)
 		LOG_ERROR_RETURN(("Invalid image for make_texture"),tex);

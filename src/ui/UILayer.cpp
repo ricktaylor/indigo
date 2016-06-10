@@ -66,16 +66,6 @@ Indigo::UILayer::UILayer(const CreateParams& params) :
 		this->size(ideal_size());
 }
 
-Indigo::UILayer::~UILayer()
-{
-	render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&UILayer::destroy_render_layer));
-}
-
-void Indigo::UILayer::show(bool visible)
-{
-	UIGroup::show(visible);
-}
-
 bool Indigo::UILayer::add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len)
 {
 	if (!m_names.insert(OOBase::Hash<const char*>::hash(name,len),widget))
@@ -94,16 +84,17 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILayer::find_widget(const char* nam
 
 void Indigo::UILayer::on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask)
 {
-	UIGroup::on_state_change(state,change_mask);
-
 	if (change_mask & UIWidget::eWS_visible)
 	{
 		bool visible = (state & eWS_visible) == eWS_visible;
 		if (visible)
 			m_sizer.fit(size());
 
-		Layer::show(visible);
+		if (m_render_parent)
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Render::UIDrawable*>(m_render_parent),&Render::UIDrawable::show),visible);
 	}
+
+	UIGroup::on_state_change(state,change_mask);
 }
 
 OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> Indigo::UILayer::on_close(const OOBase::Delegate0<void,OOBase::ThreadLocalAllocator>& delegate)
@@ -154,16 +145,16 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 	else if (!on_render_create(group.get()))
 		group.reset();
 
-	return OOBase::static_pointer_cast<Indigo::Render::Layer>(group);
-}
+	m_render_parent = group.get();
 
-void Indigo::UILayer::destroy_render_layer()
-{
-	m_group.reset();
+	return OOBase::static_pointer_cast<Indigo::Render::Layer>(group);
 }
 
 bool Indigo::UILayer::on_mousemove(const double& screen_x, const double& screen_y)
 {
+	if (!visible())
+		return false;
+
 	const glm::uvec2& sz = size();
 	if (!sz.x || !sz.y)
 		return false;
@@ -174,6 +165,9 @@ bool Indigo::UILayer::on_mousemove(const double& screen_x, const double& screen_
 
 bool Indigo::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 {
+	if (!visible())
+		return false;
+
 	bool ret = UIGroup::on_mousebutton(click);
 	return m_modal || ret;
 }

@@ -30,6 +30,15 @@
 Indigo::Render::Window::Window(Indigo::Window* owner) :
 		m_owner(owner)
 {
+	ASSERT_RENDER_THREAD();
+}
+
+Indigo::Render::Window::~Window()
+{
+	ASSERT_RENDER_THREAD();
+
+	m_layers.clear();
+	m_wnd.reset();
 }
 
 bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& params)
@@ -76,33 +85,14 @@ void Indigo::Render::Window::on_move(const OOGL::Window& win, const glm::ivec2& 
 
 void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& sz)
 {
-	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;)
-	{
-		OOBase::SharedPtr<Layer> layer = i->lock();
-		if (layer)
-		{
-			layer->on_size(sz);
-			++i;
-		}
-		else
-			i = m_layers.erase(i);
-	}
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
+		(*i)->on_size(sz);
 }
 
 void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
-	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;)
-	{ 
-		OOBase::SharedPtr<Layer> layer = i->lock();
-		if (layer)
-		{
-			if (layer->m_visible)
-				layer->on_draw(glState);
-			++i;
-		}
-		else
-			i = m_layers.erase(i);
-	}
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
+		(*i)->on_draw(glState);
 }
 
 void Indigo::Render::Window::on_mousemove(const OOGL::Window& win, double screen_x, double screen_y)
@@ -119,23 +109,29 @@ void Indigo::Render::Window::on_mousebutton(const OOGL::Window& win, const OOGL:
 
 void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, bool* ret)
 {
-	*ret = true;
-	if (!layer->m_render_layer)
+	*ret = false;
+	OOBase::SharedPtr<Render::Layer> render_layer = layer->m_render_layer;
+	if (!render_layer)
 	{
-		*ret = false;
-
-		layer->m_render_layer = layer->create_render_layer(this);
-		if (layer->m_render_layer)
-		{
-			if (!m_layers.push_back(layer->m_render_layer))
-			{
-				LOG_ERROR(("Failed to insert layer: %s",OOBase::system_error_text()));
-				layer->m_render_layer.reset();
-			}
-			else
-				*ret = true;
-		}
+		render_layer = layer->create_render_layer(this);
+		layer->m_render_layer = render_layer;
 	}
+
+	if (render_layer)
+	{
+		if (!m_layers.push_back(render_layer))
+		{
+			LOG_ERROR(("Failed to insert layer: %s",OOBase::system_error_text()));
+			layer->m_render_layer.reset();
+		}
+		else
+			*ret = true;
+	}
+}
+
+void Indigo::Render::Window::remove_render_layer(Indigo::Layer* layer)
+{
+	m_layers.remove(layer->m_render_layer);
 }
 
 Indigo::Window::Window()
@@ -229,6 +225,8 @@ void Indigo::Window::run()
 
 void Indigo::Window::destroy()
 {
+	show(false);
+
 	m_layers.clear();
 	m_named_layers.clear();
 
@@ -258,11 +256,10 @@ bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, const char
 	if (!m_render_wnd)
 		LOG_ERROR_RETURN(("Failed to add layer: incomplete window"),false);
 
+	size_t hash;
 	if (name && len)
 	{
-		size_t hash = OOBase::Hash<const char*>::hash(name,len);
-
-		m_named_layers.remove(hash);
+		hash = OOBase::Hash<const char*>::hash(name,len);
 
 		if (!m_named_layers.insert(hash,layer))
 			LOG_ERROR_RETURN(("Failed to insert layer name: %s",OOBase::system_error_text()),false);
@@ -271,11 +268,14 @@ bool Indigo::Window::add_layer(const OOBase::SharedPtr<Layer>& layer, const char
 	if (!m_layers.push_back(layer))
 		LOG_ERROR_RETURN(("Failed to insert layer: %s",OOBase::system_error_text()),false);
 
-	OOBase::Guard<Pipe> lock(*render_pipe());
-
 	bool ret = false;
 	if (!render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_wnd.get(),&Render::Window::add_render_layer),layer.get(),&ret) || !ret)
-		remove_layer(name,len);
+	{
+		if (name && len)
+			m_named_layers.remove(hash);
+
+		m_layers.pop_back();
+	}
 
 	return ret;
 }
@@ -285,87 +285,55 @@ bool Indigo::Window::remove_layer(const char* name, size_t len)
 	if (!name || !len)
 		return false;
 
-	bool ret = false;
-	OOBase::HashTable<size_t,OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i = m_named_layers.find(OOBase::Hash<const char*>::hash(name,len));
-	if (i)
-	{
-		ret = m_layers.remove(i->second) != 0;
-		m_named_layers.erase(i);
-	}
+	OOBase::HashTable<size_t,OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i = m_named_layers.find(OOBase::Hash<const char*>::hash(name,len));
+	if (!i)
+		return false;
 
-	return ret;
+	OOBase::SharedPtr<Layer> l = i->second.lock();
+	m_named_layers.erase(i);
+
+	if (!l)
+		return false;
+
+	return remove_layer(l);
 }
 
 bool Indigo::Window::remove_layer(const OOBase::SharedPtr<Layer>& layer)
 {
-	return m_layers.remove(layer) != 0;
+	OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i = m_layers.find(layer);
+	if (!i)
+		return false;
+
+	if (m_render_wnd)
+		render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_wnd.get(),&Render::Window::remove_render_layer),i->get());
+
+	m_layers.erase(i);
+	return true;
 }
 
 void Indigo::Window::on_close()
 {
 	bool handled = false;
-	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;)
-	{
-		OOBase::SharedPtr<Layer> layer = i->lock();
-		if (!layer)
-			i = m_layers.erase(i);
-		else
-		{
-			if (layer->visible())
-				handled = layer->on_close();
-
-			--i;
-		}
-	}
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
+		handled = (*i)->on_close();
 }
 
 void Indigo::Window::on_move(const glm::ivec2& pos)
 {
-	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;)
-	{
-		OOBase::SharedPtr<Layer> layer = i->lock();
-		if (!layer)
-			i = m_layers.erase(i);
-		else
-		{
-			layer->on_move(pos);
-			++i;
-		}
-	}
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
+		(*i)->on_move(pos);
 }
 
 void Indigo::Window::on_mousemove(double screen_x, double screen_y)
 {
 	bool handled = false;
-	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;)
-	{
-		OOBase::SharedPtr<Layer> layer = i->lock();
-		if (!layer)
-			i = m_layers.erase(i);
-		else
-		{
-			if (layer->visible())
-				handled = layer->on_mousemove(screen_x,screen_y);
-
-			--i;
-		}
-	}
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
+		handled = (*i)->on_mousemove(screen_x,screen_y);
 }
 
 void Indigo::Window::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 {
 	bool handled = false;
-	for (OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;)
-	{
-		OOBase::SharedPtr<Layer> layer = i->lock();
-		if (!layer)
-			i = m_layers.erase(i);
-		else
-		{
-			if (layer->visible())
-				handled = layer->on_mousebutton(click);
-
-			--i;
-		}
-	}
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
+		handled = (*i)->on_mousebutton(click);
 }

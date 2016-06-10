@@ -31,6 +31,12 @@ Indigo::Render::UIDrawable::UIDrawable(bool visible, const glm::ivec2& position,
 		m_position(position),
 		m_size(size)
 {
+	ASSERT_RENDER_THREAD();
+}
+
+Indigo::Render::UIDrawable::~UIDrawable()
+{
+	ASSERT_RENDER_THREAD();
 }
 
 void Indigo::Render::UIGroup::on_draw(OOGL::State& glState, const glm::mat4& mvp) const

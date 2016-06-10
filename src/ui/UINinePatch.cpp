@@ -36,7 +36,6 @@ namespace
 	{
 	public:
 		NinePatchFactory();
-		~NinePatchFactory();
 
 		GLsizei alloc_patch(const glm::uvec2& size, const glm::uvec4& borders, const glm::uvec2& tex_size);
 		void free_patch(GLsizei p);
@@ -73,12 +72,6 @@ namespace
 
 NinePatchFactory::NinePatchFactory() : m_allocated(0)
 {
-
-}
-
-NinePatchFactory::~NinePatchFactory()
-{
-
 }
 
 bool NinePatchFactory::create_program()
@@ -546,6 +539,8 @@ bool Indigo::NinePatch::get_bounds()
 
 OOBase::SharedPtr<Indigo::Render::UIDrawable> Indigo::NinePatch::make_drawable(const glm::vec4& colour, bool visible, const glm::ivec2& position, const glm::uvec2& size) const
 {
+	ASSERT_RENDER_THREAD();
+
 	if (!valid())
 		LOG_ERROR_RETURN(("NinePatch::make_drawable called when invalid!"),OOBase::SharedPtr<Indigo::Render::UIDrawable>());
 

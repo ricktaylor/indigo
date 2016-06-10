@@ -63,6 +63,13 @@ const OOBase::SharedPtr<Indigo::Pipe>& Indigo::logic_pipe()
 	return pipe;
 }
 
+#if !defined(NDEBUG)
+void Indigo::assert_render_thread()
+{
+	assert(render_pipe()->is_local());
+}
+#endif
+
 static void on_glfw_error(int code, const char* message)
 {
 	OOBase::Logger::log(OOBase::Logger::Error,"GLFW error %d: %s",code,message);
@@ -71,8 +78,11 @@ static void on_glfw_error(int code, const char* message)
 bool Indigo::run(const char* name, void (*fn)(void*), void* param)
 {
 	// Create render comms pipe
-	Indigo::Pipe pipe("render");
-	render_init(&pipe);
+	RENDER_PIPE::instance() =  OOBase::allocate_shared<Indigo::Pipe,OOBase::ThreadLocalAllocator>("render");
+	if (!RENDER_PIPE::instance())
+		LOG_ERROR_RETURN(("Failed to allocate render pipe: %s",OOBase::system_error_text()),false);
+
+	render_init(RENDER_PIPE::instance().get());
 
 	// Not sure if we need to set this first...
 	glfwSetErrorCallback(&on_glfw_error);

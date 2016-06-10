@@ -25,6 +25,16 @@
 
 #include "../Common.h"
 
+Indigo::Render::SGDrawable::SGDrawable(const AABB& aabb) : m_aabb(aabb)
+{
+	ASSERT_RENDER_THREAD();
+}
+
+Indigo::Render::SGDrawable::~SGDrawable()
+{
+	ASSERT_RENDER_THREAD();
+}
+
 Indigo::Render::SGNode::SGNode(SGGroup* parent, const OOBase::SharedPtr<SGDrawable>& drawable, const glm::mat4& local_transform) :
 		m_state(eRSG_dirty | (drawable ? eRSG_visible : 0)),
 		m_parent(parent),
@@ -32,6 +42,7 @@ Indigo::Render::SGNode::SGNode(SGGroup* parent, const OOBase::SharedPtr<SGDrawab
 		m_world_transform(local_transform),
 		m_drawable(drawable)
 {
+	ASSERT_RENDER_THREAD();
 }
 
 Indigo::Render::SGNode::SGNode(SGGroup* parent, bool visible, const glm::mat4& local_transform) :
@@ -40,6 +51,12 @@ Indigo::Render::SGNode::SGNode(SGGroup* parent, bool visible, const glm::mat4& l
 		m_local_transform(local_transform),
 		m_world_transform(local_transform)
 {
+	ASSERT_RENDER_THREAD();
+}
+
+Indigo::Render::SGNode::~SGNode()
+{
+	ASSERT_RENDER_THREAD();
 }
 
 void Indigo::Render::SGNode::show(bool visible)

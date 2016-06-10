@@ -74,8 +74,8 @@ namespace Indigo
 
 	private:
 		OOBase::SharedPtr<Indigo::Render::Window> m_render_wnd;
-		OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
-		OOBase::HashTable<size_t,OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator> m_named_layers;
+		OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
+		OOBase::HashTable<size_t,OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator> m_named_layers;
 
 		void run();
 		void on_create(const CreateParams& params, bool* ret);
@@ -98,13 +98,14 @@ namespace Indigo
 
 		private:
 			Window(Indigo::Window* owner);
+			~Window();
 
 			OOBase::SharedPtr<OOGL::Window> m_wnd;
 			Indigo::Window* const m_owner;
 
 			bool create_window(const Indigo::Window::CreateParams& params);
 
-			OOBase::Vector<OOBase::WeakPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
+			OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
 
 			void on_close(const OOGL::Window& win);
 			void on_draw(const OOGL::Window& win, OOGL::State& glState);
@@ -114,6 +115,7 @@ namespace Indigo
 			void on_mousebutton(const OOGL::Window& win, const OOGL::Window::mouse_click_t& click);
 
 			void add_render_layer(Indigo::Layer* layer, bool* ret);
+			void remove_render_layer(Indigo::Layer* layer);
 		};
 	}
 }

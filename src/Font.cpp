@@ -213,10 +213,12 @@ namespace
 
 Indigo::Render::Font::Font(const OOBase::SharedPtr<Indigo::Font::Info>& info) : m_allocated(0), m_info(info)
 {
+	ASSERT_RENDER_THREAD();
 }
 
 Indigo::Render::Font::~Font()
 {
+	ASSERT_RENDER_THREAD();
 }
 
 bool Indigo::Render::Font::load(const OOBase::SharedPtr<Indigo::Image>* pages, size_t page_count)
@@ -509,12 +511,7 @@ Indigo::Font::Font()
 Indigo::Font::~Font()
 {
 	if (m_render_font)
-	{
-		if (m_render_font.unique())
-			render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Font::do_unload));
-		else
-			m_render_font.reset();
-	}
+		render_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Font::do_unload));
 
 	m_info.reset();
 }
@@ -685,6 +682,8 @@ void Indigo::Font::do_unload()
 
 const OOBase::SharedPtr<Indigo::Render::Font>& Indigo::Font::render_font() const
 {
+	ASSERT_RENDER_THREAD();
+
 	return m_render_font;
 }
 

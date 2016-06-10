@@ -51,7 +51,7 @@ namespace Indigo
 
 		protected:
 			UIDrawable(bool visible, const glm::ivec2& position, const glm::uvec2& size);
-			virtual ~UIDrawable() {}
+			virtual ~UIDrawable();
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
 

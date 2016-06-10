@@ -37,17 +37,15 @@ namespace Indigo
 			friend class Window;
 
 		public:
-			void show(bool visible);
+			virtual ~Layer();
 
 		protected:
-			Layer(Window* window) : m_window(window), m_visible(false)
-			{}
+			Layer(Window* window);
 
 			virtual void on_draw(OOGL::State& glState) const = 0;
 			virtual void on_size(const glm::uvec2& sz) {};
 
 			Window* const m_window;
-			bool m_visible;
 		};
 	}
 
@@ -57,16 +55,13 @@ namespace Indigo
 		friend class Render::Window;
 
 	public:
-		virtual void show(bool visible = true);
-		bool visible() const { return m_visible; }
-
-	protected:
-		Layer() : m_visible(false)
-		{}
-
 		virtual ~Layer();
 
-		OOBase::SharedPtr<Render::Layer> render_layer() const { return m_render_layer; }
+	protected:
+		Layer()
+		{}
+
+		const OOBase::SharedPtr<Render::Layer>& render_layer() const { return m_render_layer; }
 
 		virtual OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window) = 0;
 
@@ -78,9 +73,8 @@ namespace Indigo
 
 	private:
 		OOBase::SharedPtr<Render::Layer> m_render_layer;
-		bool m_visible;
 
-		void destroy_render_layer();
+		void reset_render_layer();
 	};
 }
 

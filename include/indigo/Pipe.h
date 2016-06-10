@@ -188,6 +188,8 @@ namespace Indigo
 
 		void close();
 
+		bool is_local() const;
+
 		bool call(void (*fn)(void*), void* param);
 
 		bool call(const OOBase::Delegate0<void,OOBase::ThreadLocalAllocator>& delegate)

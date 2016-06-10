@@ -142,9 +142,9 @@ Indigo::Pipe::Pipe(const char* name) :
 }
 
 Indigo::Pipe::Pipe(const OOBase::SharedPtr<detail::IPC::Queue>& send_queue, const OOBase::SharedPtr<detail::IPC::Queue>& recv_queue) :
-		m_spin_lock(0),
 		m_recv_queue(recv_queue),
-		m_send_queue(send_queue)
+		m_send_queue(send_queue),
+		m_spin_lock(0)
 {
 }
 
@@ -333,4 +333,9 @@ bool Indigo::Pipe::spin_unlock(void* param)
 		--pThis->m_spin_lock;
 
 	return true;
+}
+
+bool Indigo::Pipe::is_local() const
+{
+	return !m_send_queue && this == thread_pipe();
 }
