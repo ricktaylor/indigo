@@ -39,12 +39,17 @@ namespace Indigo
 		public:
 			UILayer(Window* window, Indigo::UILayer* owner);
 
-			void on_draw(OOGL::State& glState) const;
-			void on_size(const glm::uvec2& sz);
-
 		private:
 			glm::mat4        m_mvp;
 			Indigo::UILayer* m_owner;
+
+			OOBase::WeakPtr<UIGroup> m_cursor_group;
+			OOBase::WeakPtr<UIGroup> m_focus_group;
+
+			bool on_update(OOGL::State& glState);
+			void on_draw(OOGL::State& glState) const;
+			void on_size(const glm::uvec2& sz);
+			bool on_cursormove(const glm::dvec2& pos);
 		};
 	}
 
@@ -82,15 +87,6 @@ namespace Indigo
 		OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> on_close(const OOBase::Delegate0<void,OOBase::ThreadLocalAllocator>& delegate);
 
 	protected:
-		virtual bool on_close();
-		virtual void on_size(glm::uvec2& sz);
-		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
-		virtual bool on_mousemove(const double& screen_x, const double& screen_y);
-		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
-
-		virtual glm::uvec2 min_size() const;
-		virtual glm::uvec2 ideal_size() const;
-
 		bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len = -1);
 
 	private:
@@ -98,10 +94,18 @@ namespace Indigo
 		bool             m_modal;
 
 		OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> m_on_close;
-
 		OOBase::HashTable<size_t,OOBase::WeakPtr<UIWidget>,OOBase::ThreadLocalAllocator> m_names;
 
 		OOBase::SharedPtr<Render::Layer> create_render_layer(Render::Window* window);
+		glm::uvec2 min_size() const;
+		glm::uvec2 ideal_size() const;
+
+		bool on_close();
+		void on_size(glm::uvec2& sz);
+		void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
+		
+		//virtual bool on_cursormove(const double& screen_x, const double& screen_y);
+		//virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 
 		void on_layer_size(const glm::uvec2& sz);
 	};

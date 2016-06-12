@@ -73,7 +73,7 @@ namespace Indigo
 		enum State
 		{
 			eBS_pressed = 0x4,
-			eBS_mouseover = 0x8
+			eBS_cursorover = 0x8
 		};
 
 		struct CreateParams : public UIWidget::CreateParams
@@ -102,7 +102,7 @@ namespace Indigo
 		virtual bool on_render_create(Render::UIGroup* group);
 		virtual void on_size(glm::uvec2& sz);
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
-		virtual void on_mouseenter(bool enter);
+		virtual void on_cursorenter(bool enter);
 		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 
 	private:

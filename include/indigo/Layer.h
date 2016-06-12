@@ -42,8 +42,13 @@ namespace Indigo
 		protected:
 			Layer(Window* window);
 
+			virtual bool on_update(OOGL::State& glState) = 0;
 			virtual void on_draw(OOGL::State& glState) const = 0;
-			virtual void on_size(const glm::uvec2& sz) {};
+			virtual void on_size(const glm::uvec2& sz) {}
+			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
+			virtual bool on_cursormove(const glm::dvec2& pos) { return false; }
+			virtual void on_losecursor() {}
+			virtual void on_losefocus() {}
 
 			Window* const m_window;
 		};
@@ -67,10 +72,8 @@ namespace Indigo
 
 		virtual bool on_close() { return false; }
 		virtual void on_move(const glm::ivec2& sz) {}
-		virtual void on_size(const glm::uvec2& sz) {}
-		virtual bool on_mousemove(const double& screen_x, const double& screen_y) { return false; }
-		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
-
+		virtual bool on_iconify(bool iconified) { return false; }
+		
 	private:
 		OOBase::SharedPtr<Render::Layer> m_render_layer;
 

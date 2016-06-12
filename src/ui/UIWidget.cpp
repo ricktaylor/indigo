@@ -77,6 +77,63 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, bool* ret)
 	}
 }
 
+bool Indigo::Render::UIGroup::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+{
+	OOBase::SharedPtr<UIDrawable> cursor_child = m_cursor_child.lock();
+	if (cursor_child)
+	{
+		if (cursor_child->on_mousebutton(click))
+		{
+			// Grabbed focus!
+			if (cursor_child != m_focus_child)
+			{
+				OOBase::SharedPtr<UIDrawable> prev_focus_child = m_focus_child.lock();
+				if (prev_focus_child)
+					prev_focus_child->on_losefocus();
+
+				m_focus_child = cursor_child;
+			}
+		}
+	}
+
+	return m_focus_child != NULL;
+}
+
+bool Indigo::Render::UIGroup::on_cursormove(const glm::ivec2& pos)
+{
+	OOBase::SharedPtr<UIDrawable> cursor_child;
+	for (OOBase::Vector<OOBase::SharedPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator i=m_children.back();i;--i)
+	{
+		if ((*i)->visible())
+		{
+			glm::ivec2 child_pos = (*i)->position();
+			if (pos.x >= child_pos.x && pos.y >= child_pos.y)
+			{
+				glm::ivec2 child_size = (*i)->size();
+				if (pos.x < child_pos.x + child_size.x && pos.y < child_pos.y + child_size.y)
+				{
+					if ((*i)->on_cursormove(pos - child_pos))
+					{
+						cursor_child = *i;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	if (cursor_child != m_cursor_child)
+	{
+		OOBase::SharedPtr<UIDrawable> prev_cursor_child = m_cursor_child.lock();
+		if (prev_cursor_child)
+			prev_cursor_child->on_losecursor();
+
+		m_cursor_child = cursor_child;
+	}
+
+	return m_cursor_child != NULL;
+}
+
 Indigo::UIWidget::UIWidget(UIGroup* parent, const CreateParams& params) :
 		m_parent(parent),
 		m_render_group(NULL),
@@ -237,50 +294,13 @@ glm::uvec2 Indigo::UIGroup::ideal_size() const
 	return ideal;
 }
 
-bool Indigo::UIGroup::on_mousemove(const glm::ivec2& pos)
+/*bool Indigo::UIGroup::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 {
-	for (OOBase::Vector<OOBase::SharedPtr<UIWidget>,OOBase::ThreadLocalAllocator>::iterator i=m_children.back();i;--i)
-	{
-		if ((*i)->visible())
-		{
-			glm::ivec2 child_pos = (*i)->position();
-			if (pos.x >= child_pos.x && pos.y >= child_pos.y)
-			{
-				glm::ivec2 child_size = (*i)->size();
-				if (pos.x < child_pos.x + child_size.x && pos.y < child_pos.y + child_size.y)
-				{
-					OOBase::SharedPtr<UIWidget> mouse_child = m_mouse_child.lock();
-					if (mouse_child != (*i))
-					{
-						if (mouse_child)
-							mouse_child->on_mouseenter(false);
+	OOBase::SharedPtr<UIWidget> cursor_child = m_cursor_child.lock();
+	if (cursor_child && cursor_child->visible() && cursor_child->enabled())
+		return cursor_child->on_mousebutton(click);
 
-						m_mouse_child = (*i);
-						(*i)->on_mouseenter(true);
-					}
-
-					return (*i)->on_mousemove(pos - child_pos);
-				}
-			}
-		}
-	}
-
-	OOBase::SharedPtr<UIWidget> mouse_child = m_mouse_child.lock();
-	if (mouse_child)
-		mouse_child->on_mouseenter(false);
-
-	m_mouse_child.reset();
+	m_cursor_child.reset();
 
 	return false;
-}
-
-bool Indigo::UIGroup::on_mousebutton(const OOGL::Window::mouse_click_t& click)
-{
-	OOBase::SharedPtr<UIWidget> mouse_child = m_mouse_child.lock();
-	if (mouse_child && mouse_child->visible() && mouse_child->enabled())
-		return mouse_child->on_mousebutton(click);
-
-	m_mouse_child.reset();
-
-	return false;
-}
+}*/

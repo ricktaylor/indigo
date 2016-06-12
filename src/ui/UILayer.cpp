@@ -49,12 +49,31 @@ void Indigo::Render::UILayer::on_draw(OOGL::State& glState) const
 	}
 }
 
+bool Indigo::Render::UILayer::on_update(OOGL::State& glState)
+{
+	// TODO Enable dirty flag
+	return true;
+}
+
 void Indigo::Render::UILayer::on_size(const glm::uvec2& sz)
 {
 	glm::vec2 sz2 = sz;
 	m_mvp = glm::ortho(0.f,sz2.x,0.f,sz2.y);
 
 	Indigo::logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::UILayer::on_layer_size),sz);
+}
+
+bool Indigo::Render::UILayer::on_cursormove(const glm::dvec2& pos)
+{
+	if (!visible())
+		return false;
+
+	const glm::uvec2& sz = size();
+	if (!sz.x || !sz.y)
+		return false;
+
+	bool ret = UIGroup::on_cursormove(glm::clamp(glm::ivec2(floor(pos)),glm::ivec2(0),glm::ivec2(sz.x-1,sz.y-1)));
+	return m_owner->m_modal || ret;
 }
 
 Indigo::UILayer::UILayer(const CreateParams& params) :
@@ -150,18 +169,7 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 	return OOBase::static_pointer_cast<Indigo::Render::Layer>(group);
 }
 
-bool Indigo::UILayer::on_mousemove(const double& screen_x, const double& screen_y)
-{
-	if (!visible())
-		return false;
-
-	const glm::uvec2& sz = size();
-	if (!sz.x || !sz.y)
-		return false;
-
-	bool ret = UIGroup::on_mousemove(glm::clamp(glm::ivec2(floor(screen_x),floor(screen_y)),glm::ivec2(0),glm::ivec2(sz.x-1,sz.y-1)));
-	return m_modal || ret;
-}
+/*
 
 bool Indigo::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 {
@@ -171,3 +179,4 @@ bool Indigo::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 	bool ret = UIGroup::on_mousebutton(click);
 	return m_modal || ret;
 }
+*/

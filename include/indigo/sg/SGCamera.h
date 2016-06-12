@@ -44,8 +44,9 @@ namespace Indigo
 			friend class Indigo::SGCamera;
 
 		public:
-			SGCamera(Window* window, const glm::vec3& source, const glm::mat4& vp, SGNode* scene) :
+			SGCamera(Indigo::SGCamera* owner, Window* window, const glm::vec3& source, const glm::mat4& vp, SGNode* scene) :
 				Layer(window), 
+				m_owner(owner),
 				m_source(source),
 				m_view_proj(vp),
 				m_scene(scene)
@@ -56,9 +57,16 @@ namespace Indigo
 			SGNode* scene() const { return m_scene; }
 
 		protected:
+			virtual bool on_update(OOGL::State& glState);
 			virtual void on_draw(OOGL::State& glState) const;
+			virtual void on_size(const glm::uvec2& sz);
+			//virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click)
+			//virtual bool on_cursormove(const glm::dvec2& pos);
+			//virtual void on_losecursor();
+			//virtual void on_losefocus();
 
 		private:
+			Indigo::SGCamera* m_owner;
 			glm::vec3 m_source;
 			glm::mat4 m_view_proj;
 			SGNode*   m_scene;
@@ -110,6 +118,9 @@ namespace Indigo
 		const glm::vec3& position() const { return m_position; }
 		void position(const glm::vec3& pos);
 
+		const glm::vec2& size() const { return m_size; }
+		void size(const glm::uvec2& sz);
+
 		const glm::vec3& target() const { return m_target; }
 		void target(const glm::vec3& t);
 
@@ -154,8 +165,7 @@ namespace Indigo
 		void destroy_render_layer();
 
 		bool on_close();
-		void on_size(const glm::uvec2& sz);
-
+		
 		glm::mat4 view_proj() const;
 	};
 }

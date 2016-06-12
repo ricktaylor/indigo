@@ -334,18 +334,18 @@ void Indigo::UIButton::do_style_change(RenderStyleState* new_style)
 
 void Indigo::UIButton::on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask)
 {
-	if (change_mask & (eWS_enabled | eBS_pressed | eBS_mouseover))
+	if (change_mask & (eWS_enabled | eBS_pressed | eBS_cursorover))
 	{
 		bool enabled = (state & eWS_enabled) == eWS_enabled;
 		bool pressed = (state & eBS_pressed) == eBS_pressed;
-		bool mouseover = (state & eBS_mouseover) == eBS_mouseover;
+		bool cursorover = (state & eBS_cursorover) == eBS_cursorover;
 
 		RenderStyleState* new_style = NULL;
 		if (!enabled)
 			new_style = &m_disabled;
 		else if (pressed)
 			new_style = &m_pressed;
-		else if (mouseover)
+		else if (cursorover)
 			new_style = &m_active;
 		else
 			new_style = &m_normal;
@@ -357,9 +357,9 @@ void Indigo::UIButton::on_state_change(OOBase::uint32_t state, OOBase::uint32_t 
 	UIWidget::on_state_change(state,change_mask);
 }
 
-void Indigo::UIButton::on_mouseenter(bool enter)
+void Indigo::UIButton::on_cursorenter(bool enter)
 {
-	toggle_state(OOBase::uint32_t(enter ? eBS_mouseover : 0),eBS_mouseover | eBS_pressed);
+	toggle_state(OOBase::uint32_t(enter ? eBS_cursorover : 0),eBS_cursorover | eBS_pressed);
 }
 
 bool Indigo::UIButton::on_mousebutton(const OOGL::Window::mouse_click_t& click)
@@ -378,7 +378,7 @@ bool Indigo::UIButton::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 		return true;
 	}
 
-	return UIWidget::on_mousebutton(click);
+	return false; //UIWidget::on_mousebutton(click);
 }
 
 OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> Indigo::UIButton::on_click(const OOBase::Delegate0<void,OOBase::ThreadLocalAllocator>& delegate)

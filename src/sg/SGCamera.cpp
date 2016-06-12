@@ -109,17 +109,30 @@ void ClipVisitor::draw(OOGL::State& glState, const glm::mat4& mvp) const
 		i->m_drawable->on_draw(glState,mvp * i->m_transform);
 }
 
+bool Indigo::Render::SGCamera::on_update(OOGL::State& glState)
+{
+	if (!m_scene || !m_scene->dirty())
+		return false;
+
+	m_scene->on_update(glm::mat4());
+	return true;
+}
+
 void Indigo::Render::SGCamera::on_draw(OOGL::State& glState) const
 {
 	if (m_scene && m_scene->visible())
 	{
-		m_scene->on_update(glm::mat4());
-
 		ClipVisitor visitor(m_source);
 		m_scene->visit(visitor);
 
 		visitor.draw(glState,view_proj());
 	}
+}
+
+void Indigo::Render::SGCamera::on_size(const glm::uvec2& sz)
+{
+	// Let the logic pipe handle it
+	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::SGCamera::size),sz);
 }
 
 Indigo::SGCamera::SGCamera(const CreateParams& params) :
@@ -147,7 +160,7 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::SGCamera::create_render_layer(R
 	if (m_scene)
 		render_scene = m_scene->render_node();
 
-	OOBase::SharedPtr<Render::SGCamera> render_cam = OOBase::allocate_shared<Render::SGCamera,OOBase::ThreadLocalAllocator>(window,m_position,view_proj(),render_scene);
+	OOBase::SharedPtr<Render::SGCamera> render_cam = OOBase::allocate_shared<Render::SGCamera,OOBase::ThreadLocalAllocator>(this,window,m_position,view_proj(),render_scene);
 	if (!render_cam)
 		LOG_ERROR(("Failed to allocate render camera: %s",OOBase::system_error_text()));
 	else
@@ -169,6 +182,17 @@ void Indigo::SGCamera::position(const glm::vec3& pos)
 
 		if (m_render_camera)
 			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj_source),view_proj(),m_position);
+	}
+}
+
+void Indigo::SGCamera::size(const glm::uvec2& sz)
+{
+	if (m_size.x != sz.x || m_size.y != sz.y)
+	{
+		m_size = sz;
+
+		if (m_render_camera)
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
 	}
 }
 
@@ -271,17 +295,6 @@ void Indigo::SGCamera::scene(const OOBase::SharedPtr<SGNode>& s)
 
 		if (m_render_camera)
 			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::scene),render_scene);
-	}
-}
-
-void Indigo::SGCamera::on_size(const glm::uvec2& sz)
-{
-	if (m_size.x != sz.x || m_size.y != sz.y)
-	{
-		m_size = sz;
-
-		if (m_render_camera)
-			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj),view_proj());
 	}
 }
 

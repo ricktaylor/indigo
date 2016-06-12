@@ -66,6 +66,7 @@ glm::uvec2 Indigo::UIPanel::min_size() const
 {
 	return m_sizer.min_fit();
 }
+
 glm::uvec2 Indigo::UIPanel::ideal_size() const
 {
 	return m_sizer.ideal_fit();
@@ -79,9 +80,9 @@ void Indigo::UIPanel::on_size(glm::uvec2& sz)
 		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_background,&Render::UIDrawable::size),sz);
 }
 
-bool Indigo::UIPanel::on_mousemove(const glm::ivec2& pos)
+bool Indigo::UIPanel::on_cursormove(const glm::ivec2& pos)
 {
-	UIGroup::on_mousemove(pos);
+	//UIGroup::on_cursormove(pos);
 
 	// Always eat the message
 	return true;

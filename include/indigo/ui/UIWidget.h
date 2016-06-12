@@ -54,6 +54,10 @@ namespace Indigo
 			virtual ~UIDrawable();
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
+			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
+			virtual bool on_cursormove(const glm::ivec2& pos) { return false; }
+			virtual void on_losecursor() {}
+			virtual void on_losefocus() {}
 
 		private:
 			bool       m_visible;
@@ -74,9 +78,13 @@ namespace Indigo
 
 		protected:
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
-
+			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
+			virtual bool on_cursormove(const glm::ivec2& pos);
+			
 		private:
 			OOBase::Vector<OOBase::SharedPtr<UIDrawable>,OOBase::ThreadLocalAllocator> m_children;
+			OOBase::WeakPtr<UIDrawable> m_cursor_child;
+			OOBase::WeakPtr<UIDrawable> m_focus_child;
 
 			void add_subgroup(UIWidget* widget, bool* ret);
 		};
@@ -139,9 +147,12 @@ namespace Indigo
 		virtual bool on_render_create(Render::UIGroup* group) = 0;
 		virtual void on_size(glm::uvec2& sz) { }
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
-		virtual void on_mouseenter(bool enter) { }
-		virtual bool on_mousemove(const glm::ivec2& pos) { return false; }
-		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
+
+		/*
+			virtual void on_cursorenter(bool enter) { }
+			virtual bool on_cursormove(const glm::ivec2& pos) { return false; }
+			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
+		*/
 
 	private:
 		UIGroup*         m_parent;
@@ -165,17 +176,12 @@ namespace Indigo
 		virtual glm::uvec2 min_size() const;
 		virtual glm::uvec2 ideal_size() const;
 
-		virtual bool on_mousemove(const glm::ivec2& pos);
-		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
-
 		virtual bool add_named_widget(const OOBase::SharedPtr<UIWidget>& widget, const char* name, size_t len = -1);
 
 		virtual bool on_render_create(Render::UIGroup* group);
 
 	private:
 		OOBase::Vector<OOBase::SharedPtr<UIWidget>,OOBase::ThreadLocalAllocator> m_children;
-
-		OOBase::WeakPtr<UIWidget> m_mouse_child;
 	};
 }
 

@@ -266,7 +266,6 @@ void SimpleGroup::on_update(const glm::mat4& parent_transform)
 			first_aabb = false;
 		}
 
-
 		for (OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
 		{
 			(*i)->on_update(world_transform());

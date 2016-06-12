@@ -82,8 +82,7 @@ namespace Indigo
 		void on_destroy();
 		void on_close();
 		void on_move(const glm::ivec2& pos);
-		void on_mousemove(double screen_x, double screen_y);
-		void on_mousebutton(const OOGL::Window::mouse_click_t& click);
+		void on_iconify(bool iconified);
 	};
 
 	namespace Render
@@ -95,6 +94,8 @@ namespace Indigo
 
 		public:
 			const OOBase::SharedPtr<OOGL::Window>& window() const { return m_wnd; }
+
+			void grab_focus(Layer* layer);
 
 		private:
 			Window(Indigo::Window* owner);
@@ -108,14 +109,22 @@ namespace Indigo
 			OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator> m_layers;
 
 			void on_close(const OOGL::Window& win);
+			void on_iconify(const OOGL::Window&, bool iconified);
 			void on_draw(const OOGL::Window& win, OOGL::State& glState);
 			void on_move(const OOGL::Window& win, const glm::ivec2& pos);
 			void on_size(const OOGL::Window& win, const glm::uvec2& sz);
-			void on_mousemove(const OOGL::Window& win, double screen_x, double screen_y);
 			void on_mousebutton(const OOGL::Window& win, const OOGL::Window::mouse_click_t& click);
+			void on_cursorenter(const OOGL::Window& win, bool enter);
+			void on_focus(const OOGL::Window& win, bool focused);
 
 			void add_render_layer(Indigo::Layer* layer, bool* ret);
 			void remove_render_layer(Indigo::Layer* layer);
+
+			bool m_have_cursor;
+			glm::dvec2 m_cursor_pos;
+			OOBase::WeakPtr<Layer> m_cursor_layer;
+			OOBase::WeakPtr<Layer> m_focus_layer;
+			void hit_test(const glm::dvec2& cursor_pos);
 		};
 	}
 }

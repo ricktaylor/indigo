@@ -28,7 +28,8 @@
 #include <OOGL/StateFns.h>
 
 Indigo::Render::Window::Window(Indigo::Window* owner) :
-		m_owner(owner)
+		m_owner(owner),
+		m_have_cursor(false)
 {
 	ASSERT_RENDER_THREAD();
 }
@@ -63,9 +64,11 @@ bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& p
 		m_wnd->on_moved(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_move));
 		m_wnd->on_sized(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_size));
 		m_wnd->on_draw(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_draw));
-		m_wnd->on_mousemove(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_mousemove));
 		m_wnd->on_mousebutton(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_mousebutton));
-
+		m_wnd->on_cursorenter(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_cursorenter));
+		m_wnd->on_focus(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_focus));
+		m_wnd->on_iconify(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_iconify));
+				
 		if (params.m_style & OOGL::Window::eWSdebug_context)
 			OOGL::StateFns::get_current()->enable_logging();
 	}
@@ -73,9 +76,19 @@ bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& p
 	return true;
 }
 
-void Indigo::Render::Window::on_close(const OOGL::Window& win)
+void Indigo::Render::Window::hit_test(const glm::dvec2& cursor_pos)
+{
+	
+}
+
+void Indigo::Render::Window::on_close(const OOGL::Window&)
 {
 	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::Window::on_close));
+}
+
+void Indigo::Render::Window::on_iconify(const OOGL::Window&, bool iconified)
+{
+	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::Window::on_iconify),iconified);
 }
 
 void Indigo::Render::Window::on_move(const OOGL::Window& win, const glm::ivec2& pos)
@@ -83,7 +96,7 @@ void Indigo::Render::Window::on_move(const OOGL::Window& win, const glm::ivec2& 
 	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::Window::on_move),pos);
 }
 
-void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& sz)
+void Indigo::Render::Window::on_size(const OOGL::Window&, const glm::uvec2& sz)
 {
 	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
 		(*i)->on_size(sz);
@@ -91,20 +104,111 @@ void Indigo::Render::Window::on_size(const OOGL::Window& win, const glm::uvec2& 
 
 void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
+	glm::dvec2 cursor_pos = win.cursor_pos();
+	bool hit_test = (m_cursor_pos != cursor_pos);
+	
+	// Update all layers
 	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
-		(*i)->on_draw(glState);
+	{
+		if ((*i)->on_update(glState))
+			hit_test = true;
+	}
+
+	if (m_wnd->visible() && !m_wnd->iconified())
+	{
+		if (m_have_cursor && hit_test)
+		{
+			// If something changed, then hit test
+			OOBase::SharedPtr<Layer> cursor_layer;
+			for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();i;--i)
+			{
+				if ((*i)->on_cursormove(cursor_pos))
+				{
+					cursor_layer = *i;
+					break;
+				}
+			}
+
+			if (cursor_layer != m_cursor_layer)
+			{
+				OOBase::SharedPtr<Layer> prev_cursor_layer = m_cursor_layer.lock();
+				if (prev_cursor_layer)
+					prev_cursor_layer->on_losecursor();
+
+				m_cursor_layer = cursor_layer;
+			}
+
+			m_cursor_pos = cursor_pos;
+		}
+	
+		// Render all layers
+		for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::const_iterator i=m_layers.cbegin();i;++i)
+			(*i)->on_draw(glState);
+	}
 }
 
-void Indigo::Render::Window::on_mousemove(const OOGL::Window& win, double screen_x, double screen_y)
+void Indigo::Render::Window::on_mousebutton(const OOGL::Window&, const OOGL::Window::mouse_click_t& click)
 {
-	void* TODO; // TODO - Make this go through the render layers!
-	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::Window::on_mousemove),screen_x,screen_y);
+	OOBase::SharedPtr<Layer> cursor_layer = m_cursor_layer.lock();
+	if (cursor_layer)
+	{
+		if (cursor_layer->on_mousebutton(click))
+		{
+			// Grabbed focus!
+			if (cursor_layer != m_focus_layer)
+			{
+				OOBase::SharedPtr<Layer> prev_focus_layer = m_focus_layer.lock();
+				if (prev_focus_layer)
+					prev_focus_layer->on_losefocus();
+
+				m_focus_layer = cursor_layer;
+			}
+		}
+	}
 }
 
-void Indigo::Render::Window::on_mousebutton(const OOGL::Window& win, const OOGL::Window::mouse_click_t& click)
+void Indigo::Render::Window::on_cursorenter(const OOGL::Window& win, bool enter)
 {
-	void* TODO; // TODO - Make this go through the render layers!
-	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::Window::on_mousebutton),click);
+	if (!enter)
+	{
+		OOBase::SharedPtr<Layer> prev_cursor_layer = m_cursor_layer.lock();
+		if (prev_cursor_layer)
+			prev_cursor_layer->on_losecursor();
+
+		m_cursor_layer.reset();
+	}
+
+	m_have_cursor = enter;
+}
+
+void Indigo::Render::Window::on_focus(const OOGL::Window& win, bool focused)
+{
+	if (!focused)
+	{
+		OOBase::SharedPtr<Layer> prev_focus_layer = m_focus_layer.lock();
+		if (prev_focus_layer)
+			prev_focus_layer->on_losefocus();
+
+		m_focus_layer.reset();
+	}
+}
+
+void Indigo::Render::Window::grab_focus(Layer* layer)
+{
+	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
+	{
+		if (i->get() == layer)
+		{
+			if (m_focus_layer != *i)
+			{
+				OOBase::SharedPtr<Layer> prev_focus_layer = m_focus_layer.lock();
+				if (prev_focus_layer)
+					prev_focus_layer->on_losefocus();
+
+				m_focus_layer = *i;
+			}
+		}
+	}
 }
 
 void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, bool* ret)
@@ -125,13 +229,17 @@ void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, bool* ret)
 			layer->m_render_layer.reset();
 		}
 		else
+		{
+			hit_test(m_wnd->cursor_pos());
 			*ret = true;
+		}
 	}
 }
 
 void Indigo::Render::Window::remove_render_layer(Indigo::Layer* layer)
 {
-	m_layers.remove(layer->m_render_layer);
+	if (m_layers.remove(layer->m_render_layer) != 0)
+		hit_test(m_wnd->cursor_pos());
 }
 
 Indigo::Window::Window()
@@ -181,21 +289,15 @@ void Indigo::Window::run()
 	{
 		OOBase::Clock draw_clock;
 
-		// Scope wnd
-		{
-			OOBase::SharedPtr<OOGL::Window> wnd(weak_wnd.lock());
-			if (!wnd)
-				break;
+		OOBase::SharedPtr<OOGL::Window> wnd(weak_wnd.lock());
+		if (!wnd)
+			break;
 
-			if (wnd->visible() && !wnd->iconified())
-			{
-				// Update animations
+		// Update animations
 
-
-				// Draw window
-				wnd->draw();
-			}
-		}
+		// Draw window
+		wnd->draw();
+		wnd.reset();
 
 		// Poll for UI events
 		glfwPollEvents();
@@ -324,16 +426,9 @@ void Indigo::Window::on_move(const glm::ivec2& pos)
 		(*i)->on_move(pos);
 }
 
-void Indigo::Window::on_mousemove(double screen_x, double screen_y)
+void Indigo::Window::on_iconify(bool iconified)
 {
 	bool handled = false;
 	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
-		handled = (*i)->on_mousemove(screen_x,screen_y);
-}
-
-void Indigo::Window::on_mousebutton(const OOGL::Window::mouse_click_t& click)
-{
-	bool handled = false;
-	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();!handled && i;--i)
-		handled = (*i)->on_mousebutton(click);
+		handled = (*i)->on_iconify(iconified);
 }

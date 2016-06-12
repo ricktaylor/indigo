@@ -33,6 +33,7 @@ namespace
 	public:
 		ImageLayer(const OOBase::SharedPtr<OOGL::Texture>& texture, Indigo::Render::Window* window, const glm::vec4& colour);
 
+		bool on_update(OOGL::State& glState) { return false; }
 		void on_draw(OOGL::State& glState) const;
 
 		void colour(const glm::vec4& colour) { m_colour = colour; }
