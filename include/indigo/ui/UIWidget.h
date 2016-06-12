@@ -114,10 +114,10 @@ namespace Indigo
 
 		UIGroup* parent() const { return m_parent; }
 
-		bool visible() const { return (m_state & eWS_visible); }
+		bool visible() const { return (m_state & eWS_visible) == eWS_visible; }
 		virtual void show(bool visible = true);
 
-		bool enabled() const { return (m_state & eWS_enabled); }
+		bool enabled() const { return (m_state & eWS_enabled) == eWS_enabled; }
 		void enable(bool enabled = true);
 
 		OOBase::uint32_t state() const { return m_state; }

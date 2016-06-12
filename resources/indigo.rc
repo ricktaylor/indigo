@@ -27,7 +27,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDR_2D_TEX_COLOUR_VS    RCDATA                  "2d_textured_colour.vert"
 IDR_3D_COLOUR_VS        RCDATA                  "3d_colour.vert"
 IDR_COLOUR_BLEND_FS     RCDATA                  "colour_blend.frag"
-IDR_FOND_RED_BLEND_FS   RCDATA                  "font_red_blend.frag"
+IDR_FONT_RED_BLEND_FS   RCDATA                  "font_red_blend.frag"
 IDR_COLOUR_FS           RCDATA                  "colour.frag"
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////

@@ -195,10 +195,10 @@ namespace Indigo
 
 		SGGroup* parent() const { return m_parent; }
 
-		bool visible() const { return (m_state & eNS_visible); }
+		bool visible() const { return (m_state & eNS_visible) == eNS_visible; }
 		virtual void show(bool visible = true);
 
-		bool enabled() const { return (m_state & eNS_enabled); }
+		bool enabled() const { return (m_state & eNS_enabled) == eNS_enabled; }
 		void enable(bool enabled = true);
 
 		OOBase::uint32_t state() const { return m_state; }
