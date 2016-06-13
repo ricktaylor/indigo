@@ -34,20 +34,18 @@ namespace Indigo
 
 namespace
 {
-	struct RenderModule
-	{};
+	struct PipeRack
+	{
+		OOBase::SharedPtr<Indigo::Pipe> m_render_pipe;
+		OOBase::SharedPtr<Indigo::Pipe> m_logic_pipe;
+	};
 
-	typedef OOBase::TLSSingleton<OOBase::SharedPtr<Indigo::Pipe>,RenderModule> RENDER_PIPE;
-
-	struct LogicModule
-	{};
-
-	typedef OOBase::TLSSingleton<OOBase::SharedPtr<Indigo::Pipe>,LogicModule> LOGIC_PIPE;
+	typedef OOBase::TLSSingleton<PipeRack> PIPE_RACK;
 }
 
 const OOBase::SharedPtr<Indigo::Pipe>& Indigo::render_pipe()
 {
-	OOBase::SharedPtr<Indigo::Pipe>& pipe = RENDER_PIPE::instance();
+	OOBase::SharedPtr<Indigo::Pipe>& pipe = PIPE_RACK::instance().m_render_pipe;
 	if (!pipe)
 		pipe = thread_pipe()->open("render");
 
@@ -56,7 +54,7 @@ const OOBase::SharedPtr<Indigo::Pipe>& Indigo::render_pipe()
 
 const OOBase::SharedPtr<Indigo::Pipe>& Indigo::logic_pipe()
 {
-	OOBase::SharedPtr<Indigo::Pipe>& pipe = LOGIC_PIPE::instance();
+	OOBase::SharedPtr<Indigo::Pipe>& pipe = PIPE_RACK::instance().m_logic_pipe;
 	if (!pipe)
 		pipe = thread_pipe()->open("logic");
 
@@ -78,11 +76,11 @@ static void on_glfw_error(int code, const char* message)
 bool Indigo::run(const char* name, void (*fn)(void*), void* param)
 {
 	// Create render comms pipe
-	RENDER_PIPE::instance() =  OOBase::allocate_shared<Indigo::Pipe,OOBase::ThreadLocalAllocator>("render");
-	if (!RENDER_PIPE::instance())
+	PIPE_RACK::instance().m_render_pipe =  OOBase::allocate_shared<Indigo::Pipe,OOBase::ThreadLocalAllocator>("render");
+	if (!PIPE_RACK::instance().m_render_pipe)
 		LOG_ERROR_RETURN(("Failed to allocate render pipe: %s",OOBase::system_error_text()),false);
 
-	render_init(RENDER_PIPE::instance().get());
+	render_init(PIPE_RACK::instance().m_render_pipe.get());
 
 	// Not sure if we need to set this first...
 	glfwSetErrorCallback(&on_glfw_error);
@@ -95,10 +93,10 @@ bool Indigo::run(const char* name, void (*fn)(void*), void* param)
 
 	bool ret = false;
 	OOBase::SharedPtr<OOBase::Thread> thread;
-	OOBase::SharedPtr<Indigo::Pipe> logic_pipe = Indigo::start_thread(name,thread);
-	if (logic_pipe)
+	PIPE_RACK::instance().m_logic_pipe = Indigo::start_thread(name,thread);
+	if (PIPE_RACK::instance().m_logic_pipe)
 	{
-		ret = logic_pipe->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(fn),param);
+		ret = PIPE_RACK::instance().m_logic_pipe->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(fn),param);
 		if (ret)
 			thread->join();
 	}
