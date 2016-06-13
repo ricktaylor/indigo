@@ -150,6 +150,8 @@ namespace Indigo
 		virtual void on_size(glm::uvec2& sz) { }
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 
+		virtual void make_dirty();
+
 		/*
 			virtual void on_cursorenter(bool enter) { }
 			virtual bool on_cursormove(const glm::ivec2& pos) { return false; }

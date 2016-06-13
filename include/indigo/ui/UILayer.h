@@ -36,12 +36,15 @@ namespace Indigo
 	{
 		class UILayer : public UIGroup, public Layer
 		{
+			friend class Indigo::UILayer;
+
 		public:
 			UILayer(Window* window, Indigo::UILayer* owner, bool visible = false, const glm::ivec2& pos = glm::ivec2(), const glm::uvec2& size = glm::uvec2());
 
 		private:
 			glm::mat4        m_mvp;
 			Indigo::UILayer* m_owner;
+			bool             m_dirty;
 
 			OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator> m_cursor_hits;
 			OOBase::WeakPtr<UIDrawable> m_focus_child;
@@ -51,6 +54,8 @@ namespace Indigo
 			bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 			void on_size(const glm::uvec2& sz);
 			bool on_cursormove(const glm::dvec2& pos);
+
+			void make_dirty() { m_dirty = true; }
 		};
 	}
 
@@ -109,6 +114,7 @@ namespace Indigo
 		//virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 
 		void on_layout(const glm::uvec2& sz);
+		void make_dirty();
 	};
 }
 

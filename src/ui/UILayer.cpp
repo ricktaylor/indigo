@@ -28,7 +28,8 @@
 Indigo::Render::UILayer::UILayer(Indigo::Render::Window* window, Indigo::UILayer* owner, bool visible, const glm::ivec2& pos, const glm::uvec2& sz) :
 		Indigo::Render::UIGroup(visible,pos,sz),
 		Indigo::Render::Layer(window),
-		m_owner(owner)
+		m_owner(owner),
+		m_dirty(true)
 {
 	size(sz);
 	glm::vec2 sz2(sz);
@@ -51,8 +52,9 @@ void Indigo::Render::UILayer::on_draw(OOGL::State& glState) const
 
 bool Indigo::Render::UILayer::on_update(OOGL::State& glState)
 {
-	// TODO Enable dirty flag
-	return true;
+	bool dirty = m_dirty;
+	m_dirty = false;
+	return dirty;
 }
 
 void Indigo::Render::UILayer::on_size(const glm::uvec2& sz)
@@ -143,7 +145,6 @@ bool Indigo::Render::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& 
 
 	return grabbed_outer;
 }
-
 
 Indigo::UILayer::UILayer(const CreateParams& params) :
 		UIGroup(NULL,params),
@@ -244,14 +245,8 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(In
 	return OOBase::static_pointer_cast<Indigo::Render::Layer>(group);
 }
 
-/*
-
-bool Indigo::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+void Indigo::UILayer::make_dirty()
 {
-	if (!visible())
-		return false;
-
-	bool ret = UIGroup::on_mousebutton(click);
-	return m_modal || ret;
+	if (m_render_parent)
+		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Render::UILayer*>(m_render_parent),&Render::UILayer::make_dirty));
 }
-*/

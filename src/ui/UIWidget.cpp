@@ -101,6 +101,8 @@ Indigo::UIWidget::UIWidget(UIGroup* parent, const CreateParams& params) :
 		m_position(params.m_position),
 		m_size(params.m_size)
 {
+	if (m_parent)
+		make_dirty();
 }
 
 void Indigo::UIWidget::toggle_state(OOBase::uint32_t new_state, OOBase::uint32_t mask)
@@ -120,7 +122,11 @@ void Indigo::UIWidget::on_state_change(OOBase::uint32_t state, OOBase::uint32_t 
 	{
 		bool visible = (state & eWS_visible) == eWS_visible;
 		if (m_render_group)
+		{
 			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Render::UIDrawable*>(m_render_group),&Render::UIDrawable::show),visible);
+
+			make_dirty();
+		}
 	}
 }
 
@@ -141,7 +147,11 @@ void Indigo::UIWidget::position(const glm::ivec2& pos)
 		m_position = pos;
 
 		if (m_render_group)
+		{
 			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Render::UIDrawable*>(m_render_group),&Render::UIDrawable::position),pos);
+
+			make_dirty();
+		}
 	}
 }
 
@@ -161,12 +171,21 @@ const glm::uvec2& Indigo::UIWidget::size(const glm::uvec2& sz)
 				m_size = new_size;
 
 				if (m_render_group)
+				{
 					render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Render::UIDrawable*>(m_render_group),&Render::UIDrawable::size),m_size);
+
+					make_dirty();
+				}
 			}
 		}
 	}
 
 	return m_size;
+}
+
+void Indigo::UIWidget::make_dirty()
+{
+	m_parent->make_dirty(); 
 }
 
 Indigo::UIGroup::UIGroup(UIGroup* parent, const CreateParams& params) :
