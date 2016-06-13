@@ -25,14 +25,14 @@
 
 #include "../Common.h"
 
-Indigo::Render::UILayer::UILayer(Indigo::Render::Window* window, Indigo::UILayer* owner) :
-		Indigo::Render::UIGroup(true),
+Indigo::Render::UILayer::UILayer(Indigo::Render::Window* window, Indigo::UILayer* owner, bool visible, const glm::ivec2& pos, const glm::uvec2& sz) :
+		Indigo::Render::UIGroup(visible,pos,sz),
 		Indigo::Render::Layer(window),
 		m_owner(owner)
 {
-	glm::vec2 sz = window->window()->size();
-
-	m_mvp = glm::ortho(0.f,sz.x,0.f,sz.y);
+	size(sz);
+	glm::vec2 sz2(sz);
+	m_mvp = glm::ortho(0.f,sz2.x,0.f,sz2.y);
 }
 
 void Indigo::Render::UILayer::on_draw(OOGL::State& glState) const
@@ -57,10 +57,14 @@ bool Indigo::Render::UILayer::on_update(OOGL::State& glState)
 
 void Indigo::Render::UILayer::on_size(const glm::uvec2& sz)
 {
-	glm::vec2 sz2 = sz;
-	m_mvp = glm::ortho(0.f,sz2.x,0.f,sz2.y);
+	if (sz != size())
+	{
+		size(sz);
+		glm::vec2 sz2(sz);
+		m_mvp = glm::ortho(0.f,sz2.x,0.f,sz2.y);
 
-	Indigo::logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::UILayer::on_layer_size),sz);
+		Indigo::logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::UILayer::on_layout),sz);
+	}
 }
 
 bool Indigo::Render::UILayer::on_cursormove(const glm::dvec2& pos)
@@ -133,7 +137,7 @@ bool Indigo::UILayer::on_close()
 	return false;
 }
 
-void Indigo::UILayer::on_layer_size(const glm::uvec2& sz)
+void Indigo::UILayer::on_layout(const glm::uvec2& sz)
 {
 	size(sz);
 }
@@ -149,6 +153,7 @@ glm::uvec2 Indigo::UILayer::min_size() const
 {
 	return m_sizer.min_fit();
 }
+
 glm::uvec2 Indigo::UILayer::ideal_size() const
 {
 	return m_sizer.ideal_fit();
@@ -156,9 +161,11 @@ glm::uvec2 Indigo::UILayer::ideal_size() const
 
 OOBase::SharedPtr<Indigo::Render::Layer> Indigo::UILayer::create_render_layer(Indigo::Render::Window* window)
 {
-	size(window->window()->size());
+	glm::uvec2 sz(window->window()->size());
+	if (sz != size())
+		Indigo::logic_pipe()->call(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Indigo::UILayer::on_layout),sz);
 
-	OOBase::SharedPtr<Indigo::Render::UILayer> group = OOBase::allocate_shared<Indigo::Render::UILayer,OOBase::ThreadLocalAllocator>(window,this);
+	OOBase::SharedPtr<Indigo::Render::UILayer> group = OOBase::allocate_shared<Indigo::Render::UILayer,OOBase::ThreadLocalAllocator>(window,this,visible(),position(),size());
 	if (!group)
 		LOG_ERROR(("Failed to allocate group: %s",OOBase::system_error_text()));
 	else if (!on_render_create(group.get()))

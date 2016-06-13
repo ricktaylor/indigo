@@ -37,7 +37,7 @@ namespace Indigo
 		class UILayer : public UIGroup, public Layer
 		{
 		public:
-			UILayer(Window* window, Indigo::UILayer* owner);
+			UILayer(Window* window, Indigo::UILayer* owner, bool visible = false, const glm::ivec2& pos = glm::ivec2(), const glm::uvec2& size = glm::uvec2());
 
 		private:
 			glm::mat4        m_mvp;
@@ -107,7 +107,7 @@ namespace Indigo
 		//virtual bool on_cursormove(const double& screen_x, const double& screen_y);
 		//virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 
-		void on_layer_size(const glm::uvec2& sz);
+		void on_layout(const glm::uvec2& sz);
 	};
 }
 
