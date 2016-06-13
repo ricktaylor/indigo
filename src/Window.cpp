@@ -29,7 +29,8 @@
 
 Indigo::Render::Window::Window(Indigo::Window* owner) :
 		m_owner(owner),
-		m_have_cursor(false)
+		m_have_cursor(false),
+		m_dirty(true)
 {
 	ASSERT_RENDER_THREAD();
 }
@@ -76,11 +77,6 @@ bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& p
 	return true;
 }
 
-void Indigo::Render::Window::hit_test(const glm::dvec2& cursor_pos)
-{
-	
-}
-
 void Indigo::Render::Window::on_close(const OOGL::Window&)
 {
 	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::Window::on_close));
@@ -88,6 +84,8 @@ void Indigo::Render::Window::on_close(const OOGL::Window&)
 
 void Indigo::Render::Window::on_iconify(const OOGL::Window&, bool iconified)
 {
+	ASSERT_RENDER_THREAD();
+
 	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::Window::on_iconify),iconified);
 }
 
@@ -104,8 +102,10 @@ void Indigo::Render::Window::on_size(const OOGL::Window&, const glm::uvec2& sz)
 
 void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
+	bool hit_test = m_dirty;
 	glm::dvec2 cursor_pos = win.cursor_pos();
-	bool hit_test = (m_cursor_pos != cursor_pos);
+	if (m_cursor_pos != cursor_pos)
+		hit_test = true;
 	
 	// Update all layers
 	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
@@ -113,6 +113,7 @@ void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glSta
 		if ((*i)->on_update(glState))
 			hit_test = true;
 	}
+	m_dirty = false;
 
 	if (m_wnd->visible() && !m_wnd->iconified())
 	{
@@ -230,7 +231,7 @@ void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, bool* ret)
 		}
 		else
 		{
-			hit_test(m_wnd->cursor_pos());
+			m_dirty = true;
 			*ret = true;
 		}
 	}
@@ -239,7 +240,7 @@ void Indigo::Render::Window::add_render_layer(Indigo::Layer* layer, bool* ret)
 void Indigo::Render::Window::remove_render_layer(Indigo::Layer* layer)
 {
 	if (m_layers.remove(layer->m_render_layer) != 0)
-		hit_test(m_wnd->cursor_pos());
+		m_dirty = true;
 }
 
 Indigo::Window::Window()

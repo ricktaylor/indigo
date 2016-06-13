@@ -121,10 +121,10 @@ namespace Indigo
 			void remove_render_layer(Indigo::Layer* layer);
 
 			bool m_have_cursor;
+			bool m_dirty;
 			glm::dvec2 m_cursor_pos;
 			OOBase::WeakPtr<Layer> m_cursor_layer;
 			OOBase::WeakPtr<Layer> m_focus_layer;
-			void hit_test(const glm::dvec2& cursor_pos);
 		};
 	}
 }
