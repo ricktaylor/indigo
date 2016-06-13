@@ -76,9 +76,74 @@ bool Indigo::Render::UILayer::on_cursormove(const glm::dvec2& pos)
 	if (!sz.x || !sz.y)
 		return false;
 
-	bool ret = UIGroup::on_cursormove(glm::clamp(glm::ivec2(floor(pos)),glm::ivec2(0),glm::ivec2(sz.x-1,sz.y-1)));
-	return m_owner->m_modal || ret;
+	OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator> hits;
+	hit_test(hits,glm::clamp(glm::ivec2(glm::floor(pos)),glm::ivec2(0),glm::ivec2(sz.x-1,sz.y-1)));
+
+	OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator i=m_cursor_hits.back();
+	OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator j=hits.back();
+	for (;i && j && *i == *j;--i,--j)
+		;
+
+	// Everything from i loses cursor
+	for (OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator k=m_cursor_hits.begin();k && k < i;++k)
+	{
+		OOBase::SharedPtr<UIDrawable> d = k->lock();
+		if (d && d->on_cursorenter(false))
+			break;
+	}
+
+	// Everything from j gains cursor
+	for (OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator k=hits.begin();k && k < j;++k)
+	{
+		OOBase::SharedPtr<UIDrawable> d = k->lock();
+		if (d && d->on_cursorenter(true))
+			break;
+	}
+
+	m_cursor_hits.swap(hits);
+	hits.clear();
+
+	bool handled = false;
+	for (i=m_cursor_hits.begin();!handled && i;++i)
+	{
+		OOBase::SharedPtr<UIDrawable> d = i->lock();
+		if (d)
+			handled = d->on_cursormove();
+	}
+
+	return m_owner->m_modal || handled;
 }
+
+bool Indigo::Render::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+{
+	bool grabbed_outer = false;
+	bool handled = false;
+	for (OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator i=m_cursor_hits.begin();!handled && i;++i)
+	{
+		OOBase::SharedPtr<UIDrawable> d = i->lock();
+		if (d)
+		{
+			bool grabbed = false;
+			handled = d->on_mousebutton(click,grabbed);
+			if (grabbed)
+			{
+				grabbed_outer = true;
+				if (*i != m_focus_child)
+				{
+					// Grabbed focus!
+					OOBase::SharedPtr<UIDrawable> prev_focus_child = m_focus_child.lock();
+					if (prev_focus_child)
+						prev_focus_child->on_losefocus();
+
+					m_focus_child = *i;
+				}
+			}
+		}
+	}
+
+	return grabbed_outer;
+}
+
 
 Indigo::UILayer::UILayer(const CreateParams& params) :
 		UIGroup(NULL,params),
@@ -147,6 +212,9 @@ void Indigo::UILayer::on_layout(const glm::uvec2& sz)
 void Indigo::UILayer::on_size(glm::uvec2& sz)
 {
 	m_sizer.fit(sz);
+
+	if (m_render_parent)
+		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Render::UIDrawable*>(m_render_parent),&Render::UIDrawable::size),sz);
 }
 
 glm::uvec2 Indigo::UILayer::min_size() const

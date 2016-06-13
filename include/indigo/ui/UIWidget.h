@@ -38,7 +38,8 @@ namespace Indigo
 		class UIDrawable : public OOBase::NonCopyable
 		{
 			friend class UIGroup;
-
+			friend class UILayer;
+			
 		public:
 			void show(bool visible = true) { m_visible = visible; }
 			bool visible() const { return m_visible; }
@@ -54,19 +55,23 @@ namespace Indigo
 			virtual ~UIDrawable();
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
-			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
-			virtual bool on_cursormove(const glm::ivec2& pos) { return false; }
-			virtual void on_losecursor() {}
+
+			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus) { return false; }
+			virtual bool on_cursorenter(bool enter) { return false; }
+			virtual bool on_cursormove() { return false; }
 			virtual void on_losefocus() {}
 
 		private:
 			bool       m_visible;
 			glm::ivec2 m_position;
 			glm::uvec2 m_size;
+
+			virtual void hit_test(OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>& hits, const glm::ivec2& pos) { }
 		};
 
 		class UIGroup : public UIDrawable
 		{
+			friend class UILayer;
 			friend class Indigo::UIGroup;
 
 		public:
@@ -78,15 +83,12 @@ namespace Indigo
 
 		protected:
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
-			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
-			virtual bool on_cursormove(const glm::ivec2& pos);
 			
 		private:
 			OOBase::Vector<OOBase::SharedPtr<UIDrawable>,OOBase::ThreadLocalAllocator> m_children;
-			OOBase::WeakPtr<UIDrawable> m_cursor_child;
-			OOBase::WeakPtr<UIDrawable> m_focus_child;
 
 			void add_subgroup(UIWidget* widget, bool* ret);
+			void hit_test(OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>& hits, const glm::ivec2& pos);
 		};
 	}
 

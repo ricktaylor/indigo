@@ -43,11 +43,12 @@ namespace Indigo
 			glm::mat4        m_mvp;
 			Indigo::UILayer* m_owner;
 
-			OOBase::WeakPtr<UIGroup> m_cursor_group;
-			OOBase::WeakPtr<UIGroup> m_focus_group;
+			OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator> m_cursor_hits;
+			OOBase::WeakPtr<UIDrawable> m_focus_child;
 
 			bool on_update(OOGL::State& glState);
 			void on_draw(OOGL::State& glState) const;
+			bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 			void on_size(const glm::uvec2& sz);
 			bool on_cursormove(const glm::dvec2& pos);
 		};

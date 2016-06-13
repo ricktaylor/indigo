@@ -77,31 +77,8 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, bool* ret)
 	}
 }
 
-bool Indigo::Render::UIGroup::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+void Indigo::Render::UIGroup::hit_test(OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>& hits, const glm::ivec2& pos)
 {
-	OOBase::SharedPtr<UIDrawable> cursor_child = m_cursor_child.lock();
-	if (cursor_child)
-	{
-		if (cursor_child->on_mousebutton(click))
-		{
-			// Grabbed focus!
-			if (cursor_child != m_focus_child)
-			{
-				OOBase::SharedPtr<UIDrawable> prev_focus_child = m_focus_child.lock();
-				if (prev_focus_child)
-					prev_focus_child->on_losefocus();
-
-				m_focus_child = cursor_child;
-			}
-		}
-	}
-
-	return m_focus_child != NULL;
-}
-
-bool Indigo::Render::UIGroup::on_cursormove(const glm::ivec2& pos)
-{
-	OOBase::SharedPtr<UIDrawable> cursor_child;
 	for (OOBase::Vector<OOBase::SharedPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator i=m_children.back();i;--i)
 	{
 		if ((*i)->visible())
@@ -111,27 +88,10 @@ bool Indigo::Render::UIGroup::on_cursormove(const glm::ivec2& pos)
 			{
 				glm::ivec2 child_size = (*i)->size();
 				if (pos.x < child_pos.x + child_size.x && pos.y < child_pos.y + child_size.y)
-				{
-					if ((*i)->on_cursormove(pos - child_pos))
-					{
-						cursor_child = *i;
-						break;
-					}
-				}
+					hits.push_back(*i);
 			}
 		}
 	}
-
-	if (cursor_child != m_cursor_child)
-	{
-		OOBase::SharedPtr<UIDrawable> prev_cursor_child = m_cursor_child.lock();
-		if (prev_cursor_child)
-			prev_cursor_child->on_losecursor();
-
-		m_cursor_child = cursor_child;
-	}
-
-	return m_cursor_child != NULL;
 }
 
 Indigo::UIWidget::UIWidget(UIGroup* parent, const CreateParams& params) :
