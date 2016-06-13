@@ -139,13 +139,13 @@ bool Indigo::UILayer::on_close()
 
 void Indigo::UILayer::on_layout(const glm::uvec2& sz)
 {
+	OOBase::Guard<Pipe> lock(*render_pipe());
+
 	size(sz);
 }
 
 void Indigo::UILayer::on_size(glm::uvec2& sz)
 {
-	OOBase::Guard<Pipe> lock(*render_pipe());
-
 	m_sizer.fit(sz);
 }
 

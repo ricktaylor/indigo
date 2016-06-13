@@ -276,26 +276,18 @@ bool Indigo::Pipe::drain()
 
 bool Indigo::Pipe::acquire()
 {
-	/*if (!m_send_queue)
+	if (!m_send_queue)
 		return false;
 
-	LOG_DEBUG(("Spinlock acquire"));
-
-	return m_send_queue->enqueue(&Pipe::spin_lock,NULL);*/
-
-	return true;
+	return m_send_queue->enqueue(&Pipe::spin_lock,NULL);
 }
 
 bool Indigo::Pipe::release()
 {
-	/*if (!m_send_queue)
+	if (!m_send_queue)
 		return false;
 
-	LOG_DEBUG(("Spinlock release"));
-
-	return m_send_queue->enqueue(&Pipe::spin_unlock,NULL);*/
-
-	return true;
+	return m_send_queue->enqueue(&Pipe::spin_unlock,NULL);
 }
 
 bool Indigo::Pipe::spin_lock(void* param)
@@ -308,20 +300,8 @@ bool Indigo::Pipe::do_spin_lock()
 	if (!m_recv_queue)
 		return false;
 
-	if (m_spin_lock)
-		LOG_DEBUG(("Double lock!"));
-
-	size_t prev = m_spin_lock++;
-
-	LOG_DEBUG(("Pipe %p enter spinlock %zu",this,m_spin_lock));
-
-
-	while (m_spin_lock != prev)
-	{
+	for (size_t prev = m_spin_lock++;m_spin_lock != prev;)
 		m_recv_queue->dequeue(false,true);
-	}
-
-	LOG_DEBUG(("Pipe %p leave spinlock %zu",this,m_spin_lock));
 
 	return true;
 }
