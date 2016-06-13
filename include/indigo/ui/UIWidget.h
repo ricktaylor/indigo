@@ -83,7 +83,7 @@ namespace Indigo
 
 		protected:
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
-			
+
 		private:
 			OOBase::Vector<OOBase::SharedPtr<UIDrawable>,OOBase::ThreadLocalAllocator> m_children;
 

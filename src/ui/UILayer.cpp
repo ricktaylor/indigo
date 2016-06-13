@@ -146,6 +146,7 @@ bool Indigo::Render::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& 
 	return grabbed_outer;
 }
 
+
 Indigo::UILayer::UILayer(const CreateParams& params) :
 		UIGroup(NULL,params),
 		m_sizer(params.m_fixed,params.m_margins,params.m_padding),
