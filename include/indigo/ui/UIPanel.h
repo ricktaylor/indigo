@@ -63,7 +63,6 @@ namespace Indigo
 
 		virtual bool on_render_create(Render::UIGroup* group);
 		virtual void on_size(glm::uvec2& sz);
-		virtual bool on_cursormove(const glm::ivec2& pos);
 
 	private:
 		UIGridSizer m_sizer;

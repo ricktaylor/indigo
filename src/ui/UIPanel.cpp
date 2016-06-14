@@ -79,11 +79,3 @@ void Indigo::UIPanel::on_size(glm::uvec2& sz)
 	if (m_render_background)
 		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_background,&Render::UIDrawable::size),sz);
 }
-
-bool Indigo::UIPanel::on_cursormove(const glm::ivec2& pos)
-{
-	//UIGroup::on_cursormove(pos);
-
-	// Always eat the message
-	return true;
-}
