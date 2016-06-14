@@ -39,6 +39,57 @@ Indigo::Render::UIDrawable::~UIDrawable()
 	ASSERT_RENDER_THREAD();
 }
 
+OOBase::SharedPtr<Indigo::Render::UIEventHandler> Indigo::Render::UIDrawable::event_handler(const OOBase::SharedPtr<UIEventHandler>& handler)
+{
+	OOBase::SharedPtr<UIEventHandler> prev = m_event_handler;
+	m_event_handler = handler;
+	return prev;
+}
+
+bool Indigo::Render::UIDrawable::on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus)
+{
+	if (m_event_handler)
+		return m_event_handler->on_mousebutton(click,grab_focus);
+
+	return false;
+}
+
+bool Indigo::Render::UIDrawable::on_cursorenter(bool enter)
+{
+	if (m_event_handler)
+		return m_event_handler->on_cursorenter(enter);
+
+	return false;
+}
+
+bool Indigo::Render::UIDrawable::on_cursormove()
+{
+	if (m_event_handler)
+		return m_event_handler->on_cursormove();
+
+	return false;
+}
+
+void Indigo::Render::UIDrawable::on_losefocus()
+{
+	if (m_event_handler)
+		m_event_handler->on_losefocus();
+}
+
+void Indigo::Render::UIDrawable::hit_test(OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>& hits, const glm::ivec2& pos)
+{
+	if (visible() && m_event_handler)
+	{
+		const glm::ivec2& min = position();
+		if (pos.x >= min.x && pos.y >= min.y)
+		{
+			const glm::uvec2& sz = size();
+			if (pos.x < static_cast<glm::ivec2::value_type>(min.x + sz.x) && pos.y < static_cast<glm::ivec2::value_type>(min.y + sz.y))
+				hits.push_back(shared_from_this());
+		}
+	}
+}
+
 void Indigo::Render::UIGroup::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	for (OOBase::Vector<OOBase::SharedPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::const_iterator i=m_children.begin();i;++i)
@@ -80,18 +131,9 @@ void Indigo::Render::UIGroup::add_subgroup(UIWidget* widget, bool* ret)
 void Indigo::Render::UIGroup::hit_test(OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>& hits, const glm::ivec2& pos)
 {
 	for (OOBase::Vector<OOBase::SharedPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator i=m_children.back();i;--i)
-	{
-		if ((*i)->visible())
-		{
-			glm::ivec2 child_pos = (*i)->position();
-			if (pos.x >= child_pos.x && pos.y >= child_pos.y)
-			{
-				glm::ivec2 child_size = (*i)->size();
-				if (pos.x < child_pos.x + child_size.x && pos.y < child_pos.y + child_size.y)
-					hits.push_back(*i);
-			}
-		}
-	}
+		(*i)->hit_test(hits,pos - position());
+
+	UIDrawable::hit_test(hits,pos);
 }
 
 Indigo::UIWidget::UIWidget(UIGroup* parent, const CreateParams& params) :
@@ -272,14 +314,3 @@ glm::uvec2 Indigo::UIGroup::ideal_size() const
 
 	return ideal;
 }
-
-/*bool Indigo::UIGroup::on_mousebutton(const OOGL::Window::mouse_click_t& click)
-{
-	OOBase::SharedPtr<UIWidget> cursor_child = m_cursor_child.lock();
-	if (cursor_child && cursor_child->visible() && cursor_child->enabled())
-		return cursor_child->on_mousebutton(click);
-
-	m_cursor_child.reset();
-
-	return false;
-}*/

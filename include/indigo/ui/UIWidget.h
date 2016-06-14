@@ -35,7 +35,16 @@ namespace Indigo
 	{
 		class UIGroup;
 
-		class UIDrawable : public OOBase::NonCopyable
+		class UIEventHandler
+		{
+		public:
+			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus) { return false; }
+			virtual bool on_cursorenter(bool enter) { return false; }
+			virtual bool on_cursormove() { return false; }
+			virtual void on_losefocus() {}
+		};
+
+		class UIDrawable : public OOBase::NonCopyable, public OOBase::EnableSharedFromThis<UIDrawable>
 		{
 			friend class UIGroup;
 			friend class UILayer;
@@ -50,23 +59,28 @@ namespace Indigo
 			virtual void size(const glm::uvec2& size) { m_size = size; }
 			const glm::uvec2& size() const { return m_size; }
 
+			OOBase::SharedPtr<UIEventHandler> event_handler(const OOBase::SharedPtr<UIEventHandler>& handler);
+			const OOBase::SharedPtr<UIEventHandler>& event_handler() const { return m_event_handler; }
+
 		protected:
 			UIDrawable(bool visible, const glm::ivec2& position, const glm::uvec2& size);
 			virtual ~UIDrawable();
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const = 0;
 
-			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus) { return false; }
-			virtual bool on_cursorenter(bool enter) { return false; }
-			virtual bool on_cursormove() { return false; }
-			virtual void on_losefocus() {}
-
 		private:
 			bool       m_visible;
 			glm::ivec2 m_position;
 			glm::uvec2 m_size;
 
-			virtual void hit_test(OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>& hits, const glm::ivec2& pos) { }
+			OOBase::SharedPtr<UIEventHandler> m_event_handler;
+
+			virtual void hit_test(OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>& hits, const glm::ivec2& pos);
+
+			bool on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus);
+			bool on_cursorenter(bool enter);
+			bool on_cursormove();
+			void on_losefocus();
 		};
 
 		class UIGroup : public UIDrawable
@@ -151,12 +165,6 @@ namespace Indigo
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
 
 		virtual void make_dirty();
-
-		/*
-			virtual void on_cursorenter(bool enter) { }
-			virtual bool on_cursormove(const glm::ivec2& pos) { return false; }
-			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
-		*/
 
 	private:
 		UIGroup*         m_parent;

@@ -25,6 +25,27 @@
 
 #include "../Common.h"
 
+bool Indigo::Render::UIButtonEventHandler::on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus)
+{
+	if (m_owner && click.button == GLFW_MOUSE_BUTTON_LEFT)
+	{
+		logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&UIButton::on_lmousebutton),click.down);
+
+		grab_focus = click.down;
+		return true;
+	}
+
+	return false;
+}
+
+bool Indigo::Render::UIButtonEventHandler::on_cursorenter(bool enter)
+{
+	if (m_owner)
+		logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&UIButton::on_cursorenter),enter);
+
+	return false;
+}
+
 void Indigo::UIButton::StyleState::unload()
 {
 	if (m_background)
@@ -237,6 +258,12 @@ bool Indigo::UIButton::on_render_create(Indigo::Render::UIGroup* group)
 	if (!m_style)
 		LOG_ERROR_RETURN(("Invalid style passed to UIButton constructor"),false);
 
+	OOBase::SharedPtr<Render::UIButtonEventHandler> ev = OOBase::allocate_shared<Render::UIButtonEventHandler,OOBase::ThreadLocalAllocator>(this);
+	if (!ev)
+		LOG_ERROR_RETURN(("Failed to allocate event handler"),false);
+
+	group->event_handler(ev);
+
 	bool normal = false;
 	bool pressed = false;
 	bool disabled = false;
@@ -362,23 +389,14 @@ void Indigo::UIButton::on_cursorenter(bool enter)
 	toggle_state(OOBase::uint32_t(enter ? eBS_cursorover : 0),eBS_cursorover | eBS_pressed);
 }
 
-bool Indigo::UIButton::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+void Indigo::UIButton::on_lmousebutton(bool down)
 {
-	if (click.button == GLFW_MOUSE_BUTTON_LEFT)
-	{
-		OOBase::uint32_t curr_state = state();
-		if (!click.down && (curr_state & eBS_pressed))
-		{
-			if (m_on_click)
-				thread_pipe()->post(m_on_click);
-		}
+	OOBase::uint32_t curr_state = state();
+	bool click = (!down && (curr_state & eBS_pressed));
+	toggle_state(down,eBS_pressed);
 
-		toggle_state(click.down,eBS_pressed);
-
-		return true;
-	}
-
-	return false; //UIWidget::on_mousebutton(click);
+	if (click && m_on_click)
+		m_on_click.invoke();
 }
 
 OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> Indigo::UIButton::on_click(const OOBase::Delegate0<void,OOBase::ThreadLocalAllocator>& delegate)

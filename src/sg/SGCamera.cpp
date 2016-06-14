@@ -109,7 +109,7 @@ void ClipVisitor::draw(OOGL::State& glState, const glm::mat4& mvp) const
 		i->m_drawable->on_draw(glState,mvp * i->m_transform);
 }
 
-bool Indigo::Render::SGCamera::on_update(OOGL::State& glState)
+bool Indigo::Render::SGCamera::on_update()
 {
 	if (!m_scene || !m_scene->dirty())
 		return false;

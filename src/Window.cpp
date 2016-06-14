@@ -67,6 +67,7 @@ bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& p
 		m_wnd->on_draw(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_draw));
 		m_wnd->on_mousebutton(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_mousebutton));
 		m_wnd->on_cursorenter(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_cursorenter));
+		m_wnd->on_cursormove(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_cursormove));
 		m_wnd->on_focus(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_focus));
 		m_wnd->on_iconify(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_iconify));
 				
@@ -103,27 +104,24 @@ void Indigo::Render::Window::on_size(const OOGL::Window&, const glm::uvec2& sz)
 void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glState)
 {
 	bool hit_test = m_dirty;
-	glm::dvec2 cursor_pos = win.cursor_pos();
-	if (m_cursor_pos != cursor_pos)
-		hit_test = true;
 	
 	// Update all layers
 	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
 	{
-		if ((*i)->on_update(glState))
+		if ((*i)->on_update())
 			hit_test = true;
 	}
 	m_dirty = false;
 
 	if (m_wnd->visible() && !m_wnd->iconified())
 	{
+		// If something changed, then hit test
 		if (m_have_cursor && hit_test)
 		{
-			// If something changed, then hit test
 			OOBase::SharedPtr<Layer> cursor_layer;
 			for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();i;--i)
 			{
-				if ((*i)->on_cursormove(cursor_pos))
+				if ((*i)->on_cursormove(m_cursor_pos))
 				{
 					cursor_layer = *i;
 					break;
@@ -138,13 +136,39 @@ void Indigo::Render::Window::on_draw(const OOGL::Window& win, OOGL::State& glSta
 
 				m_cursor_layer = cursor_layer;
 			}
-
-			m_cursor_pos = cursor_pos;
 		}
 	
 		// Render all layers
 		for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::const_iterator i=m_layers.cbegin();i;++i)
 			(*i)->on_draw(glState);
+	}
+}
+
+void Indigo::Render::Window::on_cursormove(const OOGL::Window& win, const glm::dvec2& pos)
+{
+	if (m_wnd->visible() && !m_wnd->iconified())
+	{
+		m_cursor_pos = pos;
+		m_have_cursor = true;
+
+		OOBase::SharedPtr<Layer> cursor_layer;
+		for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.back();i;--i)
+		{
+			if ((*i)->on_cursormove(m_cursor_pos))
+			{
+				cursor_layer = *i;
+				break;
+			}
+		}
+
+		if (cursor_layer != m_cursor_layer)
+		{
+			OOBase::SharedPtr<Layer> prev_cursor_layer = m_cursor_layer.lock();
+			if (prev_cursor_layer)
+				prev_cursor_layer->on_losecursor();
+
+			m_cursor_layer = cursor_layer;
+		}
 	}
 }
 
@@ -196,19 +220,14 @@ void Indigo::Render::Window::on_focus(const OOGL::Window& win, bool focused)
 
 void Indigo::Render::Window::grab_focus(Layer* layer)
 {
-	for (OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.begin();i;++i)
+	OOBase::Vector<OOBase::SharedPtr<Layer>,OOBase::ThreadLocalAllocator>::iterator i=m_layers.find(layer);
+	if (i && m_focus_layer != *i)
 	{
-		if (i->get() == layer)
-		{
-			if (m_focus_layer != *i)
-			{
-				OOBase::SharedPtr<Layer> prev_focus_layer = m_focus_layer.lock();
-				if (prev_focus_layer)
-					prev_focus_layer->on_losefocus();
+		OOBase::SharedPtr<Layer> prev_focus_layer = m_focus_layer.lock();
+		if (prev_focus_layer)
+			prev_focus_layer->on_losefocus();
 
-				m_focus_layer = *i;
-			}
-		}
+		m_focus_layer = *i;
 	}
 }
 

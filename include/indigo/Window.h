@@ -115,6 +115,7 @@ namespace Indigo
 			void on_size(const OOGL::Window& win, const glm::uvec2& sz);
 			void on_mousebutton(const OOGL::Window& win, const OOGL::Window::mouse_click_t& click);
 			void on_cursorenter(const OOGL::Window& win, bool enter);
+			void on_cursormove(const OOGL::Window& win, const glm::dvec2& pos);
 			void on_focus(const OOGL::Window& win, bool focused);
 
 			void add_render_layer(Indigo::Layer* layer, bool* ret);

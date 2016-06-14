@@ -50,7 +50,7 @@ void Indigo::Render::UILayer::on_draw(OOGL::State& glState) const
 	}
 }
 
-bool Indigo::Render::UILayer::on_update(OOGL::State& glState)
+bool Indigo::Render::UILayer::on_update()
 {
 	bool dirty = m_dirty;
 	m_dirty = false;
@@ -71,46 +71,51 @@ void Indigo::Render::UILayer::on_size(const glm::uvec2& sz)
 
 bool Indigo::Render::UILayer::on_cursormove(const glm::dvec2& pos)
 {
-	if (!visible())
-		return false;
-
 	const glm::uvec2& sz = size();
-	if (!sz.x || !sz.y)
-		return false;
+	glm::ivec2 ipos = glm::clamp(glm::ivec2(glm::floor(pos)),glm::ivec2(0),glm::ivec2(sz.x-1,sz.y-1));
+
 
 	OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator> hits;
-	hit_test(hits,glm::clamp(glm::ivec2(glm::floor(pos)),glm::ivec2(0),glm::ivec2(sz.x-1,sz.y-1)));
+	hit_test(hits,ipos);
 
-	OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator i=m_cursor_hits.back();
-	OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator j=hits.back();
-	for (;i && j && *i == *j;--i,--j)
-		;
-
-	// Everything from i loses cursor
-	for (OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator k=m_cursor_hits.begin();k && k < i;++k)
+	for (OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator i=m_cursor_hits.begin();i;)
 	{
-		OOBase::SharedPtr<UIDrawable> d = k->lock();
-		if (d && d->on_cursorenter(false))
-			break;
+		if (hits.find(*i))
+			++i;
+		else
+		{
+			OOBase::SharedPtr<UIDrawable> d = i->lock();
+
+			i = m_cursor_hits.erase(i);
+
+			if (d && d->on_cursorenter(false))
+				break;
+		}
 	}
 
-	// Everything from j gains cursor
-	for (OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator k=hits.begin();k && k < j;++k)
+	for (OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator i=hits.begin();i;++i)
 	{
-		OOBase::SharedPtr<UIDrawable> d = k->lock();
-		if (d && d->on_cursorenter(true))
-			break;
+		if (m_cursor_hits.remove(*i) == 0)
+		{
+			OOBase::SharedPtr<UIDrawable> d = i->lock();
+			if (d && d->on_cursorenter(true))
+				break;
+		}
 	}
 
 	m_cursor_hits.swap(hits);
-	hits.clear();
 
 	bool handled = false;
-	for (i=m_cursor_hits.begin();!handled && i;++i)
+	for (OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator i=m_cursor_hits.begin();!handled && i;)
 	{
 		OOBase::SharedPtr<UIDrawable> d = i->lock();
-		if (d)
+		if (!d)
+			m_cursor_hits.erase(i);
+		else
+		{
 			handled = d->on_cursormove();
+			++i;
+		}
 	}
 
 	return m_owner->m_modal || handled;

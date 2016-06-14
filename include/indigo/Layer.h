@@ -42,7 +42,7 @@ namespace Indigo
 		protected:
 			Layer(Window* window);
 
-			virtual bool on_update(OOGL::State& glState) = 0;
+			virtual bool on_update() = 0;
 			virtual void on_draw(OOGL::State& glState) const = 0;
 			virtual void on_size(const glm::uvec2& sz) {}
 			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }

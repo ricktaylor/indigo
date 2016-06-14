@@ -57,7 +57,7 @@ namespace Indigo
 			SGNode* scene() const { return m_scene; }
 
 		protected:
-			virtual bool on_update(OOGL::State& glState);
+			virtual bool on_update();
 			virtual void on_draw(OOGL::State& glState) const;
 			virtual void on_size(const glm::uvec2& sz);
 			//virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click)

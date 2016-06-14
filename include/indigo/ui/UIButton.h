@@ -27,8 +27,30 @@
 
 namespace Indigo
 {
+	class UIButton;
+
+	namespace Render
+	{
+		class UIButtonEventHandler : public Indigo::Render::UIEventHandler
+		{
+		public:
+			UIButtonEventHandler(Indigo::UIButton* owner) : m_owner(owner)
+			{}
+
+			bool on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus);
+			bool on_cursorenter(bool enter);
+			bool on_cursormove() { return false; }
+			void on_losefocus() {}
+
+		private:
+			Indigo::UIButton* m_owner;
+		};
+	}
+
 	class UIButton : public UIWidget
 	{
+		friend class Render::UIButtonEventHandler;
+
 	public:
 		enum eStyleFlags
 		{
@@ -102,8 +124,6 @@ namespace Indigo
 		virtual bool on_render_create(Render::UIGroup* group);
 		virtual void on_size(glm::uvec2& sz);
 		virtual void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
-		virtual void on_cursorenter(bool enter);
-		virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 
 	private:
 		OOBase::SharedString<OOBase::ThreadLocalAllocator> m_text;
@@ -134,6 +154,9 @@ namespace Indigo
 		bool style_create(Render::UIGroup* group, StyleState& style, RenderStyleState& rs, bool visible);
 		void do_style_size(const glm::uvec2& sz, const StyleState& style, RenderStyleState& rs);
 		void do_style_change(RenderStyleState* new_style);
+
+		void on_cursorenter(bool enter);
+		void on_lmousebutton(bool down);
 	};
 }
 
