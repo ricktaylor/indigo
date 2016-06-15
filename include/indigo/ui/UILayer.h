@@ -109,10 +109,6 @@ namespace Indigo
 		bool on_close();
 		void on_size(glm::uvec2& sz);
 		void on_state_change(OOBase::uint32_t state, OOBase::uint32_t change_mask);
-		
-		//virtual bool on_cursormove(const double& screen_x, const double& screen_y);
-		//virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
-
 		void on_layout(const glm::uvec2& sz);
 		void make_dirty();
 	};

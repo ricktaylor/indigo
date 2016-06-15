@@ -25,13 +25,11 @@
 
 #include "../Common.h"
 
-bool Indigo::Render::UIButtonEventHandler::on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus)
+bool Indigo::Render::UIButtonEventHandler::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 {
 	if (m_owner && click.button == GLFW_MOUSE_BUTTON_LEFT)
 	{
 		logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&UIButton::on_lmousebutton),click.down);
-
-		grab_focus = click.down;
 		return true;
 	}
 

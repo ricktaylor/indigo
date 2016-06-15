@@ -38,7 +38,7 @@ namespace Indigo
 		class UIEventHandler
 		{
 		public:
-			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus) { return false; }
+			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
 			virtual bool on_cursorenter(bool enter) { return false; }
 			virtual bool on_cursormove() { return false; }
 			virtual void on_losefocus() {}
@@ -77,7 +77,7 @@ namespace Indigo
 
 			virtual void hit_test(OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>& hits, const glm::ivec2& pos);
 
-			bool on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus);
+			bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 			bool on_cursorenter(bool enter);
 			bool on_cursormove();
 			void on_losefocus();

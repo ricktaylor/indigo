@@ -46,10 +46,10 @@ OOBase::SharedPtr<Indigo::Render::UIEventHandler> Indigo::Render::UIDrawable::ev
 	return prev;
 }
 
-bool Indigo::Render::UIDrawable::on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus)
+bool Indigo::Render::UIDrawable::on_mousebutton(const OOGL::Window::mouse_click_t& click)
 {
 	if (m_event_handler)
-		return m_event_handler->on_mousebutton(click,grab_focus);
+		return m_event_handler->on_mousebutton(click);
 
 	return false;
 }

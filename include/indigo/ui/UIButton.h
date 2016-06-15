@@ -37,7 +37,7 @@ namespace Indigo
 			UIButtonEventHandler(Indigo::UIButton* owner) : m_owner(owner)
 			{}
 
-			bool on_mousebutton(const OOGL::Window::mouse_click_t& click, bool& grab_focus);
+			bool on_mousebutton(const OOGL::Window::mouse_click_t& click);
 			bool on_cursorenter(bool enter);
 			bool on_cursormove() { return false; }
 			void on_losefocus() {}
