@@ -45,8 +45,8 @@ namespace Indigo
 			virtual bool on_update() = 0;
 			virtual void on_draw(OOGL::State& glState) const = 0;
 			virtual void on_size(const glm::uvec2& sz) {}
-			virtual bool on_mousebutton(const OOGL::Window::mouse_click_t& click) { return false; }
 			virtual bool on_cursormove(const glm::dvec2& pos) { return false; }
+			virtual void on_mousebutton(const OOGL::Window::mouse_click_t& click) { }
 			virtual void on_losecursor() {}
 			virtual void on_losefocus() {}
 

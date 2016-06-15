@@ -176,20 +176,7 @@ void Indigo::Render::Window::on_mousebutton(const OOGL::Window&, const OOGL::Win
 {
 	OOBase::SharedPtr<Layer> cursor_layer = m_cursor_layer.lock();
 	if (cursor_layer)
-	{
-		if (cursor_layer->on_mousebutton(click))
-		{
-			// Grabbed focus!
-			if (cursor_layer != m_focus_layer)
-			{
-				OOBase::SharedPtr<Layer> prev_focus_layer = m_focus_layer.lock();
-				if (prev_focus_layer)
-					prev_focus_layer->on_losefocus();
-
-				m_focus_layer = cursor_layer;
-			}
-		}
-	}
+		cursor_layer->on_mousebutton(click);
 }
 
 void Indigo::Render::Window::on_cursorenter(const OOGL::Window& win, bool enter)

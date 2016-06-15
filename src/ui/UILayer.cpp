@@ -74,7 +74,6 @@ bool Indigo::Render::UILayer::on_cursormove(const glm::dvec2& pos)
 	const glm::uvec2& sz = size();
 	glm::ivec2 ipos = glm::clamp(glm::ivec2(glm::floor(pos)),glm::ivec2(0),glm::ivec2(sz.x-1,sz.y-1));
 
-
 	OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator> hits;
 	hit_test(hits,ipos);
 
@@ -121,36 +120,29 @@ bool Indigo::Render::UILayer::on_cursormove(const glm::dvec2& pos)
 	return m_owner->m_modal || handled;
 }
 
-bool Indigo::Render::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+void Indigo::Render::UILayer::on_losecursor()
 {
-	bool grabbed_outer = false;
+	for (OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator i=m_cursor_hits.begin();i;++i)
+	{
+		OOBase::SharedPtr<UIDrawable> d = i->lock();
+		if (d)
+			d->on_cursorenter(false);
+	}
+	m_cursor_hits.clear();
+}
+
+void Indigo::Render::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+{
 	bool handled = false;
 	for (OOBase::Vector<OOBase::WeakPtr<UIDrawable>,OOBase::ThreadLocalAllocator>::iterator i=m_cursor_hits.begin();!handled && i;++i)
 	{
 		OOBase::SharedPtr<UIDrawable> d = i->lock();
 		if (d)
-		{
-			bool grabbed = false;
-			handled = d->on_mousebutton(click,grabbed);
-			if (grabbed)
-			{
-				grabbed_outer = true;
-				if (*i != m_focus_child)
-				{
-					// Grabbed focus!
-					OOBase::SharedPtr<UIDrawable> prev_focus_child = m_focus_child.lock();
-					if (prev_focus_child)
-						prev_focus_child->on_losefocus();
-
-					m_focus_child = *i;
-				}
-			}
-		}
+			handled = d->on_mousebutton(click);
 	}
 
-	return grabbed_outer;
+	//return m_owner->m_modal || handled;
 }
-
 
 Indigo::UILayer::UILayer(const CreateParams& params) :
 		UIGroup(NULL,params),
