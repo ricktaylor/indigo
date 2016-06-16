@@ -570,7 +570,7 @@ bool Indigo::Font::load(const ResourceBundle& resource, const unsigned char* dat
 			tex_width = read_uint16(data);
 			tex_height = read_uint16(data);
 			pages = read_uint16(data);
-			if (*data++ == 1)
+			if (*data++ == 0x80)
 			{
 				// TODO: Packed data
 				data += 4;
