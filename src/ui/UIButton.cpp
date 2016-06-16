@@ -171,8 +171,7 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 					styles[i]->m_background_colour == style.m_background_colour)
 			{
 				rs.m_background = render_styles[i]->m_background;
-
-				if (visible)
+				if (visible && rs.m_background)
 					rs.m_background->show(true);
 			}
 
@@ -183,8 +182,7 @@ bool Indigo::UIButton::style_create(Indigo::Render::UIGroup* group, StyleState& 
 					styles[i]->m_text_colour == style.m_text_colour)
 			{
 				rs.m_caption = render_styles[i]->m_caption;
-
-				if (visible)
+				if (visible && rs.m_caption)
 					rs.m_caption->show(true);
 			}
 
