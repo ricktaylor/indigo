@@ -26,6 +26,8 @@
 
 namespace Indigo
 {
+	class Image;
+
 	class SGCube : public SGNode
 	{
 	public:
@@ -50,11 +52,40 @@ namespace Indigo
 		{}
 
 	private:
-		virtual OOBase::SharedPtr<Render::SGNode> on_render_create(Render::SGGroup* parent);
+		OOBase::SharedPtr<Render::SGNode> on_render_create(Render::SGGroup* parent);
 
 		glm::vec4 m_colour;
+	};
 
-		OOBase::WeakPtr<Render::SGDrawable> m_drawable;
+	class SGQuad : public SGNode
+	{
+	public:
+		struct CreateParams : public SGNode::CreateParams
+		{
+			CreateParams(OOBase::uint32_t state = 0,
+					const glm::vec3& position = glm::vec3(),
+					const glm::vec3& scaling = glm::vec3(1.f,1.f,1.f),
+					const glm::quat& rotation = glm::quat(),
+					const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f)
+			) :
+				SGNode::CreateParams(state,position,scaling,rotation),
+				m_colour(colour)
+			{}
+
+			glm::vec4               m_colour;
+		};
+
+		SGQuad(SGGroup* parent, const OOBase::SharedPtr<Image>& image, const CreateParams& params = CreateParams()) : 
+				SGNode(parent,params),
+				m_image(image),
+				m_colour(params.m_colour)
+		{}
+
+	private:
+		OOBase::SharedPtr<Render::SGNode> on_render_create(Render::SGGroup* parent);
+
+		OOBase::SharedPtr<Image> m_image;
+		glm::vec4 m_colour;
 	};
 }
 

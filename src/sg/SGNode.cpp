@@ -184,7 +184,7 @@ void Indigo::SGNode::enable(bool enable)
 
 glm::mat4 Indigo::SGNode::transform() const
 {
-	return glm::scale(glm::translate(glm::mat4_cast(m_rotation),m_position),m_scaling);
+	return glm::translate(glm::mat4(),m_position) * glm::mat4_cast(m_rotation) * glm::scale(glm::mat4(),m_scaling);
 }
 
 void Indigo::SGNode::position(const glm::vec3& pos)

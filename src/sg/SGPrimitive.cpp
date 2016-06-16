@@ -63,9 +63,9 @@ namespace
 		const size_t m_discriminator;
 
 		bool alloc();
-	};
 
-	const unsigned int elements_per_cube = 36;
+		static const unsigned int elements_per_cube = 36;
+	};
 }
 
 bool CubeFactory::alloc()
@@ -165,18 +165,11 @@ OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGCube::on_render_create(Rende
 {
 	OOBase::SharedPtr<Render::SGNode> node;
 
-	OOBase::SharedPtr<Render::SGDrawable> drawable = m_drawable.lock();
-	if (!drawable)
-	{
-		OOBase::SharedPtr< ::Cube> cube = OOBase::allocate_shared< ::Cube>(AABB(glm::vec3(0.5f),glm::vec3(0.5f)),m_colour);
-		if (!cube)
-			LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
+	OOBase::SharedPtr< ::Cube> cube = OOBase::allocate_shared< ::Cube>(AABB(glm::vec3(0.5f),glm::vec3(0.5f)),m_colour);
+	if (!cube)
+		LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
 
-		drawable = OOBase::static_pointer_cast<Render::SGDrawable>(cube);
-		m_drawable = drawable;
-	}
-
-	node = OOBase::allocate_shared<Render::SGNode>(parent,drawable,transform());
+	node = OOBase::allocate_shared<Render::SGNode>(parent,OOBase::static_pointer_cast<Render::SGDrawable>(cube),transform());
 	if (!node)
 		LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
 

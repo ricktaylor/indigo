@@ -21,6 +21,8 @@
 
 #include "../include/indigo/Quad.h"
 
+#include "../include/indigo/sg/SGPrimitive.h"
+#include "../include/indigo/Image.h"
 #include "../include/indigo/ShaderPool.h"
 
 #include "Common.h"
@@ -47,9 +49,21 @@ namespace
 		OOBase::SharedPtr<OOGL::BufferObject> m_ptrElements;
 
 		bool alloc();
-	};
 
-	const unsigned int elements_per_quad = 6;
+		static const unsigned int elements_per_quad = 6;
+	};
+	
+	class SGQuad : public Indigo::Render::SGDrawable
+	{
+	public:
+		SGQuad(const Indigo::AABB& aabb, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::vec4& colour);
+
+		void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
+
+	private:
+		OOBase::SharedPtr<OOGL::Texture> m_texture;
+		glm::vec4 m_colour;
+	};
 }
 
 bool QuadFactory::alloc()
@@ -123,4 +137,45 @@ void Indigo::Render::Quad::draw(OOGL::State& state, const OOBase::SharedPtr<OOGL
 {
 	if (texture && colour.a > 0.f)
 		OOGL::ContextSingleton<QuadFactory>::instance().draw(state,texture,mvp,colour);
+}
+
+SGQuad::SGQuad(const Indigo::AABB& aabb, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::vec4& colour) :
+		Indigo::Render::SGDrawable(aabb),
+		m_texture(texture),
+		m_colour(colour)
+{
+}
+
+void SGQuad::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
+{
+	if (m_colour.a > 0.f)
+		OOGL::ContextSingleton<QuadFactory>::instance().draw(glState,m_texture,mvp,m_colour);
+}
+
+OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGQuad::on_render_create(Render::SGGroup* parent)
+{
+	OOBase::SharedPtr<Render::SGNode> node;
+
+	bool cached = true;
+	OOBase::SharedPtr<OOGL::Texture> texture = m_image->make_texture(GL_RGBA8,cached);
+	if (!texture)
+		return node;
+
+	if (!cached)
+	{
+		texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+		texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+		texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+		texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	}
+
+	OOBase::SharedPtr< ::SGQuad> quad = OOBase::allocate_shared< ::SGQuad>(AABB(glm::vec3(0.5f,0.5f,0),glm::vec3(0.5f,0.5f,0)),texture,m_colour);
+	if (!quad)
+		LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
+
+	node = OOBase::allocate_shared<Render::SGNode>(parent,OOBase::static_pointer_cast<Render::SGDrawable>(quad),transform());
+	if (!node)
+		LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
+
+	return node;
 }
