@@ -499,7 +499,7 @@ OOBase::SharedPtr<Indigo::ResourceBundle> Indigo::Parser::cd_resource(const char
 	return prev_resource;
 }
 
-OOBase::SharedPtr<Indigo::Image> Indigo::Parser::load_image(const char*& p, const char* pe, const OOBase::ScopedString& image_name)
+OOBase::SharedPtr<Indigo::Image> Indigo::Parser::load_image(const OOBase::ScopedString& image_name)
 {
 	size_t hash = OOBase::Hash<const char*>::hash(image_name);
 	image_hash_t::iterator i = m_hashImages.find(hash);
@@ -522,7 +522,7 @@ OOBase::SharedPtr<Indigo::Image> Indigo::Parser::load_image(const char*& p, cons
 	return image;
 }
 
-OOBase::SharedPtr<Indigo::Font> Indigo::Parser::load_font(const char*& p, const char* pe, const OOBase::ScopedString& font_name)
+OOBase::SharedPtr<Indigo::Font> Indigo::Parser::load_font(const OOBase::ScopedString& font_name)
 {
 	size_t hash = OOBase::Hash<const char*>::hash(font_name);
 	font_hash_t::iterator i = m_hashFonts.find(hash);

@@ -69,8 +69,8 @@ namespace Indigo
 
 		OOBase::SharedPtr<ResourceBundle> cd_resource(const char* res_name, OOBase::ScopedString& filename);
 		
-		OOBase::SharedPtr<Image> load_image(const char*& p, const char* pe, const OOBase::ScopedString& image_name);
-		OOBase::SharedPtr<Font> load_font(const char*& p, const char* pe, const OOBase::ScopedString& font_name);
+		OOBase::SharedPtr<Image> load_image(const OOBase::ScopedString& image_name);
+		OOBase::SharedPtr<Font> load_font(const OOBase::ScopedString& font_name);
 
 		virtual bool load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type) = 0;
 		

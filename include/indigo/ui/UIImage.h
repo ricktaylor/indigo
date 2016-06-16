@@ -72,7 +72,6 @@ namespace Indigo
 	private:
 		OOBase::SharedPtr<Image> m_image;
 		Render::UIImage* m_render_image;
-
 		glm::vec4 m_colour;
 
 		void on_size(glm::uvec2& sz);

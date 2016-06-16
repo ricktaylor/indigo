@@ -428,7 +428,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 	if (image_name.empty())
 		SYNTAX_ERROR_RETURN(("Image name expected"),OOBase::SharedPtr<UIWidget>());
 
-	OOBase::SharedPtr<Image> image = load_image(p,pe,image_name);
+	OOBase::SharedPtr<Image> image = load_image(image_name);
 	if (!image)
 		return OOBase::SharedPtr<UIWidget>();
 
@@ -559,7 +559,7 @@ bool Indigo::UILoader::load_button_style_state(const char*& p, const char* pe, U
 					}
 					else
 					{
-						state.m_font = load_font(p,pe,font_name);
+						state.m_font = load_font(font_name);
 						if (!state.m_font)
 							return false;
 					}
@@ -781,7 +781,7 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_label(const char*& p,
 					if (font_name.empty())
 						SYNTAX_ERROR_RETURN(("Font name required"),OOBase::SharedPtr<UIWidget>());
 
-					params.m_font = load_font(p,pe,font_name);
+					params.m_font = load_font(font_name);
 					if (!params.m_font)
 						return OOBase::SharedPtr<UIWidget>();
 				}
