@@ -28,6 +28,9 @@
 
 #include <OOBase/Set.h>
 
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/vector_angle.hpp>
+
 namespace
 {
 	class ClipVisitor : public Indigo::Render::SGVisitor
@@ -135,8 +138,74 @@ void Indigo::Render::SGCamera::on_size(const glm::uvec2& sz)
 	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::SGCamera::size),sz);
 }
 
-Indigo::SGCamera::SGCamera(const CreateParams& params) :
-		m_scene(params.m_scene),
+bool Indigo::Render::SGCamera::on_cursormove(const glm::dvec2& pos)
+{
+	// First we must hit test the scene
+
+	// If nothing hits, then check to see if it's a camera move
+	switch (m_cam_control)
+	{
+	case eCC_pan:
+		if (pos != m_cam_pos)
+		{
+			logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::SGCamera::on_pan),m_cam_pos - pos,m_scene->world_bounds());
+			m_cam_pos = pos;
+		}
+		break;
+
+	case eCC_rotate:
+		if (pos != m_cam_pos)
+		{
+			logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::SGCamera::on_rotate),pos - m_cam_pos);
+			m_cam_pos = pos;
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	// Let the logic pipe handle it
+	
+
+	return true;
+}
+
+void Indigo::Render::SGCamera::on_mousebutton(const OOGL::Window::mouse_click_t& click)
+{
+	// If nothing else is hit
+
+	if (click.down)
+	{
+		if (click.button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			m_cam_control = eCC_pan;
+			m_cam_pos = m_window->cursor_pos();
+		}
+		else if (click.button == GLFW_MOUSE_BUTTON_MIDDLE)
+		{
+			m_cam_control = eCC_rotate;
+			m_cam_pos = m_window->cursor_pos();
+		}
+	}
+	else
+		m_cam_control = eCC_none;
+}
+
+void Indigo::Render::SGCamera::on_scroll(const glm::dvec2& pos)
+{
+	// If nothing else is hit
+
+	logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::SGCamera::on_zoom),pos);
+}
+
+void Indigo::Render::SGCamera::on_losecursor()
+{
+	m_cam_control = eCC_none;
+}
+
+Indigo::SGCamera::SGCamera(const OOBase::SharedPtr<SGNode>& scene, const CreateParams& params) :
+		m_scene(scene),
 		m_position(params.m_position),
 		m_target(params.m_target),
 		m_up(params.m_up),
@@ -145,6 +214,8 @@ Indigo::SGCamera::SGCamera(const CreateParams& params) :
 		m_fov(params.m_fov),
 		m_ortho(!params.m_perspective)
 {
+	if (!scene)
+		LOG_WARNING(("SGCamera created with no scene!"));
 }
 
 Indigo::SGCamera::~SGCamera()
@@ -158,7 +229,16 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::SGCamera::create_render_layer(R
 
 	Render::SGNode* render_scene = NULL;
 	if (m_scene)
+	{
 		render_scene = m_scene->render_node();
+		if (render_scene)
+		{
+			// Clamp the target to within the scene AABB
+			AABB bounds = render_scene->world_bounds();
+			
+			glm::clamp(m_target,bounds.min(),bounds.max());
+		}
+	}
 
 	OOBase::SharedPtr<Render::SGCamera> render_cam = OOBase::allocate_shared<Render::SGCamera,OOBase::ThreadLocalAllocator>(this,window,m_position,view_proj(),render_scene);
 	if (!render_cam)
@@ -172,6 +252,60 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::SGCamera::create_render_layer(R
 void Indigo::SGCamera::destroy_render_layer()
 {
 	m_render_camera.reset();
+}
+
+void Indigo::SGCamera::on_pan(const glm::dvec2& pan_v, const AABB& bounds)
+{
+	glm::vec3 cam_dir = m_position - m_target;
+	glm::vec3 dirx = glm::normalize(glm::cross(cam_dir,m_up));
+	glm::vec3 diry = glm::normalize(glm::cross(m_up,dirx));
+		
+	glm::vec3 move = dirx * static_cast<float>(-pan_v.x);
+	move += diry * static_cast<float>(-pan_v.y);
+
+	float length = glm::length(cam_dir) * glm::tan(m_fov);
+	move *= length / m_size.x;
+
+	m_position += move;
+
+	glm::vec3 new_target = m_target + move; //glm::clamp(m_target + move,bounds.min(),bounds.max());
+	m_target = new_target;
+			
+	if (m_render_camera)
+		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj_source),view_proj(),m_position);
+}
+
+void Indigo::SGCamera::on_rotate(const glm::dvec2& rot_v)
+{
+	glm::vec3 eye = m_position - m_target;
+	glm::vec3 dirx = glm::normalize(glm::cross(eye,m_up));
+	glm::vec3 diry = glm::normalize(glm::cross(m_up,dirx));
+		
+	eye = glm::rotate(eye,static_cast<float>(glm::pi<double>() * rot_v.x / m_size.x),diry);
+	eye = glm::rotate(eye,static_cast<float>(glm::pi<double>() * rot_v.y / m_size.y),dirx);
+
+	glm::vec3 new_pos = m_target + eye;
+	float angle = glm::angle(glm::normalize(m_target - new_pos),m_up);
+	if (angle > 1.7 && angle < 3.0)
+	{
+		m_position = new_pos;
+		if (m_render_camera)
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj_source),view_proj(),m_position);
+	}
+}
+
+void Indigo::SGCamera::on_zoom(const glm::dvec2& pan_v)
+{
+	float zoom = (float)(pan_v.y - m_size.y);
+
+	glm::vec3 cam_dir = m_position - m_target;
+	float l = glm::length(cam_dir);
+	if ((l > m_near * 1.9f || zoom > 0) && (l < m_far * 0.9f || zoom < 0))
+	{
+		m_position = m_target + (cam_dir * (1 + zoom / 10.f));
+		if (m_render_camera)
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::view_proj_source),view_proj(),m_position);
+	}
 }
 
 void Indigo::SGCamera::position(const glm::vec3& pos)

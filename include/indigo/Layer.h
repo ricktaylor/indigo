@@ -49,6 +49,7 @@ namespace Indigo
 			virtual void on_mousebutton(const OOGL::Window::mouse_click_t& click) { }
 			virtual void on_losecursor() {}
 			virtual void on_losefocus() {}
+			virtual void on_scroll(const glm::dvec2& pos) { }
 
 			Window* const m_window;
 		};

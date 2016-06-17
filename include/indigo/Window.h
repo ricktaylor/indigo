@@ -96,6 +96,7 @@ namespace Indigo
 			const OOBase::SharedPtr<OOGL::Window>& window() const { return m_wnd; }
 
 			void grab_focus(Layer* layer);
+			const glm::dvec2& cursor_pos() const { return m_cursor_pos; }
 
 		private:
 			Window(Indigo::Window* owner);
@@ -117,6 +118,7 @@ namespace Indigo
 			void on_cursorenter(const OOGL::Window& win, bool enter);
 			void on_cursormove(const OOGL::Window& win, const glm::dvec2& pos);
 			void on_focus(const OOGL::Window& win, bool focused);
+			void on_scroll(const OOGL::Window& win, const glm::dvec2& pos);
 
 			void add_render_layer(Indigo::Layer* layer, bool* ret);
 			void remove_render_layer(Indigo::Layer* layer);

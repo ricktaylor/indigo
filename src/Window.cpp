@@ -70,6 +70,7 @@ bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& p
 		m_wnd->on_cursormove(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_cursormove));
 		m_wnd->on_focus(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_focus));
 		m_wnd->on_iconify(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_iconify));
+		m_wnd->on_scroll(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(this,&Window::on_scroll));
 				
 		if (params.m_style & OOGL::Window::eWSdebug_context)
 			OOGL::StateFns::get_current()->enable_logging();
@@ -179,6 +180,13 @@ void Indigo::Render::Window::on_mousebutton(const OOGL::Window&, const OOGL::Win
 		cursor_layer->on_mousebutton(click);
 }
 
+void Indigo::Render::Window::on_scroll(const OOGL::Window&, const glm::dvec2& pos)
+{
+	OOBase::SharedPtr<Layer> cursor_layer = m_cursor_layer.lock();
+	if (cursor_layer)
+		cursor_layer->on_scroll(pos);
+}
+
 void Indigo::Render::Window::on_cursorenter(const OOGL::Window& win, bool enter)
 {
 	if (!enter)
@@ -187,6 +195,7 @@ void Indigo::Render::Window::on_cursorenter(const OOGL::Window& win, bool enter)
 		if (prev_cursor_layer)
 			prev_cursor_layer->on_losecursor();
 
+		m_cursor_pos = glm::dvec2(-1.0,-1.0);
 		m_cursor_layer.reset();
 	}
 

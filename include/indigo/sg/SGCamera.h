@@ -49,8 +49,9 @@ namespace Indigo
 				m_owner(owner),
 				m_source(source),
 				m_view_proj(vp),
-				m_scene(scene)
-			{}
+				m_scene(scene),
+				m_cam_control(eCC_none)
+			{ }
 
 			const glm::mat4& view_proj() const { return m_view_proj; }
 			const glm::vec3& source() const { return m_source; }
@@ -61,9 +62,10 @@ namespace Indigo
 			virtual void on_draw(OOGL::State& glState) const;
 			virtual void on_size(const glm::uvec2& sz);
 
-			//virtual bool on_cursormove(const glm::dvec2& pos);
-			//virtual void on_mousebutton(const OOGL::Window::mouse_click_t& click);
-			//virtual void on_losecursor();
+			virtual bool on_cursormove(const glm::dvec2& pos);
+			virtual void on_mousebutton(const OOGL::Window::mouse_click_t& click);
+			virtual void on_losecursor();
+			virtual void on_scroll(const glm::dvec2& pos);
 			//virtual void on_losefocus();
 
 		private:
@@ -71,6 +73,15 @@ namespace Indigo
 			glm::vec3 m_source;
 			glm::mat4 m_view_proj;
 			SGNode*   m_scene;
+			
+			enum eCamControl
+			{
+				eCC_none = 0,
+				eCC_pan,
+				eCC_rotate
+			};
+			enum eCamControl m_cam_control;
+			glm::dvec2 m_cam_pos;
 
 			void view_proj_source(const glm::mat4& vp, const glm::vec3& s) { m_view_proj = vp; m_source = s; }
 			void view_proj(const glm::mat4& vp) { m_view_proj = vp; }
@@ -80,11 +91,12 @@ namespace Indigo
 
 	class SGCamera : public Layer
 	{
+		friend class Render::SGCamera;
+
 	public:
 		struct CreateParams
 		{
 			CreateParams(
-				const OOBase::SharedPtr<SGNode>& scene = OOBase::SharedPtr<SGNode>(),
 				const glm::vec3& position = glm::vec3(),
 				const glm::vec3& target = glm::vec3(),
 				const glm::vec3& up = glm::vec3(0.f,1.f,0.f),
@@ -93,7 +105,6 @@ namespace Indigo
 				glm::mat4::value_type far = 100.f,
 				glm::mat4::value_type fov = 0.785398f
 			) : 
-				m_scene(scene),
 				m_position(position),
 				m_target(target),
 				m_up(up),
@@ -103,7 +114,6 @@ namespace Indigo
 				m_fov(fov)
 			{}
 
-			OOBase::SharedPtr<SGNode> m_scene;
 			glm::vec3                 m_position;
 			glm::vec3                 m_target;
 			glm::vec3                 m_up;
@@ -113,7 +123,7 @@ namespace Indigo
 			glm::mat4::value_type     m_fov;
 		};
 
-		SGCamera(const CreateParams& params = CreateParams());
+		SGCamera(const OOBase::SharedPtr<SGNode>& scene, const CreateParams& params = CreateParams());
 		virtual ~SGCamera();
 
 		const glm::vec3& position() const { return m_position; }
@@ -166,6 +176,9 @@ namespace Indigo
 		void destroy_render_layer();
 
 		bool on_close();
+		void on_pan(const glm::dvec2& pan_v, const AABB& bounds);
+		void on_rotate(const glm::dvec2& pan_v);
+		void on_zoom(const glm::dvec2& pan_v);
 		
 		glm::mat4 view_proj() const;
 	};
