@@ -114,7 +114,7 @@ void ClipVisitor::draw(OOGL::State& glState, const glm::mat4& mvp) const
 
 bool Indigo::Render::SGCamera::on_update()
 {
-	if (!m_scene || !m_scene->dirty())
+	if (!m_visible || !m_scene || !m_scene->dirty())
 		return false;
 
 	m_scene->on_update(glm::mat4());
@@ -123,7 +123,7 @@ bool Indigo::Render::SGCamera::on_update()
 
 void Indigo::Render::SGCamera::on_draw(OOGL::State& glState) const
 {
-	if (m_scene && m_scene->visible())
+	if (m_visible && m_scene && m_scene->visible())
 	{
 		ClipVisitor visitor(m_source);
 		m_scene->visit(visitor);
@@ -140,6 +140,9 @@ void Indigo::Render::SGCamera::on_size(const glm::uvec2& sz)
 
 bool Indigo::Render::SGCamera::on_cursormove(const glm::dvec2& pos)
 {
+	if (!m_visible)
+		return false;
+	
 	// First we must hit test the scene
 
 	// If nothing hits, then check to see if it's a camera move
@@ -167,7 +170,6 @@ bool Indigo::Render::SGCamera::on_cursormove(const glm::dvec2& pos)
 
 	// Let the logic pipe handle it
 	
-
 	return true;
 }
 
@@ -212,7 +214,8 @@ Indigo::SGCamera::SGCamera(const OOBase::SharedPtr<SGNode>& scene, const CreateP
 		m_near(params.m_near),
 		m_far(params.m_far),
 		m_fov(params.m_fov),
-		m_ortho(!params.m_perspective)
+		m_ortho(!params.m_perspective),
+		m_visible(false)
 {
 	if (!scene)
 		LOG_WARNING(("SGCamera created with no scene!"));
@@ -240,7 +243,7 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::SGCamera::create_render_layer(R
 		}
 	}
 
-	OOBase::SharedPtr<Render::SGCamera> render_cam = OOBase::allocate_shared<Render::SGCamera,OOBase::ThreadLocalAllocator>(this,window,m_position,view_proj(),render_scene);
+	OOBase::SharedPtr<Render::SGCamera> render_cam = OOBase::allocate_shared<Render::SGCamera,OOBase::ThreadLocalAllocator>(this,window,m_position,view_proj(),render_scene,m_visible);
 	if (!render_cam)
 		LOG_ERROR(("Failed to allocate render camera: %s",OOBase::system_error_text()));
 	else
@@ -252,6 +255,17 @@ OOBase::SharedPtr<Indigo::Render::Layer> Indigo::SGCamera::create_render_layer(R
 void Indigo::SGCamera::destroy_render_layer()
 {
 	m_render_camera.reset();
+}
+
+void Indigo::SGCamera::show(bool visible)
+{
+	if (visible != m_visible)
+	{
+		m_visible = visible;
+
+		if (m_render_camera)
+			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_camera.get(),&Render::SGCamera::show),m_visible);
+	}
 }
 
 void Indigo::SGCamera::on_pan(const glm::dvec2& pan_v, const AABB& bounds)
@@ -441,7 +455,7 @@ OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> Indigo::SGCamera::on_close(
 
 bool Indigo::SGCamera::on_close()
 {
-	if (m_on_close)
+	if (m_visible && m_on_close)
 	{
 		m_on_close.invoke();
 		return true;

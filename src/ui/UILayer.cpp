@@ -52,6 +52,9 @@ void Indigo::Render::UILayer::on_draw(OOGL::State& glState) const
 
 bool Indigo::Render::UILayer::on_update()
 {
+	if (!visible())
+		return false;
+
 	bool dirty = m_dirty;
 	m_dirty = false;
 	return dirty;
@@ -71,6 +74,9 @@ void Indigo::Render::UILayer::on_size(const glm::uvec2& sz)
 
 bool Indigo::Render::UILayer::on_cursormove(const glm::dvec2& pos)
 {
+	if (!visible())
+		return false;
+
 	const glm::uvec2& sz = size();
 	glm::ivec2 ipos = glm::clamp(glm::ivec2(glm::floor(pos)),glm::ivec2(0),glm::ivec2(sz.x-1,sz.y-1));
 
@@ -140,8 +146,6 @@ void Indigo::Render::UILayer::on_mousebutton(const OOGL::Window::mouse_click_t& 
 		if (d)
 			handled = d->on_mousebutton(click);
 	}
-
-	//return m_owner->m_modal || handled;
 }
 
 Indigo::UILayer::UILayer(const CreateParams& params) :
@@ -193,7 +197,7 @@ OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> Indigo::UILayer::on_close(c
 
 bool Indigo::UILayer::on_close()
 {
-	if (m_on_close)
+	if (visible() && m_on_close)
 	{
 		m_on_close.invoke();
 		return true;

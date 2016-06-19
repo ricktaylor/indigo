@@ -44,13 +44,14 @@ namespace Indigo
 			friend class Indigo::SGCamera;
 
 		public:
-			SGCamera(Indigo::SGCamera* owner, Window* window, const glm::vec3& source, const glm::mat4& vp, SGNode* scene) :
+			SGCamera(Indigo::SGCamera* owner, Window* window, const glm::vec3& source, const glm::mat4& vp, SGNode* scene, bool visible) :
 				Layer(window), 
 				m_owner(owner),
 				m_source(source),
 				m_view_proj(vp),
 				m_scene(scene),
-				m_cam_control(eCC_none)
+				m_cam_control(eCC_none),
+				m_visible(visible)
 			{ }
 
 			const glm::mat4& view_proj() const { return m_view_proj; }
@@ -73,6 +74,7 @@ namespace Indigo
 			glm::vec3 m_source;
 			glm::mat4 m_view_proj;
 			SGNode*   m_scene;
+			bool      m_visible;
 			
 			enum eCamControl
 			{
@@ -83,6 +85,7 @@ namespace Indigo
 			enum eCamControl m_cam_control;
 			glm::dvec2 m_cam_pos;
 
+			void show(bool visible) { m_visible = visible; }
 			void view_proj_source(const glm::mat4& vp, const glm::vec3& s) { m_view_proj = vp; m_source = s; }
 			void view_proj(const glm::mat4& vp) { m_view_proj = vp; }
 			void scene(SGNode* scene) { m_scene = scene; }
@@ -125,6 +128,9 @@ namespace Indigo
 
 		SGCamera(const OOBase::SharedPtr<SGNode>& scene, const CreateParams& params = CreateParams());
 		virtual ~SGCamera();
+
+		bool visible() const { return m_visible; }
+		void show(bool visible = true);
 
 		const glm::vec3& position() const { return m_position; }
 		void position(const glm::vec3& pos);
@@ -169,6 +175,7 @@ namespace Indigo
 		glm::mat4::value_type m_far;
 		glm::mat4::value_type m_fov;
 		bool m_ortho;
+		bool m_visible;
 
 		OOBase::Delegate0<void,OOBase::ThreadLocalAllocator> m_on_close;
 
