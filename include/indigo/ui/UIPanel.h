@@ -38,18 +38,21 @@ namespace Indigo
 					const OOBase::SharedPtr<NinePatch>& background = OOBase::SharedPtr<NinePatch>(),
 					const glm::vec4& colour = glm::vec4(1.f),
 					bool fixed = false,
+					const glm::uvec4& margins = glm::uvec4(),
 					const glm::uvec2& padding = glm::uvec2()
 			) :
 				UIWidget::CreateParams(state,position,size),
 				m_background(background),
 				m_colour(colour),
 				m_fixed(fixed),
+				m_margins(margins),
 				m_padding(padding)
 			{}
 
 			OOBase::SharedPtr<NinePatch> m_background;
 			glm::vec4                    m_colour;
 			bool                         m_fixed;
+			glm::uvec4                   m_margins;
 			glm::uvec2                   m_padding;
 		};
 

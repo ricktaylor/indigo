@@ -53,7 +53,7 @@ bool Indigo::Render::Window::create_window(const Indigo::Window::CreateParams& p
 	if (!title)
 		title = "Indigo";
 
-	m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(params.m_width,params.m_height,title,params.m_style,monitor);
+	m_wnd = OOBase::allocate_shared<OOGL::Window,OOBase::ThreadLocalAllocator>(params.m_width,params.m_height,title,params.m_style,monitor,params.m_msaa_samples);
 	if (!m_wnd)
 		LOG_ERROR_RETURN(("Failed to create window: %s",OOBase::system_error_text()),false);
 

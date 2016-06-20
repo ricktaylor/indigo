@@ -47,13 +47,15 @@ namespace Indigo
 					unsigned int height = 0,
 					bool fullscreen = false,
 					const char* title = NULL,
-					unsigned int style = OOGL::Window::eWSresizable | OOGL::Window::eWSdecorated
+					unsigned int style = OOGL::Window::eWSresizable | OOGL::Window::eWSdecorated,
+					unsigned int msaa_samples = 0
 			) :
 				m_width(width),
 				m_height(height),
 				m_fullscreen(fullscreen),
 				m_title(title),
-				m_style(style)
+				m_style(style),
+				m_msaa_samples(msaa_samples)
 			{}
 
 			unsigned int m_width;
@@ -61,6 +63,7 @@ namespace Indigo
 			bool         m_fullscreen;
 			const char*  m_title;
 			unsigned int m_style; // From OOGL::Window::Style
+			unsigned int m_msaa_samples;
 		};
 
 		bool create(const CreateParams& params = CreateParams());
