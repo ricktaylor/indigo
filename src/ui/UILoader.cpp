@@ -851,6 +851,11 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_panel(const char*& p,
 					if (!parse_colour(p,pe,params.m_colour))
 						return OOBase::SharedPtr<UIWidget>();
 				}
+				else if (arg == "MARGINS")
+				{
+					if (!parse_uvec4(p,pe,params.m_margins))
+						return OOBase::SharedPtr<UIWidget>();
+				}
 				else if (arg == "PADDING")
 				{
 					if (!parse_uvec2(p,pe,params.m_padding))

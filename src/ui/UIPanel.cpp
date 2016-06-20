@@ -27,7 +27,7 @@
 
 Indigo::UIPanel::UIPanel(UIGroup* parent, const CreateParams& params) :
 		UIGroup(parent,params),
-		m_sizer(params.m_fixed,params.m_background ? params.m_background->margins() : glm::uvec4(0),params.m_padding),
+		m_sizer(params.m_fixed,glm::max(params.m_background ? params.m_background->margins() : glm::uvec4(0),params.m_margins),params.m_padding),
 		m_background(params.m_background),
 		m_colour(params.m_colour),
 		m_render_background(NULL)
