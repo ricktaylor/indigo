@@ -50,8 +50,8 @@ namespace Indigo
 				m_source(source),
 				m_view_proj(vp),
 				m_scene(scene),
-				m_cam_control(eCC_none),
-				m_visible(visible)
+				m_visible(visible),
+				m_cam_control(eCC_none)
 			{ }
 
 			const glm::mat4& view_proj() const { return m_view_proj; }
