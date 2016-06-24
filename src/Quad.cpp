@@ -173,7 +173,7 @@ OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGQuad::on_render_create(Rende
 	if (!quad)
 		LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
 
-	node = OOBase::allocate_shared<Render::SGNode>(parent,OOBase::static_pointer_cast<Render::SGDrawable>(quad),transform());
+	node = OOBase::allocate_shared<Render::SGNode>(parent,OOBase::static_pointer_cast<Render::SGDrawable>(quad),visible(),SGNode::transparent(),transform());
 	if (!node)
 		LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
 

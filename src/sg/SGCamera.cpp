@@ -33,12 +33,14 @@
 
 namespace
 {
-	class ClipVisitor : public Indigo::Render::SGVisitor
+	class RenderVisitor : public Indigo::Render::SGVisitor
 	{
 	public:
-		ClipVisitor(const glm::vec3& source) :
+		RenderVisitor(const glm::vec3& source) :
 			m_front_to_back(source),
-			m_nodes(m_front_to_back)
+			m_back_to_front(source),
+			m_opaque_nodes(m_front_to_back),
+			m_transparent_nodes(m_back_to_front)
 		{}
 
 		bool visit(const Indigo::Render::SGNode& node, OOBase::uint32_t& hint);
@@ -65,7 +67,7 @@ namespace
 			glm::vec3 m_source;
 		} m_front_to_back;
 
-		/*struct BackToFront
+		struct BackToFront
 		{
 			BackToFront(const glm::vec3& source) : m_source(source)
 			{}
@@ -77,13 +79,14 @@ namespace
 			}
 
 			glm::vec3 m_source;
-		} m_back_to_front;*/
+		} m_back_to_front;
 
-		OOBase::Set<node_info,FrontToBack,OOBase::ThreadLocalAllocator> m_nodes;
+		OOBase::Set<node_info,FrontToBack,OOBase::ThreadLocalAllocator> m_opaque_nodes;
+		OOBase::Set<node_info,BackToFront,OOBase::ThreadLocalAllocator> m_transparent_nodes;
 	};
 }
 
-bool ClipVisitor::visit(const Indigo::Render::SGNode& node, OOBase::uint32_t& hint)
+bool RenderVisitor::visit(const Indigo::Render::SGNode& node, OOBase::uint32_t& hint)
 {
 	if (!node.visible())
 		return false;
@@ -94,21 +97,32 @@ bool ClipVisitor::visit(const Indigo::Render::SGNode& node, OOBase::uint32_t& hi
 	{
 		i.m_bounds = node.world_bounds();
 		i.m_transform = node.world_transform();
-		m_nodes.insert(i);
+
+		// TODO:  Clip test!!
+
+		if (node.transparent())
+			m_transparent_nodes.insert(i);
+		else
+			m_opaque_nodes.insert(i);
 	}
 
 	return true;
 }
 
-void ClipVisitor::draw(OOGL::State& glState, const glm::mat4& mvp) const
+void RenderVisitor::draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	glState.disable(GL_BLEND);
-
-	glDepthMask(GL_TRUE);
 	glState.enable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_TRUE);
 
-	for (OOBase::Set<node_info,FrontToBack,OOBase::ThreadLocalAllocator>::const_iterator i=m_nodes.begin();i;++i)
+	for (OOBase::Set<node_info,FrontToBack,OOBase::ThreadLocalAllocator>::const_iterator i=m_opaque_nodes.begin();i;++i)
+		i->m_drawable->on_draw(glState,mvp * i->m_transform);
+
+	glState.enable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+
+	for (OOBase::Set<node_info,BackToFront,OOBase::ThreadLocalAllocator>::const_iterator i=m_transparent_nodes.begin();i;++i)
 		i->m_drawable->on_draw(glState,mvp * i->m_transform);
 }
 
@@ -125,7 +139,7 @@ void Indigo::Render::SGCamera::on_draw(OOGL::State& glState) const
 {
 	if (m_visible && m_scene && m_scene->visible())
 	{
-		ClipVisitor visitor(m_source);
+		RenderVisitor visitor(m_source);
 		m_scene->visit(visitor);
 
 		visitor.draw(glState,view_proj());

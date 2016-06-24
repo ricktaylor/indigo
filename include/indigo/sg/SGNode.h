@@ -85,15 +85,17 @@ namespace Indigo
 		class SGNode : public OOBase::NonCopyable
 		{
 		public:
-			SGNode(SGGroup* parent, const OOBase::SharedPtr<SGDrawable>& drawable, const glm::mat4& local_transform = glm::mat4());
-			SGNode(SGGroup* parent, bool visible, const glm::mat4& local_transform = glm::mat4());
-
+			SGNode(SGGroup* parent, const OOBase::SharedPtr<SGDrawable>& drawable, bool visible = false, bool transparent = false, const glm::mat4& local_transform = glm::mat4());
+			
 			virtual ~SGNode();
 
 			SGGroup* parent() const { return m_parent; }
 
 			bool visible() const { return (m_state & eRSG_visible) == eRSG_visible; }
 			void show(bool visible = true);
+
+			bool transparent() const { return (m_state & eRSG_transparent) == eRSG_transparent; }
+			void transparent(bool trans);
 
 			bool dirty() const { return (m_state & (eRSG_visible | eRSG_dirty)) == (eRSG_visible | eRSG_dirty); }
 			void make_dirty();
@@ -112,6 +114,8 @@ namespace Indigo
 			virtual void visit(SGVisitor& visitor, OOBase::uint32_t hint = 0) const;
 
 		protected:
+			SGNode(SGGroup* parent, bool visible, bool transparent, const glm::mat4& local_transform = glm::mat4());
+
 			void world_bounds(const AABB& aabb) { m_world_aabb = aabb; }
 			void drawable(const OOBase::SharedPtr<SGDrawable>& d);
 
@@ -120,6 +124,7 @@ namespace Indigo
 			{
 				eRSG_dirty = 1,
 				eRSG_visible = 2,
+				eRSG_transparent = 4,
 			};
 			unsigned int m_state;
 			SGGroup*     m_parent;
@@ -140,8 +145,8 @@ namespace Indigo
 			virtual void visit(SGVisitor& visitor, OOBase::uint32_t hint = 0) const = 0;
 
 		protected:
-			SGGroup(SGGroup* parent, bool visible = false, const glm::mat4& local_transform = glm::mat4()) :
-					SGNode(parent,visible,local_transform)
+			SGGroup(SGGroup* parent, bool visible = false, bool transparent = false, const glm::mat4& local_transform = glm::mat4()) :
+					SGNode(parent,visible,transparent,local_transform)
 			{}
 
 			virtual bool add_node(const OOBase::SharedPtr<SGNode>& node) = 0;
@@ -168,13 +173,15 @@ namespace Indigo
 	public:
 		enum State
 		{
-			eNS_visible = 0x1,
-			eNS_enabled = 0x2
+			eNS_invisible = 0,
+			eNS_visible = 1,
+			eNS_enabled = 2,
+			eNS_transparent = 4
 		};
 
 		struct CreateParams
 		{
-			CreateParams(OOBase::uint32_t state = 0,
+			CreateParams(OOBase::uint32_t state = eNS_invisible,
 				const glm::vec3& position = glm::vec3(),
 				const glm::vec3& scaling = glm::vec3(1.f,1.f,1.f),
 				const glm::quat& rotation = glm::quat()
@@ -198,6 +205,9 @@ namespace Indigo
 		bool visible() const { return (m_state & eNS_visible) == eNS_visible; }
 		virtual void show(bool visible = true);
 
+		bool transparent() const { return (m_state & eNS_transparent) == eNS_transparent; }
+		void transparent(bool trans);
+		
 		bool enabled() const { return (m_state & eNS_enabled) == eNS_enabled; }
 		void enable(bool enabled = true);
 

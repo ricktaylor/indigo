@@ -33,7 +33,7 @@ namespace Indigo
 	public:
 		struct CreateParams : public SGNode::CreateParams
 		{
-			CreateParams(OOBase::uint32_t state = 0,
+			CreateParams(OOBase::uint32_t state = SGNode::eNS_invisible,
 					const glm::vec3& position = glm::vec3(),
 					const glm::vec3& scaling = glm::vec3(1.f,1.f,1.f),
 					const glm::quat& rotation = glm::quat(),
@@ -62,7 +62,7 @@ namespace Indigo
 	public:
 		struct CreateParams : public SGNode::CreateParams
 		{
-			CreateParams(OOBase::uint32_t state = 0,
+			CreateParams(OOBase::uint32_t state = SGNode::eNS_invisible,
 					const glm::vec3& position = glm::vec3(),
 					const glm::vec3& scaling = glm::vec3(1.f,1.f,1.f),
 					const glm::quat& rotation = glm::quat(),
@@ -72,7 +72,7 @@ namespace Indigo
 				m_colour(colour)
 			{}
 
-			glm::vec4               m_colour;
+			glm::vec4 m_colour;
 		};
 
 		SGQuad(SGGroup* parent, const OOBase::SharedPtr<Image>& image, const CreateParams& params = CreateParams()) : 

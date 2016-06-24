@@ -30,11 +30,12 @@ namespace
 	class Cube : public Indigo::Render::SGDrawable
 	{
 	public:
-		Cube(const Indigo::AABB& aabb, const glm::vec4& colour);
+		Cube(const Indigo::AABB& aabb, bool transparent, const glm::vec4& colour);
 
 		void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 
 	private:
+		bool      m_transparent;
 		glm::vec4 m_colour;
 	};
 
@@ -149,8 +150,9 @@ void CubeFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const glm::ve
 	}
 }
 
-Cube::Cube(const Indigo::AABB& aabb, const glm::vec4& colour) :
+Cube::Cube(const Indigo::AABB& aabb, bool transparent, const glm::vec4& colour) :
 		Indigo::Render::SGDrawable(aabb),
+		m_transparent(transparent),
 		m_colour(colour)
 {
 }
@@ -165,11 +167,11 @@ OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGCube::on_render_create(Rende
 {
 	OOBase::SharedPtr<Render::SGNode> node;
 
-	OOBase::SharedPtr< ::Cube> cube = OOBase::allocate_shared< ::Cube>(AABB(glm::vec3(0.5f),glm::vec3(0.5f)),m_colour);
+	OOBase::SharedPtr< ::Cube> cube = OOBase::allocate_shared< ::Cube>(AABB(glm::vec3(0.5f),glm::vec3(0.5f)),transparent(),m_colour);
 	if (!cube)
 		LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
 
-	node = OOBase::allocate_shared<Render::SGNode>(parent,OOBase::static_pointer_cast<Render::SGDrawable>(cube),transform());
+	node = OOBase::allocate_shared<Render::SGNode>(parent,OOBase::static_pointer_cast<Render::SGDrawable>(cube),visible(),transparent(),transform());
 	if (!node)
 		LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
 
