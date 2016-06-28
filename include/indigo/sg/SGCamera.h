@@ -183,11 +183,13 @@ namespace Indigo
 		void destroy_render_layer();
 
 		bool on_close();
-		void on_pan(const glm::dvec2& pan_v, const AABB& bounds);
-		void on_rotate(const glm::dvec2& pan_v);
-		void on_zoom(const glm::dvec2& pan_v);
+		void on_pan(const glm::dvec2& from, const glm::dvec2& to, const AABB& bounds);
+		void on_rotate(const glm::dvec2& rot_v);
+		void on_zoom(const glm::dvec2& zoom_v);
 		
-		glm::mat4 view_proj() const;
+		glm::mat4 view() const;
+		glm::mat4 proj() const;
+		glm::mat4 view_proj() const { return proj() * view(); }
 	};
 }
 

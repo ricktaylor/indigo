@@ -165,7 +165,7 @@ bool Indigo::Render::SGCamera::on_cursormove(const glm::dvec2& pos)
 	case eCC_pan:
 		if (pos != m_cam_pos)
 		{
-			logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::SGCamera::on_pan),m_cam_pos - pos,m_scene->world_bounds());
+			logic_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_owner,&Indigo::SGCamera::on_pan),m_cam_pos,pos,m_scene->world_bounds());
 			m_cam_pos = pos;
 		}
 		break;
@@ -282,21 +282,46 @@ void Indigo::SGCamera::show(bool visible)
 	}
 }
 
-void Indigo::SGCamera::on_pan(const glm::dvec2& pan_v, const AABB& bounds)
+void Indigo::SGCamera::on_pan(const glm::dvec2& from, const glm::dvec2& to, const AABB& bounds)
 {
+	/*glm::vec4 f(from.x / (m_size.x * 0.5f) - 1.0f,from.y / (m_size.y * 0.5f) - 1.0f,1.0f,1.0f);
+	glm::vec4 t(to.x / (m_size.x * 0.5f) - 1.0f,to.y / (m_size.y * 0.5f) - 1.0f,1.0f,1.0f);
+	
+	glm::mat4 invVP = glm::inverse(view_proj());
+
+	glm::vec3 from_ray = glm::normalize(glm::vec3(invVP * f));
+	glm::vec3 to_ray = glm::normalize(glm::vec3(invVP * t));
+	
+	// Intersect with plane (0,0,1)
+	glm::vec3 plane_normal(0.f,0.f,1.f);
+	float denom = glm::dot(plane_normal,from_ray);
+	if (glm::abs(denom) <= 1e-6f)
+		return;
+	
+	float ray_len = glm::dot(-m_position,plane_normal) / denom;
+	glm::vec3 from_pos = m_position + from_ray * ray_len;
+
+	denom = glm::dot(plane_normal,to_ray);
+	if (glm::abs(denom) <= 1e-6f)
+		return;
+
+	ray_len = glm::dot(-m_position,plane_normal) / denom;
+	glm::vec3 to_pos = m_position + to_ray * ray_len;
+	glm::vec3 move = from_pos - to_pos; */
+
 	glm::vec3 cam_dir = m_position - m_target;
 	glm::vec3 dirx = glm::normalize(glm::cross(cam_dir,m_up));
 	glm::vec3 diry = glm::normalize(glm::cross(m_up,dirx));
 		
-	glm::vec3 move = dirx * static_cast<float>(-pan_v.x);
-	move += diry * static_cast<float>(-pan_v.y);
+	glm::vec3 move = dirx * static_cast<float>(to.x - from.x);
+	move += diry * static_cast<float>(to.y - from.y);
 
 	float length = glm::length(cam_dir) * glm::tan(m_fov);
 	move *= length / m_size.x;
 
-	m_position += move;
+	glm::vec3 new_target = glm::clamp(m_target + move,bounds.min(),bounds.max());
 
-	glm::vec3 new_target = m_target + move; //glm::clamp(m_target + move,bounds.min(),bounds.max());
+	m_position += new_target - m_target;
 	m_target = new_target;
 			
 	if (m_render_camera)
@@ -322,9 +347,9 @@ void Indigo::SGCamera::on_rotate(const glm::dvec2& rot_v)
 	}
 }
 
-void Indigo::SGCamera::on_zoom(const glm::dvec2& pan_v)
+void Indigo::SGCamera::on_zoom(const glm::dvec2& zoom_v)
 {
-	float zoom = (float)(pan_v.y - m_size.y);
+	float zoom = (float)(zoom_v.y - m_size.y);
 
 	glm::vec3 cam_dir = m_position - m_target;
 	float l = glm::length(cam_dir);
@@ -398,14 +423,18 @@ void Indigo::SGCamera::ortho(bool ortho)
 #undef far
 #endif
 
-glm::mat4 Indigo::SGCamera::view_proj() const
+glm::mat4 Indigo::SGCamera::view() const
 {
-	if (m_ortho)
-		return glm::ortho(0.f,m_size.x,0.f,m_size.y,m_near,m_far) * glm::lookAt(m_position,m_target,m_up);
-
-	return glm::perspectiveFov(m_fov,m_size.x,m_size.y,m_near,m_far) * glm::lookAt(m_position,m_target,m_up);
+	return glm::lookAt(m_position,m_target,m_up);
 }
 
+glm::mat4 Indigo::SGCamera::proj() const
+{
+	if (m_ortho)
+		return glm::ortho(0.f,m_size.x,0.f,m_size.y,m_near,m_far);
+	
+	return glm::perspectiveFov(m_fov,m_size.x,m_size.y,m_near,m_far);
+}
 
 void Indigo::SGCamera::near(glm::mat4::value_type n)
 {
