@@ -90,7 +90,30 @@ void Indigo::Render::SGNode::on_update(const glm::mat4& parent_transform)
 		m_world_transform = parent_transform * m_local_transform;
 
 		if (m_drawable)
-			m_world_aabb = m_drawable->bounds();
+		{
+			const AABB& b = m_drawable->bounds();
+			glm::vec3 corners[8];
+			corners[0] = glm::vec3(m_world_transform * glm::vec4(b.m_midpoint.x - b.m_extents.x,b.m_midpoint.y - b.m_extents.y,b.m_midpoint.z - b.m_extents.z,1.f));
+			corners[1] = glm::vec3(m_world_transform * glm::vec4(b.m_midpoint.x + b.m_extents.x,b.m_midpoint.y - b.m_extents.y,b.m_midpoint.z - b.m_extents.z,1.f));
+			corners[2] = glm::vec3(m_world_transform * glm::vec4(b.m_midpoint.x - b.m_extents.x,b.m_midpoint.y + b.m_extents.y,b.m_midpoint.z - b.m_extents.z,1.f));
+			corners[3] = glm::vec3(m_world_transform * glm::vec4(b.m_midpoint.x + b.m_extents.x,b.m_midpoint.y + b.m_extents.y,b.m_midpoint.z - b.m_extents.z,1.f));
+			corners[4] = glm::vec3(m_world_transform * glm::vec4(b.m_midpoint.x - b.m_extents.x,b.m_midpoint.y - b.m_extents.y,b.m_midpoint.z + b.m_extents.z,1.f));
+			corners[5] = glm::vec3(m_world_transform * glm::vec4(b.m_midpoint.x + b.m_extents.x,b.m_midpoint.y - b.m_extents.y,b.m_midpoint.z + b.m_extents.z,1.f));
+			corners[6] = glm::vec3(m_world_transform * glm::vec4(b.m_midpoint.x - b.m_extents.x,b.m_midpoint.y + b.m_extents.y,b.m_midpoint.z + b.m_extents.z,1.f));
+			corners[7] = glm::vec3(m_world_transform * glm::vec4(b.m_midpoint.x + b.m_extents.x,b.m_midpoint.y + b.m_extents.y,b.m_midpoint.z + b.m_extents.z,1.f));
+
+			glm::vec3 min(corners[0]);
+			glm::vec3 max(corners[0]);
+
+			for (unsigned int i=1;i<8;++i)
+			{
+				min = glm::min(min,corners[i]);
+				max = glm::max(max,corners[i]);
+			}
+
+			m_world_aabb.m_midpoint = (min + max) / 2.0f;
+			m_world_aabb.m_extents = (max - min) / 2.0f;
+		}
 		else
 			m_world_aabb.m_midpoint = glm::vec3(m_world_transform * glm::vec4(0.f,0.f,0.f,1.f));
 
