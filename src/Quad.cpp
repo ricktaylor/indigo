@@ -56,12 +56,14 @@ namespace
 	class SGQuad : public Indigo::Render::SGDrawable
 	{
 	public:
-		SGQuad(const Indigo::AABB& aabb, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::vec4& colour);
+		SGQuad(const Indigo::AABB& aabb, const OOBase::SharedPtr<OOGL::Texture>& texture, bool transparent, const glm::vec4& colour);
 
+		bool transparent() const { return m_transparent; }
 		void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 
 	private:
 		OOBase::SharedPtr<OOGL::Texture> m_texture;
+		bool m_transparent;
 		glm::vec4 m_colour;
 	};
 }
@@ -139,9 +141,10 @@ void Indigo::Render::Quad::draw(OOGL::State& state, const OOBase::SharedPtr<OOGL
 		OOGL::ContextSingleton<QuadFactory>::instance().draw(state,texture,mvp,colour);
 }
 
-SGQuad::SGQuad(const Indigo::AABB& aabb, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::vec4& colour) :
+SGQuad::SGQuad(const Indigo::AABB& aabb, const OOBase::SharedPtr<OOGL::Texture>& texture, bool transparent, const glm::vec4& colour) :
 		Indigo::Render::SGDrawable(aabb),
 		m_texture(texture),
+		m_transparent(transparent),
 		m_colour(colour)
 {
 }
@@ -169,11 +172,11 @@ OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGQuad::on_render_create(Rende
 		texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	}
 
-	OOBase::SharedPtr< ::SGQuad> quad = OOBase::allocate_shared< ::SGQuad>(AABB(glm::vec3(0.5f,0.5f,0),glm::vec3(0.5f,0.5f,0)),texture,m_colour);
+	OOBase::SharedPtr< ::SGQuad> quad = OOBase::allocate_shared< ::SGQuad>(AABB(glm::vec3(0.5f,0.5f,0),glm::vec3(0.5f,0.5f,0)),texture,m_transparent,m_colour);
 	if (!quad)
 		LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
 
-	node = OOBase::allocate_shared<Render::SGNode>(parent,OOBase::static_pointer_cast<Render::SGDrawable>(quad),visible(),SGNode::transparent(),transform());
+	node = OOBase::allocate_shared<Render::SGNode>(parent,OOBase::static_pointer_cast<Render::SGDrawable>(quad),visible(),transform());
 	if (!node)
 		LOG_ERROR_RETURN(("Failed to allocate: %s\n",OOBase::system_error_text()),node);
 

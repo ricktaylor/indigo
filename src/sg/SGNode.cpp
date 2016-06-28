@@ -35,8 +35,8 @@ Indigo::Render::SGDrawable::~SGDrawable()
 	ASSERT_RENDER_THREAD();
 }
 
-Indigo::Render::SGNode::SGNode(SGGroup* parent, const OOBase::SharedPtr<SGDrawable>& drawable, bool visible, bool transparent, const glm::mat4& local_transform) :
-		m_state(eRSG_dirty | (visible ? eRSG_visible : 0) | (transparent ? eRSG_transparent : 0)),
+Indigo::Render::SGNode::SGNode(SGGroup* parent, const OOBase::SharedPtr<SGDrawable>& drawable, bool visible, const glm::mat4& local_transform) :
+		m_state(eRSG_dirty | (visible ? eRSG_visible : 0) | (drawable->transparent() ? eRSG_transparent : 0)),
 		m_parent(parent),
 		m_local_transform(local_transform),
 		m_world_transform(local_transform),
@@ -45,8 +45,8 @@ Indigo::Render::SGNode::SGNode(SGGroup* parent, const OOBase::SharedPtr<SGDrawab
 	ASSERT_RENDER_THREAD();
 }
 
-Indigo::Render::SGNode::SGNode(SGGroup* parent, bool visible, bool transparent, const glm::mat4& local_transform) :
-		m_state(eRSG_dirty | (visible ? eRSG_visible : 0) | (transparent ? eRSG_transparent : 0)),
+Indigo::Render::SGNode::SGNode(SGGroup* parent, bool visible, const glm::mat4& local_transform) :
+		m_state(eRSG_dirty | (visible ? eRSG_visible : 0)),
 		m_parent(parent),
 		m_local_transform(local_transform),
 		m_world_transform(local_transform)
@@ -70,14 +70,6 @@ void Indigo::Render::SGNode::show(bool visible)
 		if (m_parent && dirty())
 			m_parent->make_dirty();
 	}
-}
-
-void Indigo::Render::SGNode::transparent(bool trans)
-{
-	if (!trans)
-		m_state &= ~eRSG_transparent;
-	else
-		m_state |= eRSG_transparent;
 }
 
 void Indigo::Render::SGNode::make_dirty()
@@ -178,23 +170,11 @@ void Indigo::SGNode::on_state_change(OOBase::uint32_t state, OOBase::uint32_t ch
 		if (m_render_node)
 			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_node,&Render::SGNode::show),visible);
 	}
-
-	if (change_mask & eNS_transparent)
-	{
-		bool trans = (state & eNS_transparent) == eNS_transparent;
-		if (m_render_node)
-			render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_render_node,&Render::SGNode::transparent),trans);
-	}
 }
 
 void Indigo::SGNode::show(bool visible)
 {
 	toggle_state(visible,eNS_visible);
-}
-
-void Indigo::SGNode::transparent(bool trans)
-{
-	toggle_state(trans,eNS_transparent);
 }
 
 void Indigo::SGNode::enable(bool enable)
@@ -245,8 +225,8 @@ namespace
 	class SimpleGroup : public Indigo::Render::SGGroup
 	{
 	public:
-		SimpleGroup(Indigo::Render::SGGroup* parent, bool visible = false, bool transparent = false, const glm::mat4& local_transform = glm::mat4()) : 
-			SGGroup(parent,visible,transparent,local_transform)
+		SimpleGroup(Indigo::Render::SGGroup* parent, bool visible = false, const glm::mat4& local_transform = glm::mat4()) : 
+			SGGroup(parent,visible,local_transform)
 		{}
 
 		OOBase::Vector<OOBase::SharedPtr<SGNode>,OOBase::ThreadLocalAllocator> m_children;
@@ -344,7 +324,7 @@ bool Indigo::SGGroup::remove_node(const OOBase::SharedPtr<SGNode>& node)
 
 OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGGroup::on_render_create(Render::SGGroup* parent)
 {
-	OOBase::SharedPtr<Indigo::Render::SGNode> node = OOBase::allocate_shared< ::SimpleGroup>(parent,visible(),transparent(),transform());
+	OOBase::SharedPtr<Indigo::Render::SGNode> node = OOBase::allocate_shared< ::SimpleGroup>(parent,visible(),transform());
 	if (!node)
 		LOG_ERROR(("Failed to allocate: %s\n",OOBase::system_error_text()));
 	return node;
@@ -363,7 +343,7 @@ Indigo::SGRoot::~SGRoot()
 
 void Indigo::SGRoot::on_init()
 {
-	m_render_root = OOBase::allocate_shared< ::SimpleGroup>(static_cast<Render::SGGroup*>(NULL),visible(),transparent(),transform());
+	m_render_root = OOBase::allocate_shared< ::SimpleGroup>(static_cast<Render::SGGroup*>(NULL),visible(),transform());
 
 	m_render_node = m_render_root.get();
 }

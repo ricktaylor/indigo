@@ -66,18 +66,23 @@ namespace Indigo
 					const glm::vec3& position = glm::vec3(),
 					const glm::vec3& scaling = glm::vec3(1.f,1.f,1.f),
 					const glm::quat& rotation = glm::quat(),
+					bool transparent = false,
 					const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f)
 			) :
 				SGNode::CreateParams(state,position,scaling,rotation),
+				m_transparent(transparent),
 				m_colour(colour)
 			{}
 
+			bool m_transparent;
 			glm::vec4 m_colour;
+
 		};
 
 		SGQuad(SGGroup* parent, const OOBase::SharedPtr<Image>& image, const CreateParams& params = CreateParams()) : 
 				SGNode(parent,params),
 				m_image(image),
+				m_transparent(params.m_transparent),
 				m_colour(params.m_colour)
 		{}
 
@@ -85,6 +90,7 @@ namespace Indigo
 		OOBase::SharedPtr<Render::SGNode> on_render_create(Render::SGGroup* parent);
 
 		OOBase::SharedPtr<Image> m_image;
+		bool m_transparent;
 		glm::vec4 m_colour;
 	};
 }
