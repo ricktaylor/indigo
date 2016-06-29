@@ -58,6 +58,7 @@ namespace Indigo
 
 		bool load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type);
 		bool load_layer(const char*& p, const char* pe);
+		bool load_dialog(const char*& p, const char* pe);
 		bool load_children(const char*& p, const char* pe, UIGroup* parent);
 		OOBase::SharedPtr<UIWidget> load_child(const char*& p, const char* pe, const OOBase::ScopedString& type, UIGroup* parent);
 		bool load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, UIGridSizer& sizer, bool add_loose);

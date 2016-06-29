@@ -76,9 +76,14 @@ OOBase::SharedPtr<Indigo::UILayer> Indigo::UILoader::find_layer(const char* name
 
 bool Indigo::UILoader::load_top_level(const char*& p, const char* pe, const OOBase::ScopedString& type)
 {
-	if (type == "DIALOG")
+	if (type == "LAYER")
 	{
 		return load_layer(p,pe);
+	}
+
+	if (type == "DIALOG")
+	{
+		return load_dialog(p,pe);
 	}
 
 	if (type == "BUTTON_STYLE")
@@ -153,6 +158,112 @@ bool Indigo::UILoader::load_layer(const char*& p, const char* pe)
 		return false;
 
 	return true;
+}
+
+bool Indigo::UILoader::load_dialog(const char*& p, const char* pe)
+{
+	OOBase::ScopedString name;
+	if (!ident(p,pe,name))
+		SYNTAX_ERROR_RETURN(("Identifier expected"),false);
+
+	size_t hash = OOBase::Hash<const char*>::hash(name);
+	if (m_hashLayers.find(hash))
+		SYNTAX_ERROR_RETURN(("Duplicate identifier '%s'",name.c_str()),false);
+
+	UILayer::CreateParams layer_params;
+	UIPanel::CreateParams panel_params;
+	unsigned int grid_flags = UIGridSizer::align_centre;
+
+	if (character(p,pe,'('))
+	{
+		OOBase::ScopedString arg;
+		if (type_name(p,pe,arg))
+		{
+			for (;;)
+			{
+				if (arg == "ALIGN_LEFT")
+					grid_flags = (grid_flags & 0x3c) | UIGridSizer::align_left;
+				else if (arg == "ALIGN_RIGHT")
+					grid_flags = (grid_flags & 0x3c) | UIGridSizer::align_right;
+				else if (arg == "ALIGN_HCENTRE")
+					grid_flags = (grid_flags & 0x3c) | UIGridSizer::align_hcentre;
+				else if (arg == "ALIGN_BOTTOM")
+					grid_flags = (grid_flags & 0x33) | UIGridSizer::align_bottom;
+				else if (arg == "ALIGN_TOP")
+					grid_flags = (grid_flags & 0x33) | UIGridSizer::align_top;
+				else if (arg == "ALIGN_VCENTRE")
+					grid_flags = (grid_flags & 0x33) | UIGridSizer::align_vcentre;
+				else if (arg == "ALIGN_CENTRE")
+					grid_flags = (grid_flags & 0x30) | UIGridSizer::align_centre;
+				else if (arg == "EXPAND_HORIZ")
+					grid_flags = (grid_flags & 0xF) | UIGridSizer::expand_horiz;
+				else if (arg == "EXPAND_VERT")
+					grid_flags = (grid_flags & 0xF) | UIGridSizer::expand_vert;
+				else if (arg == "EXPAND")
+					grid_flags = (grid_flags & 0xF) | UIGridSizer::expand;
+				else if (arg == "MODAL")
+					layer_params.m_modal = true;
+				else if (arg == "FIXED")
+					panel_params.m_fixed = true;
+				else if (arg == "COLOUR")
+				{
+					if (!parse_colour(p,pe,panel_params.m_colour))
+						return false;
+				}
+				else if (arg == "MARGINS")
+				{
+					if (!parse_uvec4(p,pe,panel_params.m_margins))
+						return false;
+				}
+				else if (arg == "PADDING")
+				{
+					if (!parse_uvec2(p,pe,panel_params.m_padding))
+						return false;
+				}
+				else if (!parse_create_params(arg,p,pe,panel_params))
+					SYNTAX_ERROR_RETURN(("Unexpected argument '%s' in DIALOG",arg.c_str()),false);
+
+				if (!character(p,pe,','))
+					break;
+
+				if (!type_name(p,pe,arg))
+					SYNTAX_ERROR_RETURN(("Argument expected"),false);
+			}
+		}
+
+		if (!character(p,pe,')'))
+			SYNTAX_ERROR_RETURN(("')' expected"),false);
+	}
+
+	OOBase::ScopedString patch_name;
+	if (!parse_string(p,pe,patch_name))
+		return false;
+
+	if (patch_name.empty())
+		SYNTAX_ERROR_RETURN(("9 patch name expected"),false);
+
+	panel_params.m_background = load_9patch(p,pe,patch_name);
+	if (!panel_params.m_background)
+		return false;
+
+	OOBase::SharedPtr<UILayer> layer = OOBase::allocate_shared<UILayer,OOBase::ThreadLocalAllocator>(layer_params);
+	if (!layer)
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),false);
+
+	if (!m_hashLayers.insert(hash,layer))
+		LOG_ERROR_RETURN(("Failed to insert layer into map: %s",OOBase::system_error_text()),false);
+
+	OOBase::SharedPtr<UIPanel> panel = OOBase::allocate_shared<UIPanel,OOBase::ThreadLocalAllocator>(layer.get(),panel_params);
+	if (!panel)
+		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),OOBase::SharedPtr<UIWidget>());
+
+	if (!layer->add_widget(panel))
+		return OOBase::SharedPtr<UIWidget>();
+
+	if (!layer->sizer().add_widget(0,0,panel,grid_flags,1))
+		return false;
+
+	return load_grid_sizer(p,pe,panel.get(),panel->sizer(),true);
 }
 
 bool Indigo::UILoader::load_grid_sizer(const char*& p, const char* pe, UIGroup* parent, UIGridSizer& sizer, bool add_loose)
