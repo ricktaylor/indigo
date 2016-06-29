@@ -167,6 +167,8 @@ void Indigo::Image::unload()
 		stbi_image_free(m_pixels);
 		m_pixels = NULL;
 	}
+
+	m_texture.reset();
 }
 
 OOBase::SharedPtr<OOGL::Texture> Indigo::Image::make_texture(GLenum internalFormat, bool& cached, GLsizei levels) const
