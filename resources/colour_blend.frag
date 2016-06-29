@@ -7,5 +7,5 @@ varying vec2 pass_TexCoord;
 
 void main() 
 {
-	gl_FragColor = (texture2D(texture0,pass_TexCoord) * pass_Colour.a) + (pass_Colour * (1.0 - pass_Colour.a));
+	gl_FragColor = mix(pass_Colour,texture2D(texture0,pass_TexCoord),pass_Colour.a);
 }
