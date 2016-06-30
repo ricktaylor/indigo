@@ -319,7 +319,7 @@ OOBase::SharedPtr<Indigo::ResourceBundle> Indigo::ZipResource::sub_dir(const cha
 {
 	OOBase::SharedPtr<ZipResource> ret;
 	OOBase::String new_prefix(m_prefix);
-	if (!new_prefix.append('/') || !new_prefix.append(name))
+	if (!new_prefix.append(name) || !new_prefix.append('/'))
 		LOG_ERROR(("Failed to assign string: %s",OOBase::system_error_text()));
 	else
 	{

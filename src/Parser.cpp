@@ -483,7 +483,7 @@ OOBase::SharedPtr<Indigo::ResourceBundle> Indigo::Parser::cd_resource(const char
 		if (slash > 0)
 		{
 			OOBase::ScopedString sub_dir;
-			if (!sub_dir.assign(res_name + start,slash - start - 1))
+			if (!sub_dir.assign(res_name + start,slash - start))
 				LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),prev_resource);
 
 			OOBase::SharedPtr<ResourceBundle> res = m_resource->sub_dir(sub_dir.c_str());
@@ -529,18 +529,19 @@ OOBase::SharedPtr<Indigo::Font> Indigo::Parser::load_font(const OOBase::ScopedSt
 	if (i)
 		return i->second;
 
-	if (!m_resource->exists(font_name.c_str()))
-		SYNTAX_ERROR_RETURN(("Missing font resource '%s'",font_name.c_str()),OOBase::SharedPtr<Font>());
+	OOBase::ScopedString file_name;
+	OOBase::SharedPtr<ResourceBundle> prev_res = cd_resource(font_name.c_str(),file_name);
+	if (!prev_res)
+		return OOBase::SharedPtr<Font>();
 
-	OOBase::SharedPtr<ResourceBundle> prev_res = m_resource;
-	
-	// TODO: cd into resource subdir
+	if (!m_resource->exists(file_name.c_str()))
+		SYNTAX_ERROR_RETURN(("Missing font resource '%s'",font_name.c_str()),OOBase::SharedPtr<Font>());
 
 	OOBase::SharedPtr<Font> font = OOBase::allocate_shared<Font,OOBase::ThreadLocalAllocator>();
 	if (!font)
 		LOG_ERROR_RETURN(("Failed to allocate: %s",OOBase::system_error_text()),font);
 
-	if (!font->load(*m_resource,font_name.c_str()))
+	if (!font->load(*m_resource,file_name.c_str()))
 		return OOBase::SharedPtr<Font>();
 
 	m_resource = prev_res;
