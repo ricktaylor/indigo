@@ -62,6 +62,7 @@ namespace
 		void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
 
 	private:
+		QuadFactory* const m_factory;
 		OOBase::SharedPtr<OOGL::Texture> m_texture;
 		bool m_transparent;
 		glm::vec4 m_colour;
@@ -135,14 +136,20 @@ void QuadFactory::draw(OOGL::State& glState, const OOBase::SharedPtr<OOGL::Textu
 	}
 }
 
-void Indigo::Render::Quad::draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp, const glm::vec4& colour)
+Indigo::Render::Quad::Quad() :
+		m_factory(OOGL::ContextSingleton<QuadFactory>::instance_ptr())
+{
+}
+
+void Indigo::Render::Quad::draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp, const glm::vec4& colour) const
 {
 	if (texture && colour.a > 0.f)
-		OOGL::ContextSingleton<QuadFactory>::instance().draw(state,texture,mvp,colour);
+		static_cast<QuadFactory*>(m_factory)->draw(state,texture,mvp,colour);
 }
 
 SGQuad::SGQuad(const Indigo::AABB& aabb, const OOBase::SharedPtr<OOGL::Texture>& texture, bool transparent, const glm::vec4& colour) :
 		Indigo::Render::SGDrawable(aabb),
+		m_factory(OOGL::ContextSingleton<QuadFactory>::instance_ptr()),
 		m_texture(texture),
 		m_transparent(transparent),
 		m_colour(colour)
@@ -152,7 +159,7 @@ SGQuad::SGQuad(const Indigo::AABB& aabb, const OOBase::SharedPtr<OOGL::Texture>&
 void SGQuad::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	if (m_colour.a > 0.f)
-		OOGL::ContextSingleton<QuadFactory>::instance().draw(glState,m_texture,mvp,m_colour);
+		m_factory->draw(glState,m_texture,mvp,m_colour);
 }
 
 OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGQuad::on_render_create(Render::SGGroup* parent)

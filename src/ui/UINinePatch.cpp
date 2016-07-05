@@ -64,8 +64,6 @@ namespace
 		bool create_program();
 	};
 
-	typedef OOGL::ContextSingleton<NinePatchFactory> NinePatchFactory_t;
-
 	const unsigned int vertices_per_patch = 16;
 	const unsigned int elements_per_patch = 24;
 }
@@ -251,12 +249,13 @@ void NinePatchFactory::draw(OOGL::State& glState, const OOBase::SharedPtr<OOGL::
 
 Indigo::Render::UINinePatch::UINinePatch(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::vec4& colour, const OOBase::SharedPtr<Indigo::NinePatch::Info>& info, bool visible, const glm::ivec2& position, const glm::uvec2& size) :
 		UIDrawable(visible,position,size),
+		m_factory(OOGL::ContextSingleton<NinePatchFactory>::instance_ptr()),
 		m_texture(texture),
 		m_colour(colour),
 		m_patch(-1),
 		m_info(info)
 {
-	m_patch = NinePatchFactory_t::instance().alloc_patch(size,m_info->m_borders,m_info->m_tex_size);
+	m_patch = static_cast<NinePatchFactory*>(m_factory)->alloc_patch(size,m_info->m_borders,m_info->m_tex_size);
 	if (m_patch != -1)
 	{
 		GLsizei patch = m_patch * elements_per_patch;
@@ -318,13 +317,13 @@ Indigo::Render::UINinePatch::UINinePatch(const OOBase::SharedPtr<OOGL::Texture>&
 Indigo::Render::UINinePatch::~UINinePatch()
 {
 	if (m_patch != -1)
-		NinePatchFactory_t::instance().free_patch(m_patch);
+		static_cast<NinePatchFactory*>(m_factory)->free_patch(m_patch);
 }
 
 void Indigo::Render::UINinePatch::size(const glm::uvec2& sz)
 {
 	if (m_patch != -1 && m_info)
-		NinePatchFactory_t::instance().layout_patch(m_patch,sz,m_info->m_borders,m_info->m_tex_size);
+		static_cast<NinePatchFactory*>(m_factory)->layout_patch(m_patch,sz,m_info->m_borders,m_info->m_tex_size);
 
 	UIDrawable::size(sz);
 }
@@ -336,16 +335,16 @@ void Indigo::Render::UINinePatch::on_draw(OOGL::State& glState, const glm::mat4&
 		if (m_counts[0])
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(glState,m_texture,mvp,m_colour,m_firsts,m_counts,3);
+				static_cast<NinePatchFactory*>(m_factory)->draw(glState,m_texture,mvp,m_colour,m_firsts,m_counts,3);
 			else
-				NinePatchFactory_t::instance().draw(glState,m_texture,mvp,m_colour,m_firsts,m_counts,2);
+				static_cast<NinePatchFactory*>(m_factory)->draw(glState,m_texture,mvp,m_colour,m_firsts,m_counts,2);
 		}
 		else
 		{
 			if (m_counts[2])
-				NinePatchFactory_t::instance().draw(glState,m_texture,mvp,m_colour,&m_firsts[1],&m_counts[1],2);
+				static_cast<NinePatchFactory*>(m_factory)->draw(glState,m_texture,mvp,m_colour,&m_firsts[1],&m_counts[1],2);
 			else
-				NinePatchFactory_t::instance().draw(glState,m_texture,mvp,m_colour,&m_firsts[1],&m_counts[1],1);
+				static_cast<NinePatchFactory*>(m_factory)->draw(glState,m_texture,mvp,m_colour,&m_firsts[1],&m_counts[1],1);
 		}
 	}
 }

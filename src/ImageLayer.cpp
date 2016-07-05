@@ -38,6 +38,7 @@ namespace
 
 		void colour(const glm::vec4& colour) { m_colour = colour; }
 
+		Indigo::Render::Quad m_quad;
 		OOBase::SharedPtr<OOGL::Texture> m_texture;
 		glm::vec4 m_colour;
 
@@ -63,7 +64,7 @@ void ::ImageLayer::on_draw(OOGL::State& glState) const
 		glDepthMask(GL_FALSE);
 		glState.disable(GL_DEPTH_TEST);
 
-		Indigo::Render::Quad::draw(glState,m_texture,m_mvp,m_colour);
+		m_quad.draw(glState,m_texture,m_mvp,m_colour);
 	}
 }
 

@@ -36,7 +36,7 @@ Indigo::Render::UIImage::UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture
 void Indigo::Render::UIImage::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	const glm::uvec2& sz = size();
-	Quad::draw(glState,m_texture,glm::scale(mvp,glm::vec3(sz.x,sz.y,0.f)),m_colour);
+	m_quad.draw(glState,m_texture,glm::scale(mvp,glm::vec3(sz.x,sz.y,0.f)),m_colour);
 }
 
 Indigo::UIImage::UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image, const CreateParams& params) :

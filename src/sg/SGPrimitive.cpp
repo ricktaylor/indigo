@@ -27,19 +27,6 @@
 
 namespace
 {
-	class Cube : public Indigo::Render::SGDrawable
-	{
-	public:
-		Cube(const Indigo::AABB& aabb, const glm::vec4& colour);
-
-		void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
-
-		bool transparent() const { return false; }
-
-	private:
-		glm::vec4 m_colour;
-	};
-
 	class CubeFactory
 	{
 	public:
@@ -67,6 +54,20 @@ namespace
 		bool alloc();
 
 		static const unsigned int elements_per_cube = 36;
+	};
+
+	class Cube : public Indigo::Render::SGDrawable
+	{
+	public:
+		Cube(const Indigo::AABB& aabb, const glm::vec4& colour);
+
+		void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
+
+		bool transparent() const { return false; }
+
+	private:
+		CubeFactory* const m_factory;
+		glm::vec4 m_colour;
 	};
 }
 
@@ -153,6 +154,7 @@ void CubeFactory::draw(OOGL::State& glState, const glm::mat4& mvp, const glm::ve
 
 Cube::Cube(const Indigo::AABB& aabb, const glm::vec4& colour) :
 		Indigo::Render::SGDrawable(aabb),
+		m_factory(OOGL::ContextSingleton<CubeFactory>::instance_ptr()),
 		m_colour(colour)
 {
 }
@@ -160,7 +162,7 @@ Cube::Cube(const Indigo::AABB& aabb, const glm::vec4& colour) :
 void Cube::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
 	if (m_colour.a > 0.f)
-		OOGL::ContextSingleton<CubeFactory>::instance().draw(glState,mvp,m_colour);
+		m_factory->draw(glState,mvp,m_colour);
 }
 
 OOBase::SharedPtr<Indigo::Render::SGNode> Indigo::SGCube::on_render_create(Render::SGGroup* parent)

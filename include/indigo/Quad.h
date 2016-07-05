@@ -28,10 +28,16 @@ namespace Indigo
 {
 	namespace Render
 	{
-		namespace Quad
+		class Quad
 		{
-			void draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp, const glm::vec4& colour);
-		}
+		public:
+			Quad();
+
+			void draw(OOGL::State& state, const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::mat4& mvp, const glm::vec4& colour) const;
+
+		private:
+			void* const m_factory;
+		};
 	}
 }
 

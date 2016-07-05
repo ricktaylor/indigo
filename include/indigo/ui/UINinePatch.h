@@ -82,6 +82,7 @@ namespace Indigo
 			virtual void size(const glm::uvec2& size);
 
 		private:
+			void* const m_factory;
 			OOBase::SharedPtr<OOGL::Texture> m_texture;
 			glm::vec4  m_colour;
 			GLsizei    m_patch;

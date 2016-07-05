@@ -37,6 +37,7 @@ namespace Indigo
 			UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture, const glm::vec4& colour = glm::vec4(1.f), bool visible = true, const glm::ivec2& position = glm::ivec2(), const glm::uvec2& size = glm::uvec2());
 
 		protected:
+			Quad m_quad;
 			OOBase::SharedPtr<OOGL::Texture> m_texture;
 			glm::vec4 m_colour;
 
