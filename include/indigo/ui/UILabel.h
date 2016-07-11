@@ -28,10 +28,14 @@
 
 namespace Indigo
 {
+	class UILabel;
+
 	namespace Render
 	{
 		class UILabel : public Text, public UIDrawable
 		{
+			friend class Indigo::UILabel;
+
 		public:
 			UILabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len = -1, unsigned int font_size = 0, const glm::vec4& colour = glm::vec4(0.f,0.f,0.f,1.f), bool visible = true, const glm::ivec2& position = glm::ivec2(), const glm::uvec2& size = glm::uvec2());
 
@@ -40,6 +44,9 @@ namespace Indigo
 			float m_font_size;
 
 			virtual void on_draw(OOGL::State& glState, const glm::mat4& mvp) const;
+
+		private:
+			void caption(const OOBase::SharedString<OOBase::ThreadLocalAllocator>* c);
 		};
 
 		class UIShadowLabel : public UILabel
@@ -95,6 +102,9 @@ namespace Indigo
 		UILabel(UIGroup* parent, const OOBase::SharedString<OOBase::ThreadLocalAllocator>& caption, const CreateParams& params = CreateParams());
 		UILabel(UIGroup* parent, const char* sz, size_t len = -1, const CreateParams& params = CreateParams());
 
+		bool caption(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& c);
+		bool caption(const char* sz, size_t len = -1);
+
 	protected:
 		virtual glm::uvec2 min_size() const { return glm::uvec2(); }
 		virtual glm::uvec2 ideal_size() const;
@@ -107,7 +117,7 @@ namespace Indigo
 		unsigned int m_font_size;
 		unsigned int m_style;
 		glm::vec4 m_colour;
-		Render::UIDrawable* m_caption;
+		Render::UILabel* m_caption;
 
 		void on_size(glm::uvec2& sz);
 	};

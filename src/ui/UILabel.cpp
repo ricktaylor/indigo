@@ -42,6 +42,11 @@ void Indigo::Render::UILabel::on_draw(OOGL::State& glState, const glm::mat4& mvp
 		Text::draw(glState,glm::scale(mvp,glm::vec3(m_font_size)),m_colour);
 }
 
+void Indigo::Render::UILabel::caption(const OOBase::SharedString<OOBase::ThreadLocalAllocator>* c)
+{
+	text(c ? c->c_str() : NULL,c ? c->length() : 0);
+}
+
 Indigo::Render::UIShadowLabel::UIShadowLabel(const OOBase::SharedPtr<Font>& font, const char* sz, size_t len, unsigned int size, const glm::vec4& colour, const glm::vec4& shadow, const glm::ivec2& drop, bool visible, const glm::ivec2& position) :
 		UILabel(font,sz,len,size,colour,visible,position),
 		m_shadow(shadow),
@@ -120,7 +125,7 @@ bool Indigo::UILabel::on_render_create(Indigo::Render::UIGroup* group)
 	else if (m_style & UILabel::align_vcentre)
 		pos.y = (sz.y - caption_height) / 2;
 
-	OOBase::SharedPtr<Render::UIDrawable> caption = OOBase::allocate_shared<Render::UILabel,OOBase::ThreadLocalAllocator>(m_font->render_font(),m_text.c_str(),m_text.length(),m_font_size,m_colour,true,pos);
+	OOBase::SharedPtr<Render::UILabel> caption = OOBase::allocate_shared<Render::UILabel,OOBase::ThreadLocalAllocator>(m_font->render_font(),m_text.c_str(),m_text.length(),m_font_size,m_colour,true,pos);
 	if (!caption)
 		LOG_ERROR_RETURN(("Failed to allocate button caption: %s",OOBase::system_error_text()),false);
 
@@ -168,5 +173,24 @@ void Indigo::UILabel::on_size(glm::uvec2& sz)
 		pos.y = (sz.y - caption_height) / 2;
 
 	if (m_caption)
-		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_caption,&Render::UIDrawable::position),pos);
+		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(static_cast<Render::UIDrawable*>(m_caption),&Render::UIDrawable::position),pos);
+}
+
+bool Indigo::UILabel::caption(const char* sz, size_t len)
+{
+	OOBase::SharedString<OOBase::ThreadLocalAllocator> c;
+	if (!c.assign(sz,len))
+		LOG_ERROR_RETURN(("Failed to assign string: %s",OOBase::system_error_text()),false);
+
+	return caption(c);
+}
+
+bool Indigo::UILabel::caption(const OOBase::SharedString<OOBase::ThreadLocalAllocator>& c)
+{
+	m_text = c;
+
+	if (m_caption)
+		render_pipe()->post(OOBase::make_delegate<OOBase::ThreadLocalAllocator>(m_caption,&Render::UILabel::caption),&m_text);
+
+	return true;
 }
