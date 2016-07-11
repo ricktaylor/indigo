@@ -35,8 +35,11 @@ Indigo::Render::UIImage::UIImage(const OOBase::SharedPtr<OOGL::Texture>& texture
 
 void Indigo::Render::UIImage::on_draw(OOGL::State& glState, const glm::mat4& mvp) const
 {
-	const glm::uvec2& sz = size();
-	m_quad.draw(glState,m_texture,glm::scale(mvp,glm::vec3(sz.x,sz.y,0.f)),m_colour);
+	if (m_texture && m_colour.a > 0.f)
+	{
+		const glm::uvec2& sz = size();
+		m_quad.draw(glState,m_texture,glm::scale(mvp,glm::vec3(sz.x,sz.y,0.f)),m_colour);
+	}
 }
 
 Indigo::UIImage::UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image, const CreateParams& params) :
@@ -45,8 +48,8 @@ Indigo::UIImage::UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image,
 		m_render_image(NULL),
 		m_colour(params.m_colour)
 {
-	if (!m_image || !m_image->valid())
-		LOG_ERROR(("Invalid image passed to UINinePatch constructor"));
+	if (m_image && !m_image->valid())
+		LOG_ERROR(("Invalid image passed to UIImage constructor"));
 
 	if (params.m_size == glm::uvec2(0))
 		this->size(ideal_size());
@@ -54,7 +57,7 @@ Indigo::UIImage::UIImage(UIGroup* parent, const OOBase::SharedPtr<Image>& image,
 
 glm::uvec2 Indigo::UIImage::ideal_size() const
 {
-	return m_image->size();
+	return m_image ? m_image->size() : glm::uvec2();
 }
 
 void Indigo::UIImage::on_size(glm::uvec2& sz)
@@ -65,17 +68,22 @@ void Indigo::UIImage::on_size(glm::uvec2& sz)
 
 bool Indigo::UIImage::on_render_create(Indigo::Render::UIGroup* group)
 {
-	bool cached = true;
-	OOBase::SharedPtr<OOGL::Texture> texture = m_image->make_texture(GL_RGBA8,cached);
-	if (!texture)
-		return false;
-
-	if (!cached)
+	
+	OOBase::SharedPtr<OOGL::Texture> texture;
+	if (m_image)
 	{
-		texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-		texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-		texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-		texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+		bool cached = true;
+		texture = m_image->make_texture(GL_RGBA8,cached);
+		if (!texture)
+			return false;
+
+		if (!cached)
+		{
+			texture->parameter(GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+			texture->parameter(GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+			texture->parameter(GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+			texture->parameter(GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+		}
 	}
 
 	OOBase::SharedPtr<Render::UIImage> render_image = OOBase::allocate_shared<Render::UIImage,OOBase::ThreadLocalAllocator>(texture,m_colour,true,glm::ivec2(),size());

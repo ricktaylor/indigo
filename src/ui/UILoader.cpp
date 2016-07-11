@@ -536,12 +536,13 @@ OOBase::SharedPtr<Indigo::UIWidget> Indigo::UILoader::load_uiimage(const char*& 
 	if (!parse_string(p,pe,image_name))
 		return OOBase::SharedPtr<UIWidget>();
 
-	if (image_name.empty())
-		SYNTAX_ERROR_RETURN(("Image name expected"),OOBase::SharedPtr<UIWidget>());
-
-	OOBase::SharedPtr<Image> image = load_image(image_name);
-	if (!image)
-		return OOBase::SharedPtr<UIWidget>();
+	OOBase::SharedPtr<Image> image;
+	if (!image_name.empty())
+	{
+		image = load_image(image_name);
+		if (!image)
+			return OOBase::SharedPtr<UIWidget>();
+	}
 
 	OOBase::SharedPtr<UIImage> uiimage = OOBase::allocate_shared<UIImage,OOBase::ThreadLocalAllocator>(parent,image,params);
 	if (!uiimage)

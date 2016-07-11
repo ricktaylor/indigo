@@ -592,7 +592,7 @@ Indigo::UINinePatch::UINinePatch(UIGroup* parent, const CreateParams& params) :
 
 glm::uvec2 Indigo::UINinePatch::min_size() const
 {
-	return m_9patch->min_size();
+	return m_9patch ? m_9patch->min_size() : glm::uvec2();
 }
 
 glm::uvec2 Indigo::UINinePatch::ideal_size() const
